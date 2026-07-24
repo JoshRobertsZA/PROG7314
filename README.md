@@ -1,7 +1,7 @@
 # PROG7314
 
 
-# Current gitignore subject to cahnge: 
+# Current gitignore subject to change: 
 
 # Built application files
 *.apk
