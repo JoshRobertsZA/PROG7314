@@ -12,4 +12,13 @@
     <color name="waypoint_google_blue">#4285F4</color>
     <color name="waypoint_google_text">#3C3D43</color>
     <color name="waypoint_deco_text">#FFEBDE</color>
+
+    <!-- Shared "card" surface, reused across screens (Figma waypoint
+         cream #FCF8F0 fill: badges, buttons, widgets) -->
+    <color name="waypoint_card">#FCF8F0</color>
+    <color name="waypoint_trip_badge_text">#A9522E</color>
+
+    <!-- Trip calendar screen (Figma node 56:2, "04 Waypoint — Trip Calendar") -->
+    <color name="waypoint_day_muted">#B5AEA5</color>
+    <color name="waypoint_trip_range">#5B7FA5</color>
 </resources>

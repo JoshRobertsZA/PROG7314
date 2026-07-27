@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Trip calendar screen (Figma node 56:2, "04 Waypoint — Trip Calendar").
-    Frontend-only skeleton: trip name/dates, the August 2026 day grid, and
-    the selected-days summary below are mock content, not live data - the
-    activity that displays this layout is added in a separate commit.
-    Colors/strings are still inline hex/literals here and will be moved to
-    colors.xml/strings.xml in a later commit.
+    Trip name, dates, the August 2026 day grid, and the selected-days
+    summary are mock content, not live data, and are intentionally left as
+    inline text (see strings.xml) since they'll be set from code once real
+    trip/date data exists. Colors and static UI labels are resolved through
+    colors.xml/strings.xml. See TripCalendarActivity for the (minimal)
+    logic behind this screen.
 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -13,7 +14,7 @@
     android:id="@+id/tripCalendar"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F2E9D3"
+    android:background="@color/waypoint_cream"
     android:paddingStart="22dp"
     android:paddingTop="28dp"
     android:paddingEnd="22dp"
@@ -42,12 +43,12 @@
                 android:layout_height="36dp"
                 android:background="@drawable/bg_calendar_back_button"
                 android:clickable="true"
-                android:contentDescription="Back"
+                android:contentDescription="@string/calendar_back_cd"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center"
-                android:text="←"
-                android:textColor="#C1673D"
+                android:text="@string/calendar_back_glyph"
+                android:textColor="@color/waypoint_terracotta"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -68,7 +69,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Cape Town Getaway"
-                    android:textColor="#473021"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -78,8 +79,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
-                    android:text="✎"
-                    android:textColor="#C1673D"
+                    android:text="@string/calendar_edit_trip_glyph"
+                    android:textColor="@color/waypoint_terracotta"
                     android:textSize="13sp" />
 
             </LinearLayout>
@@ -93,7 +94,7 @@
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center"
                 android:text="Aug 2 – Aug 9, 2026 · 8 days"
-                android:textColor="#8C7866"
+                android:textColor="@color/waypoint_text_muted"
                 android:textSize="12sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -108,8 +109,8 @@
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center"
-                android:text="‹"
-                android:textColor="#C1673D"
+                android:text="@string/calendar_prev_month_glyph"
+                android:textColor="@color/waypoint_terracotta"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/tvMonthLabel"
@@ -122,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
                 android:text="August 2026"
-                android:textColor="#473021"
+                android:textColor="@color/waypoint_text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -137,8 +138,8 @@
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center"
-                android:text="›"
-                android:textColor="#C1673D"
+                android:text="@string/calendar_next_month_glyph"
+                android:textColor="@color/waypoint_terracotta"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/tvMonthLabel"
@@ -156,13 +157,13 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvMonthLabel">
 
-                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="S" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
-                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="M" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
-                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="T" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
-                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="W" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
-                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="T" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
-                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="F" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
-                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="S" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="@string/calendar_wd_sun" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="@string/calendar_wd_mon" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="@string/calendar_wd_tue" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="@string/calendar_wd_wed" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="@string/calendar_wd_thu" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="@string/calendar_wd_fri" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="@string/calendar_wd_sat" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" android:textStyle="bold" />
 
             </LinearLayout>
 
@@ -192,7 +193,7 @@
                     <View android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" />
                     <View android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="1" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="1" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -227,82 +228,82 @@
                         <TextView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_calendar_day_range" android:gravity="center" android:text="9" android:textColor="@color/white" android:textSize="13sp" android:textStyle="bold" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="10" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="10" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="11" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="11" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="12" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="12" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="13" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="13" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="14" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="14" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="15" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="15" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                 </LinearLayout>
 
                 <!-- Row: 16-22 -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="16" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="16" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="17" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="17" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="18" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="18" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="19" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="19" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="20" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="20" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="21" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="21" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="22" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="22" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                 </LinearLayout>
 
                 <!-- Row: 23-29 -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="23" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="23" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="24" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="24" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="25" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="25" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="26" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="26" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="27" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="27" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="28" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="28" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="29" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="29" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                 </LinearLayout>
 
                 <!-- Row: 30 31 blank blank blank blank blank -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="30" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="30" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
-                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="31" android:textColor="#B5AEA5" android:textSize="13sp" />
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:gravity="center" android:text="31" android:textColor="@color/waypoint_day_muted" android:textSize="13sp" />
                     </LinearLayout>
                     <View android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" />
                     <View android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" />
@@ -325,7 +326,7 @@
                 android:paddingEnd="14dp"
                 android:paddingBottom="8dp"
                 android:text="3 days selected · Aug 3 – Aug 5"
-                android:textColor="#A9522E"
+                android:textColor="@color/waypoint_trip_badge_text"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -356,8 +357,8 @@
                     android:gravity="center"
                     android:paddingTop="14dp"
                     android:paddingBottom="14dp"
-                    android:text="View itinerary"
-                    android:textColor="#C1673D"
+                    android:text="@string/calendar_view_itinerary"
+                    android:textColor="@color/waypoint_terracotta"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -374,7 +375,7 @@
                     android:gravity="center"
                     android:paddingTop="14dp"
                     android:paddingBottom="14dp"
-                    android:text="Edit itinerary"
+                    android:text="@string/calendar_edit_itinerary"
                     android:textColor="@color/white"
                     android:textSize="13sp"
                     android:textStyle="bold" />
