@@ -1,5 +1,6 @@
 package com.example.prog7314
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,16 @@ import androidx.core.view.WindowInsetsCompat
  * Login screen. Frontend skeleton only, no auth logic wired up yet.
  */
 class LoginActivity : AppCompatActivity() {
+
+    /**
+     * Sends the user to the register screen. This is real navigation (not a
+     * stub) since RegisterActivity exists and is reachable now; the auth
+     * logic on either screen is still not wired up.
+     */
+    private fun onCreateAccountClicked() {
+        startActivity(Intent(this, RegisterActivity::class.java))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -28,6 +39,10 @@ class LoginActivity : AppCompatActivity() {
                 basePaddingBottom + systemBars.bottom
             )
             insets
+        }
+
+        findViewById<android.view.View>(R.id.tvCreateAccount).setOnClickListener {
+            onCreateAccountClicked()
         }
     }
 }
