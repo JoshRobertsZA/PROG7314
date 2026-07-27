@@ -2,4 +2,14 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Waypoint brand palette (login screen, Figma node 64:2) -->
+    <color name="waypoint_cream">#F2E9D3</color>
+    <color name="waypoint_terracotta">#C1673D</color>
+    <color name="waypoint_text_primary">#473021</color>
+    <color name="waypoint_text_muted">#8C7866</color>
+    <color name="waypoint_border">#DADCDF</color>
+    <color name="waypoint_google_blue">#4285F4</color>
+    <color name="waypoint_google_text">#3C3D43</color>
+    <color name="waypoint_deco_text">#FFEBDE</color>
 </resources>

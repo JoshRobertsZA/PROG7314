@@ -1,5 +1,6 @@
 package com.example.prog7314
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +16,12 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        // Temporary: navigate to the login screen until the real home/first
+        // screen for the app is decided.
+        findViewById<android.widget.Button>(R.id.btnGoToLogin).setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
         }
     }
 }
