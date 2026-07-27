@@ -28,13 +28,13 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     /**
-     * Stub for returning to the login screen. No navigation graph decided
-     * yet, so this just closes the screen and falls back to whatever
-     * activity is underneath it on the back stack (LoginActivity, if the
-     * user got here the normal way).
+     * Returns to the login screen. RegisterActivity is only ever reached by
+     * launching it from LoginActivity (see LoginActivity.onCreateAccountClicked),
+     * so LoginActivity is already sitting underneath this one on the back
+     * stack. Finishing here is enough to get back to it, no need to start a
+     * second instance.
      */
     private fun onLogInClicked() {
-        // TODO: navigate back to LoginActivity once nav wiring is decided.
         finish()
     }
 
@@ -67,10 +67,10 @@ class RegisterActivity : AppCompatActivity() {
             insets
         }
 
-        // Both taps just call their stub handler above. Keeping the
-        // click-to-stub wiring here (rather than inline lambdas with logic)
-        // means the eventual auth implementation only has to fill in the
-        // two private functions, not touch onCreate again.
+        // Google sign-up is still a stub; log in is real navigation back to
+        // LoginActivity. Both are kept as named handlers (rather than inline
+        // lambdas with logic) so the eventual auth implementation only has
+        // to fill in onGoogleSignUpClicked, not touch onCreate again.
         findViewById<android.view.View>(R.id.btnGoogleSignUp).setOnClickListener {
             onGoogleSignUpClicked()
         }
