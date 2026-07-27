@@ -12,4 +12,13 @@
     <color name="waypoint_google_blue">#4285F4</color>
     <color name="waypoint_google_text">#3C3D43</color>
     <color name="waypoint_deco_text">#FFEBDE</color>
+
+    <!-- Home screen (Figma node 47:30, "03 Waypoint — Home") -->
+    <color name="waypoint_card">#FCF8F0</color>
+    <color name="waypoint_trip_label">#D9FFEBDE</color>
+    <color name="waypoint_trip_badge_text">#A9522E</color>
+    <color name="waypoint_border_soft">#D9CCB5</color>
+    <color name="waypoint_place_accent_1">#F1BD8A</color>
+    <color name="waypoint_place_accent_2">#C88C5A</color>
+    <color name="waypoint_place_accent_3">#E39D6B</color>
 </resources>

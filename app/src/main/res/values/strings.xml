@@ -16,4 +16,24 @@
     <string name="login_deco_text">Every trip, well kept.</string>
     <string name="login_footer_prompt">New to Waypoint?</string>
     <string name="login_footer_cta">Create account</string>
+
+    <!-- Home screen (Figma node 47:30, "03 Waypoint — Home").
+         Reuses login_brand_name / login_tagline for the header, since the
+         brand name and tagline are shared across screens.
+         Mock content (trip name/dates/status, weather, currency, nearby
+         place names/subtitles) is intentionally left inline in
+         activity_home.xml, not here, since it will be replaced with
+         real/dynamic values set from code once the backend is wired up. -->
+    <string name="home_settings_cd">Settings</string>
+    <string name="home_upcoming_trip_label">UPCOMING TRIP</string>
+    <string name="home_view_all_trips">View all trips</string>
+    <string name="home_new_trip">+ New trip</string>
+    <string name="home_nearby_places_title">Nearby places</string>
+    <string name="home_nearby_source">via LocationIQ</string>
+    <string name="home_map_cta">View all nearby places on map</string>
+    <string name="home_map_cta_arrow">→</string>
+    <string name="home_nav_home">Home</string>
+    <string name="home_nav_trips">Trips</string>
+    <string name="home_nav_map">Map</string>
+    <string name="home_nav_profile">Profile</string>
 </resources>
