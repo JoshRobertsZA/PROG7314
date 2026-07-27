@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Home screen (Figma node 47:30, "03 Waypoint — Home").
+    Frontend-only skeleton: trip name/dates, weather, currency, and nearby
+    places below are mock content, not live data. Colors/strings are still
+    inline hex/literals here and will be moved to colors.xml/strings.xml in
+    a later commit; the backend wiring (LocationIQ, OpenWeatherMap,
+    ExchangeRate-API) lives on its own branch, not this one.
+-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -23,6 +31,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- TODO: not wired to a Settings screen yet -->
     <ImageView
         android:id="@+id/btnSettings"
         android:layout_width="24dp"
@@ -50,7 +59,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvBrandName" />
 
-    <!-- UpcomingTrip card -->
+    <!-- UpcomingTrip card. Trip name, dates and "In 8 days" badge are mock
+         content until the real upcoming-trip data source is wired up. -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/tripCard"
         android:layout_width="0dp"
@@ -120,7 +130,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- TripActions -->
+    <!-- TripActions. Neither button navigates anywhere yet. -->
     <LinearLayout
         android:id="@+id/tripActionsRow"
         android:layout_width="0dp"
@@ -164,7 +174,9 @@
 
     </LinearLayout>
 
-    <!-- Widgets: Weather + Currency -->
+    <!-- Widgets: Weather + Currency. Values are mock content; these will be
+         bound to OpenWeatherMap / ExchangeRate-API responses on the backend
+         branch. -->
     <LinearLayout
         android:id="@+id/widgetsRow"
         android:layout_width="0dp"
@@ -266,7 +278,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tvNearbyTitle" />
 
-    <!-- NearbyPlacesList -->
+    <!-- NearbyPlacesList. Three hardcoded rows for layout purposes; the
+         real list will come from LocationIQ and should replace these
+         rows rather than append to them. Thumbnail colors (bg_home_thumb_1/
+         2/3) are placeholder tiles, not photos, since these APIs don't
+         return place imagery. -->
     <LinearLayout
         android:id="@+id/nearbyPlacesList"
         android:layout_width="0dp"
@@ -413,7 +429,7 @@
 
     </LinearLayout>
 
-    <!-- MapCTABanner -->
+    <!-- MapCTABanner. Not wired to a Map screen yet. -->
     <LinearLayout
         android:id="@+id/mapCtaBanner"
         android:layout_width="0dp"
@@ -460,7 +476,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/mapCtaBanner" />
 
-    <!-- Nav: bottom navigation bar -->
+    <!-- Nav: bottom navigation bar. Only "Home" reflects the active state
+         (terracotta dot/text); Trips, Map and Profile are styled inactive
+         placeholders and don't navigate anywhere yet - those screens don't
+         exist. This home screen is intentionally standalone for now and is
+         not launched from MainActivity/activity_main. -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="0dp"
