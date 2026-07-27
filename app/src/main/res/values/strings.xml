@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">PROG7314</string>
+    <string name="login_title">Trip Organizer</string>
+    <string name="login_hint_username">Email</string>
+    <string name="login_hint_password">Password</string>
+    <string name="login_action_login">Log In</string>
+    <string name="login_prompt_create_account">Don\'t have an account? Sign up</string>
 </resources>
