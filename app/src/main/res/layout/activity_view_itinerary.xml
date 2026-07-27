@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     View itinerary screen (Figma node 58:2, "05 Waypoint — View Itinerary").
-    Trip name/dates, per-day weather, and every booking/place row below are
-    mock content, not live data - the activity that displays this layout is
-    added in a separate commit. Colors/strings are still inline hex/literals
-    here and will be moved to colors.xml/strings.xml in a later commit.
+    Trip name/dates, per-day weather, and every booking/place row's content
+    are mock content, not live data, and are intentionally left as inline
+    text (see strings.xml) since they'll be set from code once real trip/
+    booking data exists. Colors and static UI labels are resolved through
+    colors.xml/strings.xml. See ViewItineraryActivity for the (minimal)
+    logic behind this screen.
 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -12,7 +14,7 @@
     android:id="@+id/viewItinerary"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F2E9D3"
+    android:background="@color/waypoint_cream"
     android:paddingStart="22dp"
     android:paddingTop="28dp"
     android:paddingEnd="22dp"
@@ -41,12 +43,12 @@
                 android:layout_height="36dp"
                 android:background="@drawable/bg_itinerary_back_button"
                 android:clickable="true"
-                android:contentDescription="Back"
+                android:contentDescription="@string/itinerary_back_cd"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center"
-                android:text="←"
-                android:textColor="#C1673D"
+                android:text="@string/itinerary_back_glyph"
+                android:textColor="@color/waypoint_terracotta"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -66,8 +68,8 @@
                     android:id="@+id/tvItineraryTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Itinerary"
-                    android:textColor="#473021"
+                    android:text="@string/itinerary_title"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -78,7 +80,7 @@
                     android:layout_marginTop="2dp"
                     android:fontFamily="sans-serif-medium"
                     android:text="Cape Town Getaway · Aug 3 – Aug 5"
-                    android:textColor="#8C7866"
+                    android:textColor="@color/waypoint_text_muted"
                     android:textSize="10sp" />
 
             </LinearLayout>
@@ -104,9 +106,9 @@
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aug 3" android:textColor="#8C7866" android:textSize="10sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="22°C" android:textColor="#473021" android:textSize="15sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Sunny" android:textColor="#8C7866" android:textSize="10sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aug 3" android:textColor="@color/waypoint_text_muted" android:textSize="10sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="22°C" android:textColor="@color/waypoint_text_primary" android:textSize="15sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Sunny" android:textColor="@color/waypoint_text_muted" android:textSize="10sp" />
 
                 </LinearLayout>
 
@@ -121,9 +123,9 @@
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aug 4" android:textColor="#8C7866" android:textSize="10sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="20°C" android:textColor="#473021" android:textSize="15sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Cloudy" android:textColor="#8C7866" android:textSize="10sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aug 4" android:textColor="@color/waypoint_text_muted" android:textSize="10sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="20°C" android:textColor="@color/waypoint_text_primary" android:textSize="15sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Cloudy" android:textColor="@color/waypoint_text_muted" android:textSize="10sp" />
 
                 </LinearLayout>
 
@@ -138,9 +140,9 @@
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aug 5" android:textColor="#8C7866" android:textSize="10sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="18°C" android:textColor="#473021" android:textSize="15sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Rain" android:textColor="#8C7866" android:textSize="10sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aug 5" android:textColor="@color/waypoint_text_muted" android:textSize="10sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="18°C" android:textColor="@color/waypoint_text_primary" android:textSize="15sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Rain" android:textColor="@color/waypoint_text_muted" android:textSize="10sp" />
 
                 </LinearLayout>
 
@@ -152,8 +154,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Flights"
-                android:textColor="#473021"
+                android:text="@string/itinerary_header_flights"
+                android:textColor="@color/waypoint_text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -189,8 +191,8 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CPT → JNB · SA 123" android:textColor="#473021" android:textSize="13sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Aug 3 · Departs 09:40" android:textColor="#8C7866" android:textSize="11sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CPT → JNB · SA 123" android:textColor="@color/waypoint_text_primary" android:textSize="13sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Aug 3 · Departs 09:40" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" />
 
                 </LinearLayout>
 
@@ -204,8 +206,8 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="9dp"
                     android:paddingBottom="5dp"
-                    android:text="View PDF"
-                    android:textColor="#C1673D"
+                    android:text="@string/itinerary_view_pdf"
+                    android:textColor="@color/waypoint_terracotta"
                     android:textSize="9sp"
                     android:textStyle="bold" />
 
@@ -217,8 +219,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Lodging"
-                android:textColor="#473021"
+                android:text="@string/itinerary_header_lodging"
+                android:textColor="@color/waypoint_text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -254,8 +256,8 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Test Valley Boutique Hotel" android:textColor="#473021" android:textSize="13sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Check-in Aug 3 · 2 nights" android:textColor="#8C7866" android:textSize="11sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Test Valley Boutique Hotel" android:textColor="@color/waypoint_text_primary" android:textSize="13sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Check-in Aug 3 · 2 nights" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" />
 
                 </LinearLayout>
 
@@ -269,8 +271,8 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="9dp"
                     android:paddingBottom="5dp"
-                    android:text="View PDF"
-                    android:textColor="#C1673D"
+                    android:text="@string/itinerary_view_pdf"
+                    android:textColor="@color/waypoint_terracotta"
                     android:textSize="9sp"
                     android:textStyle="bold" />
 
@@ -282,8 +284,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Car rental"
-                android:textColor="#473021"
+                android:text="@string/itinerary_header_car"
+                android:textColor="@color/waypoint_text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -319,8 +321,8 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Compact Car · Avis" android:textColor="#473021" android:textSize="13sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Aug 3 – Aug 5 pickup" android:textColor="#8C7866" android:textSize="11sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Compact Car · Avis" android:textColor="@color/waypoint_text_primary" android:textSize="13sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Aug 3 – Aug 5 pickup" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" />
 
                 </LinearLayout>
 
@@ -334,8 +336,8 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="9dp"
                     android:paddingBottom="5dp"
-                    android:text="View PDF"
-                    android:textColor="#C1673D"
+                    android:text="@string/itinerary_view_pdf"
+                    android:textColor="@color/waypoint_terracotta"
                     android:textSize="9sp"
                     android:textStyle="bold" />
 
@@ -347,8 +349,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Restaurants &amp; cafes"
-                android:textColor="#473021"
+                android:text="@string/itinerary_header_food"
+                android:textColor="@color/waypoint_text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -389,8 +391,8 @@
                         android:layout_weight="1"
                         android:orientation="vertical">
 
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="The Test Kitchen" android:textColor="#473021" android:textSize="13sp" android:textStyle="bold" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Restaurant · Aug 3" android:textColor="#8C7866" android:textSize="11sp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="The Test Kitchen" android:textColor="@color/waypoint_text_primary" android:textSize="13sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Restaurant · Aug 3" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" />
 
                     </LinearLayout>
 
@@ -398,7 +400,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="19:00"
-                        android:textColor="#A9522E"
+                        android:textColor="@color/waypoint_trip_badge_text"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
@@ -429,8 +431,8 @@
                         android:layout_weight="1"
                         android:orientation="vertical">
 
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Truth Coffee" android:textColor="#473021" android:textSize="13sp" android:textStyle="bold" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Cafe · Aug 4" android:textColor="#8C7866" android:textSize="11sp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Truth Coffee" android:textColor="@color/waypoint_text_primary" android:textSize="13sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Cafe · Aug 4" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" />
 
                     </LinearLayout>
 
@@ -438,7 +440,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="09:00"
-                        android:textColor="#A9522E"
+                        android:textColor="@color/waypoint_trip_badge_text"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
@@ -452,8 +454,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Attractions"
-                android:textColor="#473021"
+                android:text="@string/itinerary_header_attractions"
+                android:textColor="@color/waypoint_text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -489,8 +491,8 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Table Mountain Cableway" android:textColor="#473021" android:textSize="13sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Attraction · Aug 4" android:textColor="#8C7866" android:textSize="11sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Table Mountain Cableway" android:textColor="@color/waypoint_text_primary" android:textSize="13sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Attraction · Aug 4" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" />
 
                 </LinearLayout>
 
@@ -498,7 +500,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="11:00"
-                    android:textColor="#A9522E"
+                    android:textColor="@color/waypoint_trip_badge_text"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -510,8 +512,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Entertainment"
-                android:textColor="#473021"
+                android:text="@string/itinerary_header_entertainment"
+                android:textColor="@color/waypoint_text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -529,8 +531,8 @@
                 android:gravity="center"
                 android:paddingTop="16dp"
                 android:paddingBottom="16dp"
-                android:text="No entertainment added for these days"
-                android:textColor="#8C7866"
+                android:text="@string/itinerary_empty_entertainment"
+                android:textColor="@color/waypoint_text_muted"
                 android:textSize="12sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
