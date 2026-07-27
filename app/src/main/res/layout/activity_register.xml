@@ -5,7 +5,7 @@
     android:id="@+id/register"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F2E9D3"
+    android:background="@color/waypoint_cream"
     android:paddingStart="28dp"
     android:paddingTop="64dp"
     android:paddingEnd="28dp"
@@ -27,8 +27,8 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:gravity="center"
-        android:text="W"
-        android:textColor="#FFFFFFFF"
+        android:text="@string/register_logo_glyph"
+        android:textColor="@color/white"
         android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/logoCircle"
@@ -42,8 +42,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Waypoint"
-        android:textColor="#C1673D"
+        android:text="@string/register_brand_name"
+        android:textColor="@color/waypoint_terracotta"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -56,8 +56,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:fontFamily="sans-serif-medium"
-        android:text="Plan the route. Keep the story."
-        android:textColor="#8C7866"
+        android:text="@string/register_tagline"
+        android:textColor="@color/waypoint_text_muted"
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -80,8 +80,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:fontFamily="sans-serif-medium"
-            android:text="Every trip, well kept."
-            android:textColor="#FFEBDE"
+            android:text="@string/register_deco_text"
+            android:textColor="@color/waypoint_deco_text"
             android:textSize="13sp" />
     </FrameLayout>
 
@@ -91,8 +91,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Create your account"
-        android:textColor="#473021"
+        android:text="@string/register_heading"
+        android:textColor="@color/waypoint_text_primary"
         android:textSize="21sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -105,8 +105,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:gravity="center"
-        android:text="Sign up to start planning your trips."
-        android:textColor="#8C7866"
+        android:text="@string/register_subtitle"
+        android:textColor="@color/waypoint_text_muted"
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -138,8 +138,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="G"
-                android:textColor="#4285F4"
+                android:text="@string/register_google_glyph"
+                android:textColor="@color/waypoint_google_blue"
                 android:textSize="12sp"
                 android:textStyle="bold" />
         </FrameLayout>
@@ -149,8 +149,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:fontFamily="sans-serif-medium"
-            android:text="Sign up with Google"
-            android:textColor="#3C3D43"
+            android:text="@string/register_google_cta"
+            android:textColor="@color/waypoint_google_text"
             android:textSize="13sp" />
     </LinearLayout>
 
@@ -161,8 +161,8 @@
         android:layout_marginTop="24dp"
         android:alpha="0.85"
         android:gravity="center"
-        android:text="By continuing, you agree to Waypoint’s Terms of Service and Privacy Policy."
-        android:textColor="#8C7866"
+        android:text="@string/register_disclaimer"
+        android:textColor="@color/waypoint_text_muted"
         android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -182,8 +182,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Already have an account?"
-            android:textColor="#8C7866"
+            android:text="@string/register_footer_prompt"
+            android:textColor="@color/waypoint_text_muted"
             android:textSize="12sp" />
 
         <TextView
@@ -194,8 +194,8 @@
             android:clickable="true"
             android:focusable="true"
             android:fontFamily="sans-serif-medium"
-            android:text="Log in"
-            android:textColor="#C1673D"
+            android:text="@string/register_footer_cta"
+            android:textColor="@color/waypoint_terracotta"
             android:textSize="12sp" />
     </LinearLayout>
 
