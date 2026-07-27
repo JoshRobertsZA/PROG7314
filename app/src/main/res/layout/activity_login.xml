@@ -5,62 +5,197 @@
     android:id="@+id/login"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
+    android:background="@color/waypoint_cream"
+    android:paddingStart="28dp"
+    android:paddingTop="64dp"
+    android:paddingEnd="28dp"
+    android:paddingBottom="36dp"
     tools:context=".LoginActivity">
 
-    <TextView
-        android:id="@+id/tvLoginTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
-        android:text="@string/login_title"
-        android:textSize="24sp"
+    <!-- LogoMark -->
+    <View
+        android:id="@+id/logoCircle"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/bg_waypoint_logo_circle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/etUsername"
+    <TextView
+        android:id="@+id/tvLogoGlyph"
         android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:text="@string/login_logo_glyph"
+        android:textColor="@color/white"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/logoCircle"
+        app:layout_constraintEnd_toEndOf="@id/logoCircle"
+        app:layout_constraintStart_toStartOf="@id/logoCircle"
+        app:layout_constraintTop_toTopOf="@id/logoCircle" />
+
+    <!-- BrandCol -->
+    <TextView
+        android:id="@+id/tvBrandName"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:autofillHints="username"
-        android:hint="@string/login_hint_username"
-        android:inputType="textEmailAddress"
+        android:layout_marginTop="24dp"
+        android:text="@string/login_brand_name"
+        android:textColor="@color/waypoint_terracotta"
+        android:textSize="24sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvLoginTitle" />
+        app:layout_constraintTop_toBottomOf="@id/logoCircle" />
 
-    <EditText
-        android:id="@+id/etPassword"
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/tvTagline"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:autofillHints="password"
-        android:hint="@string/login_hint_password"
-        android:inputType="textPassword"
+        android:layout_marginTop="4dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="@string/login_tagline"
+        android:textColor="@color/waypoint_text_muted"
+        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etUsername" />
+        app:layout_constraintTop_toBottomOf="@id/tvBrandName" />
 
-    <Button
-        android:id="@+id/btnLogin"
+    <!-- HeadingCol -->
+    <TextView
+        android:id="@+id/tvWelcomeBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/login_welcome_back"
+        android:textColor="@color/waypoint_text_primary"
+        android:textSize="21sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTagline" />
+
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:text="@string/login_subtitle"
+        android:textColor="@color/waypoint_text_muted"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvWelcomeBack" />
+
+    <!-- GoogleSSOButton -->
+    <LinearLayout
+        android:id="@+id/btnGoogleSignIn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="@string/login_action_login"
+        android:background="@drawable/bg_google_button"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingVertical="14dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etPassword" />
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
+
+        <FrameLayout
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/bg_google_g_badge">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/login_google_glyph"
+                android:textColor="@color/waypoint_google_blue"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/login_google_cta"
+            android:textColor="@color/waypoint_google_text"
+            android:textSize="13sp" />
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/tvCreateAccount"
-        android:layout_width="wrap_content"
+        android:id="@+id/tvDisclaimer"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/login_prompt_create_account"
+        android:layout_marginTop="24dp"
+        android:alpha="0.85"
+        android:gravity="center"
+        android:text="@string/login_disclaimer"
+        android:textColor="@color/waypoint_text_muted"
+        android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnLogin" />
+        app:layout_constraintTop_toBottomOf="@id/btnGoogleSignIn" />
+
+    <!-- DecoBlock -->
+    <FrameLayout
+        android:id="@+id/decoBlock"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_deco_block"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvDisclaimer">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/login_deco_text"
+            android:textColor="@color/waypoint_deco_text"
+            android:textSize="13sp" />
+    </FrameLayout>
+
+    <!-- FooterRow, pinned to the bottom of the screen -->
+    <LinearLayout
+        android:id="@+id/footerRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/login_footer_prompt"
+            android:textColor="@color/waypoint_text_muted"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tvCreateAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/login_footer_cta"
+            android:textColor="@color/waypoint_terracotta"
+            android:textSize="12sp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
