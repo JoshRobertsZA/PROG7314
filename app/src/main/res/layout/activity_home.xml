@@ -586,7 +586,7 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
- 
+
             <View
                 android:layout_width="6dp"
                 android:layout_height="6dp"

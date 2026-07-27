@@ -1,5 +1,6 @@
 package com.example.prog7314
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -8,6 +9,10 @@ import androidx.core.view.WindowInsetsCompat
 
 /**
  * Login screen. Frontend skeleton only, no auth logic wired up yet.
+ *
+ * TODO: btnGoogleSignIn currently navigates straight to HomeActivity as a
+ * placeholder. Replace with a real Google Sign-In flow (and only navigate
+ * to Home on success) once auth is implemented.
  */
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +33,10 @@ class LoginActivity : AppCompatActivity() {
                 basePaddingBottom + systemBars.bottom
             )
             insets
+        }
+
+        findViewById<android.view.View>(R.id.btnGoogleSignIn).setOnClickListener {
+            startActivity(Intent(this, HomeActivity::class.java))
         }
     }
 }
