@@ -1,8 +1,16 @@
 <resources>
     <string name="app_name">PROG7314</string>
-    <string name="login_title">Trip Organizer</string>
-    <string name="login_hint_username">Email</string>
-    <string name="login_hint_password">Password</string>
-    <string name="login_action_login">Log In</string>
-    <string name="login_prompt_create_account">Don\'t have an account? Sign up</string>
+
+    <!-- Login screen (Figma node 64:2, "01 Waypoint — Login") -->
+    <string name="login_logo_glyph">W</string>
+    <string name="login_brand_name">Waypoint</string>
+    <string name="login_tagline">Plan the route. Keep the story.</string>
+    <string name="login_welcome_back">Welcome back</string>
+    <string name="login_subtitle">Sign in to continue planning your trips.</string>
+    <string name="login_google_glyph">G</string>
+    <string name="login_google_cta">Continue with Google</string>
+    <string name="login_disclaimer">By continuing, you agree to Waypoint’s Terms of Service and Privacy Policy.</string>
+    <string name="login_deco_text">Every trip, well kept.</string>
+    <string name="login_footer_prompt">New to Waypoint?</string>
+    <string name="login_footer_cta">Create account</string>
 </resources>
