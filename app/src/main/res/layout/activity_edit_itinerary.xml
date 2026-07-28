@@ -3,11 +3,10 @@
     Edit itinerary screen (Figma node 59:2, "06 Waypoint — Edit Itinerary").
     Trip name/dates, per-day weather, and every booking/place row's content
     are mock content, not live data, and are intentionally left as inline
-    text since they'll be set from code once real trip/booking data exists.
-    Colors are inline hex for now (this commit is frontend-only, no
-    Activity/resources wired up yet) - see the upcoming refactor commit for
-    colors.xml/strings.xml extraction, matching the pattern used on the
-    view-itinerary screen.
+    text (see strings.xml) since they'll be set from code once real trip/
+    booking data exists. Colors and static UI labels/content descriptions
+    are resolved through colors.xml/strings.xml. See EditItineraryActivity
+    for the (minimal) logic behind this screen.
 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -15,7 +14,7 @@
     android:id="@+id/editItinerary"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F2E9D3"
+    android:background="@color/waypoint_cream"
     android:paddingStart="22dp"
     android:paddingTop="28dp"
     android:paddingEnd="22dp"
@@ -44,12 +43,12 @@
                 android:layout_height="36dp"
                 android:background="@drawable/bg_edit_itinerary_back_button"
                 android:clickable="true"
-                android:contentDescription="Back"
+                android:contentDescription="@string/edit_itinerary_back_cd"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center"
-                android:text="←"
-                android:textColor="#C1673D"
+                android:text="@string/edit_itinerary_back_glyph"
+                android:textColor="@color/waypoint_terracotta"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -68,8 +67,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Edit itinerary"
-                    android:textColor="#473021"
+                    android:text="@string/edit_itinerary_title"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -79,7 +78,7 @@
                     android:layout_marginTop="2dp"
                     android:fontFamily="sans-serif-medium"
                     android:text="Cape Town Getaway · Aug 3 – Aug 5"
-                    android:textColor="#8C7866"
+                    android:textColor="@color/waypoint_text_muted"
                     android:textSize="10sp" />
 
             </LinearLayout>
@@ -105,9 +104,9 @@
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aug 3" android:textColor="#8C7866" android:textSize="10sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="22°C" android:textColor="#473021" android:textSize="15sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Sunny" android:textColor="#8C7866" android:textSize="10sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aug 3" android:textColor="@color/waypoint_text_muted" android:textSize="10sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="22°C" android:textColor="@color/waypoint_text_primary" android:textSize="15sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Sunny" android:textColor="@color/waypoint_text_muted" android:textSize="10sp" />
 
                 </LinearLayout>
 
@@ -122,9 +121,9 @@
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aug 4" android:textColor="#8C7866" android:textSize="10sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="20°C" android:textColor="#473021" android:textSize="15sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Cloudy" android:textColor="#8C7866" android:textSize="10sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aug 4" android:textColor="@color/waypoint_text_muted" android:textSize="10sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="20°C" android:textColor="@color/waypoint_text_primary" android:textSize="15sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Cloudy" android:textColor="@color/waypoint_text_muted" android:textSize="10sp" />
 
                 </LinearLayout>
 
@@ -139,9 +138,9 @@
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aug 5" android:textColor="#8C7866" android:textSize="10sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="18°C" android:textColor="#473021" android:textSize="15sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Rain" android:textColor="#8C7866" android:textSize="10sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aug 5" android:textColor="@color/waypoint_text_muted" android:textSize="10sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="18°C" android:textColor="@color/waypoint_text_primary" android:textSize="15sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Rain" android:textColor="@color/waypoint_text_muted" android:textSize="10sp" />
 
                 </LinearLayout>
 
@@ -163,8 +162,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Flights"
-                    android:textColor="#473021"
+                    android:text="@string/edit_itinerary_header_flights"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -179,8 +178,8 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="10dp"
                     android:paddingBottom="5dp"
-                    android:text="+ Upload"
-                    android:textColor="#C1673D"
+                    android:text="@string/edit_itinerary_upload_chip"
+                    android:textColor="@color/waypoint_terracotta"
                     android:textSize="10sp"
                     android:textStyle="bold" />
 
@@ -215,9 +214,9 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CPT → JNB · SA 123" android:textColor="#473021" android:textSize="13sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Aug 3 · Departs 09:40" android:textColor="#8C7866" android:textSize="11sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:alpha="0.8" android:text="boarding-pass.pdf" android:textColor="#A9522E" android:textSize="9sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CPT → JNB · SA 123" android:textColor="@color/waypoint_text_primary" android:textSize="13sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Aug 3 · Departs 09:40" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:alpha="0.8" android:text="boarding-pass.pdf" android:textColor="@color/waypoint_trip_badge_text" android:textSize="9sp" />
 
                 </LinearLayout>
 
@@ -231,12 +230,12 @@
                         android:layout_height="28dp"
                         android:background="@drawable/bg_edit_itinerary_icon_btn_terracotta"
                         android:clickable="true"
-                        android:contentDescription="Replace boarding pass"
+                        android:contentDescription="@string/edit_itinerary_replace_flight_doc_cd"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
-                        android:text="↺"
-                        android:textColor="#C1673D"
+                        android:text="@string/edit_itinerary_undo_glyph"
+                        android:textColor="@color/waypoint_terracotta"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
@@ -246,12 +245,12 @@
                         android:layout_marginStart="6dp"
                         android:background="@drawable/bg_edit_itinerary_icon_btn_muted"
                         android:clickable="true"
-                        android:contentDescription="Remove flight"
+                        android:contentDescription="@string/edit_itinerary_remove_flight_cd"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
-                        android:text="✕"
-                        android:textColor="#8C7866"
+                        android:text="@string/edit_itinerary_close_glyph"
+                        android:textColor="@color/waypoint_text_muted"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
@@ -275,8 +274,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Lodging"
-                    android:textColor="#473021"
+                    android:text="@string/edit_itinerary_header_lodging"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -291,8 +290,8 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="10dp"
                     android:paddingBottom="5dp"
-                    android:text="+ Upload"
-                    android:textColor="#C1673D"
+                    android:text="@string/edit_itinerary_upload_chip"
+                    android:textColor="@color/waypoint_terracotta"
                     android:textSize="10sp"
                     android:textStyle="bold" />
 
@@ -327,9 +326,9 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Test Valley Boutique Hotel" android:textColor="#473021" android:textSize="13sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Check-in Aug 3 · 2 nights" android:textColor="#8C7866" android:textSize="11sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:alpha="0.8" android:text="hotel-booking.pdf" android:textColor="#A9522E" android:textSize="9sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Test Valley Boutique Hotel" android:textColor="@color/waypoint_text_primary" android:textSize="13sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Check-in Aug 3 · 2 nights" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:alpha="0.8" android:text="hotel-booking.pdf" android:textColor="@color/waypoint_trip_badge_text" android:textSize="9sp" />
 
                 </LinearLayout>
 
@@ -343,12 +342,12 @@
                         android:layout_height="28dp"
                         android:background="@drawable/bg_edit_itinerary_icon_btn_terracotta"
                         android:clickable="true"
-                        android:contentDescription="Replace hotel booking"
+                        android:contentDescription="@string/edit_itinerary_replace_lodging_doc_cd"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
-                        android:text="↺"
-                        android:textColor="#C1673D"
+                        android:text="@string/edit_itinerary_undo_glyph"
+                        android:textColor="@color/waypoint_terracotta"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
@@ -358,12 +357,12 @@
                         android:layout_marginStart="6dp"
                         android:background="@drawable/bg_edit_itinerary_icon_btn_muted"
                         android:clickable="true"
-                        android:contentDescription="Remove lodging"
+                        android:contentDescription="@string/edit_itinerary_remove_lodging_cd"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
-                        android:text="✕"
-                        android:textColor="#8C7866"
+                        android:text="@string/edit_itinerary_close_glyph"
+                        android:textColor="@color/waypoint_text_muted"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
@@ -387,8 +386,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Car rental"
-                    android:textColor="#473021"
+                    android:text="@string/edit_itinerary_header_car"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -403,8 +402,8 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="10dp"
                     android:paddingBottom="5dp"
-                    android:text="+ Upload"
-                    android:textColor="#C1673D"
+                    android:text="@string/edit_itinerary_upload_chip"
+                    android:textColor="@color/waypoint_terracotta"
                     android:textSize="10sp"
                     android:textStyle="bold" />
 
@@ -439,9 +438,9 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Compact Car · Avis" android:textColor="#473021" android:textSize="13sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Aug 3 – Aug 5 pickup" android:textColor="#8C7866" android:textSize="11sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:alpha="0.8" android:text="rental-agreement.pdf" android:textColor="#A9522E" android:textSize="9sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Compact Car · Avis" android:textColor="@color/waypoint_text_primary" android:textSize="13sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Aug 3 – Aug 5 pickup" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:alpha="0.8" android:text="rental-agreement.pdf" android:textColor="@color/waypoint_trip_badge_text" android:textSize="9sp" />
 
                 </LinearLayout>
 
@@ -455,12 +454,12 @@
                         android:layout_height="28dp"
                         android:background="@drawable/bg_edit_itinerary_icon_btn_terracotta"
                         android:clickable="true"
-                        android:contentDescription="Replace rental agreement"
+                        android:contentDescription="@string/edit_itinerary_replace_car_doc_cd"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
-                        android:text="↺"
-                        android:textColor="#C1673D"
+                        android:text="@string/edit_itinerary_undo_glyph"
+                        android:textColor="@color/waypoint_terracotta"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
@@ -470,12 +469,12 @@
                         android:layout_marginStart="6dp"
                         android:background="@drawable/bg_edit_itinerary_icon_btn_muted"
                         android:clickable="true"
-                        android:contentDescription="Remove car rental"
+                        android:contentDescription="@string/edit_itinerary_remove_car_cd"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
-                        android:text="✕"
-                        android:textColor="#8C7866"
+                        android:text="@string/edit_itinerary_close_glyph"
+                        android:textColor="@color/waypoint_text_muted"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
@@ -499,8 +498,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Restaurants &amp; cafes"
-                    android:textColor="#473021"
+                    android:text="@string/edit_itinerary_header_food"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -515,8 +514,8 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="10dp"
                     android:paddingBottom="5dp"
-                    android:text="+ Add"
-                    android:textColor="#C1673D"
+                    android:text="@string/edit_itinerary_add_chip"
+                    android:textColor="@color/waypoint_terracotta"
                     android:textSize="10sp"
                     android:textStyle="bold" />
 
@@ -556,8 +555,8 @@
                         android:layout_weight="1"
                         android:orientation="vertical">
 
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="The Test Kitchen" android:textColor="#473021" android:textSize="13sp" android:textStyle="bold" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Restaurant · Aug 3 · 19:00" android:textColor="#8C7866" android:textSize="11sp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="The Test Kitchen" android:textColor="@color/waypoint_text_primary" android:textSize="13sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Restaurant · Aug 3 · 19:00" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" />
 
                     </LinearLayout>
 
@@ -571,12 +570,12 @@
                             android:layout_height="28dp"
                             android:background="@drawable/bg_edit_itinerary_icon_btn_terracotta"
                             android:clickable="true"
-                            android:contentDescription="Edit The Test Kitchen"
+                            android:contentDescription="@string/edit_itinerary_edit_place_cd"
                             android:focusable="true"
                             android:foreground="?attr/selectableItemBackgroundBorderless"
                             android:gravity="center"
-                            android:text="✎"
-                            android:textColor="#C1673D"
+                            android:text="@string/edit_itinerary_edit_glyph"
+                            android:textColor="@color/waypoint_terracotta"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -586,12 +585,12 @@
                             android:layout_marginStart="6dp"
                             android:background="@drawable/bg_edit_itinerary_icon_btn_muted"
                             android:clickable="true"
-                            android:contentDescription="Remove The Test Kitchen"
+                            android:contentDescription="@string/edit_itinerary_remove_place_cd"
                             android:focusable="true"
                             android:foreground="?attr/selectableItemBackgroundBorderless"
                             android:gravity="center"
-                            android:text="✕"
-                            android:textColor="#8C7866"
+                            android:text="@string/edit_itinerary_close_glyph"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -624,8 +623,8 @@
                         android:layout_weight="1"
                         android:orientation="vertical">
 
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Truth Coffee" android:textColor="#473021" android:textSize="13sp" android:textStyle="bold" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Cafe · Aug 4 · 09:00" android:textColor="#8C7866" android:textSize="11sp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Truth Coffee" android:textColor="@color/waypoint_text_primary" android:textSize="13sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Cafe · Aug 4 · 09:00" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" />
 
                     </LinearLayout>
 
@@ -639,12 +638,12 @@
                             android:layout_height="28dp"
                             android:background="@drawable/bg_edit_itinerary_icon_btn_terracotta"
                             android:clickable="true"
-                            android:contentDescription="Edit Truth Coffee"
+                            android:contentDescription="@string/edit_itinerary_edit_place_cd"
                             android:focusable="true"
                             android:foreground="?attr/selectableItemBackgroundBorderless"
                             android:gravity="center"
-                            android:text="✎"
-                            android:textColor="#C1673D"
+                            android:text="@string/edit_itinerary_edit_glyph"
+                            android:textColor="@color/waypoint_terracotta"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -654,12 +653,12 @@
                             android:layout_marginStart="6dp"
                             android:background="@drawable/bg_edit_itinerary_icon_btn_muted"
                             android:clickable="true"
-                            android:contentDescription="Remove Truth Coffee"
+                            android:contentDescription="@string/edit_itinerary_remove_place_cd"
                             android:focusable="true"
                             android:foreground="?attr/selectableItemBackgroundBorderless"
                             android:gravity="center"
-                            android:text="✕"
-                            android:textColor="#8C7866"
+                            android:text="@string/edit_itinerary_close_glyph"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -685,8 +684,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Attractions"
-                    android:textColor="#473021"
+                    android:text="@string/edit_itinerary_header_attractions"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -701,8 +700,8 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="10dp"
                     android:paddingBottom="5dp"
-                    android:text="+ Add"
-                    android:textColor="#C1673D"
+                    android:text="@string/edit_itinerary_add_chip"
+                    android:textColor="@color/waypoint_terracotta"
                     android:textSize="10sp"
                     android:textStyle="bold" />
 
@@ -737,8 +736,8 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Table Mountain Cableway" android:textColor="#473021" android:textSize="13sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Attraction · Aug 4 · 11:00" android:textColor="#8C7866" android:textSize="11sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Table Mountain Cableway" android:textColor="@color/waypoint_text_primary" android:textSize="13sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Attraction · Aug 4 · 11:00" android:textColor="@color/waypoint_text_muted" android:textSize="11sp" />
 
                 </LinearLayout>
 
@@ -752,12 +751,12 @@
                         android:layout_height="28dp"
                         android:background="@drawable/bg_edit_itinerary_icon_btn_terracotta"
                         android:clickable="true"
-                        android:contentDescription="Edit Table Mountain Cableway"
+                        android:contentDescription="@string/edit_itinerary_edit_place_cd"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
-                        android:text="✎"
-                        android:textColor="#C1673D"
+                        android:text="@string/edit_itinerary_edit_glyph"
+                        android:textColor="@color/waypoint_terracotta"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
@@ -767,12 +766,12 @@
                         android:layout_marginStart="6dp"
                         android:background="@drawable/bg_edit_itinerary_icon_btn_muted"
                         android:clickable="true"
-                        android:contentDescription="Remove Table Mountain Cableway"
+                        android:contentDescription="@string/edit_itinerary_remove_place_cd"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
-                        android:text="✕"
-                        android:textColor="#8C7866"
+                        android:text="@string/edit_itinerary_close_glyph"
+                        android:textColor="@color/waypoint_text_muted"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
@@ -796,8 +795,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Entertainment"
-                    android:textColor="#473021"
+                    android:text="@string/edit_itinerary_header_entertainment"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -812,8 +811,8 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="10dp"
                     android:paddingBottom="5dp"
-                    android:text="+ Add"
-                    android:textColor="#C1673D"
+                    android:text="@string/edit_itinerary_add_chip"
+                    android:textColor="@color/waypoint_terracotta"
                     android:textSize="10sp"
                     android:textStyle="bold" />
 
@@ -834,8 +833,8 @@
                 android:gravity="center"
                 android:paddingTop="14dp"
                 android:paddingBottom="14dp"
-                android:text="+ Add entertainment for these days"
-                android:textColor="#C1673D"
+                android:text="@string/edit_itinerary_add_entertainment_placeholder"
+                android:textColor="@color/waypoint_terracotta"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
