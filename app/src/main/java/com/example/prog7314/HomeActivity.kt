@@ -1,5 +1,6 @@
 package com.example.prog7314
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -8,15 +9,16 @@ import androidx.core.view.WindowInsetsCompat
 
 /**
  * Home screen. Frontend skeleton only: static/mock content matching the
- * Waypoint Figma design (node 47:30), no networking or navigation wired up
- * yet. This is a separate screen from MainActivity/activity_main; the two
- * are not linked together at this stage.
+ * Waypoint Figma design (node 47:30), no networking wired up yet. This is a
+ * separate screen from MainActivity/activity_main; the two are not linked
+ * together at this stage.
  *
  * TODO: replace mock trip/weather/currency/nearby-places content with real
  * data once the backend (LocationIQ, OpenWeatherMap, ExchangeRate-API) is
  * wired up on its own branch.
- * TODO: wire up bottomNav (navTrips/navMap/navProfile), btnSettings, the
- * trip action buttons, and the map CTA banner once those destinations exist.
+ * TODO: wire up bottomNav (navTrips/navMap/navProfile), btnSettings, and
+ * the map CTA banner once those destinations exist. btnNewTrip is wired
+ * below; "View all" is still unwired pending the all-trips destination.
  */
 class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,6 +67,13 @@ class HomeActivity : AppCompatActivity() {
             // Returning the insets unchanged (rather than CONSUMED) lets
             // any child views that also listen for insets still receive them.
             insets
+        }
+
+        // "+ New trip" button on the trip card: launches the new trip
+        // screen (name + date selection). This is the only trip action
+        // button wired up so far - "View all" still awaits its destination.
+        findViewById<android.view.View>(R.id.btnNewTrip).setOnClickListener {
+            startActivity(Intent(this, NewTripActivity::class.java))
         }
     }
 }
