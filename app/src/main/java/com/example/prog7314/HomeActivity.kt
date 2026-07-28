@@ -16,9 +16,10 @@ import androidx.core.view.WindowInsetsCompat
  * TODO: replace mock trip/weather/currency/nearby-places content with real
  * data once the backend (LocationIQ, OpenWeatherMap, ExchangeRate-API) is
  * wired up on its own branch.
- * TODO: wire up bottomNav (navTrips/navMap/navProfile), btnSettings, and
- * the map CTA banner once those destinations exist. btnNewTrip is wired
- * below; "View all" is still unwired pending the all-trips destination.
+ * TODO: wire up bottomNav (navTrips/navMap/navProfile) and the map CTA
+ * banner once those destinations exist. btnNewTrip and btnSettings are
+ * wired below; "View all" is still unwired pending the all-trips
+ * destination.
  */
 class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,6 +75,11 @@ class HomeActivity : AppCompatActivity() {
         // button wired up so far - "View all" still awaits its destination.
         findViewById<android.view.View>(R.id.btnNewTrip).setOnClickListener {
             startActivity(Intent(this, NewTripActivity::class.java))
+        }
+
+        // Settings gear in the header: launches the settings screen.
+        findViewById<android.view.View>(R.id.btnSettings).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
         }
     }
 }
