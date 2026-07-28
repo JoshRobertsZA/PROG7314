@@ -4,6 +4,7 @@
     <!-- Temporary nav on MainActivity until the real home/first screen is decided -->
     <string name="main_go_to_login">Go to Login</string>
     <string name="main_go_to_trip_calendar">Go to Trip Calendar</string>
+    <string name="main_go_to_view_itinerary">Go to View Itinerary</string>
 
     <!-- Login screen (Figma node 64:2, "01 Waypoint — Login") -->
     <string name="login_logo_glyph">W</string>
@@ -17,6 +18,23 @@
     <string name="login_deco_text">Every trip, well kept.</string>
     <string name="login_footer_prompt">New to Waypoint?</string>
     <string name="login_footer_cta">Create account</string>
+
+    <!-- View itinerary screen (Figma node 58:2, "05 Waypoint — View Itinerary").
+         Trip name/dates, per-day weather, and every booking/place row's
+         content are intentionally left inline in activity_view_itinerary.xml,
+         not here, since they're mock content that will be set from code
+         once real trip/booking data exists. -->
+    <string name="itinerary_back_cd">Back</string>
+    <string name="itinerary_back_glyph">←</string>
+    <string name="itinerary_title">Itinerary</string>
+    <string name="itinerary_header_flights">Flights</string>
+    <string name="itinerary_header_lodging">Lodging</string>
+    <string name="itinerary_header_car">Car rental</string>
+    <string name="itinerary_header_food">Restaurants &amp; cafes</string>
+    <string name="itinerary_header_attractions">Attractions</string>
+    <string name="itinerary_header_entertainment">Entertainment</string>
+    <string name="itinerary_view_pdf">View PDF</string>
+    <string name="itinerary_empty_entertainment">No entertainment added for these days</string>
 
     <!-- Trip calendar screen (Figma node 56:2, "04 Waypoint — Trip Calendar").
          Trip name, date range, month label, day numbers, and the
