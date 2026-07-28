@@ -15,6 +15,16 @@ import androidx.core.view.WindowInsetsCompat
  * to Home on success) once auth is implemented.
  */
 class LoginActivity : AppCompatActivity() {
+
+    /**
+     * Sends the user to the register screen. This is real navigation (not a
+     * stub) since RegisterActivity exists and is reachable now; the auth
+     * logic on either screen is still not wired up.
+     */
+    private fun onCreateAccountClicked() {
+        startActivity(Intent(this, RegisterActivity::class.java))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -37,6 +47,10 @@ class LoginActivity : AppCompatActivity() {
 
         findViewById<android.view.View>(R.id.btnGoogleSignIn).setOnClickListener {
             startActivity(Intent(this, HomeActivity::class.java))
+        }
+
+        findViewById<android.view.View>(R.id.tvCreateAccount).setOnClickListener {
+            onCreateAccountClicked()
         }
     }
 }

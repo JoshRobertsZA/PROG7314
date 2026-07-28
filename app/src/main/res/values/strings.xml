@@ -36,4 +36,17 @@
     <string name="home_nav_trips">Trips</string>
     <string name="home_nav_map">Map</string>
     <string name="home_nav_profile">Profile</string>
+
+    <!-- Register screen (Figma node 64:23, "02 Waypoint — Register") -->
+    <string name="register_logo_glyph">W</string>
+    <string name="register_brand_name">Waypoint</string>
+    <string name="register_tagline">Plan the route. Keep the story.</string>
+    <string name="register_deco_text">Every trip, well kept.</string>
+    <string name="register_heading">Create your account</string>
+    <string name="register_subtitle">Sign up to start planning your trips.</string>
+    <string name="register_google_glyph">G</string>
+    <string name="register_google_cta">Sign up with Google</string>
+    <string name="register_disclaimer">By continuing, you agree to Waypoint’s Terms of Service and Privacy Policy.</string>
+    <string name="register_footer_prompt">Already have an account?</string>
+    <string name="register_footer_cta">Log in</string>
 </resources>
