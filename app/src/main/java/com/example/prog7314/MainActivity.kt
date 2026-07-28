@@ -24,6 +24,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, LoginActivity::class.java))
         }
 
+        // Temporary: jump straight to the trip calendar screen for testing,
+        // bypassing login/home. Remove once there's a real nav path to it.
+        findViewById<android.widget.Button>(R.id.btnGoToTripCalendar).setOnClickListener {
+            startActivity(Intent(this, TripCalendarActivity::class.java))
+        }
+
         // Temporary: jump straight to the view itinerary screen for
         // testing, bypassing login/home/calendar. Remove once there's a
         // real nav path into it.

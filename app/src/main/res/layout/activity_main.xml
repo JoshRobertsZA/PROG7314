@@ -24,10 +24,23 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/main_go_to_login"
-        app:layout_constraintBottom_toTopOf="@id/btnGoToViewItinerary"
+        app:layout_constraintBottom_toTopOf="@id/btnGoToTripCalendar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvHello" />
+
+    <!-- Temporary: jumps straight to the trip calendar screen for testing,
+         bypassing login/home. Remove once there's a real nav path to it. -->
+    <Button
+        android:id="@+id/btnGoToTripCalendar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/main_go_to_trip_calendar"
+        app:layout_constraintBottom_toTopOf="@id/btnGoToViewItinerary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnGoToLogin" />
 
     <!-- Temporary: jumps straight to the view itinerary screen for testing,
          bypassing login/home/calendar. Remove once there's a real nav path
@@ -41,6 +54,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnGoToLogin" />
+        app:layout_constraintTop_toBottomOf="@id/btnGoToTripCalendar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
