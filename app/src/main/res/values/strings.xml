@@ -158,4 +158,19 @@
     <string name="new_trip_wd_sat">S</string>
     <string name="new_trip_save_button">Save trip</string>
     <string name="new_trip_footer_hint">You’ll land on the edit itinerary screen next — your trip will only have a name and dates until you add flights, stays, and places.</string>
+
+    <!-- Settings screen (Figma node 83:2, "10 Waypoint — Settings").
+         "Language 1"/"Language 2" are placeholders for Zulu/Xhosa until
+         the real names are wired in (this app supports English, Zulu,
+         and Xhosa per the master prompt). -->
+    <string name="settings_back_cd">Back</string>
+    <string name="settings_back_glyph">←</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_bell_cd">Notifications</string>
+    <string name="settings_row_notifications">Notifications</string>
+    <string name="settings_row_logout">Logout</string>
+    <string name="settings_row_language">English</string>
+    <string name="settings_language_expand_glyph">▲</string>
+    <string name="settings_row_language_1">Language 1</string>
+    <string name="settings_row_language_2">Language 2</string>
 </resources>

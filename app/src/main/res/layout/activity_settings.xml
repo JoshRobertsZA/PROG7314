@@ -14,19 +14,16 @@
     The notifications toggle (track + thumb) and the language radio
     circles are hand-built shapes rather than the Figma-exported raster
     image, matching how the rest of this app builds UI (no CheckBox/
-    Switch/RadioButton widgets used anywhere else) - their fill colors
-    were adapted to the app's existing warm palette (waypoint_border_soft)
-    since the source image had no extractable exact hex. The bell, logout,
-    and globe icons are new hand-authored vector drawables (ic_bell,
+    Switch/RadioButton widgets used anywhere else). The bell, logout, and
+    globe icons are new hand-authored vector drawables (ic_bell,
     ic_logout, ic_globe), matching the existing ic_settings.xml pattern
     already used on the home screen, rather than downloading the Figma
     Code Connect placeholder icons (which point to a generic design
     system this project doesn't have).
 
-    Colors are inline hex for now (this commit is frontend-only, no
-    Activity/resources wired up yet) - see the upcoming refactor commit
-    for colors.xml/strings.xml extraction, matching the pattern used on
-    the other screens.
+    Colors and static labels now resolve through colors.xml/strings.xml -
+    all reusing tokens already established on other screens, no new
+    colors were needed.
 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -34,7 +31,7 @@
     android:id="@+id/settings"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F2E9D3"
+    android:background="@color/waypoint_cream"
     android:paddingStart="28dp"
     android:paddingTop="64dp"
     android:paddingEnd="28dp"
@@ -63,12 +60,12 @@
                 android:layout_height="36dp"
                 android:background="@drawable/bg_settings_back_button"
                 android:clickable="true"
-                android:contentDescription="Back"
+                android:contentDescription="@string/settings_back_cd"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center"
-                android:text="←"
-                android:textColor="#C1673D"
+                android:text="@string/settings_back_glyph"
+                android:textColor="@color/waypoint_terracotta"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -77,8 +74,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Settings"
-                android:textColor="#473021"
+                android:text="@string/settings_title"
+                android:textColor="@color/waypoint_text_primary"
                 android:textSize="17sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/btnBack"
@@ -92,7 +89,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:clickable="true"
-                android:contentDescription="Notifications"
+                android:contentDescription="@string/settings_bell_cd"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_bell"
@@ -123,8 +120,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:text="Notifications"
-                    android:textColor="#473021"
+                    android:text="@string/settings_row_notifications"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="17sp" />
 
                 <!-- Toggle: off state (thumb at start). Hand-built from a
@@ -179,8 +176,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:text="Logout"
-                    android:textColor="#473021"
+                    android:text="@string/settings_row_logout"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="17sp" />
 
             </LinearLayout>
@@ -212,16 +209,16 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:text="English"
-                    android:textColor="#473021"
+                    android:text="@string/settings_row_language"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="17sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:alpha="0.6"
-                    android:text="▲"
-                    android:textColor="#8C7866"
+                    android:text="@string/settings_language_expand_glyph"
+                    android:textColor="@color/waypoint_text_muted"
                     android:textSize="14sp" />
 
             </LinearLayout>
@@ -252,8 +249,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:text="Language 1"
-                    android:textColor="#473021"
+                    android:text="@string/settings_row_language_1"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="17sp" />
 
             </LinearLayout>
@@ -286,8 +283,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:text="Language 2"
-                    android:textColor="#473021"
+                    android:text="@string/settings_row_language_2"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="17sp" />
 
             </LinearLayout>
