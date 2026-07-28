@@ -134,4 +134,24 @@
     <string name="all_trips_filter_upcoming">Upcoming</string>
     <string name="all_trips_filter_ongoing">Ongoing</string>
     <string name="all_trips_filter_past">Past</string>
+
+    <!-- Nearby places search screen (Figma node 62:2,
+         "09 Waypoint — Nearby Places Search"). The entered town, the
+         results header, and each place's name/category/distance are
+         intentionally left inline in activity_nearby_places.xml, not
+         here, since they're mock content that will be set from code
+         once real LocationIQ/Wikipedia data exists. -->
+    <string name="nearby_places_back_cd">Back</string>
+    <string name="nearby_places_back_glyph">←</string>
+    <string name="nearby_places_title">Nearby places</string>
+    <string name="nearby_places_search_cd">Search</string>
+    <string name="nearby_places_search_glyph">→</string>
+    <string name="nearby_places_helper">Enter a town or city — e.g. Cape Town, London</string>
+    <string name="nearby_places_filter_all">All</string>
+    <string name="nearby_places_filter_restaurants">Restaurants</string>
+    <string name="nearby_places_filter_cafes">Cafes</string>
+    <string name="nearby_places_filter_attractions">Attractions</string>
+    <string name="nearby_places_filter_entertainment">Entertainment</string>
+    <string name="nearby_places_filter_hotels">Hotels</string>
+    <string name="nearby_places_attribution">via LocationIQ</string>
 </resources>

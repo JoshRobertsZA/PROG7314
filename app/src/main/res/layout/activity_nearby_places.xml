@@ -7,12 +7,11 @@
     replaced once this screen is wired up against LocationIQ (place search)
     and Wikipedia's REST summary API (place blurbs), on a separate backend
     branch. "All" is the only filter chip shown selected; tapping the others
-    doesn't do anything yet. Colors are inline hex for now (this commit is
-    frontend-only, no Activity/resources wired up yet) - see the upcoming
-    refactor commit for colors.xml/strings.xml extraction, matching the
-    pattern used on the other screens. Layout/spacing follows the all-trips
-    screen's back-button + search-box + filter-chip patterns closely, since
-    both screens share the same visual language.
+    doesn't do anything yet. Colors and static labels now resolve through
+    colors.xml/strings.xml - all reusing tokens already established on
+    other screens, no new colors were needed. Layout/spacing follows the
+    all-trips screen's back-button + search-box + filter-chip patterns
+    closely, since both screens share the same visual language.
 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -20,7 +19,7 @@
     android:id="@+id/nearbyPlaces"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F2E9D3"
+    android:background="@color/waypoint_cream"
     android:paddingStart="22dp"
     android:paddingTop="28dp"
     android:paddingEnd="22dp"
@@ -49,12 +48,12 @@
                 android:layout_height="36dp"
                 android:background="@drawable/bg_nearby_back_button"
                 android:clickable="true"
-                android:contentDescription="Back"
+                android:contentDescription="@string/nearby_places_back_cd"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center"
-                android:text="←"
-                android:textColor="#C1673D"
+                android:text="@string/nearby_places_back_glyph"
+                android:textColor="@color/waypoint_terracotta"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -63,8 +62,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nearby places"
-                android:textColor="#473021"
+                android:text="@string/nearby_places_title"
+                android:textColor="@color/waypoint_text_primary"
                 android:textSize="17sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/btnBack"
@@ -87,8 +86,8 @@
                 android:paddingEnd="14dp"
                 android:paddingBottom="13dp"
                 android:text="Cape Town"
-                android:textColor="#473021"
-                android:textColorHint="#8C7866"
+                android:textColor="@color/waypoint_text_primary"
+                android:textColorHint="@color/waypoint_text_muted"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@id/btnSearch"
@@ -103,12 +102,12 @@
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_nearby_search_button"
                 android:clickable="true"
-                android:contentDescription="Search"
+                android:contentDescription="@string/nearby_places_search_cd"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center"
-                android:text="→"
-                android:textColor="#FFFFFF"
+                android:text="@string/nearby_places_search_glyph"
+                android:textColor="@color/white"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -121,8 +120,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:alpha="0.8"
-                android:text="Enter a town or city — e.g. Cape Town, London"
-                android:textColor="#8C7866"
+                android:text="@string/nearby_places_helper"
+                android:textColor="@color/waypoint_text_muted"
                 android:textSize="10sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -157,8 +156,8 @@
                         android:paddingTop="7dp"
                         android:paddingEnd="13dp"
                         android:paddingBottom="7dp"
-                        android:text="All"
-                        android:textColor="#FFFFFF"
+                        android:text="@string/nearby_places_filter_all"
+                        android:textColor="@color/white"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
@@ -174,8 +173,8 @@
                         android:paddingTop="7dp"
                         android:paddingEnd="13dp"
                         android:paddingBottom="7dp"
-                        android:text="Restaurants"
-                        android:textColor="#8C7866"
+                        android:text="@string/nearby_places_filter_restaurants"
+                        android:textColor="@color/waypoint_text_muted"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
@@ -191,8 +190,8 @@
                         android:paddingTop="7dp"
                         android:paddingEnd="13dp"
                         android:paddingBottom="7dp"
-                        android:text="Cafes"
-                        android:textColor="#8C7866"
+                        android:text="@string/nearby_places_filter_cafes"
+                        android:textColor="@color/waypoint_text_muted"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
@@ -208,8 +207,8 @@
                         android:paddingTop="7dp"
                         android:paddingEnd="13dp"
                         android:paddingBottom="7dp"
-                        android:text="Attractions"
-                        android:textColor="#8C7866"
+                        android:text="@string/nearby_places_filter_attractions"
+                        android:textColor="@color/waypoint_text_muted"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
@@ -232,8 +231,8 @@
                         android:paddingTop="7dp"
                         android:paddingEnd="13dp"
                         android:paddingBottom="7dp"
-                        android:text="Entertainment"
-                        android:textColor="#8C7866"
+                        android:text="@string/nearby_places_filter_entertainment"
+                        android:textColor="@color/waypoint_text_muted"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
@@ -249,8 +248,8 @@
                         android:paddingTop="7dp"
                         android:paddingEnd="13dp"
                         android:paddingBottom="7dp"
-                        android:text="Hotels"
-                        android:textColor="#8C7866"
+                        android:text="@string/nearby_places_filter_hotels"
+                        android:textColor="@color/waypoint_text_muted"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
@@ -274,15 +273,15 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Results near Cape Town"
-                    android:textColor="#473021"
+                    android:textColor="@color/waypoint_text_primary"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="via LocationIQ"
-                    android:textColor="#8C7866"
+                    android:text="@string/nearby_places_attribution"
+                    android:textColor="@color/waypoint_text_muted"
                     android:textSize="10sp" />
 
             </LinearLayout>
@@ -330,7 +329,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Table Mountain"
-                            android:textColor="#473021"
+                            android:textColor="@color/waypoint_text_primary"
                             android:textSize="13sp"
                             android:textStyle="bold" />
 
@@ -339,7 +338,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="3dp"
                             android:text="Landmark · 2.1 km away"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                     </LinearLayout>
@@ -375,7 +374,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="V&amp;A Waterfront"
-                            android:textColor="#473021"
+                            android:textColor="@color/waypoint_text_primary"
                             android:textSize="13sp"
                             android:textStyle="bold" />
 
@@ -384,7 +383,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="3dp"
                             android:text="Shopping · 3.4 km away"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                     </LinearLayout>
@@ -420,7 +419,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Camps Bay Beach"
-                            android:textColor="#473021"
+                            android:textColor="@color/waypoint_text_primary"
                             android:textSize="13sp"
                             android:textStyle="bold" />
 
@@ -429,7 +428,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="3dp"
                             android:text="Beach · 4.8 km away"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                     </LinearLayout>
@@ -465,7 +464,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="The Test Kitchen"
-                            android:textColor="#473021"
+                            android:textColor="@color/waypoint_text_primary"
                             android:textSize="13sp"
                             android:textStyle="bold" />
 
@@ -474,7 +473,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="3dp"
                             android:text="Restaurant · 1.6 km away"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                     </LinearLayout>
@@ -510,7 +509,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Truth Coffee"
-                            android:textColor="#473021"
+                            android:textColor="@color/waypoint_text_primary"
                             android:textSize="13sp"
                             android:textStyle="bold" />
 
@@ -519,7 +518,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="3dp"
                             android:text="Cafe · 0.9 km away"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                     </LinearLayout>
@@ -555,7 +554,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Kirstenbosch Gardens"
-                            android:textColor="#473021"
+                            android:textColor="@color/waypoint_text_primary"
                             android:textSize="13sp"
                             android:textStyle="bold" />
 
@@ -564,7 +563,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="3dp"
                             android:text="Attraction · 6.2 km away"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                     </LinearLayout>
