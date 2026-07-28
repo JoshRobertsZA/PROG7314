@@ -42,5 +42,11 @@ class MainActivity : AppCompatActivity() {
         findViewById<android.widget.Button>(R.id.btnGoToEditItinerary).setOnClickListener {
             startActivity(Intent(this, EditItineraryActivity::class.java))
         }
+
+        // Temporary: navigate directly to the all trips screen for testing
+        // until it's wired into the app's real navigation.
+        findViewById<android.widget.Button>(R.id.btnGoToAllTrips).setOnClickListener {
+            startActivity(Intent(this, AllTripsActivity::class.java))
+        }
     }
 }

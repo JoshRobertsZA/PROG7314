@@ -6,6 +6,7 @@
     <string name="main_go_to_trip_calendar">Go to Trip Calendar</string>
     <string name="main_go_to_view_itinerary">Go to View Itinerary</string>
     <string name="main_go_to_edit_itinerary">Go to Edit Itinerary</string>
+    <string name="main_go_to_all_trips">Go to All Trips</string>
 
     <!-- Login screen (Figma node 64:2, "01 Waypoint — Login") -->
     <string name="login_logo_glyph">W</string>
@@ -118,4 +119,19 @@
     <string name="edit_itinerary_edit_place_cd">Edit place</string>
     <string name="edit_itinerary_remove_place_cd">Remove place</string>
     <string name="edit_itinerary_add_entertainment_placeholder">+ Add entertainment for these days</string>
+
+    <!-- All trips screen (Figma node 60:2, "07 Waypoint — All Trips").
+         Every trip card's content (name, destination, dates, and the
+         status badge text - "In 8 days"/"Ongoing"/"Completed"/etc.) is
+         intentionally left inline in activity_all_trips.xml, not here,
+         since it's mock content that will be computed/set from code once
+         real trip data exists. -->
+    <string name="all_trips_back_cd">Back</string>
+    <string name="all_trips_back_glyph">←</string>
+    <string name="all_trips_title">All trips</string>
+    <string name="all_trips_search_hint">Search trips by name or date</string>
+    <string name="all_trips_filter_all">All</string>
+    <string name="all_trips_filter_upcoming">Upcoming</string>
+    <string name="all_trips_filter_ongoing">Ongoing</string>
+    <string name="all_trips_filter_past">Past</string>
 </resources>
