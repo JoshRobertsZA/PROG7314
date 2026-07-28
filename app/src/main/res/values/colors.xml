@@ -22,7 +22,7 @@
     <color name="waypoint_place_accent_2">#C88C5A</color>
     <color name="waypoint_place_accent_3">#E39D6B</color>
 
-    <!-- View itinerary screen (Figma node 58:2, "05 Waypoint — View Itinerary") -->
+    <!-- View / edit itinerary screens (Figma nodes 58:2, 59:2) -->
     <color name="waypoint_place_accent_4">#A57F5B</color>
 
     <!-- Trip calendar screen (Figma node 56:2, "04 Waypoint — Trip Calendar") -->

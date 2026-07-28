@@ -36,5 +36,11 @@ class MainActivity : AppCompatActivity() {
         findViewById<android.widget.Button>(R.id.btnGoToViewItinerary).setOnClickListener {
             startActivity(Intent(this, ViewItineraryActivity::class.java))
         }
+
+        // Temporary: navigate directly to the edit itinerary screen for
+        // testing until it's wired into the app's real navigation.
+        findViewById<android.widget.Button>(R.id.btnGoToEditItinerary).setOnClickListener {
+            startActivity(Intent(this, EditItineraryActivity::class.java))
+        }
     }
 }
