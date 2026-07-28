@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     All trips screen (Figma node 60:2, "07 Waypoint — All Trips").
-    Every trip card's content (name, destination, dates, status badge) is
-    mock content, not live data, and is intentionally left as inline text
-    since it'll be set from code once real trip data exists. Colors are
-    inline hex for now (this commit is frontend-only, no Activity/resources
-    wired up yet) - see the upcoming refactor commit for colors.xml/
-    strings.xml extraction, matching the pattern used on the view/edit
-    itinerary screens.
+    Every trip card's content (name, destination, dates, and status badge
+    text) is mock content, not live data, and is intentionally left as
+    inline text (see strings.xml) since it'll be set from code once real
+    trip data exists. Colors and static UI labels/content descriptions are
+    resolved through colors.xml/strings.xml - all reusing tokens already
+    established on other screens, no new colors were needed. See
+    AllTripsActivity for the (minimal) logic behind this screen.
 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -15,7 +15,7 @@
     android:id="@+id/allTrips"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F2E9D3"
+    android:background="@color/waypoint_cream"
     android:paddingStart="22dp"
     android:paddingTop="28dp"
     android:paddingEnd="22dp"
@@ -45,12 +45,12 @@
                 android:layout_height="36dp"
                 android:background="@drawable/bg_all_trips_back_button"
                 android:clickable="true"
-                android:contentDescription="Back"
+                android:contentDescription="@string/all_trips_back_cd"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center"
-                android:text="←"
-                android:textColor="#C1673D"
+                android:text="@string/all_trips_back_glyph"
+                android:textColor="@color/waypoint_terracotta"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -59,8 +59,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="All trips"
-                android:textColor="#473021"
+                android:text="@string/all_trips_title"
+                android:textColor="@color/waypoint_text_primary"
                 android:textSize="17sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/btnBack"
@@ -76,15 +76,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_all_trips_search_box"
-                android:hint="Search trips by name or date"
+                android:hint="@string/all_trips_search_hint"
                 android:inputType="text"
                 android:maxLines="1"
                 android:paddingStart="14dp"
                 android:paddingTop="12dp"
                 android:paddingEnd="14dp"
                 android:paddingBottom="12dp"
-                android:textColor="#473021"
-                android:textColorHint="#8C7866"
+                android:textColor="@color/waypoint_text_primary"
+                android:textColorHint="@color/waypoint_text_muted"
                 android:textSize="12sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -112,8 +112,8 @@
                     android:paddingTop="7dp"
                     android:paddingEnd="14dp"
                     android:paddingBottom="7dp"
-                    android:text="All"
-                    android:textColor="#FFFFFF"
+                    android:text="@string/all_trips_filter_all"
+                    android:textColor="@color/white"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -129,8 +129,8 @@
                     android:paddingTop="7dp"
                     android:paddingEnd="14dp"
                     android:paddingBottom="7dp"
-                    android:text="Upcoming"
-                    android:textColor="#8C7866"
+                    android:text="@string/all_trips_filter_upcoming"
+                    android:textColor="@color/waypoint_text_muted"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -146,8 +146,8 @@
                     android:paddingTop="7dp"
                     android:paddingEnd="14dp"
                     android:paddingBottom="7dp"
-                    android:text="Ongoing"
-                    android:textColor="#8C7866"
+                    android:text="@string/all_trips_filter_ongoing"
+                    android:textColor="@color/waypoint_text_muted"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -163,8 +163,8 @@
                     android:paddingTop="7dp"
                     android:paddingEnd="14dp"
                     android:paddingBottom="7dp"
-                    android:text="Past"
-                    android:textColor="#8C7866"
+                    android:text="@string/all_trips_filter_past"
+                    android:textColor="@color/waypoint_text_muted"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -218,7 +218,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="Cape Town Getaway"
-                                android:textColor="#473021"
+                                android:textColor="@color/waypoint_text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -231,7 +231,7 @@
                                 android:paddingEnd="9dp"
                                 android:paddingBottom="4dp"
                                 android:text="In 8 days"
-                                android:textColor="#FFFFFF"
+                                android:textColor="@color/white"
                                 android:textSize="9sp"
                                 android:textStyle="bold" />
 
@@ -242,7 +242,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="Cape Town, South Africa"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                         <TextView
@@ -250,7 +250,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="Aug 2 – Aug 9, 2026"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                     </LinearLayout>
@@ -293,7 +293,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="Nairobi Street Food Tour"
-                                android:textColor="#473021"
+                                android:textColor="@color/waypoint_text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -306,7 +306,7 @@
                                 android:paddingEnd="9dp"
                                 android:paddingBottom="4dp"
                                 android:text="Ongoing"
-                                android:textColor="#FFFFFF"
+                                android:textColor="@color/white"
                                 android:textSize="9sp"
                                 android:textStyle="bold" />
 
@@ -317,7 +317,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="Nairobi, Kenya"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                         <TextView
@@ -325,7 +325,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="Jul 22 – Jul 27, 2026"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                     </LinearLayout>
@@ -368,7 +368,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="Zanzibar Honeymoon"
-                                android:textColor="#473021"
+                                android:textColor="@color/waypoint_text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -381,7 +381,7 @@
                                 android:paddingEnd="9dp"
                                 android:paddingBottom="4dp"
                                 android:text="In 51 days"
-                                android:textColor="#FFFFFF"
+                                android:textColor="@color/white"
                                 android:textSize="9sp"
                                 android:textStyle="bold" />
 
@@ -392,7 +392,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="Zanzibar, Tanzania"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                         <TextView
@@ -400,7 +400,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="Sep 14 – Sep 21, 2026"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                     </LinearLayout>
@@ -445,7 +445,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="Lisbon Long Weekend"
-                                android:textColor="#8C7866"
+                                android:textColor="@color/waypoint_text_muted"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -458,7 +458,7 @@
                                 android:paddingEnd="9dp"
                                 android:paddingBottom="4dp"
                                 android:text="Completed"
-                                android:textColor="#473021"
+                                android:textColor="@color/waypoint_text_primary"
                                 android:textSize="9sp"
                                 android:textStyle="bold" />
 
@@ -469,7 +469,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="Lisbon, Portugal"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                         <TextView
@@ -477,7 +477,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="Jun 10 – Jun 13, 2026"
-                            android:textColor="#8C7866"
+                            android:textColor="@color/waypoint_text_muted"
                             android:textSize="11sp" />
 
                     </LinearLayout>
