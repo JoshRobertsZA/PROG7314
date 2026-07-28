@@ -21,4 +21,11 @@
     <!-- Trip calendar screen (Figma node 56:2, "04 Waypoint — Trip Calendar") -->
     <color name="waypoint_day_muted">#B5AEA5</color>
     <color name="waypoint_trip_range">#5B7FA5</color>
+
+    <!-- Home screen (Figma node 47:30, "03 Waypoint — Home") -->
+    <color name="waypoint_trip_label">#D9FFEBDE</color>
+    <color name="waypoint_border_soft">#D9CCB5</color>
+    <color name="waypoint_place_accent_1">#F1BD8A</color>
+    <color name="waypoint_place_accent_2">#C88C5A</color>
+    <color name="waypoint_place_accent_3">#E39D6B</color>
 </resources>
