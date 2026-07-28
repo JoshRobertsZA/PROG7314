@@ -48,5 +48,11 @@ class MainActivity : AppCompatActivity() {
         findViewById<android.widget.Button>(R.id.btnGoToAllTrips).setOnClickListener {
             startActivity(Intent(this, AllTripsActivity::class.java))
         }
+
+        // Temporary: navigate directly to the nearby places screen for
+        // testing until it's wired into the app's real navigation.
+        findViewById<android.widget.Button>(R.id.btnGoToNearbyPlaces).setOnClickListener {
+            startActivity(Intent(this, NearbyPlacesActivity::class.java))
+        }
     }
 }
