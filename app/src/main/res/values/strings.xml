@@ -3,6 +3,7 @@
 
     <!-- Temporary nav on MainActivity until the real home/first screen is decided -->
     <string name="main_go_to_login">Go to Login</string>
+    <string name="main_go_to_edit_itinerary">Go to Edit Itinerary</string>
 
     <!-- Login screen (Figma node 64:2, "01 Waypoint — Login") -->
     <string name="login_logo_glyph">W</string>
