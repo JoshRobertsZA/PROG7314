@@ -6,6 +6,7 @@
     <string name="main_go_to_trip_calendar">Go to Trip Calendar</string>
     <string name="main_go_to_view_itinerary">Go to View Itinerary</string>
     <string name="main_go_to_edit_itinerary">Go to Edit Itinerary</string>
+    <string name="main_go_to_all_trips">Go to All Trips</string>
 
     <!-- Login screen (Figma node 64:2, "01 Waypoint — Login") -->
     <string name="login_logo_glyph">W</string>
