@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    New trip screen (Figma node 61:2, "08 Waypoint — New Trip").
+    The month shown (July 2026), which day is "today" (25), and which days
+    are in the selected range (28-31) are all mock content, not live data,
+    and are intentionally left as inline text since they'll be computed
+    from the real device date and user selection once this screen is wired
+    up. Colors are inline hex for now (this commit is frontend-only, no
+    Activity/resources wired up yet) - see the upcoming refactor commit for
+    colors.xml/strings.xml extraction, matching the pattern used on the
+    other screens. The day-grid row/cell structure follows the same
+    weighted-LinearLayout pattern established on the trip calendar screen.
+-->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/newTrip"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F2E9D3"
+    android:paddingStart="22dp"
+    android:paddingTop="20dp"
+    android:paddingEnd="22dp"
+    android:paddingBottom="28dp"
+    tools:context=".NewTripActivity">
+
+    <!-- Scrollable so the sheet doesn't get clipped on shorter screens,
+         same fix applied on every other screen in this app. -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- HandleWrap: decorative drag-handle bar, purely visual -->
+            <View
+                android:id="@+id/dragHandle"
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@drawable/bg_new_trip_handle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- TopBar: centered title, close button on the right -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="New trip"
+                android:textColor="#473021"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/btnClose"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/btnClose" />
+
+            <TextView
+                android:id="@+id/btnClose"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_new_trip_close_button"
+                android:clickable="true"
+                android:contentDescription="Close"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center"
+                android:text="✕"
+                android:textColor="#C1673D"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/dragHandle" />
+
+            <!-- Trip name -->
+            <TextView
+                android:id="@+id/tvNameLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Trip name"
+                android:textColor="#8C7866"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnClose" />
+
+            <EditText
+                android:id="@+id/etTripName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_new_trip_name_input"
+                android:hint="e.g. Cape Town Getaway"
+                android:inputType="text"
+                android:maxLines="1"
+                android:paddingStart="14dp"
+                android:paddingTop="13dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="13dp"
+                android:textColor="#473021"
+                android:textColorHint="#8C7866"
+                android:textSize="13sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvNameLabel" />
+
+            <!-- DatesLabel -->
+            <LinearLayout
+                android:id="@+id/datesLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/etTripName">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select trip dates"
+                    android:textColor="#8C7866"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:alpha="0.8"
+                    android:text="Only today and future dates can be selected"
+                    android:textColor="#8C7866"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+
+            <!-- MonthNav. TODO: prev/next don't change the displayed month yet -->
+            <TextView
+                android:id="@+id/btnPrevMonth"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center"
+                android:text="‹"
+                android:textColor="#C1673D"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/datesLabel" />
+
+            <TextView
+                android:id="@+id/tvMonthLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="July 2026"
+                android:textColor="#473021"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/btnPrevMonth"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/btnPrevMonth" />
+
+            <TextView
+                android:id="@+id/btnNextMonth"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center"
+                android:text="›"
+                android:textColor="#C1673D"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/btnPrevMonth"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/btnPrevMonth" />
+
+            <!-- WeekdayRow -->
+            <LinearLayout
+                android:id="@+id/weekdayRow"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnPrevMonth">
+
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="S" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="M" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="T" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="W" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="T" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="F" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
+                <TextView android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:gravity="center" android:text="S" android:textColor="#8C7866" android:textSize="11sp" android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- CalendarGrid: July 2026 hardcoded to match the mock design.
+                 Jul 1, 2026 is a Wednesday, so row 0 leads with three blank
+                 slots. Days 1-24 are in the past (muted, 60% alpha, not
+                 selectable). Day 25 is "today" (outlined). Days 26-27 are
+                 selectable future days with no selection yet (card fill).
+                 Days 28-31 are the currently selected range (terracotta
+                 fill). Row 4 ends with one trailing blank slot. -->
+            <LinearLayout
+                android:id="@+id/calendarGrid"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/weekdayRow">
+
+                <!-- Row: blank blank blank 1 2 3 4 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <View android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" />
+                    <View android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" />
+                    <View android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="1" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="2" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="3" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="4" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Row: 5-11 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="5" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="6" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="7" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="8" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="9" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="10" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="11" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Row: 12-18 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="12" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="13" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="14" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="15" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="16" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="17" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="18" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Row: 19-25 (25 is "today") -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="19" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="20" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="21" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="22" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="23" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:alpha="0.6" android:gravity="center" android:text="24" android:textColor="#B5AEA5" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_new_trip_day_today" android:gravity="center" android:text="25" android:textColor="#A9522E" android:textSize="13sp" android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Row: 26(unselected) 27(unselected) 28-31(selected range) blank -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_new_trip_day_unselected" android:gravity="center" android:text="26" android:textColor="#473021" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_new_trip_day_unselected" android:gravity="center" android:text="27" android:textColor="#473021" android:textSize="13sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_new_trip_day_selected" android:gravity="center" android:text="28" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_new_trip_day_selected" android:gravity="center" android:text="29" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_new_trip_day_selected" android:gravity="center" android:text="30" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:gravity="center">
+                        <TextView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_new_trip_day_selected" android:gravity="center" android:text="31" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold" />
+                    </LinearLayout>
+                    <View android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- SelectedSummary chip -->
+            <TextView
+                android:id="@+id/tvSelectedSummary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_new_trip_summary_chip"
+                android:paddingStart="14dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp"
+                android:text="4 days selected · Jul 28 – Jul 31, 2026"
+                android:textColor="#A9522E"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/calendarGrid" />
+
+            <!-- SaveButton. TODO: not wired to save/navigate yet -->
+            <TextView
+                android:id="@+id/btnSaveTrip"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_new_trip_save_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
+                android:text="Save trip"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvSelectedSummary" />
+
+            <!-- Footer hint -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="4dp"
+                android:alpha="0.85"
+                android:gravity="center"
+                android:text="You’ll land on the edit itinerary screen next — your trip will only have a name and dates until you add flights, stays, and places."
+                android:textColor="#8C7866"
+                android:textSize="10sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnSaveTrip" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
