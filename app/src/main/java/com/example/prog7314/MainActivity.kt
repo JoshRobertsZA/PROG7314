@@ -1,64 +1,102 @@
 package com.example.prog7314
 
-import android.content.Intent
 import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.prog7314.core.navigation.Routes
+import com.example.prog7314.core.theme.WaypointTheme
+import com.example.prog7314.features.alltrips.ui.AllTripsScreen
+import com.example.prog7314.features.edititinerary.ui.EditItineraryScreen
+import com.example.prog7314.features.home.ui.HomeScreen
+import com.example.prog7314.features.login.ui.LoginScreen
+import com.example.prog7314.features.main.ui.MainScreen
+import com.example.prog7314.features.nearbyplaces.ui.NearbyPlacesScreen
+import com.example.prog7314.features.newtrip.ui.NewTripScreen
+import com.example.prog7314.features.register.ui.RegisterScreen
+import com.example.prog7314.features.settings.ui.SettingsScreen
+import com.example.prog7314.features.tripcalendar.ui.TripCalendarScreen
+import com.example.prog7314.features.viewitinerary.ui.ViewItineraryScreen
 
-class MainActivity : AppCompatActivity() {
+/**
+ * The app's only Activity. Hosts a single flat NavHost (see
+ * core/navigation/Routes.kt) covering every screen - replaces the old
+ * per-screen Activity + Intent navigation entirely.
+ */
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        setContent {
+            WaypointTheme {
+                WaypointNavHost()
+            }
         }
+    }
+}
 
-        // Temporary: navigate to the login screen until the real home/first
-        // screen for the app is decided.
-        findViewById<android.widget.Button>(R.id.btnGoToLogin).setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
+@Composable
+private fun WaypointNavHost(navController: NavHostController = rememberNavController()) {
+    NavHost(navController = navController, startDestination = Routes.Main) {
+        composable(Routes.Main) {
+            MainScreen(
+                onGoToLoginClick = { navController.navigate(Routes.Login) },
+                onGoToTripCalendarClick = { navController.navigate(Routes.TripCalendar) },
+                onGoToViewItineraryClick = { navController.navigate(Routes.ViewItinerary) },
+                onGoToEditItineraryClick = { navController.navigate(Routes.EditItinerary) },
+                onGoToAllTripsClick = { navController.navigate(Routes.AllTrips) },
+                onGoToSettingsClick = { navController.navigate(Routes.Settings) },
+                onGoToNearbyPlacesClick = { navController.navigate(Routes.NearbyPlaces) },
+            )
         }
-
-        // Temporary: jump straight to the trip calendar screen for testing,
-        // bypassing login/home. Remove once there's a real nav path to it.
-        findViewById<android.widget.Button>(R.id.btnGoToTripCalendar).setOnClickListener {
-            startActivity(Intent(this, TripCalendarActivity::class.java))
+        composable(Routes.Login) {
+            LoginScreen(
+                // TODO: onGoogleSignInClick currently navigates straight to
+                // Home as a placeholder. Replace with a real Google Sign-In
+                // flow (and only navigate to Home on success) once auth is
+                // implemented.
+                onGoogleSignInClick = { navController.navigate(Routes.Home) },
+                onCreateAccountClick = { navController.navigate(Routes.Register) },
+            )
         }
-
-        // Temporary: jump straight to the view itinerary screen for
-        // testing, bypassing login/home/calendar. Remove once there's a
-        // real nav path into it.
-        findViewById<android.widget.Button>(R.id.btnGoToViewItinerary).setOnClickListener {
-            startActivity(Intent(this, ViewItineraryActivity::class.java))
+        composable(Routes.Register) {
+            RegisterScreen(
+                // Google sign-up is still a stub; log in is real navigation
+                // back to Login.
+                onGoogleSignUpClick = {},
+                onLogInClick = { navController.popBackStack() },
+            )
         }
-
-        // Temporary: navigate directly to the edit itinerary screen for
-        // testing until it's wired into the app's real navigation.
-        findViewById<android.widget.Button>(R.id.btnGoToEditItinerary).setOnClickListener {
-            startActivity(Intent(this, EditItineraryActivity::class.java))
+        composable(Routes.Home) {
+            HomeScreen(
+                onNewTripClick = { navController.navigate(Routes.NewTrip) },
+            )
         }
-
-        // Temporary: navigate directly to the all trips screen for testing
-        // until it's wired into the app's real navigation.
-        findViewById<android.widget.Button>(R.id.btnGoToAllTrips).setOnClickListener {
-            startActivity(Intent(this, AllTripsActivity::class.java))
+        composable(Routes.NewTrip) {
+            NewTripScreen(onCloseClick = { navController.popBackStack() })
         }
-
-        // Temporary: navigate directly to the settings screen for testing
-        // until it's wired into the app's real navigation.
-        findViewById<android.widget.Button>(R.id.btnGoToSettings).setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+        composable(Routes.TripCalendar) {
+            TripCalendarScreen(onBackClick = { navController.popBackStack() })
         }
-
-        // Temporary: navigate directly to the nearby places screen for
-        // testing until it's wired into the app's real navigation.
-        findViewById<android.widget.Button>(R.id.btnGoToNearbyPlaces).setOnClickListener {
-            startActivity(Intent(this, NearbyPlacesActivity::class.java))
+        composable(Routes.AllTrips) {
+            AllTripsScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable(Routes.EditItinerary) {
+            EditItineraryScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable(Routes.ViewItinerary) {
+            ViewItineraryScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable(Routes.NearbyPlaces) {
+            NearbyPlacesScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable(Routes.Settings) {
+            SettingsScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }
