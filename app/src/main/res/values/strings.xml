@@ -136,6 +136,30 @@
     <string name="all_trips_filter_ongoing">Ongoing</string>
     <string name="all_trips_filter_past">Past</string>
 
+    <!-- New trip screen (Figma node 61:2, "08 Waypoint — New Trip").
+         The displayed month, "today", and the selected day range are
+         intentionally left inline in activity_new_trip.xml, not here,
+         since they're mock content that will be computed from the real
+         device date and user selection once this screen is wired up. -->
+    <string name="new_trip_close_cd">Close</string>
+    <string name="new_trip_close_glyph">✕</string>
+    <string name="new_trip_title">New trip</string>
+    <string name="new_trip_name_label">Trip name</string>
+    <string name="new_trip_name_hint">e.g. Cape Town Getaway</string>
+    <string name="new_trip_dates_label">Select trip dates</string>
+    <string name="new_trip_dates_subtitle">Only today and future dates can be selected</string>
+    <string name="new_trip_prev_month_glyph">‹</string>
+    <string name="new_trip_next_month_glyph">›</string>
+    <string name="new_trip_wd_sun">S</string>
+    <string name="new_trip_wd_mon">M</string>
+    <string name="new_trip_wd_tue">T</string>
+    <string name="new_trip_wd_wed">W</string>
+    <string name="new_trip_wd_thu">T</string>
+    <string name="new_trip_wd_fri">F</string>
+    <string name="new_trip_wd_sat">S</string>
+    <string name="new_trip_save_button">Save trip</string>
+    <string name="new_trip_footer_hint">You’ll land on the edit itinerary screen next — your trip will only have a name and dates until you add flights, stays, and places.</string>
+
     <!-- Nearby places search screen (Figma node 62:2,
          "09 Waypoint — Nearby Places Search"). The entered town, the
          results header, and each place's name/category/distance are
