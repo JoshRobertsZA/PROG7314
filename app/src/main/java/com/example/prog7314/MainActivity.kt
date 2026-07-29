@@ -1,6 +1,7 @@
 package com.example.prog7314
 
 import android.os.Bundle
+import com.example.prog7314.BuildConfig
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -42,7 +43,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun WaypointNavHost(navController: NavHostController = rememberNavController()) {
-    NavHost(navController = navController, startDestination = Routes.Main) {
+    NavHost(
+        navController = navController,
+        startDestination = if (BuildConfig.DEBUG) Routes.Main else Routes.Login,
+    ) {
         composable(Routes.Main) {
             MainScreen(
                 onGoToLoginClick = { navController.navigate(Routes.Login) },
