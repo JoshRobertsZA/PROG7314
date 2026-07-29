@@ -1,6 +1,5 @@
 package com.example.prog7314
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -8,20 +7,20 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 /**
- * Home screen. Frontend skeleton only: static/mock content matching the
- * Waypoint Figma design (node 47:30), no networking wired up yet. This is a
- * separate screen from MainActivity/activity_main; the two are not linked
- * together at this stage.
+ * Settings screen. Minimal skeleton whose only job is to display
+ * activity_settings.xml and let the user go back - the notifications
+ * toggle, logout row, language row, and language radio rows are still
+ * static/mock content from the previous commit, not wired up yet.
  *
- * TODO: replace mock trip/weather/currency/nearby-places content with real
- * data once the backend (LocationIQ, OpenWeatherMap, ExchangeRate-API) is
- * wired up on its own branch.
- * TODO: wire up bottomNav (navTrips/navMap/navProfile) and the map CTA
- * banner once those destinations exist. btnNewTrip and btnSettings are
- * wired below; "View all" is still unwired pending the all-trips
- * destination.
+ * TODO: wire up toggleNotifications (persist the notification
+ * preference), rowLogout (sign the user out and navigate to login),
+ * rowLanguage/radioLanguage1/radioLanguage2 (switch the app's locale
+ * between English, Zulu, and Xhosa - "Language 1"/"Language 2" are
+ * placeholders for Zulu/Xhosa until the real names are wired in), and
+ * btnTopBell (once there's a notifications feed/screen to open), once
+ * settings persistence is wired up on its own branch.
  */
-class HomeActivity : AppCompatActivity() {
+class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -30,12 +29,12 @@ class HomeActivity : AppCompatActivity() {
         // padding ourselves below so it stacks with the XML-declared padding.
         enableEdgeToEdge()
 
-        // Inflate activity_home.xml as this screen's view hierarchy.
-        setContentView(R.layout.activity_home)
+        // Inflate activity_settings.xml as this screen's view hierarchy.
+        setContentView(R.layout.activity_settings)
 
-        // Root ConstraintLayout (@id/home) that the XML-declared padding
-        // (22dp sides, 28dp top) lives on.
-        val root = findViewById<android.view.View>(R.id.home)
+        // Root ConstraintLayout (@id/settings) that the XML-declared
+        // padding (28dp sides, 64dp top, 36dp bottom) lives on.
+        val root = findViewById<android.view.View>(R.id.settings)
 
         // Capture the padding declared in XML before it gets overwritten,
         // so the insets callback below can add to it instead of replacing
@@ -49,7 +48,8 @@ class HomeActivity : AppCompatActivity() {
         // when the keyboard/system bars show or hide) and re-pads root so
         // its content never sits under the status bar, navigation bar, or
         // display cutouts, while still keeping the original XML padding -
-        // matching the same pattern used in LoginActivity.
+        // matching the same pattern used in HomeActivity/AllTripsActivity/
+        // NewTripActivity/etc.
         ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
             // The status bar (top) and navigation bar (bottom/sides,
             // depending on orientation/gesture nav) insets for this frame.
@@ -57,7 +57,7 @@ class HomeActivity : AppCompatActivity() {
 
             // Add the system bar insets on top of the original XML padding
             // on every side, rather than assigning the insets directly,
-            // which would discard the 22dp/28dp spacing from the layout.
+            // which would discard the 28dp/64dp/36dp spacing from the layout.
             v.setPadding(
                 basePaddingLeft + systemBars.left,
                 basePaddingTop + systemBars.top,
@@ -70,16 +70,12 @@ class HomeActivity : AppCompatActivity() {
             insets
         }
 
-        // "+ New trip" button on the trip card: launches the new trip
-        // screen (name + date selection). This is the only trip action
-        // button wired up so far - "View all" still awaits its destination.
-        findViewById<android.view.View>(R.id.btnNewTrip).setOnClickListener {
-            startActivity(Intent(this, NewTripActivity::class.java))
-        }
-
-        // Settings gear in the header: launches the settings screen.
-        findViewById<android.view.View>(R.id.btnSettings).setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+        // The only interaction this screen supports so far: leave the
+        // screen the same way the system back gesture/button would. Every
+        // other control (see the TODO above) is still the static/mock
+        // content built in the previous commit.
+        findViewById<android.view.View>(R.id.btnBack).setOnClickListener {
+            finish()
         }
     }
 }

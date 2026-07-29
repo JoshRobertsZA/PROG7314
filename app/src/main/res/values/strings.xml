@@ -7,6 +7,7 @@
     <string name="main_go_to_view_itinerary">Go to View Itinerary</string>
     <string name="main_go_to_edit_itinerary">Go to Edit Itinerary</string>
     <string name="main_go_to_all_trips">Go to All Trips</string>
+    <string name="main_go_to_settings">Go to Settings</string>
     <string name="main_go_to_nearby_places">Go to Nearby Places</string>
 
     <!-- Login screen (Figma node 64:2, "01 Waypoint — Login") -->
@@ -179,4 +180,19 @@
     <string name="nearby_places_filter_entertainment">Entertainment</string>
     <string name="nearby_places_filter_hotels">Hotels</string>
     <string name="nearby_places_attribution">via LocationIQ</string>
+
+    <!-- Settings screen (Figma node 83:2, "10 Waypoint — Settings").
+         "Language 1"/"Language 2" are placeholders for Zulu/Xhosa until
+         the real names are wired in (this app supports English, Zulu,
+         and Xhosa per the master prompt). -->
+    <string name="settings_back_cd">Back</string>
+    <string name="settings_back_glyph">←</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_bell_cd">Notifications</string>
+    <string name="settings_row_notifications">Notifications</string>
+    <string name="settings_row_logout">Logout</string>
+    <string name="settings_row_language">English</string>
+    <string name="settings_language_expand_glyph">▲</string>
+    <string name="settings_row_language_1">Language 1</string>
+    <string name="settings_row_language_2">Language 2</string>
 </resources>
