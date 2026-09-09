@@ -31,4 +31,7 @@
 
     <!-- Home screen (Figma node 47:30, "03 Waypoint — Home") -->
     <color name="waypoint_trip_label">#D9FFEBDE</color>
+
+    <!-- Shared bottom nav active-tab pill (Figma node 270:37, terracotta at 12% alpha) -->
+    <color name="waypoint_nav_active_pill">#1FC1673D</color>
 </resources>

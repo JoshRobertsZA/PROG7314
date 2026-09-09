@@ -77,7 +77,7 @@
     <string name="home_map_cta_arrow">→</string>
     <string name="home_nav_home">Home</string>
     <string name="home_nav_trips">Trips</string>
-    <string name="home_nav_map">Map</string>
+    <string name="home_nav_explore">Explore</string>
     <string name="home_nav_profile">Profile</string>
 
     <!-- Register screen (Figma node 64:23, "02 Waypoint — Register") -->
