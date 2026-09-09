@@ -36,7 +36,7 @@ fun MainScreen(
     onGoToEditItineraryClick: () -> Unit,
     onGoToAllTripsClick: () -> Unit,
     onGoToSettingsClick: () -> Unit,
-    onGoToNearbyPlacesClick: () -> Unit,
+    onGoToExploreClick: () -> Unit,
     onGoToHomeClick: () -> Unit,
     onGoToPlaceDetailClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -77,9 +77,9 @@ fun MainScreen(
         // until it's wired into the app's real navigation.
         AppButtonFilled(text = "Go to Settings", onClick = onGoToSettingsClick, modifier = Modifier.padding(top = 16.dp))
 
-        // Temporary: navigate directly to the nearby places screen for
-        // testing until it's wired into the app's real navigation.
-        AppButtonFilled(text = "Go to Nearby Places", onClick = onGoToNearbyPlacesClick, modifier = Modifier.padding(top = 16.dp))
+        // Temporary: navigate directly to the explore screen for testing
+        // until it's wired into the app's real navigation.
+        AppButtonFilled(text = "Go to Explore", onClick = onGoToExploreClick, modifier = Modifier.padding(top = 16.dp))
 
         // Temporary: navigate directly to the home screen for testing
         // (bypassing login) so the shared bottom nav is reachable without

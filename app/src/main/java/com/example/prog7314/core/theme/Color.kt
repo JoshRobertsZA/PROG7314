@@ -40,3 +40,6 @@ val WaypointTripLabel = Color(0xD9FFEBDE)
 
 // Shared bottom nav active-tab pill (Figma node 270:37, terracotta at 12% alpha)
 val WaypointNavActivePill = Color(0x1FC1673D)
+
+// Profile screen log out button border (Figma node 281:47)
+val WaypointLogoutBorder = Color(0xFFE8B4A0)
