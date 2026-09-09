@@ -26,7 +26,7 @@ local.properties
 # API keys / secrets - never commit these
 apikey.properties
 secrets.properties
-secrets/
+/secrets/
 
 # Android Studio project files (excluding entire .idea)
 .idea/
