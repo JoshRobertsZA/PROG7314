@@ -59,13 +59,14 @@ import com.example.prog7314.core.theme.White
  * TODO: replace mock trip/weather/currency/nearby-places content with real
  * data once the backend (LocationIQ, OpenWeatherMap, ExchangeRate-API) is
  * wired up on its own branch.
- * TODO: wire up btnSettings and the map CTA banner once those destinations
- * exist. onNewTripClick is wired below; "View all" is still unwired
- * pending the all-trips destination.
+ * TODO: wire up the map CTA banner once a Map destination exists.
+ * onNewTripClick/onViewAllTripsClick/onSettingsClick are wired below.
  */
 @Composable
 fun HomeScreen(
     onNewTripClick: () -> Unit,
+    onViewAllTripsClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -93,14 +94,13 @@ fun HomeScreen(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                 )
-                // TODO: not wired to a Settings screen yet
                 Icon(
                     painter = painterResource(R.drawable.ic_settings),
                     contentDescription = stringResource(R.string.home_settings_cd),
                     tint = WaypointTextPrimary,
                     modifier = Modifier
                         .size(24.dp)
-                        .clickable(onClick = {}),
+                        .clickable(onClick = onSettingsClick),
                 )
             }
 
@@ -160,8 +160,7 @@ fun HomeScreen(
                 }
             }
 
-            // TripActions - neither button navigates anywhere yet except
-            // New trip.
+            // TripActions
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -170,7 +169,7 @@ fun HomeScreen(
             ) {
                 AppButtonOutline(
                     text = stringResource(R.string.home_view_all_trips),
-                    onClick = {},
+                    onClick = onViewAllTripsClick,
                     modifier = Modifier.weight(1f).fillMaxHeight(),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                 )

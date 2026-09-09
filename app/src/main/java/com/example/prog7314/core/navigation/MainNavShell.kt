@@ -46,7 +46,11 @@ fun MainNavShell(
             modifier = Modifier.weight(1f),
         ) {
             composable(NavTab.HOME.route) {
-                HomeScreen(onNewTripClick = onNewTripClick)
+                HomeScreen(
+                    onNewTripClick = onNewTripClick,
+                    onViewAllTripsClick = { tabNavController.navigate(NavTab.TRIPS.route) { launchSingleTop = true } },
+                    onSettingsClick = { tabNavController.navigate(NavTab.PROFILE.route) { launchSingleTop = true } },
+                )
             }
             composable(NavTab.TRIPS.route) { TabPlaceholder(NavTab.TRIPS) }
             composable(NavTab.EXPLORE.route) { TabPlaceholder(NavTab.EXPLORE) }
