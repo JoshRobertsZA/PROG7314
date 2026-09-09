@@ -37,3 +37,6 @@ val WaypointTripRange = Color(0xFF5B7FA5)
 
 // Home screen (Figma node 47:30, "03 Waypoint — Home")
 val WaypointTripLabel = Color(0xD9FFEBDE)
+
+// Shared bottom nav active-tab pill (Figma node 270:37, terracotta at 12% alpha)
+val WaypointNavActivePill = Color(0x1FC1673D)

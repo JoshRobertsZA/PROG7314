@@ -10,11 +10,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.prog7314.core.navigation.MainNavShell
 import com.example.prog7314.core.navigation.Routes
 import com.example.prog7314.core.theme.WaypointTheme
 import com.example.prog7314.features.alltrips.ui.AllTripsScreen
 import com.example.prog7314.features.edititinerary.ui.EditItineraryScreen
-import com.example.prog7314.features.home.ui.HomeScreen
 import com.example.prog7314.features.login.ui.LoginScreen
 import com.example.prog7314.features.main.ui.MainScreen
 import com.example.prog7314.features.nearbyplaces.ui.NearbyPlacesScreen
@@ -56,6 +56,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 onGoToAllTripsClick = { navController.navigate(Routes.AllTrips) },
                 onGoToSettingsClick = { navController.navigate(Routes.Settings) },
                 onGoToNearbyPlacesClick = { navController.navigate(Routes.NearbyPlaces) },
+                onGoToHomeClick = { navController.navigate(Routes.Home) },
             )
         }
         composable(Routes.Login) {
@@ -77,7 +78,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             )
         }
         composable(Routes.Home) {
-            HomeScreen(
+            MainNavShell(
                 onNewTripClick = { navController.navigate(Routes.NewTrip) },
             )
         }

@@ -1,19 +1,17 @@
 package com.example.prog7314.core.navigation
 
 /**
- * Route constants for the single flat NavHost hosted in MainActivity.
- * Covers exactly the navigation graph the XML/Intent version had - see
- * MainActivity.kt (pre-migration) and each screen's own Intent calls:
+ * Route constants for the top-level flat NavHost hosted in MainActivity:
  *
  *   Main -> Login, TripCalendar, ViewItinerary, EditItinerary, AllTrips,
- *           Settings, NearbyPlaces (all temporary scratch nav)
+ *           Settings, NearbyPlaces, Home (all temporary scratch nav)
  *   Login -> Register, Home
- *   Home -> NewTrip
+ *   Home -> renders MainNavShell, which owns its own nested NavHost for
+ *           the Home/Trips/Explore/Profile tabs (see MainNavShell.kt) -
+ *           NewTrip is pushed on the top-level controller from inside it,
+ *           covering the shell entirely.
  *   NewTrip / TripCalendar / EditItinerary / ViewItinerary / AllTrips /
  *   NearbyPlaces / Settings -> back (finish()/popBackStack only)
- *
- * No authenticated-shell/bottom-nav nesting exists in the source, so this
- * is intentionally one flat graph, not a nested NavHost.
  */
 object Routes {
     const val Main = "main"

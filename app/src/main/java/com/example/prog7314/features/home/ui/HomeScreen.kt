@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -38,7 +37,6 @@ import com.example.prog7314.core.common.RowSurface
 import com.example.prog7314.core.common.ThumbnailBlock
 import com.example.prog7314.core.theme.RadiusHero
 import com.example.prog7314.core.theme.RadiusRow
-import com.example.prog7314.core.theme.WaypointBorderSoft
 import com.example.prog7314.core.theme.WaypointCard
 import com.example.prog7314.core.theme.WaypointCream
 import com.example.prog7314.core.theme.WaypointDecoText
@@ -54,19 +52,21 @@ import com.example.prog7314.core.theme.White
 
 /**
  * Home screen. Frontend skeleton only: static/mock content matching the
- * Waypoint Figma design (node 47:30), no networking wired up yet.
+ * Waypoint Figma design (node 47:30), no networking wired up yet. Rendered
+ * as the Home tab inside MainNavShell (core/navigation), which owns the
+ * shared BottomNavigationBar - this screen does not render its own nav.
  *
  * TODO: replace mock trip/weather/currency/nearby-places content with real
  * data once the backend (LocationIQ, OpenWeatherMap, ExchangeRate-API) is
  * wired up on its own branch.
- * TODO: wire up bottomNav (navTrips/navMap/navProfile), btnSettings, and
- * the map CTA banner once those destinations exist. onNewTripClick is
- * wired below; "View all" is still unwired pending the all-trips
- * destination.
+ * TODO: wire up the map CTA banner once a Map destination exists.
+ * onNewTripClick/onViewAllTripsClick/onSettingsClick are wired below.
  */
 @Composable
 fun HomeScreen(
     onNewTripClick: () -> Unit,
+    onViewAllTripsClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -94,14 +94,13 @@ fun HomeScreen(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                 )
-                // TODO: not wired to a Settings screen yet
                 Icon(
                     painter = painterResource(R.drawable.ic_settings),
                     contentDescription = stringResource(R.string.home_settings_cd),
                     tint = WaypointTextPrimary,
                     modifier = Modifier
                         .size(24.dp)
-                        .clickable(onClick = {}),
+                        .clickable(onClick = onSettingsClick),
                 )
             }
 
@@ -161,8 +160,7 @@ fun HomeScreen(
                 }
             }
 
-            // TripActions - neither button navigates anywhere yet except
-            // New trip.
+            // TripActions
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -171,7 +169,7 @@ fun HomeScreen(
             ) {
                 AppButtonOutline(
                     text = stringResource(R.string.home_view_all_trips),
-                    onClick = {},
+                    onClick = onViewAllTripsClick,
                     modifier = Modifier.weight(1f).fillMaxHeight(),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                 )
@@ -284,43 +282,5 @@ fun HomeScreen(
                 )
             }
         }
-
-        // NavDivider
-        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(WaypointBorderSoft))
-
-        // Nav: bottom navigation bar. Only "Home" reflects the active
-        // state; Trips, Map and Profile are styled inactive placeholders
-        // and don't navigate anywhere - those screens don't exist yet.
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 28.dp),
-        ) {
-            NavItem(label = stringResource(R.string.home_nav_home), active = true, modifier = Modifier.weight(1f))
-            NavItem(label = stringResource(R.string.home_nav_trips), active = false, modifier = Modifier.weight(1f))
-            NavItem(label = stringResource(R.string.home_nav_map), active = false, modifier = Modifier.weight(1f))
-            NavItem(label = stringResource(R.string.home_nav_profile), active = false, modifier = Modifier.weight(1f))
-        }
-    }
-}
-
-@Composable
-private fun NavItem(label: String, active: Boolean, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.clickable(onClick = {}),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(6.dp)
-                .background(if (active) WaypointTerracotta else WaypointTextMuted, CircleShape),
-        )
-        Text(
-            text = label,
-            color = if (active) WaypointTerracotta else WaypointTextMuted,
-            fontSize = 10.sp,
-            fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
-            modifier = Modifier.padding(top = 4.dp),
-        )
     }
 }
