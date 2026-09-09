@@ -1,7 +1,20 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
+
+// Load local API keys from apikey.properties (gitignored, never committed).
+// Copy apikey.properties.example -> apikey.properties and fill in real values.
+val apikeyPropertiesFile = rootProject.file("apikey.properties")
+val apikeyProperties = Properties()
+if (apikeyPropertiesFile.exists()) {
+    apikeyProperties.load(FileInputStream(apikeyPropertiesFile))
+}
+
+fun apiKey(name: String): String = apikeyProperties.getProperty(name, "")
 
 android {
     namespace = "com.example.prog7314"
@@ -17,6 +30,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "OPENWEATHER_API_KEY", "\"${apiKey("OPENWEATHER_API_KEY")}\"")
+        buildConfigField("String", "EXCHANGERATE_API_KEY", "\"${apiKey("EXCHANGERATE_API_KEY")}\"")
+        buildConfigField("String", "LOCATIONIQ_API_KEY", "\"${apiKey("LOCATIONIQ_API_KEY")}\"")
+        buildConfigField("String", "AIRLABS_API_KEY", "\"${apiKey("AIRLABS_API_KEY")}\"")
+        buildConfigField("String", "COUNTERAPI_API_KEY", "\"${apiKey("COUNTERAPI_API_KEY")}\"")
     }
 
     buildTypes {
