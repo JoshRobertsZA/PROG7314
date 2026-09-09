@@ -6,11 +6,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.prog7314.core.navigation.Routes
+import com.example.prog7314.core.secrets.RemoteSecrets
 import com.example.prog7314.core.theme.WaypointTheme
 import com.example.prog7314.features.alltrips.ui.AllTripsScreen
 import com.example.prog7314.features.edititinerary.ui.EditItineraryScreen
@@ -23,6 +25,7 @@ import com.example.prog7314.features.register.ui.RegisterScreen
 import com.example.prog7314.features.settings.ui.SettingsScreen
 import com.example.prog7314.features.tripcalendar.ui.TripCalendarScreen
 import com.example.prog7314.features.viewitinerary.ui.ViewItineraryScreen
+import kotlinx.coroutines.launch
 
 /**
  * The app's only Activity. Hosts a single flat NavHost (see
@@ -33,6 +36,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Kick off the shared-key fetch as early as possible, in the
+        // background. Screens that need a key call RemoteSecrets.get(),
+        // which falls back to "" until this finishes (or if it fails) -
+        // see RemoteSecrets.kt for the local-override behaviour.
+        lifecycleScope.launch { RemoteSecrets.ensureLoaded() }
+
         setContent {
             WaypointTheme {
                 WaypointNavHost()
