@@ -87,7 +87,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 contentDescription = stringResource(R.string.tab_header_avatar_cd),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .padding(top = 24.dp)
+                    .padding(top = 8.dp)
                     .size(72.dp)
                     .align(Alignment.CenterHorizontally)
                     .clip(CircleShape),
@@ -109,7 +109,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             )
 
             // StatsRow: trips planned / trips created, mock counts.
-            Row(modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
+            Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
                 StatCard(value = "4 trips", label = stringResource(R.string.profile_stat_planned_label), modifier = Modifier.weight(1f))
                 StatCard(value = "4 trips", label = stringResource(R.string.profile_stat_created_label), modifier = Modifier.weight(1f).padding(start = 10.dp))
             }
@@ -119,7 +119,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 color = WaypointTextPrimary,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(top = 24.dp),
+                modifier = Modifier.padding(top = 20.dp),
             )
 
             var notificationsEnabled by remember { mutableStateOf(true) }
@@ -164,11 +164,11 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 24.dp, bottom = 28.dp)
+                    .padding(top = 16.dp, bottom = 16.dp)
                     .background(WaypointCard, RoundedCornerShape(RadiusRow))
                     .border(1.dp, WaypointLogoutBorder, RoundedCornerShape(RadiusRow))
                     .clickable(onClick = {})
-                    .padding(vertical = 14.dp),
+                    .padding(vertical = 12.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -187,7 +187,7 @@ private fun StatCard(value: String, label: String, modifier: Modifier = Modifier
     Column(
         modifier = modifier
             .background(WaypointCard, RoundedCornerShape(RadiusButton))
-            .padding(vertical = 12.dp),
+            .padding(vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(value, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
@@ -210,7 +210,7 @@ private fun PreferenceRow(
         rowModifier = rowModifier.clickable(onClick = onClick)
     }
     Row(
-        modifier = rowModifier.padding(start = 27.dp, top = 14.dp, end = 18.dp, bottom = 14.dp),
+        modifier = rowModifier.padding(start = 27.dp, top = 12.dp, end = 18.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
