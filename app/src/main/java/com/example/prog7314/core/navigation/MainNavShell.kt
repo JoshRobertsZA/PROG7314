@@ -2,7 +2,10 @@ package com.example.prog7314.core.navigation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +33,13 @@ import com.example.prog7314.features.settings.ui.SettingsScreen
  * gets its tab-root header fix (it still has the back-button-styled
  * header from before the shell existed). Home, Explore, and Profile are
  * now real Figma-accurate tab-root content.
+ *
+ * Owns the bottom system-bar inset for the whole shell (nav bar + tab
+ * content together) - individual tab screens only handle their own top
+ * (status bar) inset. Splitting it this way avoids double-reserving
+ * bottom inset space once inside the shell, which was cutting off the
+ * bottom of each tab's scrollable content (e.g. Profile's Log out
+ * button) behind BottomNavigationBar.
  */
 @Composable
 fun MainNavShell(
@@ -40,7 +50,7 @@ fun MainNavShell(
     val backStackEntry by tabNavController.currentBackStackEntryAsState()
     val selectedTab = NavTab.entries.firstOrNull { it.route == backStackEntry?.destination?.route } ?: NavTab.HOME
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(modifier = modifier.fillMaxSize().windowInsetsPadding(WindowInsets.navigationBars)) {
         NavHost(
             navController = tabNavController,
             startDestination = NavTab.HOME.route,
