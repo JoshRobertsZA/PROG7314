@@ -21,6 +21,7 @@ import com.example.prog7314.features.explore.ui.ExploreScreen
 import com.example.prog7314.features.login.ui.LoginScreen
 import com.example.prog7314.features.main.ui.MainScreen
 import com.example.prog7314.features.newtrip.ui.NewTripScreen
+import com.example.prog7314.features.placedetail.ui.PlaceDetailScreen
 import com.example.prog7314.features.register.ui.RegisterScreen
 import com.example.prog7314.features.settings.ui.SettingsScreen
 import com.example.prog7314.features.tripcalendar.ui.TripCalendarScreen
@@ -67,6 +68,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 onGoToSettingsClick = { navController.navigate(Routes.Settings) },
                 onGoToExploreClick = { navController.navigate(Routes.Explore) },
                 onGoToHomeClick = { navController.navigate(Routes.Home) },
+                onGoToPlaceDetailClick = { navController.navigate(Routes.PlaceDetail) },
             )
         }
         composable(Routes.Login) {
@@ -118,6 +120,9 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             // own, matching Figma - system back still pops this off the
             // stack when reached from the debug scratch hub.
             SettingsScreen()
+        }
+        composable(Routes.PlaceDetail) {
+            PlaceDetailScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }

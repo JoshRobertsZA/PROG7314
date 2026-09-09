@@ -202,4 +202,18 @@
     <string name="profile_currency_subtitle">Default currency for conversions</string>
     <string name="profile_chevron_glyph">›</string>
     <string name="profile_logout">Log out</string>
+
+    <!-- Place Detail screen (Figma node 380:12, "Place Detail" - tap-through
+         target from the node 408:12 "Nearby Places" screen, which doesn't
+         exist yet). Place name/category/distance, weather, hours, and the
+         About description are intentionally left inline in code, not here,
+         since they're mock content that will be set from real LocationIQ/
+         Wikipedia data once the backend is wired up. -->
+    <string name="place_detail_back_cd">Back</string>
+    <string name="place_detail_back_glyph">←</string>
+    <string name="place_detail_about_header">About</string>
+    <string name="place_detail_wikipedia_attribution">via Wikipedia</string>
+    <string name="place_detail_location_header">Location</string>
+    <string name="place_detail_open_in_maps">Open in Maps →</string>
+    <string name="place_detail_add_to_itinerary">+ Add to itinerary</string>
 </resources>
