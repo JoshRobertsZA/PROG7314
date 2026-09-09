@@ -1,11 +1,12 @@
 package com.example.prog7314.core.navigation
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,12 +35,15 @@ import com.example.prog7314.features.settings.ui.SettingsScreen
  * header from before the shell existed). Home, Explore, and Profile are
  * now real Figma-accurate tab-root content.
  *
- * Owns the bottom system-bar inset for the whole shell (nav bar + tab
- * content together) - individual tab screens only handle their own top
- * (status bar) inset. Splitting it this way avoids double-reserving
- * bottom inset space once inside the shell, which was cutting off the
- * bottom of each tab's scrollable content (e.g. Profile's Log out
- * button) behind BottomNavigationBar.
+ * Uses Scaffold instead of a hand-rolled Column+weight(1f) split: a
+ * manual Column let BottomNavigationBar clip the bottom of every tab's
+ * scrollable content (e.g. Profile's Log out button was unreachable).
+ * Scaffold measures the bottomBar first and hands NavHost the exact
+ * remaining space via innerPadding, which is the well-tested way to
+ * combine a bottom bar with per-tab scrollable content. contentWindowInsets
+ * is zeroed out here since each tab screen already handles its own top
+ * (status bar) inset, and BottomNavigationBar handles the bottom
+ * (navigation bar) inset itself.
  */
 @Composable
 fun MainNavShell(
@@ -50,11 +54,25 @@ fun MainNavShell(
     val backStackEntry by tabNavController.currentBackStackEntryAsState()
     val selectedTab = NavTab.entries.firstOrNull { it.route == backStackEntry?.destination?.route } ?: NavTab.HOME
 
-    Column(modifier = modifier.fillMaxSize().windowInsetsPadding(WindowInsets.navigationBars)) {
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        bottomBar = {
+            BottomNavigationBar(
+                selectedTab = selectedTab,
+                onTabSelected = { tab ->
+                    if (tab != selectedTab) {
+                        tabNavController.navigate(tab.route) { launchSingleTop = true }
+                    }
+                },
+                modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
+            )
+        },
+    ) { innerPadding ->
         NavHost(
             navController = tabNavController,
             startDestination = NavTab.HOME.route,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.padding(innerPadding),
         ) {
             composable(NavTab.HOME.route) {
                 HomeScreen(
@@ -67,14 +85,6 @@ fun MainNavShell(
             composable(NavTab.EXPLORE.route) { ExploreScreen() }
             composable(NavTab.PROFILE.route) { SettingsScreen() }
         }
-        BottomNavigationBar(
-            selectedTab = selectedTab,
-            onTabSelected = { tab ->
-                if (tab != selectedTab) {
-                    tabNavController.navigate(tab.route) { launchSingleTop = true }
-                }
-            },
-        )
     }
 }
 
