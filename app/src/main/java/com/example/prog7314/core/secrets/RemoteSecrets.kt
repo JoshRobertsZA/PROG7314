@@ -1,6 +1,7 @@
 package com.example.prog7314.core.secrets
 
 import android.util.Base64
+import android.util.Log
 import com.example.prog7314.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -34,6 +35,7 @@ import retrofit2.http.Path
 object RemoteSecrets {
 
     private const val CONTENTS_PATH = "secrets/keys.json"
+    private const val TAG = "RemoteSecrets"
 
     private interface GitHubContentsApi {
         @GET("repos/{owner}/{repo}/contents/{path}")
@@ -84,9 +86,17 @@ object RemoteSecrets {
         mutex.withLock {
             if (cache != null || loadFailed) return
             cache = try {
-                withContext(Dispatchers.IO) { fetchAndDecode() }
+                withContext(Dispatchers.IO) { fetchAndDecode() }.also { result ->
+                    // Debug-only, and only key NAMES - never values.
+                    if (BuildConfig.DEBUG) {
+                        Log.d(TAG, "Remote secrets loaded: ${result.keys}")
+                    }
+                }
             } catch (e: Exception) {
                 loadFailed = true
+                if (BuildConfig.DEBUG) {
+                    Log.w(TAG, "Remote secrets fetch failed: ${e.javaClass.simpleName}: ${e.message}")
+                }
                 null
             }
         }
