@@ -12,7 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.prog7314.R
 import com.example.prog7314.core.common.AppButtonFilled
 import com.example.prog7314.core.theme.WaypointCream
 
@@ -35,6 +37,7 @@ fun MainScreen(
     onGoToAllTripsClick: () -> Unit,
     onGoToSettingsClick: () -> Unit,
     onGoToNearbyPlacesClick: () -> Unit,
+    onGoToHomeClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -76,5 +79,11 @@ fun MainScreen(
         // Temporary: navigate directly to the nearby places screen for
         // testing until it's wired into the app's real navigation.
         AppButtonFilled(text = "Go to Nearby Places", onClick = onGoToNearbyPlacesClick, modifier = Modifier.padding(top = 16.dp))
+
+        // Temporary: navigate directly to the home screen for testing
+        // (bypassing login) so the shared bottom nav is reachable without
+        // going through the login stub. Remove once there's a real nav
+        // path into it.
+        AppButtonFilled(text = stringResource(R.string.main_go_to_home), onClick = onGoToHomeClick, modifier = Modifier.padding(top = 16.dp))
     }
 }

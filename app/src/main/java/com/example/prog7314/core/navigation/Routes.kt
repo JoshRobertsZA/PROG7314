@@ -6,7 +6,7 @@ package com.example.prog7314.core.navigation
  * MainActivity.kt (pre-migration) and each screen's own Intent calls:
  *
  *   Main -> Login, TripCalendar, ViewItinerary, EditItinerary, AllTrips,
- *           Settings, NearbyPlaces (all temporary scratch nav)
+ *           Settings, NearbyPlaces, Home (all temporary scratch nav)
  *   Login -> Register, Home
  *   Home -> NewTrip
  *   NewTrip / TripCalendar / EditItinerary / ViewItinerary / AllTrips /

@@ -9,6 +9,7 @@
     <string name="main_go_to_all_trips">Go to All Trips</string>
     <string name="main_go_to_settings">Go to Settings</string>
     <string name="main_go_to_nearby_places">Go to Nearby Places</string>
+    <string name="main_go_to_home">Go to Home</string>
 
     <!-- Login screen (Figma node 64:2, "01 Waypoint — Login") -->
     <string name="login_logo_glyph">W</string>

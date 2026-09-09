@@ -56,6 +56,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 onGoToAllTripsClick = { navController.navigate(Routes.AllTrips) },
                 onGoToSettingsClick = { navController.navigate(Routes.Settings) },
                 onGoToNearbyPlacesClick = { navController.navigate(Routes.NearbyPlaces) },
+                onGoToHomeClick = { navController.navigate(Routes.Home) },
             )
         }
         composable(Routes.Login) {
