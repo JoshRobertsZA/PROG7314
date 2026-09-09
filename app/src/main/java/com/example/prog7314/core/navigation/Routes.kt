@@ -11,7 +11,8 @@ package com.example.prog7314.core.navigation
  *           NewTrip is pushed on the top-level controller from inside it,
  *           covering the shell entirely.
  *   NewTrip / TripCalendar / EditItinerary / ViewItinerary / AllTrips /
- *   NearbyPlaces / Settings -> back (finish()/popBackStack only)
+ *   NearbyPlaces / Settings / PlaceDetail -> back (finish()/popBackStack
+ *   only)
  */
 object Routes {
     const val Main = "main"
@@ -25,4 +26,5 @@ object Routes {
     const val ViewItinerary = "view_itinerary"
     const val NearbyPlaces = "nearby_places"
     const val Settings = "settings"
+    const val PlaceDetail = "place_detail"
 }

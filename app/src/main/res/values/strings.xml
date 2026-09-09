@@ -196,4 +196,18 @@
     <string name="settings_language_expand_glyph">▲</string>
     <string name="settings_row_language_1">Language 1</string>
     <string name="settings_row_language_2">Language 2</string>
+
+    <!-- Place Detail screen (Figma node 380:12, "Place Detail" - tap-through
+         target from the node 408:12 "Nearby Places" screen, which doesn't
+         exist yet). Place name/category/distance, weather, hours, and the
+         About description are intentionally left inline in code, not here,
+         since they're mock content that will be set from real LocationIQ/
+         Wikipedia data once the backend is wired up. -->
+    <string name="place_detail_back_cd">Back</string>
+    <string name="place_detail_back_glyph">←</string>
+    <string name="place_detail_about_header">About</string>
+    <string name="place_detail_wikipedia_attribution">via Wikipedia</string>
+    <string name="place_detail_location_header">Location</string>
+    <string name="place_detail_open_in_maps">Open in Maps →</string>
+    <string name="place_detail_add_to_itinerary">+ Add to itinerary</string>
 </resources>

@@ -19,6 +19,7 @@ import com.example.prog7314.features.login.ui.LoginScreen
 import com.example.prog7314.features.main.ui.MainScreen
 import com.example.prog7314.features.nearbyplaces.ui.NearbyPlacesScreen
 import com.example.prog7314.features.newtrip.ui.NewTripScreen
+import com.example.prog7314.features.placedetail.ui.PlaceDetailScreen
 import com.example.prog7314.features.register.ui.RegisterScreen
 import com.example.prog7314.features.settings.ui.SettingsScreen
 import com.example.prog7314.features.tripcalendar.ui.TripCalendarScreen
@@ -57,6 +58,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 onGoToSettingsClick = { navController.navigate(Routes.Settings) },
                 onGoToNearbyPlacesClick = { navController.navigate(Routes.NearbyPlaces) },
                 onGoToHomeClick = { navController.navigate(Routes.Home) },
+                onGoToPlaceDetailClick = { navController.navigate(Routes.PlaceDetail) },
             )
         }
         composable(Routes.Login) {
@@ -102,6 +104,9 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         }
         composable(Routes.Settings) {
             SettingsScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable(Routes.PlaceDetail) {
+            PlaceDetailScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }

@@ -38,6 +38,7 @@ fun MainScreen(
     onGoToSettingsClick: () -> Unit,
     onGoToNearbyPlacesClick: () -> Unit,
     onGoToHomeClick: () -> Unit,
+    onGoToPlaceDetailClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -85,5 +86,10 @@ fun MainScreen(
         // going through the login stub. Remove once there's a real nav
         // path into it.
         AppButtonFilled(text = stringResource(R.string.main_go_to_home), onClick = onGoToHomeClick, modifier = Modifier.padding(top = 16.dp))
+
+        // Temporary: navigate directly to the place detail screen for
+        // testing. Not reachable from the real nearby-places list yet,
+        // since that screen (Figma node 408:12) doesn't exist yet.
+        AppButtonFilled(text = "Go to Place Detail", onClick = onGoToPlaceDetailClick, modifier = Modifier.padding(top = 16.dp))
     }
 }
