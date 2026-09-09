@@ -101,7 +101,10 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             NearbyPlacesScreen(onBackClick = { navController.popBackStack() })
         }
         composable(Routes.Settings) {
-            SettingsScreen(onBackClick = { navController.popBackStack() })
+            // SettingsScreen (the Profile tab root) has no back arrow of its
+            // own, matching Figma - system back still pops this off the
+            // stack when reached from the debug scratch hub.
+            SettingsScreen()
         }
     }
 }

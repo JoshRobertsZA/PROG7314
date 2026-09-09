@@ -17,6 +17,7 @@ import com.example.prog7314.core.common.BottomNavigationBar
 import com.example.prog7314.core.common.NavTab
 import com.example.prog7314.core.theme.WaypointTextMuted
 import com.example.prog7314.features.home.ui.HomeScreen
+import com.example.prog7314.features.settings.ui.SettingsScreen
 
 /**
  * The authenticated shell: owns the shared BottomNavigationBar and a
@@ -24,11 +25,10 @@ import com.example.prog7314.features.home.ui.HomeScreen
  * Home 47:30, Trips 60:2, Explore 62:2, Profile 281:20). Reached via the
  * top-level Routes.Home destination (see MainActivity.kt).
  *
- * TODO: Trips/Explore/Profile render placeholder content until their real
- * screens are built and updated to the tab-root header (brand + bell +
- * avatar, no back arrow) that Figma uses for every tab root - see
- * AllTripsScreen.kt (still back-button-styled) and SettingsScreen.kt
- * (missing the Profile tab's avatar/stats/currency/biometric content).
+ * TODO: Trips/Explore still render placeholder content until their real
+ * tab-root screens are built - see AllTripsScreen.kt, which still has the
+ * back-button-styled header from before the shell existed. Profile
+ * (SettingsScreen.kt) is now the real Figma-accurate tab-root content.
  */
 @Composable
 fun MainNavShell(
@@ -54,7 +54,7 @@ fun MainNavShell(
             }
             composable(NavTab.TRIPS.route) { TabPlaceholder(NavTab.TRIPS) }
             composable(NavTab.EXPLORE.route) { TabPlaceholder(NavTab.EXPLORE) }
-            composable(NavTab.PROFILE.route) { TabPlaceholder(NavTab.PROFILE) }
+            composable(NavTab.PROFILE.route) { SettingsScreen() }
         }
         BottomNavigationBar(
             selectedTab = selectedTab,

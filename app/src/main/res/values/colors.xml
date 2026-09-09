@@ -34,4 +34,7 @@
 
     <!-- Shared bottom nav active-tab pill (Figma node 270:37, terracotta at 12% alpha) -->
     <color name="waypoint_nav_active_pill">#1FC1673D</color>
+
+    <!-- Profile screen log out button border (Figma node 281:47) -->
+    <color name="waypoint_logout_border">#E8B4A0</color>
 </resources>
