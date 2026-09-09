@@ -15,6 +15,7 @@ package com.example.prog7314.core.navigation
  */
 object Routes {
     const val Main = "main"
+    const val Welcome = "welcome"
     const val Login = "login"
     const val Register = "register"
     const val Home = "home"
@@ -24,5 +25,6 @@ object Routes {
     const val EditItinerary = "edit_itinerary"
     const val ViewItinerary = "view_itinerary"
     const val NearbyPlaces = "nearby_places"
+    const val Explore = "explore"
     const val Settings = "settings"
 }

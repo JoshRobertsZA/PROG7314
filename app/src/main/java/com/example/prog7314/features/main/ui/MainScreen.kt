@@ -38,6 +38,7 @@ fun MainScreen(
     onGoToSettingsClick: () -> Unit,
     onGoToNearbyPlacesClick: () -> Unit,
     onGoToHomeClick: () -> Unit,
+    onGoToWelcomeClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -79,6 +80,10 @@ fun MainScreen(
         // Temporary: navigate directly to the nearby places screen for
         // testing until it's wired into the app's real navigation.
         AppButtonFilled(text = "Go to Nearby Places", onClick = onGoToNearbyPlacesClick, modifier = Modifier.padding(top = 16.dp))
+
+        // Temporary: navigate directly to the welcome screen for testing
+        // until it's wired into the app's real navigation.
+        AppButtonFilled(text = "Go to Welcome", onClick = onGoToWelcomeClick, modifier = Modifier.padding(top = 16.dp))
 
         // Temporary: navigate directly to the home screen for testing
         // (bypassing login) so the shared bottom nav is reachable without
