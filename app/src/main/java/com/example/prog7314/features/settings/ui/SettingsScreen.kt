@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,7 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.prog7314.R
+import com.example.prog7314.core.common.TabHeader
 import com.example.prog7314.core.theme.RadiusButton
 import com.example.prog7314.core.theme.RadiusRow
 import com.example.prog7314.core.theme.WaypointBorderSoft
@@ -80,47 +79,12 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         ) {
             // Header: brand name + bell (no avatar here - the big avatar
             // below is this screen's own subject).
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.login_brand_name),
-                    color = WaypointTerracotta,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Box {
-                    // TODO: not wired to a notifications feed/screen yet
-                    Icon(
-                        painter = painterResource(R.drawable.ic_bell),
-                        contentDescription = stringResource(R.string.profile_bell_cd),
-                        tint = WaypointTextPrimary,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clickable(onClick = {}),
-                    )
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .size(9.dp)
-                            .background(WaypointCard, CircleShape),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .size(6.dp)
-                                .background(WaypointTerracotta, CircleShape),
-                        )
-                    }
-                }
-            }
+            TabHeader(showAvatar = false)
 
             // Avatar + name + email, centered.
             Image(
                 painter = painterResource(R.drawable.img_mock_avatar),
-                contentDescription = stringResource(R.string.profile_avatar_cd),
+                contentDescription = stringResource(R.string.tab_header_avatar_cd),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .padding(top = 24.dp)

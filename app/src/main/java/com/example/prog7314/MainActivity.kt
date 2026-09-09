@@ -15,9 +15,9 @@ import com.example.prog7314.core.navigation.Routes
 import com.example.prog7314.core.theme.WaypointTheme
 import com.example.prog7314.features.alltrips.ui.AllTripsScreen
 import com.example.prog7314.features.edititinerary.ui.EditItineraryScreen
+import com.example.prog7314.features.explore.ui.ExploreScreen
 import com.example.prog7314.features.login.ui.LoginScreen
 import com.example.prog7314.features.main.ui.MainScreen
-import com.example.prog7314.features.nearbyplaces.ui.NearbyPlacesScreen
 import com.example.prog7314.features.newtrip.ui.NewTripScreen
 import com.example.prog7314.features.register.ui.RegisterScreen
 import com.example.prog7314.features.settings.ui.SettingsScreen
@@ -55,7 +55,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 onGoToEditItineraryClick = { navController.navigate(Routes.EditItinerary) },
                 onGoToAllTripsClick = { navController.navigate(Routes.AllTrips) },
                 onGoToSettingsClick = { navController.navigate(Routes.Settings) },
-                onGoToNearbyPlacesClick = { navController.navigate(Routes.NearbyPlaces) },
+                onGoToExploreClick = { navController.navigate(Routes.Explore) },
                 onGoToHomeClick = { navController.navigate(Routes.Home) },
             )
         }
@@ -97,8 +97,11 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         composable(Routes.ViewItinerary) {
             ViewItineraryScreen(onBackClick = { navController.popBackStack() })
         }
-        composable(Routes.NearbyPlaces) {
-            NearbyPlacesScreen(onBackClick = { navController.popBackStack() })
+        composable(Routes.Explore) {
+            // ExploreScreen (the Explore tab root) has no back arrow of its
+            // own, matching Figma - system back still pops this off the
+            // stack when reached from the debug scratch hub.
+            ExploreScreen()
         }
         composable(Routes.Settings) {
             // SettingsScreen (the Profile tab root) has no back arrow of its

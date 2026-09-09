@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.prog7314.core.common.BottomNavigationBar
 import com.example.prog7314.core.common.NavTab
 import com.example.prog7314.core.theme.WaypointTextMuted
+import com.example.prog7314.features.explore.ui.ExploreScreen
 import com.example.prog7314.features.home.ui.HomeScreen
 import com.example.prog7314.features.settings.ui.SettingsScreen
 
@@ -25,10 +26,10 @@ import com.example.prog7314.features.settings.ui.SettingsScreen
  * Home 47:30, Trips 60:2, Explore 62:2, Profile 281:20). Reached via the
  * top-level Routes.Home destination (see MainActivity.kt).
  *
- * TODO: Trips/Explore still render placeholder content until their real
- * tab-root screens are built - see AllTripsScreen.kt, which still has the
- * back-button-styled header from before the shell existed. Profile
- * (SettingsScreen.kt) is now the real Figma-accurate tab-root content.
+ * TODO: Trips still renders placeholder content until AllTripsScreen.kt
+ * gets its tab-root header fix (it still has the back-button-styled
+ * header from before the shell existed). Home, Explore, and Profile are
+ * now real Figma-accurate tab-root content.
  */
 @Composable
 fun MainNavShell(
@@ -53,7 +54,7 @@ fun MainNavShell(
                 )
             }
             composable(NavTab.TRIPS.route) { TabPlaceholder(NavTab.TRIPS) }
-            composable(NavTab.EXPLORE.route) { TabPlaceholder(NavTab.EXPLORE) }
+            composable(NavTab.EXPLORE.route) { ExploreScreen() }
             composable(NavTab.PROFILE.route) { SettingsScreen() }
         }
         BottomNavigationBar(
