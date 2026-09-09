@@ -32,11 +32,11 @@ import com.example.prog7314.core.theme.WaypointTextMuted
  * The four tabs of the app's shared bottom navigation (Figma node 47:60),
  * in display order.
  */
-enum class NavTab(val labelRes: Int, val iconRes: Int) {
-    HOME(R.string.home_nav_home, R.drawable.ic_nav_home),
-    TRIPS(R.string.home_nav_trips, R.drawable.ic_nav_trips),
-    EXPLORE(R.string.home_nav_explore, R.drawable.ic_nav_explore),
-    PROFILE(R.string.home_nav_profile, R.drawable.ic_nav_profile),
+enum class NavTab(val route: String, val labelRes: Int, val iconRes: Int) {
+    HOME("shell_home", R.string.home_nav_home, R.drawable.ic_nav_home),
+    TRIPS("shell_trips", R.string.home_nav_trips, R.drawable.ic_nav_trips),
+    EXPLORE("shell_explore", R.string.home_nav_explore, R.drawable.ic_nav_explore),
+    PROFILE("shell_profile", R.string.home_nav_profile, R.drawable.ic_nav_profile),
 }
 
 /**

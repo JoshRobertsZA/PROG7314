@@ -33,8 +33,6 @@ import androidx.compose.ui.unit.sp
 import com.example.prog7314.R
 import com.example.prog7314.core.common.AppButtonFilled
 import com.example.prog7314.core.common.AppButtonOutline
-import com.example.prog7314.core.common.BottomNavigationBar
-import com.example.prog7314.core.common.NavTab
 import com.example.prog7314.core.common.RowSurface
 import com.example.prog7314.core.common.ThumbnailBlock
 import com.example.prog7314.core.theme.RadiusHero
@@ -54,15 +52,16 @@ import com.example.prog7314.core.theme.White
 
 /**
  * Home screen. Frontend skeleton only: static/mock content matching the
- * Waypoint Figma design (node 47:30), no networking wired up yet.
+ * Waypoint Figma design (node 47:30), no networking wired up yet. Rendered
+ * as the Home tab inside MainNavShell (core/navigation), which owns the
+ * shared BottomNavigationBar - this screen does not render its own nav.
  *
  * TODO: replace mock trip/weather/currency/nearby-places content with real
  * data once the backend (LocationIQ, OpenWeatherMap, ExchangeRate-API) is
  * wired up on its own branch.
- * TODO: wire up bottomNav (navTrips/navMap/navProfile), btnSettings, and
- * the map CTA banner once those destinations exist. onNewTripClick is
- * wired below; "View all" is still unwired pending the all-trips
- * destination.
+ * TODO: wire up btnSettings and the map CTA banner once those destinations
+ * exist. onNewTripClick is wired below; "View all" is still unwired
+ * pending the all-trips destination.
  */
 @Composable
 fun HomeScreen(
@@ -284,11 +283,5 @@ fun HomeScreen(
                 )
             }
         }
-
-        // Nav: shared bottom navigation bar (core/common/BottomNavigationBar.kt).
-        // Only Home is reachable from here; Trips/Explore/Profile are styled
-        // active-capable but don't navigate anywhere yet - those tab
-        // destinations don't exist until the authenticated nav shell is built.
-        BottomNavigationBar(selectedTab = NavTab.HOME, onTabSelected = {})
     }
 }
