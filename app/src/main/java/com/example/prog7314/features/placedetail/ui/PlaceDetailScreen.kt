@@ -77,8 +77,8 @@ fun PlaceDetailScreen(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
             Text(
                 text = "Landmark · 2.1 km away",
                 color = WaypointTextMuted,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(top = 6.dp),
+                fontSize = 11.sp,
+                modifier = Modifier.padding(top = 4.dp),
             )
 
             Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
