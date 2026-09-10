@@ -48,7 +48,7 @@ fun SelectionModal(
             .padding(horizontal = 22.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        Text(text = title, color = WaypointTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(text = title, color = WaypointTextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         content()
         Box(
             modifier = Modifier
@@ -61,7 +61,7 @@ fun SelectionModal(
             Text(
                 text = stringResource(R.string.modal_save_button),
                 color = White,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
             )
         }

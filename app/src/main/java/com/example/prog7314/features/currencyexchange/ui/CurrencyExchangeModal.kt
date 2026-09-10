@@ -1,6 +1,7 @@
 package com.example.prog7314.features.currencyexchange.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.example.prog7314.R
 import com.example.prog7314.core.common.SelectionModal
 import com.example.prog7314.core.theme.RadiusButton
+import com.example.prog7314.core.theme.WaypointBorderSoft
 import com.example.prog7314.core.theme.WaypointCream
 import com.example.prog7314.core.theme.WaypointTerracotta
 import com.example.prog7314.core.theme.WaypointTextMuted
@@ -44,7 +46,7 @@ fun CurrencyExchangeModal(onSaveClick: () -> Unit, modifier: Modifier = Modifier
             Text(
                 text = stringResource(R.string.currency_modal_arrow_glyph),
                 color = WaypointTerracotta,
-                fontSize = 20.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 12.dp),
             )
@@ -58,10 +60,11 @@ private fun CurrencyBox(code: String, rate: String, modifier: Modifier = Modifie
     Column(
         modifier = modifier
             .background(WaypointCream, RoundedCornerShape(RadiusButton))
+            .border(1.5.dp, WaypointBorderSoft, RoundedCornerShape(RadiusButton))
             .padding(14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(code, color = WaypointTextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-        Text(rate, color = WaypointTextMuted, fontSize = 12.sp, modifier = Modifier.padding(top = 2.dp))
+        Text(code, color = WaypointTextPrimary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Text(rate, color = WaypointTextMuted, fontSize = 13.sp, modifier = Modifier.padding(top = 2.dp))
     }
 }
