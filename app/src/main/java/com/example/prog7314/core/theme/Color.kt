@@ -56,4 +56,7 @@ val WelcomeCardAccent4 = Color(0xFF2F6B6B)
 
 // Language modal
 val WaypointRadioBorderUnselected = Color(0xFFE6DCC4)
-val WaypointModalScrim = Color(0x80000000) // black at 50% alpha
+val WaypointModalScrim = Color(0x80000000)
+
+// Offline dialog
+val WaypointOfflineTitle = Color(0xFF261F1A)
