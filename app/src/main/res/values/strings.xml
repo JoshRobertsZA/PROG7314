@@ -216,4 +216,17 @@
     <string name="place_detail_location_header">Location</string>
     <string name="place_detail_open_in_maps">Open in Maps →</string>
     <string name="place_detail_add_to_itinerary">+ Add to itinerary</string>
+
+    <!-- Shared modal shell (core/common/SelectionModal.kt). Currently used
+         by the Currency Change modal (Figma node 392:12); the Language
+         modal (Figma node 394:62) is the same shell but is being built on
+         its own branch. -->
+    <string name="modal_save_button">Save</string>
+
+    <!-- Currency Change modal (Figma node 392:12). The USD/ZAR values are
+         intentionally left inline in code, not here, since they're mock
+         content that will be set from real ExchangeRate-API data once the
+         backend is wired up. -->
+    <string name="currency_modal_title">Currency change</string>
+    <string name="currency_modal_arrow_glyph">→</string>
 </resources>

@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.prog7314.R
 import com.example.prog7314.core.common.TabHeader
 import com.example.prog7314.core.theme.RadiusButton
@@ -45,6 +46,7 @@ import com.example.prog7314.core.theme.WaypointLogoutBorder
 import com.example.prog7314.core.theme.WaypointTerracotta
 import com.example.prog7314.core.theme.WaypointTextMuted
 import com.example.prog7314.core.theme.WaypointTextPrimary
+import com.example.prog7314.features.currencyexchange.ui.CurrencyExchangeModal
 
 /**
  * Profile screen - the Profile tab root (Figma node 281:20, "Core
@@ -57,13 +59,17 @@ import com.example.prog7314.core.theme.WaypointTextPrimary
  * trip-count stat cards, and the currency/biometric rows entirely.
  *
  * TODO: replace the mock avatar/name/email/trip-counts with real
- * Firebase Auth + trip data, wire the notifications/biometric toggles to
- * real persistence, and wire the Language/Currency rows to their own
- * screens (Language Modal, Currency Exchange) once those exist. Log out
- * is not yet wired to a real sign-out flow.
+ * Firebase Auth + trip data, and wire the notifications/biometric
+ * toggles to real persistence. Log out is not yet wired to a real
+ * sign-out flow. Currency now opens its real modal
+ * (CurrencyExchangeModal), though selecting a value there still doesn't
+ * persist anything yet. Language is still a TODO - see the Language
+ * Modal work happening on its own branch.
  */
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier) {
+    var showCurrencyModal by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -131,7 +137,8 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 PreferenceToggle(checked = notificationsEnabled, onCheckedChange = { notificationsEnabled = it })
             }
 
-            // TODO: not wired to a Language Modal yet
+            // TODO: not wired to a Language Modal yet - see the Language
+            // Modal work happening on its own branch.
             PreferenceRow(
                 title = stringResource(R.string.profile_language_title),
                 subtitle = stringResource(R.string.profile_language_subtitle),
@@ -150,11 +157,10 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 PreferenceToggle(checked = biometricEnabled, onCheckedChange = { biometricEnabled = it })
             }
 
-            // TODO: not wired to a Currency Exchange screen yet
             PreferenceRow(
                 title = stringResource(R.string.profile_currency_title),
                 subtitle = stringResource(R.string.profile_currency_subtitle),
-                onClick = {},
+                onClick = { showCurrencyModal = true },
                 modifier = Modifier.padding(top = 12.dp),
             ) {
                 ChevronValue(value = "ZAR")
@@ -178,6 +184,12 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                     fontWeight = FontWeight.SemiBold,
                 )
             }
+        }
+    }
+
+    if (showCurrencyModal) {
+        Dialog(onDismissRequest = { showCurrencyModal = false }) {
+            CurrencyExchangeModal(onSaveClick = { showCurrencyModal = false })
         }
     }
 }
