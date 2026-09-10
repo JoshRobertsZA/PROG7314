@@ -46,7 +46,7 @@ fun CurrencyExchangeModal(onSaveClick: () -> Unit, modifier: Modifier = Modifier
             Text(
                 text = stringResource(R.string.currency_modal_arrow_glyph),
                 color = WaypointTerracotta,
-                fontSize = 22.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 12.dp),
             )
@@ -64,7 +64,7 @@ private fun CurrencyBox(code: String, rate: String, modifier: Modifier = Modifie
             .padding(14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(code, color = WaypointTextPrimary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-        Text(rate, color = WaypointTextMuted, fontSize = 13.sp, modifier = Modifier.padding(top = 2.dp))
+        Text(code, color = WaypointTextPrimary, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+        Text(rate, color = WaypointTextMuted, fontSize = 14.sp, modifier = Modifier.padding(top = 2.dp))
     }
 }
