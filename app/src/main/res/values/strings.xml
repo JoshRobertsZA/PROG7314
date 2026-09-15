@@ -171,13 +171,13 @@
     <string name="new_trip_footer_hint">You’ll land on the edit itinerary screen next — your trip will only have a name and dates until you add flights, stays, and places.</string>
 
     <!-- Explore screen (Figma node 62:2, "Core Navigation" section - the
-     Explore tab root). Was previously misnamed NearbyPlacesScreen and
-     given a back-button header; that name is reserved for the actual
-     Figma node 408:12 "Nearby Places" screen, which doesn't exist yet.
-     The entered town, results header, and each place's name/category/
-     distance are intentionally left inline, not here, since they're
-     mock content that will be set from code once real LocationIQ/
-     Wikipedia data exists. -->
+         Explore tab root). Was previously misnamed NearbyPlacesScreen and
+         given a back-button header; that name is reserved for the actual
+         Figma node 408:12 "Nearby Places" screen, which doesn't exist yet.
+         The entered town, results header, and each place's name/category/
+         distance are intentionally left inline, not here, since they're
+         mock content that will be set from code once real LocationIQ/
+         Wikipedia data exists. -->
     <string name="explore_search_glyph">→</string>
     <string name="explore_helper">Enter a town or city — e.g. Cape Town, London</string>
     <string name="explore_filter_all">All</string>
@@ -230,8 +230,8 @@
     <string name="settings_row_language_2">Language 2</string>
 
     <!-- Profile screen (Figma node 281:20, "Core Navigation" section -
-     the Profile tab root, replacing the old Settings screen that was
-     built against the wrong node, 83:2). -->
+         the Profile tab root, replacing the old Settings screen that was
+         built against the wrong node, 83:2). -->
     <string name="profile_stat_planned_label">Planned this year</string>
     <string name="profile_stat_created_label">Created on Waypoint</string>
     <string name="profile_preferences_header">Preferences</string>
@@ -246,17 +246,27 @@
     <string name="profile_chevron_glyph">›</string>
     <string name="profile_logout">Log out</string>
 
-    <!-- Language modal (Figma node 394:62, "Settings — Change language") -->
-    Option labels come from AppLanguage.displayName, not string
-    resources - language names are shown in their own native form
-    regardless of the app's current locale, so they aren't
-    translated the way language_modal_title/save are. -->
+    <!-- Language modal (Figma node 394:62, "Settings — Change language").
+         Option labels come from AppLanguage.displayName, not string
+         resources - language names are shown in their own native form
+         regardless of the app's current locale, so they aren't
+         translated the way language_modal_title/save are. -->
     <string name="language_modal_title">Change language</string>
     <string name="language_modal_save">Save</string>
 
-    <!-- Offline dialog (core/common/OfflineDialog.kt) -->
+    <!-- Offline dialog (Figma nodes 341:8 "OfflineModal", 347:9
+         "ReconnectBubble") -->
     <string name="offline_dialog_title">No internet connection</string>
-    <string name="offline_dialog_body">Check your connection and try again. Some features may be unavailable while you\'re offline.</string>
+    <string name="offline_dialog_body">We\'ve detected that your internet connection has dropped. Some features may be unavailable until it\'s back.</string>
     <string name="offline_dialog_okay">Okay</string>
-    <string name="offline_bubble_body">You\'re still offline. Some features may be unavailable until you reconnect.</string>
+    <string name="offline_bubble_body">You\'re still offline. Press the button below to try reconnecting to the network.</string>
+    <string name="offline_icon_cd">No internet connection</string>
+
+    <!-- Notifications screen (Figma section 312:1175) -->
+    <string name="notifications_back_glyph">←</string>
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_mark_all_read">Mark all read</string>
+    <string name="notifications_empty_title">You\'re all caught up</string>
+    <string name="notifications_empty_subtitle">New notifications will appear here</string>
+    <string name="notifications_empty_check_cd">All caught up</string>
 </resources>

@@ -1,22 +1,20 @@
 package com.example.prog7314.core.navigation
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.prog7314.core.common.BottomNavigationBar
 import com.example.prog7314.core.common.NavTab
-import com.example.prog7314.core.theme.WaypointTextMuted
+import com.example.prog7314.features.alltrips.ui.AllTripsScreen
 import com.example.prog7314.features.home.ui.HomeScreen
+import com.example.prog7314.features.nearbyplaces.ui.NearbyPlacesScreen
+import com.example.prog7314.features.settings.ui.SettingsScreen
 
 /**
  * The authenticated shell: owns the shared BottomNavigationBar and a
@@ -24,8 +22,8 @@ import com.example.prog7314.features.home.ui.HomeScreen
  * Home 47:30, Trips 60:2, Explore 62:2, Profile 281:20). Reached via the
  * top-level Routes.Home destination (see MainActivity.kt).
  *
- * TODO: Trips/Explore/Profile render placeholder content until their real
- * screens are built and updated to the tab-root header (brand + bell +
+ * TODO: Trips/Explore/Profile reuse AllTripsScreen/NearbyPlacesScreen/
+ * SettingsScreen as-is; still need the tab-root header (brand + bell +
  * avatar, no back arrow) that Figma uses for every tab root - see
  * AllTripsScreen.kt (still back-button-styled) and SettingsScreen.kt
  * (missing the Profile tab's avatar/stats/currency/biometric content).
@@ -38,6 +36,7 @@ fun MainNavShell(
     val tabNavController = rememberNavController()
     val backStackEntry by tabNavController.currentBackStackEntryAsState()
     val selectedTab = NavTab.entries.firstOrNull { it.route == backStackEntry?.destination?.route } ?: NavTab.HOME
+    val goHome = { tabNavController.navigate(NavTab.HOME.route) { launchSingleTop = true } }
 
     Column(modifier = modifier.fillMaxSize()) {
         NavHost(
@@ -52,9 +51,9 @@ fun MainNavShell(
                     onSettingsClick = { tabNavController.navigate(NavTab.PROFILE.route) { launchSingleTop = true } },
                 )
             }
-            composable(NavTab.TRIPS.route) { TabPlaceholder(NavTab.TRIPS) }
-            composable(NavTab.EXPLORE.route) { TabPlaceholder(NavTab.EXPLORE) }
-            composable(NavTab.PROFILE.route) { TabPlaceholder(NavTab.PROFILE) }
+            composable(NavTab.TRIPS.route) { AllTripsScreen(onBackClick = goHome) }
+            composable(NavTab.EXPLORE.route) { NearbyPlacesScreen(onBackClick = goHome) }
+            composable(NavTab.PROFILE.route) { SettingsScreen(onBackClick = goHome) }
         }
         BottomNavigationBar(
             selectedTab = selectedTab,
@@ -64,12 +63,5 @@ fun MainNavShell(
                 }
             },
         )
-    }
-}
-
-@Composable
-private fun TabPlaceholder(tab: NavTab, modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "${stringResource(tab.labelRes)} - coming soon", color = WaypointTextMuted)
     }
 }

@@ -39,6 +39,7 @@ fun MainScreen(
     onGoToNearbyPlacesClick: () -> Unit,
     onGoToHomeClick: () -> Unit,
     onGoToWelcomeClick: () -> Unit,
+    onGoToNotificationsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -90,5 +91,6 @@ fun MainScreen(
         // going through the login stub. Remove once there's a real nav
         // path into it.
         AppButtonFilled(text = stringResource(R.string.main_go_to_home), onClick = onGoToHomeClick, modifier = Modifier.padding(top = 16.dp))
+        AppButtonFilled(text = "Go to Notifications", onClick = onGoToNotificationsClick, modifier = Modifier.padding(top = 16.dp))
     }
 }

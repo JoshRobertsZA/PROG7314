@@ -27,4 +27,5 @@ object Routes {
     const val NearbyPlaces = "nearby_places"
     const val Explore = "explore"
     const val Settings = "settings"
+    const val Notifications = "notifications"
 }

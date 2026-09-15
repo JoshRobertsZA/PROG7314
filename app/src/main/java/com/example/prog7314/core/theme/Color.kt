@@ -60,3 +60,6 @@ val WaypointModalScrim = Color(0x80000000)
 
 // Offline dialog
 val WaypointOfflineTitle = Color(0xFF261F1A)
+
+// Notifications screen
+val WaypointNotifRowBorder = Color(0xFFE8C9A0)
