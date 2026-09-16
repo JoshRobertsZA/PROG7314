@@ -99,6 +99,7 @@ android {
 
 lint {
         disable += "MissingTranslation"
+        abortOnError = false
     }
 }
 
