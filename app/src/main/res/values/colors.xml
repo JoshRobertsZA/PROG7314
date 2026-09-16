@@ -51,4 +51,5 @@
     <color name="welcome_card_accent_2">#6B2F52</color>
     <color name="welcome_card_accent_3">#6BC9C9</color>
     <color name="welcome_card_accent_4">#2F6B6B</color>
+    <color name="waypoint_logout_border">#E8B4A0</color>
 </resources>

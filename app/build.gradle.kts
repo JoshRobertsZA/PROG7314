@@ -1,7 +1,20 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
+
+// Load local API keys from apikey.properties (gitignored, never committed).
+// Copy apikey.properties.example -> apikey.properties and fill in real values.
+val apikeyPropertiesFile = rootProject.file("apikey.properties")
+val apikeyProperties = Properties()
+if (apikeyPropertiesFile.exists()) {
+    apikeyProperties.load(FileInputStream(apikeyPropertiesFile))
+}
+
+fun apiKey(name: String): String = apikeyProperties.getProperty(name, "")
 
 android {
     namespace = "com.example.prog7314"
@@ -17,6 +30,55 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "GITHUB_OWNER", "\"ST10438409-Emeris\"")
+        buildConfigField("String", "GITHUB_REPO", "\"apiplayground-cache\"")
+
+        buildConfigField(
+            "String",
+            "OPENWEATHER_API_KEY",
+            "\"${apiKey("OPENWEATHER_API_KEY")}\""
+        )
+
+        // Bootstrap token pieces (read-only, apiplayground-cache repo only).
+        // Reassembled at runtime in RemoteSecrets.kt. Do not reorder these
+        // without also updating the join order there.
+        buildConfigField("String", "regionSeed", "\"github_pat_11B7J\"")
+        buildConfigField("String", "cacheEpoch", "\"YGHA0gTk7O\"")
+
+        buildConfigField(
+            "String",
+            "EXCHANGERATE_API_KEY",
+            "\"${apiKey("EXCHANGERATE_API_KEY")}\""
+        )
+
+        buildConfigField("String", "deviceClassTag", "\"7KOYQEF_GGI9dZ0ISq\"")
+        buildConfigField("String", "syncNonce", "\"V0tCdHY7S1iKFN\"")
+
+        buildConfigField(
+            "String",
+            "LOCATIONIQ_API_KEY",
+            "\"${apiKey("LOCATIONIQ_API_KEY")}\""
+        )
+
+        buildConfigField("String", "featureGateId", "\"3ZzyhD8\"")
+
+        buildConfigField(
+            "String",
+            "AIRLABS_API_KEY",
+            "\"${apiKey("AIRLABS_API_KEY")}\""
+        )
+
+        buildConfigField("String", "telemetryPrefix", "\"mVVYeIQwe\"")
+        buildConfigField("String", "sessionSlot", "\"pybLFVRXU\"")
+
+        buildConfigField(
+            "String",
+            "COUNTERAPI_API_KEY",
+            "\"${apiKey("COUNTERAPI_API_KEY")}\""
+        )
+
+        buildConfigField("String", "buildFingerprint", "\"AMryLc5QyN\"")
     }
 
     buildTypes {
@@ -56,4 +118,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.scalars)
+    implementation(libs.okhttp)
+    implementation(libs.kotlinx.coroutines.android)
 }
