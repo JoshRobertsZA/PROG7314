@@ -38,6 +38,7 @@ fun MainScreen(
     onGoToSettingsClick: () -> Unit,
     onGoToExploreClick: () -> Unit,
     onGoToHomeClick: () -> Unit,
+    onGoToWelcomeClick: () -> Unit,
     onGoToPlaceDetailClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -80,6 +81,10 @@ fun MainScreen(
         // Temporary: navigate directly to the explore screen for testing
         // until it's wired into the app's real navigation.
         AppButtonFilled(text = "Go to Explore", onClick = onGoToExploreClick, modifier = Modifier.padding(top = 16.dp))
+
+        // Temporary: navigate directly to the welcome screen for testing
+        // until it's wired into the app's real navigation.
+        AppButtonFilled(text = "Go to Welcome", onClick = onGoToWelcomeClick, modifier = Modifier.padding(top = 16.dp))
 
         // Temporary: navigate directly to the home screen for testing
         // (bypassing login) so the shared bottom nav is reachable without

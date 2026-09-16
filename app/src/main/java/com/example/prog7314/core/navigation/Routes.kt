@@ -15,6 +15,7 @@ package com.example.prog7314.core.navigation
  */
 object Routes {
     const val Main = "main"
+    const val Welcome = "welcome"
     const val Login = "login"
     const val Register = "register"
     const val Home = "home"

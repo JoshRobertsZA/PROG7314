@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    isiZulu (zu) string overrides. Android picks this file up automatically
+    whenever AppCompatDelegate.setApplicationLocales(zu) is active -
+    stringResource() calls resolve here first, falling back to the default
+    values/strings.xml for any key not overridden below.
+-->
+<resources>
+    <string name="login_welcome_back">Siyakwamukela futhi</string>
+</resources>

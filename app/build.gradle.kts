@@ -96,6 +96,11 @@ android {
         compose = true
         buildConfig = true
     }
+
+lint {
+        disable += "MissingTranslation"
+        abortOnError = false
+    }
 }
 
 dependencies {

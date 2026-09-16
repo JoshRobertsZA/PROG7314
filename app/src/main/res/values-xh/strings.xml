@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    isiXhosa (xh) string overrides. Same mechanism as values-zu/strings.xml
+    - see that file's comment for how the qualifier-folder lookup works.
+-->
+<resources>
+    <string name="login_welcome_back">Wamkelekile kwakhona</string>
+</resources>

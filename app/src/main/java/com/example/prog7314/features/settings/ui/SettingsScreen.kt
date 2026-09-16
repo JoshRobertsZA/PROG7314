@@ -1,5 +1,6 @@
 package com.example.prog7314.features.settings.ui
 
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,8 +36,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.os.LocaleListCompat
 import com.example.prog7314.R
 import com.example.prog7314.core.common.TabHeader
+import com.example.prog7314.core.locale.AppLanguage
 import com.example.prog7314.core.theme.RadiusButton
 import com.example.prog7314.core.theme.RadiusRow
 import com.example.prog7314.core.theme.WaypointBorderSoft
@@ -58,17 +61,15 @@ import com.example.prog7314.features.currencyexchange.ui.CurrencyExchangeModal
  * wrong Figma node (83:2) and was missing the avatar/name/email header,
  * trip-count stat cards, and the currency/biometric rows entirely.
  *
- * TODO: replace the mock avatar/name/email/trip-counts with real
- * Firebase Auth + trip data, and wire the notifications/biometric
- * toggles to real persistence. Log out is not yet wired to a real
- * sign-out flow. Currency now opens its real modal
- * (CurrencyExchangeModal), though selecting a value there still doesn't
- * persist anything yet. Language is still a TODO - see the Language
- * Modal work happening on its own branch.
+ * The language row opens LanguageModal (see LanguageModal.kt); the
+ * selected language is held in local state here and applied via
+ * AppCompatDelegate on save, but isn't persisted across restarts yet.
  */
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier) {
     var showCurrencyModal by remember { mutableStateOf(false) }
+    var selectedLanguage by remember { mutableStateOf(AppLanguage.current()) }
+    var showLanguageModal by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -137,15 +138,13 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 PreferenceToggle(checked = notificationsEnabled, onCheckedChange = { notificationsEnabled = it })
             }
 
-            // TODO: not wired to a Language Modal yet - see the Language
-            // Modal work happening on its own branch.
             PreferenceRow(
                 title = stringResource(R.string.profile_language_title),
                 subtitle = stringResource(R.string.profile_language_subtitle),
-                onClick = {},
+                onClick = { showLanguageModal = true },
                 modifier = Modifier.padding(top = 12.dp),
             ) {
-                ChevronValue(value = "English")
+                ChevronValue(value = selectedLanguage.displayName)
             }
 
             var biometricEnabled by remember { mutableStateOf(true) }
@@ -191,6 +190,24 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         Dialog(onDismissRequest = { showCurrencyModal = false }) {
             CurrencyExchangeModal(onSaveClick = { showCurrencyModal = false })
         }
+    }
+
+    if (showLanguageModal) {
+        LanguageModal(
+            selectedLanguage = selectedLanguage,
+            onLanguageSelected = { selectedLanguage = it },
+            onSaveClick = {
+                // This is what actually switches the app's locale.
+                // AppCompat recreates the activity to apply it immediately,
+                // and persists the choice across restarts on its own - no
+                // manual SharedPreferences/DataStore needed.
+                AppCompatDelegate.setApplicationLocales(
+                    LocaleListCompat.forLanguageTags(selectedLanguage.localeTag),
+                )
+                showLanguageModal = false
+            },
+            onDismissRequest = { showLanguageModal = false },
+        )
     }
 }
 

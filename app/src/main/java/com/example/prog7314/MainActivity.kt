@@ -1,7 +1,6 @@
 package com.example.prog7314
 
 import android.os.Bundle
-import com.example.prog7314.BuildConfig
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,6 +25,7 @@ import com.example.prog7314.features.register.ui.RegisterScreen
 import com.example.prog7314.features.settings.ui.SettingsScreen
 import com.example.prog7314.features.tripcalendar.ui.TripCalendarScreen
 import com.example.prog7314.features.viewitinerary.ui.ViewItineraryScreen
+import com.example.prog7314.features.welcome.WelcomeScreen
 import kotlinx.coroutines.launch
 
 /**
@@ -68,8 +68,12 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 onGoToSettingsClick = { navController.navigate(Routes.Settings) },
                 onGoToExploreClick = { navController.navigate(Routes.Explore) },
                 onGoToHomeClick = { navController.navigate(Routes.Home) },
+                onGoToWelcomeClick = { navController.navigate(Routes.Welcome) },
                 onGoToPlaceDetailClick = { navController.navigate(Routes.PlaceDetail) },
             )
+        }
+        composable(Routes.Welcome) {
+            WelcomeScreen(onGoogleContinueClick = { navController.navigate(Routes.Home) })
         }
         composable(Routes.Login) {
             LoginScreen(

@@ -36,5 +36,26 @@
     <color name="waypoint_nav_active_pill">#1FC1673D</color>
 
     <!-- Profile screen log out button border (Figma node 281:47) -->
+    <!-- Profile screen log out button border (Figma node 281:47) -->
     <color name="waypoint_logout_border">#E8B4A0</color>
+
+    <!-- Welcome screen (Figma node 363:20)-->
+    <color name="welcome_gradient_top">#FFD9A0</color>
+    <color name="welcome_gradient_upper_mid">#FFB199</color>
+    <color name="welcome_gradient_mid">#E8848C</color>
+    <color name="welcome_gradient_lower_mid">#7C6B96</color>
+    <color name="welcome_gradient_bottom">#4B3B62</color>
+    <color name="welcome_pin_circle_bg">#26FFFFFF</color>
+    <color name="welcome_card_scrim">#BF000000</color>
+    <color name="welcome_card_accent_1">#C97FA8</color>
+    <color name="welcome_card_accent_2">#6B2F52</color>
+    <color name="welcome_card_accent_3">#6BC9C9</color>
+    <color name="welcome_card_accent_4">#2F6B6B</color>
+
+    <!-- Language modal (Figma node 394:62, "Settings — Change language").
+       waypoint_border_soft (#D9CCB5) is close but not exact for the
+       unselected radio-row border - Figma uses a distinct lighter tan
+       here. -->
+    <color name="waypoint_radio_border_unselected">#E6DCC4</color>
+    <color name="waypoint_modal_scrim">#80000000</color>
 </resources>

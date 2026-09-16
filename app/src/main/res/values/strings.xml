@@ -94,6 +94,14 @@
     <string name="register_footer_prompt">Already have an account?</string>
     <string name="register_footer_cta">Log in</string>
 
+    <!-- Welcome screen (Figma node 363:20, "Account Setup") -->
+    <string name="welcome_pin_cd">Location pin</string>
+    <string name="welcome_heading">Welcome</string>
+    <string name="welcome_subtitle">Sign in or create an account to start planning your trips.</string>
+    <string name="welcome_destinations_heading">Popular destinations</string>
+    <string name="welcome_google_cta">Continue with Google</string>
+    <string name="welcome_disclaimer">By continuing, you agree to our Terms of Service and Privacy Policy.</string>
+
     <!-- Edit itinerary screen (Figma node 59:2, "06 Waypoint — Edit Itinerary").
          Trip name/dates, per-day weather, and every booking/place row's
          content are intentionally left inline in activity_edit_itinerary.xml,
@@ -203,6 +211,13 @@
     <string name="profile_chevron_glyph">›</string>
     <string name="profile_logout">Log out</string>
 
+    <!-- Language modal (Figma node 394:62, "Settings — Change language") -->
+    Option labels come from AppLanguage.displayName, not string
+    resources - language names are shown in their own native form
+    regardless of the app's current locale, so they aren't
+    translated the way language_modal_title/save are. -->
+    <string name="language_modal_title">Change language</string>
+    <string name="language_modal_save">Save</string>
     <!-- Place Detail screen (Figma node 380:12, "Place Detail" - tap-through
          target from the node 408:12 "Nearby Places" screen, which doesn't
          exist yet). Place name/category/distance, weather, hours, and the
