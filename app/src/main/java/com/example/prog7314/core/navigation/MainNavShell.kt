@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -21,6 +22,7 @@ import com.example.prog7314.core.theme.WaypointTextMuted
 import com.example.prog7314.features.explore.ui.ExploreScreen
 import com.example.prog7314.features.home.ui.HomeScreen
 import com.example.prog7314.features.settings.ui.SettingsScreen
+
 
 /**
  * The authenticated shell: owns the shared BottomNavigationBar and a
@@ -84,5 +86,18 @@ fun MainNavShell(
             composable(NavTab.EXPLORE.route) { ExploreScreen() }
             composable(NavTab.PROFILE.route) { SettingsScreen() }
         }
+    }
+}
+   
+@Composable
+private fun TabPlaceholder(tab: NavTab, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "${tab.name} - coming soon",
+            color = WaypointTextMuted,
+        )
     }
 }
