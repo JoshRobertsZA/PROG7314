@@ -36,10 +36,11 @@ fun MainScreen(
     onGoToEditItineraryClick: () -> Unit,
     onGoToAllTripsClick: () -> Unit,
     onGoToSettingsClick: () -> Unit,
-    onGoToNearbyPlacesClick: () -> Unit,
+    onGoToExploreClick: () -> Unit,
     onGoToHomeClick: () -> Unit,
     onGoToWelcomeClick: () -> Unit,
     onGoToNotificationsClick: () -> Unit,
+    onGoToPlaceDetailClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -78,9 +79,9 @@ fun MainScreen(
         // until it's wired into the app's real navigation.
         AppButtonFilled(text = "Go to Settings", onClick = onGoToSettingsClick, modifier = Modifier.padding(top = 16.dp))
 
-        // Temporary: navigate directly to the nearby places screen for
-        // testing until it's wired into the app's real navigation.
-        AppButtonFilled(text = "Go to Nearby Places", onClick = onGoToNearbyPlacesClick, modifier = Modifier.padding(top = 16.dp))
+        // Temporary: navigate directly to the explore screen for testing
+        // until it's wired into the app's real navigation.
+        AppButtonFilled(text = "Go to Explore", onClick = onGoToExploreClick, modifier = Modifier.padding(top = 16.dp))
 
         // Temporary: navigate directly to the welcome screen for testing
         // until it's wired into the app's real navigation.
@@ -92,5 +93,10 @@ fun MainScreen(
         // path into it.
         AppButtonFilled(text = stringResource(R.string.main_go_to_home), onClick = onGoToHomeClick, modifier = Modifier.padding(top = 16.dp))
         AppButtonFilled(text = "Go to Notifications", onClick = onGoToNotificationsClick, modifier = Modifier.padding(top = 16.dp))
+
+        // Temporary: navigate directly to the place detail screen for
+        // testing. Not reachable from the real nearby-places list yet,
+        // since that screen (Figma node 408:12) doesn't exist yet.
+        AppButtonFilled(text = "Go to Place Detail", onClick = onGoToPlaceDetailClick, modifier = Modifier.padding(top = 16.dp))
     }
 }
