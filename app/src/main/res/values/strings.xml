@@ -171,13 +171,13 @@
     <string name="new_trip_footer_hint">You’ll land on the edit itinerary screen next — your trip will only have a name and dates until you add flights, stays, and places.</string>
 
     <!-- Explore screen (Figma node 62:2, "Core Navigation" section - the
-     Explore tab root). Was previously misnamed NearbyPlacesScreen and
-     given a back-button header; that name is reserved for the actual
-     Figma node 408:12 "Nearby Places" screen, which doesn't exist yet.
-     The entered town, results header, and each place's name/category/
-     distance are intentionally left inline, not here, since they're
-     mock content that will be set from code once real LocationIQ/
-     Wikipedia data exists. -->
+         Explore tab root). Was previously misnamed NearbyPlacesScreen and
+         given a back-button header; that name is reserved for the actual
+         Figma node 408:12 "Nearby Places" screen, which doesn't exist yet.
+         The entered town, results header, and each place's name/category/
+         distance are intentionally left inline, not here, since they're
+         mock content that will be set from code once real LocationIQ/
+         Wikipedia data exists. -->
     <string name="explore_search_glyph">→</string>
     <string name="explore_helper">Enter a town or city — e.g. Cape Town, London</string>
     <string name="explore_filter_all">All</string>
@@ -188,50 +188,15 @@
     <string name="explore_filter_hotels">Hotels</string>
     <string name="explore_attribution">via LocationIQ</string>
 
-    <!-- Nearby places search screen (Figma node 62:2,
-         "09 Waypoint — Nearby Places Search"). The entered town, the
-         results header, and each place's name/category/distance are
-         intentionally left inline in activity_nearby_places.xml, not
-         here, since they're mock content that will be set from code
-         once real LocationIQ/Wikipedia data exists. -->
-    <string name="nearby_places_back_cd">Back</string>
-    <string name="nearby_places_back_glyph">←</string>
-    <string name="nearby_places_title">Nearby places</string>
-    <string name="nearby_places_search_cd">Search</string>
-    <string name="nearby_places_search_glyph">→</string>
-    <string name="nearby_places_helper">Enter a town or city — e.g. Cape Town, London</string>
-    <string name="nearby_places_filter_all">All</string>
-    <string name="nearby_places_filter_restaurants">Restaurants</string>
-    <string name="nearby_places_filter_cafes">Cafes</string>
-    <string name="nearby_places_filter_attractions">Attractions</string>
-    <string name="nearby_places_filter_entertainment">Entertainment</string>
-    <string name="nearby_places_filter_hotels">Hotels</string>
-    <string name="nearby_places_attribution">via LocationIQ</string>
-
     <!-- Shared tab-root header (core/common/TabHeader.kt): brand + bell
          (+ avatar on every tab except Profile, whose own avatar is the
          screen's subject). -->
     <string name="tab_header_avatar_cd">Profile photo</string>
     <string name="tab_header_bell_cd">Notifications</string>
 
-    <!-- Settings screen (Figma node 83:2, "10 Waypoint — Settings").
-         "Language 1"/"Language 2" are placeholders for Zulu/Xhosa until
-         the real names are wired in (this app supports English, Zulu,
-         and Xhosa per the master prompt). -->
-    <string name="settings_back_cd">Back</string>
-    <string name="settings_back_glyph">←</string>
-    <string name="settings_title">Settings</string>
-    <string name="settings_bell_cd">Notifications</string>
-    <string name="settings_row_notifications">Notifications</string>
-    <string name="settings_row_logout">Logout</string>
-    <string name="settings_row_language">English</string>
-    <string name="settings_language_expand_glyph">▲</string>
-    <string name="settings_row_language_1">Language 1</string>
-    <string name="settings_row_language_2">Language 2</string>
-
     <!-- Profile screen (Figma node 281:20, "Core Navigation" section -
-     the Profile tab root, replacing the old Settings screen that was
-     built against the wrong node, 83:2). -->
+         the Profile tab root, replacing the old Settings screen that was
+         built against the wrong node, 83:2). -->
     <string name="profile_stat_planned_label">Planned this year</string>
     <string name="profile_stat_created_label">Created on Waypoint</string>
     <string name="profile_preferences_header">Preferences</string>
@@ -253,4 +218,30 @@
     translated the way language_modal_title/save are. -->
     <string name="language_modal_title">Change language</string>
     <string name="language_modal_save">Save</string>
+    <!-- Place Detail screen (Figma node 380:12, "Place Detail" - tap-through
+         target from the node 408:12 "Nearby Places" screen, which doesn't
+         exist yet). Place name/category/distance, weather, hours, and the
+         About description are intentionally left inline in code, not here,
+         since they're mock content that will be set from real LocationIQ/
+         Wikipedia data once the backend is wired up. -->
+    <string name="place_detail_back_cd">Back</string>
+    <string name="place_detail_back_glyph">←</string>
+    <string name="place_detail_about_header">About</string>
+    <string name="place_detail_wikipedia_attribution">via Wikipedia</string>
+    <string name="place_detail_location_header">Location</string>
+    <string name="place_detail_open_in_maps">Open in Maps →</string>
+    <string name="place_detail_add_to_itinerary">+ Add to itinerary</string>
+
+    <!-- Shared modal shell (core/common/SelectionModal.kt). Currently used
+         by the Currency Change modal (Figma node 392:12); the Language
+         modal (Figma node 394:62) is the same shell but is being built on
+         its own branch. -->
+    <string name="modal_save_button">Save</string>
+
+    <!-- Currency Change modal (Figma node 392:12). The USD/ZAR values are
+         intentionally left inline in code, not here, since they're mock
+         content that will be set from real ExchangeRate-API data once the
+         backend is wired up. -->
+    <string name="currency_modal_title">Currency change</string>
+    <string name="currency_modal_arrow_glyph">→</string>
 </resources>
