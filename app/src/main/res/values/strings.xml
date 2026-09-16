@@ -218,14 +218,11 @@
          translated the way language_modal_title/save are. -->
     <string name="language_modal_title">Change language</string>
     <string name="language_modal_save">Save</string>
-
-    <!-- Offline dialog (Figma nodes 341:8 "OfflineModal", 347:9
-         "ReconnectBubble") -->
+    <!-- Offline dialog (core/common/OfflineDialog.kt) -->
     <string name="offline_dialog_title">No internet connection</string>
-    <string name="offline_dialog_body">We\'ve detected that your internet connection has dropped. Some features may be unavailable until it\'s back.</string>
+    <string name="offline_dialog_body">Check your connection and try again. Some features may be unavailable while you\'re offline.</string>
     <string name="offline_dialog_okay">Okay</string>
-    <string name="offline_bubble_body">You\'re still offline. Press the button below to try reconnecting to the network.</string>
-    <string name="offline_icon_cd">No internet connection</string>
+    <string name="offline_bubble_body">You\'re still offline. Some features may be unavailable until you reconnect.</string>
 
     <!-- Notifications screen (Figma section 312:1175) -->
     <string name="notifications_back_glyph">←</string>
