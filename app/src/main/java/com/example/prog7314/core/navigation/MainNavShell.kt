@@ -10,9 +10,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.Alignment
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -23,6 +22,7 @@ import com.example.prog7314.core.theme.WaypointTextMuted
 import com.example.prog7314.features.explore.ui.ExploreScreen
 import com.example.prog7314.features.home.ui.HomeScreen
 import com.example.prog7314.features.settings.ui.SettingsScreen
+
 
 /**
  * The authenticated shell: owns the shared BottomNavigationBar and a
@@ -53,6 +53,7 @@ fun MainNavShell(
     val tabNavController = rememberNavController()
     val backStackEntry by tabNavController.currentBackStackEntryAsState()
     val selectedTab = NavTab.entries.firstOrNull { it.route == backStackEntry?.destination?.route } ?: NavTab.HOME
+    val goHome = { tabNavController.navigate(NavTab.HOME.route) { launchSingleTop = true } }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -87,10 +88,16 @@ fun MainNavShell(
         }
     }
 }
-
+   
 @Composable
 private fun TabPlaceholder(tab: NavTab, modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "${stringResource(tab.labelRes)} - coming soon", color = WaypointTextMuted)
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "${tab.name} - coming soon",
+            color = WaypointTextMuted,
+        )
     }
 }

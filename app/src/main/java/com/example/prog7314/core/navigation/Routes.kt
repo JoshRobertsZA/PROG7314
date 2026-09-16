@@ -26,5 +26,6 @@ object Routes {
     const val ViewItinerary = "view_itinerary"
     const val Explore = "explore"
     const val Settings = "settings"
+    const val Notifications = "notifications"
     const val PlaceDetail = "place_detail"
 }

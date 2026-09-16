@@ -39,6 +39,7 @@ fun MainScreen(
     onGoToExploreClick: () -> Unit,
     onGoToHomeClick: () -> Unit,
     onGoToWelcomeClick: () -> Unit,
+    onGoToNotificationsClick: () -> Unit,
     onGoToPlaceDetailClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -91,6 +92,7 @@ fun MainScreen(
         // going through the login stub. Remove once there's a real nav
         // path into it.
         AppButtonFilled(text = stringResource(R.string.main_go_to_home), onClick = onGoToHomeClick, modifier = Modifier.padding(top = 16.dp))
+        AppButtonFilled(text = "Go to Notifications", onClick = onGoToNotificationsClick, modifier = Modifier.padding(top = 16.dp))
 
         // Temporary: navigate directly to the place detail screen for
         // testing. Not reachable from the real nearby-places list yet,

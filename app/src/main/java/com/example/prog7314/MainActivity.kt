@@ -1,9 +1,9 @@
 package com.example.prog7314
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,6 +27,7 @@ import com.example.prog7314.features.explore.ui.ExploreScreen
 import com.example.prog7314.features.login.ui.LoginScreen
 import com.example.prog7314.features.main.ui.MainScreen
 import com.example.prog7314.features.newtrip.ui.NewTripScreen
+import com.example.prog7314.features.notifications.ui.NotificationsScreen
 import com.example.prog7314.features.placedetail.ui.PlaceDetailScreen
 import com.example.prog7314.features.register.ui.RegisterScreen
 import com.example.prog7314.features.settings.ui.SettingsScreen
@@ -40,7 +41,7 @@ import kotlinx.coroutines.launch
  * core/navigation/Routes.kt) covering every screen - replaces the old
  * per-screen Activity + Intent navigation entirely.
  */
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -63,16 +64,21 @@ class MainActivity : ComponentActivity() {
 private fun WaypointNavHost(navController: NavHostController = rememberNavController()) {
     val isOnline by rememberIsOnline()
     var offlineDialogDismissed by remember { mutableStateOf(false) }
+
+    // Reset dismissal once back online, so the dialog can show again the
+    // next time connectivity actually drops, rather than being
+    // permanently silenced after the first dismiss.
     LaunchedEffect(isOnline) {
         if (isOnline) offlineDialogDismissed = false
     }
 
     NavHost(
         navController = navController,
-        startDestination = if (BuildConfig.DEBUG) Routes.Main else Routes.Login,
+        startDestination = Routes.Login,
     ) {
         composable(Routes.Main) {
             MainScreen(
+                onGoToWelcomeClick = { navController.navigate(Routes.Welcome) },
                 onGoToLoginClick = { navController.navigate(Routes.Login) },
                 onGoToTripCalendarClick = { navController.navigate(Routes.TripCalendar) },
                 onGoToViewItineraryClick = { navController.navigate(Routes.ViewItinerary) },
@@ -81,12 +87,18 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 onGoToSettingsClick = { navController.navigate(Routes.Settings) },
                 onGoToExploreClick = { navController.navigate(Routes.Explore) },
                 onGoToHomeClick = { navController.navigate(Routes.Home) },
-                onGoToWelcomeClick = { navController.navigate(Routes.Welcome) },
+                onGoToNotificationsClick = { navController.navigate(Routes.Notifications) },
                 onGoToPlaceDetailClick = { navController.navigate(Routes.PlaceDetail) },
             )
         }
         composable(Routes.Welcome) {
-            WelcomeScreen(onGoogleContinueClick = { navController.navigate(Routes.Home) })
+            // TODO: onGoogleContinueClick currently navigates straight to
+            // Home as a placeholder, same as Login's stub. Replace with a
+            // real Google Sign-In flow (and only navigate to Home on
+            // success) once auth is implemented.
+            WelcomeScreen(
+                onGoogleContinueClick = { navController.navigate(Routes.Home) },
+            )
         }
         composable(Routes.Login) {
             LoginScreen(
@@ -141,6 +153,13 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         composable(Routes.PlaceDetail) {
             PlaceDetailScreen(onBackClick = { navController.popBackStack() })
         }
+        composable(Routes.Notifications) {
+            NotificationsScreen(onBackClick = { navController.popBackStack() })
+        }
+    }
+
+    if (!isOnline && !offlineDialogDismissed) {
+        OfflineDialog(onDismissRequest = { offlineDialogDismissed = true })
     }
     if (!isOnline && !offlineDialogDismissed) {
         OfflineDialog(onDismissRequest = { offlineDialogDismissed = true })

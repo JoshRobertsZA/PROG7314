@@ -52,10 +52,13 @@
     <color name="welcome_card_accent_3">#6BC9C9</color>
     <color name="welcome_card_accent_4">#2F6B6B</color>
 
-    <!-- Language modal (Figma node 394:62, "Settings — Change language").
-       waypoint_border_soft (#D9CCB5) is close but not exact for the
-       unselected radio-row border - Figma uses a distinct lighter tan
-       here. -->
+    <!-- Language modal -->
     <color name="waypoint_radio_border_unselected">#E6DCC4</color>
     <color name="waypoint_modal_scrim">#80000000</color>
+
+    <!-- Offline dialog -->
+    <color name="waypoint_offline_title">#261F1A</color>
+
+    <!-- Notifications screen -->
+    <color name="waypoint_notif_row_border">#E8C9A0</color>
 </resources>

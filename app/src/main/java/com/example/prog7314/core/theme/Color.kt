@@ -61,5 +61,8 @@ val WaypointRadioBorderUnselected = Color(0xFFE6DCC4)
 val WaypointOfflineTitle = Color(0xFF261F1A)
 val WaypointModalScrim = Color(0x80000000) // black at 50% alpha
 
+// Notifications screen
+val WaypointNotifRowBorder = Color(0xFFE8C9A0)
+
 // Profile screen log out button border (Figma node 281:47)
 val WaypointLogoutBorder = Color(0xFFE8B4A0)
