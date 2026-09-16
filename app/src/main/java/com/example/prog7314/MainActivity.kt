@@ -34,6 +34,7 @@ import com.example.prog7314.features.settings.ui.SettingsScreen
 import com.example.prog7314.features.tripcalendar.ui.TripCalendarScreen
 import com.example.prog7314.features.viewitinerary.ui.ViewItineraryScreen
 import com.example.prog7314.features.welcome.WelcomeScreen
+import kotlinx.coroutines.launch
 
 /**
  * The app's only Activity. Hosts a single flat NavHost (see
@@ -87,7 +88,6 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 onGoToExploreClick = { navController.navigate(Routes.Explore) },
                 onGoToHomeClick = { navController.navigate(Routes.Home) },
                 onGoToNotificationsClick = { navController.navigate(Routes.Notifications) },
-                onGoToWelcomeClick = { navController.navigate(Routes.Welcome) },
                 onGoToPlaceDetailClick = { navController.navigate(Routes.PlaceDetail) },
             )
         }
