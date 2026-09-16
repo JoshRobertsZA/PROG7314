@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,13 +19,15 @@ import com.example.prog7314.core.common.OfflineDialog
 import com.example.prog7314.core.connectivity.rememberIsOnline
 import com.example.prog7314.core.navigation.MainNavShell
 import com.example.prog7314.core.navigation.Routes
+import com.example.prog7314.core.secrets.RemoteSecrets
 import com.example.prog7314.core.theme.WaypointTheme
 import com.example.prog7314.features.alltrips.ui.AllTripsScreen
 import com.example.prog7314.features.edititinerary.ui.EditItineraryScreen
+import com.example.prog7314.features.explore.ui.ExploreScreen
 import com.example.prog7314.features.login.ui.LoginScreen
 import com.example.prog7314.features.main.ui.MainScreen
-import com.example.prog7314.features.nearbyplaces.ui.NearbyPlacesScreen
 import com.example.prog7314.features.newtrip.ui.NewTripScreen
+import com.example.prog7314.features.placedetail.ui.PlaceDetailScreen
 import com.example.prog7314.features.register.ui.RegisterScreen
 import com.example.prog7314.features.settings.ui.SettingsScreen
 import com.example.prog7314.features.tripcalendar.ui.TripCalendarScreen
@@ -41,6 +44,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Kick off the shared-key fetch as early as possible, in the
+        // background. Screens that need a key call RemoteSecrets.get(),
+        // which falls back to "" until this finishes (or if it fails) -
+        // see RemoteSecrets.kt for the local-override behaviour.
+        lifecycleScope.launch { RemoteSecrets.ensureLoaded() }
+
         setContent {
             WaypointTheme {
                 WaypointNavHost()
@@ -69,9 +79,10 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 onGoToEditItineraryClick = { navController.navigate(Routes.EditItinerary) },
                 onGoToAllTripsClick = { navController.navigate(Routes.AllTrips) },
                 onGoToSettingsClick = { navController.navigate(Routes.Settings) },
-                onGoToNearbyPlacesClick = { navController.navigate(Routes.NearbyPlaces) },
+                onGoToExploreClick = { navController.navigate(Routes.Explore) },
                 onGoToHomeClick = { navController.navigate(Routes.Home) },
                 onGoToWelcomeClick = { navController.navigate(Routes.Welcome) },
+                onGoToPlaceDetailClick = { navController.navigate(Routes.PlaceDetail) },
             )
         }
         composable(Routes.Welcome) {
@@ -115,11 +126,20 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         composable(Routes.ViewItinerary) {
             ViewItineraryScreen(onBackClick = { navController.popBackStack() })
         }
-        composable(Routes.NearbyPlaces) {
-            NearbyPlacesScreen(onBackClick = { navController.popBackStack() })
+        composable(Routes.Explore) {
+            // ExploreScreen (the Explore tab root) has no back arrow of its
+            // own, matching Figma - system back still pops this off the
+            // stack when reached from the debug scratch hub.
+            ExploreScreen()
         }
         composable(Routes.Settings) {
-            SettingsScreen(onBackClick = { navController.popBackStack() })
+            // SettingsScreen (the Profile tab root) has no back arrow of its
+            // own, matching Figma - system back still pops this off the
+            // stack when reached from the debug scratch hub.
+            SettingsScreen()
+        }
+        composable(Routes.PlaceDetail) {
+            PlaceDetailScreen(onBackClick = { navController.popBackStack() })
         }
     }
     if (!isOnline && !offlineDialogDismissed) {
