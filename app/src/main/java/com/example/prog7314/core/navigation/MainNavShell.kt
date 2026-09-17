@@ -1,28 +1,26 @@
 package com.example.prog7314.core.navigation
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.prog7314.core.common.BottomNavigationBar
 import com.example.prog7314.core.common.NavTab
-import com.example.prog7314.core.theme.WaypointTextMuted
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.prog7314.features.alltrips.ui.AllTripsScreen
+import com.example.prog7314.features.home.ui.HomeViewModel
 import com.example.prog7314.features.explore.ui.ExploreScreen
 import com.example.prog7314.features.home.ui.HomeScreen
 import com.example.prog7314.features.settings.ui.SettingsScreen
-
 
 /**
  * The authenticated shell: owns the shared BottomNavigationBar and a
@@ -30,20 +28,13 @@ import com.example.prog7314.features.settings.ui.SettingsScreen
  * Home 47:30, Trips 60:2, Explore 62:2, Profile 281:20). Reached via the
  * top-level Routes.Home destination (see MainActivity.kt).
  *
- * TODO: Trips still renders placeholder content until AllTripsScreen.kt
- * gets its tab-root header fix (it still has the back-button-styled
- * header from before the shell existed). Home, Explore, and Profile are
- * now real Figma-accurate tab-root content.
- *
  * Uses Scaffold instead of a hand-rolled Column+weight(1f) split: a
  * manual Column let BottomNavigationBar clip the bottom of every tab's
- * scrollable content (e.g. Profile's Log out button was unreachable).
- * Scaffold measures the bottomBar first and hands NavHost the exact
- * remaining space via innerPadding, which is the well-tested way to
- * combine a bottom bar with per-tab scrollable content. contentWindowInsets
- * is zeroed out here since each tab screen already handles its own top
- * (status bar) inset, and BottomNavigationBar handles the bottom
- * (navigation bar) inset itself.
+ * scrollable content. Scaffold measures the bottomBar first and hands
+ * NavHost the exact remaining space via innerPadding.
+ * contentWindowInsets is zeroed out here since each tab screen already
+ * handles its own top (status bar) inset, and BottomNavigationBar handles
+ * the bottom (navigation bar) inset itself.
  */
 @Composable
 fun MainNavShell(
@@ -51,6 +42,7 @@ fun MainNavShell(
     modifier: Modifier = Modifier,
 ) {
     val tabNavController = rememberNavController()
+    val homeViewModel: HomeViewModel = viewModel()
     val backStackEntry by tabNavController.currentBackStackEntryAsState()
     val selectedTab = NavTab.entries.firstOrNull { it.route == backStackEntry?.destination?.route } ?: NavTab.HOME
     val goHome = { tabNavController.navigate(NavTab.HOME.route) { launchSingleTop = true } }
@@ -77,27 +69,21 @@ fun MainNavShell(
         ) {
             composable(NavTab.HOME.route) {
                 HomeScreen(
+                    homeViewModel = homeViewModel,
                     onNewTripClick = onNewTripClick,
-                    onViewAllTripsClick = { tabNavController.navigate(NavTab.TRIPS.route) { launchSingleTop = true } },
-                    onSettingsClick = { tabNavController.navigate(NavTab.PROFILE.route) { launchSingleTop = true } },
+                    onViewAllTripsClick = {
+                        tabNavController.navigate(NavTab.TRIPS.route) { launchSingleTop = true }
+                    },
+                    onSettingsClick = {
+                        tabNavController.navigate(NavTab.PROFILE.route) { launchSingleTop = true }
+                    },
                 )
             }
-            composable(NavTab.TRIPS.route) { TabPlaceholder(NavTab.TRIPS) }
+            composable(NavTab.TRIPS.route) {
+                AllTripsScreen(onBackClick = goHome)
+            }
             composable(NavTab.EXPLORE.route) { ExploreScreen() }
             composable(NavTab.PROFILE.route) { SettingsScreen() }
         }
-    }
-}
-   
-@Composable
-private fun TabPlaceholder(tab: NavTab, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "${tab.name} - coming soon",
-            color = WaypointTextMuted,
-        )
     }
 }

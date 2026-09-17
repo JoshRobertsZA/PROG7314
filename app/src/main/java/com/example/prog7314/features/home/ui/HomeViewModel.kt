@@ -1,0 +1,107 @@
+package com.example.prog7314.features.home.ui
+
+import android.app.Application
+import android.content.Context
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.prog7314.core.location.LocationProvider
+import com.example.prog7314.core.secrets.RemoteSecrets
+import com.example.prog7314.features.home.data.CurrencyRepository
+import com.example.prog7314.features.home.data.WeatherRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+private const val PREFS_NAME  = "home_prefs"
+private const val KEY_CITY     = "selected_city"
+private const val KEY_CURRENCY = "selected_currency"
+private const val DEFAULT_CITY = "Cape Town"
+private const val DEFAULT_CURR = "USD"
+
+/**
+ * ViewModel for the Home screen.
+ *
+ * Selections (city + FROM currency) are persisted in SharedPreferences so
+ * they survive process death and are restored on the next launch.
+ * Data (weather / rate) is cache-first via the GitHub cache repo:
+ *   - Weather: re-fetched only if the cached entry is older than 2 hours.
+ *   - Currency: re-fetched only if the cache is from a previous calendar day.
+ */
+class HomeViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+    private val _uiState = MutableStateFlow(
+        HomeUiState(
+            selectedCity         = prefs.getString(KEY_CITY,     DEFAULT_CITY) ?: DEFAULT_CITY,
+            selectedFromCurrency = prefs.getString(KEY_CURRENCY, DEFAULT_CURR) ?: DEFAULT_CURR,
+        ),
+    )
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            RemoteSecrets.ensureLoaded()
+            val s = _uiState.value
+            loadWeather(s.selectedCity)
+            loadCurrency(s.selectedFromCurrency)
+        }
+        startLocationUpdates()
+    }
+
+    // ── Public surface ─────────────────────────────────────────────────────────
+
+    fun selectCity(city: String) {
+        prefs.edit().putString(KEY_CITY, city).apply()
+        _uiState.update { it.copy(selectedCity = city) }
+        loadWeather(city)
+    }
+
+    fun selectFromCurrency(code: String) {
+        prefs.edit().putString(KEY_CURRENCY, code).apply()
+        _uiState.update { it.copy(selectedFromCurrency = code) }
+        loadCurrency(code)
+    }
+
+    fun refreshWeather()  = loadWeather(_uiState.value.selectedCity)
+    fun refreshCurrency() = loadCurrency(_uiState.value.selectedFromCurrency)
+
+    // ── Private helpers ────────────────────────────────────────────────────────
+
+    private fun loadWeather(city: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(weather = WeatherState.Loading) }
+            val result = WeatherRepository.getWeather(city)
+            _uiState.update {
+                it.copy(
+                    weather = if (result != null) WeatherState.Success(result)
+                              else WeatherState.Error,
+                )
+            }
+        }
+    }
+
+    private fun loadCurrency(fromCode: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(currency = CurrencyState.Loading) }
+            val result = CurrencyRepository.getRate(fromCode)
+            _uiState.update {
+                it.copy(
+                    currency = if (result != null) CurrencyState.Success(result)
+                               else CurrencyState.Error,
+                )
+            }
+        }
+    }
+
+    private fun startLocationUpdates() {
+        viewModelScope.launch {
+            LocationProvider.locationFlow(getApplication())
+                .catch { /* permission not granted or provider unavailable */ }
+                .collect { loc -> _uiState.update { it.copy(location = loc) } }
+        }
+    }
+}
