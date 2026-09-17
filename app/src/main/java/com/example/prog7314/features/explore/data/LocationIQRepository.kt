@@ -162,47 +162,73 @@ object LocationIQRepository {
         }
     }
 
-    /** Fetches ALL nearby places within [NEARBY_RADIUS_METRES] with no category filter. */
+    /**
+     * Fetches nearby places within [NEARBY_RADIUS_METRES].
+     *
+     * LocationIQ's /v1/nearby endpoint requires a mandatory `tag` parameter (an OSM
+     * primary-feature key). Omitting it returns HTTP 404. We make one request per
+     * relevant tag, merge, and deduplicate by place_id so every filter category in
+     * ExploreViewModel has data to show.
+     */
     private fun fetchNearby(lat: Double, lon: Double, key: String): List<ExplorePlace>? {
-        return try {
-            val url = "https://us1.locationiq.com/v1/nearby" +
-                      "?key=$key" +
-                      "&lat=$lat" +
-                      "&lon=$lon" +
-                      "&radius=$NEARBY_RADIUS_METRES" +
-                      "&format=json"
-            val req = Request.Builder().url(url).get().build()
-            HttpClient.instance.newCall(req).execute().use { resp ->
-                if (!resp.isSuccessful) {
-                    Log.w(TAG, "Nearby HTTP ${resp.code}")
-                    return@use null
-                }
-                val body = resp.body?.string() ?: return@use null
-                val arr = JSONArray(body)
-                (0 until arr.length()).mapNotNull { i ->
-                    try {
-                        val p = arr.getJSONObject(i)
-                        val rawName = p.optString("name").ifBlank { p.optString("display_name", "") }
-                        if (rawName.isBlank()) return@mapNotNull null
-                        ExplorePlace(
-                            id             = p.optString("place_id", "$i"),
-                            name           = rawName.lines().first().trim(),
-                            type           = p.optString("type", ""),
-                            category       = p.optString("class", ""),
-                            lat            = p.getString("lat").toDouble(),
-                            lon            = p.getString("lon").toDouble(),
-                            displayAddress = p.optString("display_name", ""),
-                            distanceMetres = p.optInt("distance", 0),
-                        )
-                    } catch (e: Exception) {
-                        null
+        // OSM tags that cover every ExploreFilter category used in ExploreViewModel.
+        // amenity  -> restaurants, cafes, bars, pubs, cinemas, theatres, nightclubs, sports_centre
+        // tourism  -> hotels, hostels, museums, attractions, viewpoints, galleries, theme_parks
+        // leisure  -> parks, sports facilities
+        val tags = listOf("amenity", "tourism", "leisure")
+
+        val seen    = mutableSetOf<String>()
+        val results = mutableListOf<ExplorePlace>()
+        var anySucceeded = false
+
+        for (tag in tags) {
+            try {
+                val url = "https://us1.locationiq.com/v1/nearby" +
+                          "?key=$key" +
+                          "&lat=$lat" +
+                          "&lon=$lon" +
+                          "&tag=$tag" +
+                          "&radius=$NEARBY_RADIUS_METRES" +
+                          "&format=json" +
+                          "&limit=50"
+                val req = Request.Builder().url(url).get().build()
+                HttpClient.instance.newCall(req).execute().use { resp ->
+                    if (!resp.isSuccessful) {
+                        Log.w(TAG, "Nearby[$tag] HTTP ${resp.code}")
+                        return@use
+                    }
+                    anySucceeded = true
+                    val body = resp.body?.string() ?: return@use
+                    val arr  = JSONArray(body)
+                    for (i in 0 until arr.length()) {
+                        try {
+                            val p       = arr.getJSONObject(i)
+                            val rawName = p.optString("name").ifBlank { p.optString("display_name", "") }
+                            if (rawName.isBlank()) continue
+                            val id = p.optString("place_id", "${tag}_$i")
+                            if (!seen.add(id)) continue
+                            results.add(
+                                ExplorePlace(
+                                    id             = id,
+                                    name           = rawName.lines().first().trim(),
+                                    type           = p.optString("type", tag),
+                                    category       = p.optString("class", tag),
+                                    lat            = p.getString("lat").toDouble(),
+                                    lon            = p.getString("lon").toDouble(),
+                                    displayAddress = p.optString("display_name", ""),
+                                    distanceMetres = p.optInt("distance", 0),
+                                )
+                            )
+                        } catch (_: Exception) { /* skip malformed entry */ }
                     }
                 }
+            } catch (e: Exception) {
+                Log.w(TAG, "Nearby[$tag] failed: ${e.message}")
             }
-        } catch (e: Exception) {
-            Log.w(TAG, "Nearby fetch failed: ${e.message}")
-            null
         }
+
+        if (!anySucceeded && results.isEmpty()) return null
+        return results.sortedBy { it.distanceMetres }
     }
 
     // ── CounterAPI v2 ───────────────────────────────────────────────────────
