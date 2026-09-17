@@ -90,15 +90,13 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         return when (filter) {
             ExploreFilter.ALL           -> cache.places
             ExploreFilter.RESTAURANTS   -> cache.places.filter { it.type == "restaurant" }
-            ExploreFilter.CAFES         -> cache.places.filter { it.type in setOf("cafe", "pub") }
-            ExploreFilter.HOTELS        -> cache.places.filter {
-                it.type in setOf("hotel", "hostel", "motel", "guest_house")
-            }
+            ExploreFilter.CAFES         -> cache.places.filter { it.type == "cafe" }
             ExploreFilter.ATTRACTIONS   -> cache.places.filter {
-                it.type in setOf("museum", "attraction", "viewpoint", "gallery", "theme_park", "park")
+                it.category in setOf("tourism", "leisure") ||
+                it.type in setOf("museum", "attraction", "viewpoint", "gallery", "theme_park")
             }
             ExploreFilter.ENTERTAINMENT -> cache.places.filter {
-                it.type in setOf("cinema", "theatre", "nightclub", "bar", "casino",
+                it.type in setOf("cinema", "theatre", "nightclub", "bar", "pub", "casino",
                                  "arts_centre", "stadium", "sports_centre")
             }
         }

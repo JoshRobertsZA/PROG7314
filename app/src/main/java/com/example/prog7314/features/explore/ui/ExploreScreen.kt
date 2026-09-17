@@ -140,7 +140,6 @@ fun ExploreScreen(
                     stringResource(R.string.explore_filter_all)           to ExploreFilter.ALL,
                     stringResource(R.string.explore_filter_restaurants)   to ExploreFilter.RESTAURANTS,
                     stringResource(R.string.explore_filter_cafes)         to ExploreFilter.CAFES,
-                    stringResource(R.string.explore_filter_hotels)        to ExploreFilter.HOTELS,
                     stringResource(R.string.explore_filter_attractions)   to ExploreFilter.ATTRACTIONS,
                     stringResource(R.string.explore_filter_entertainment) to ExploreFilter.ENTERTAINMENT,
                 ).forEach { (label, filter) ->
