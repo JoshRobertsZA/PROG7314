@@ -212,7 +212,8 @@ object LocationIQRepository {
         """.trimIndent()
 
         return try {
-            val body = query.toRequestBody("text/plain; charset=utf-8".toMediaType())
+            val encoded = java.net.URLEncoder.encode(query, "UTF-8")
+            val body = "data=$encoded".toRequestBody("application/x-www-form-urlencoded".toMediaType())
             val req = Request.Builder()
                 .url("https://overpass-api.de/api/interpreter")
                 .post(body)
