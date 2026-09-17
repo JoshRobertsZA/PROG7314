@@ -40,7 +40,7 @@ import com.example.prog7314.features.settings.ui.SettingsScreen
 @Composable
 fun MainNavShell(
     onNewTripClick: () -> Unit,
-    onTripClick: () -> Unit,
+    onTripClick: (tripId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabNavController = rememberNavController()
