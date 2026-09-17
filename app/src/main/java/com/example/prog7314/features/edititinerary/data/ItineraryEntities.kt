@@ -1,0 +1,47 @@
+package com.example.prog7314.features.edititinerary.data
+
+import java.time.LocalDate
+
+/** A single selected day in the itinerary. */
+data class ItineraryDayEntity(
+    val id: String,
+    val tripId: String,
+    val date: LocalDate,
+)
+
+/** A flight document attached to one specific day. */
+data class FlightEntity(
+    val id: String,
+    val dayId: String,
+    /** e.g. "SA 123" - may be blank until the user types it. */
+    val flightNumber: String?,
+    /** content:// URI string (persisted permission already taken). */
+    val pdfUri: String,
+    val createdAtMs: Long,
+)
+
+/**
+ * A lodging document that spans the entire trip selection.
+ * [fromDate] = first selected day, [toDate] = last selected day.
+ */
+data class LodgingEntity(
+    val id: String,
+    val tripId: String,
+    val fromDate: LocalDate,
+    val toDate: LocalDate,
+    val pdfUri: String,
+    val createdAtMs: Long,
+)
+
+/**
+ * A car-rental document that spans the entire trip selection.
+ * Same date-range semantics as [LodgingEntity].
+ */
+data class CarRentalEntity(
+    val id: String,
+    val tripId: String,
+    val fromDate: LocalDate,
+    val toDate: LocalDate,
+    val pdfUri: String,
+    val createdAtMs: Long,
+)
