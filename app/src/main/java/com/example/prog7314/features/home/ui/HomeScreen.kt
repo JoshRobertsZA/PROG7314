@@ -77,7 +77,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = viewModel(),
 ) {
-    val state by homeViewModel.state.collectAsState()
+    val state by homeViewModel.uiState.collectAsState()
 
     var showCitySearch by remember { mutableStateOf(false) }
     var showCurrencyModal by remember { mutableStateOf(false) }
@@ -86,7 +86,7 @@ fun HomeScreen(
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
     ) { granted ->
-        if (granted) homeViewModel.startLocationUpdates()
+        // location updates start automatically in HomeViewModel.init
     }
     LaunchedEffect(Unit) {
         locationPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
