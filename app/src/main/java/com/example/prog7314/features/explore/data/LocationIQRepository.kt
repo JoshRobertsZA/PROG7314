@@ -9,10 +9,9 @@ import com.example.prog7314.core.network.HttpClient
 import com.example.prog7314.core.secrets.RemoteSecrets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URLEncoder
@@ -212,8 +211,9 @@ object LocationIQRepository {
         """.trimIndent()
 
         return try {
-            val encoded = java.net.URLEncoder.encode(query, "UTF-8")
-            val body = "data=$encoded".toRequestBody("application/x-www-form-urlencoded".toMediaType())
+            val body = FormBody.Builder()
+                .add("data", query)
+                .build()
             val req = Request.Builder()
                 .url("https://overpass-api.de/api/interpreter")
                 .post(body)
