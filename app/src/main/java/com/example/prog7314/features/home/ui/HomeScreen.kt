@@ -1,6 +1,8 @@
 package com.example.prog7314.features.home.ui
 
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -31,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -71,6 +74,16 @@ import com.example.prog7314.features.currencyexchange.ui.CurrencyExchangeModal
  * Currency widget: tap -> CurrencyExchangeModal with real ExchangeRate-API rate.
  * Location is requested on first launch and updates continuously in the background.
  */
+fun placeTypeEmoji(type: String): String = when (type) {
+    "restaurant" -> "🍴"
+    "cafe"       -> "☕"
+    "hotel"      -> "🏨"
+    "pub"        -> "🍺"
+    "cinema"     -> "🎬"
+    "park"       -> "🌳"
+    else         -> "📍"
+}
+
 @Composable
 fun HomeScreen(
     onNewTripClick: () -> Unit,
@@ -81,6 +94,7 @@ fun HomeScreen(
 ) {
     val state by homeViewModel.uiState.collectAsState()
     val isOnline by rememberIsOnline()
+    val context = LocalContext.current
 
     var showCitySearch by remember { mutableStateOf(false) }
     var showCurrencyModal by remember { mutableStateOf(false) }
@@ -405,13 +419,21 @@ fun HomeScreen(
                             RowSurface(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = if (index == 0) 0.dp else 8.dp),
+                                    .padding(top = if (index == 0) 0.dp else 8.dp)
+                                    .clickable {
+                                        val uri = Uri.parse(
+                                            "https://www.google.com/maps/dir/?api=1" +
+                                            "&destination=${place.lat},${place.lon}" +
+                                            "&destination_place_id=${Uri.encode(place.name)}"
+                                        )
+                                        context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                                    },
                             ) {
                                 Row(
                                     modifier = Modifier.padding(start = 10.dp, top = 8.dp, end = 14.dp, bottom = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    ThumbnailBlock(accentColor = accent, cornerRadius = RadiusThumbnail)
+                                    ThumbnailBlock(accentColor = accent, cornerRadius = RadiusThumbnail, label = placeTypeEmoji(place.type))
                                     Column(modifier = Modifier.padding(start = 12.dp)) {
                                         Text(
                                             text = place.name,
