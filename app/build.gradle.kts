@@ -40,6 +40,11 @@ android {
             "\"${apiKey("OPENWEATHER_API_KEY")}\""
         )
 
+        buildConfigField("String", "COUNTERAPI_API_KEY",     apiKey("COUNTERAPI_API_KEY"))
+        buildConfigField("String", "COUNTERAPI_WORKSPACE",    apiKey("COUNTERAPI_WORKSPACE"))
+        buildConfigField("String", "COUNTERAPI_PLACES_SLUG",  apiKey("COUNTERAPI_PLACES_SLUG"))
+        buildConfigField("String", "LOCATIONIQ_API_KEY",      apiKey("LOCATIONIQ_API_KEY"))
+
         // Bootstrap token pieces (read-only, apiplayground-cache repo only).
         // Reassembled at runtime in RemoteSecrets.kt. Do not reorder these
         // without also updating the join order there.
