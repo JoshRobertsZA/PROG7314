@@ -123,6 +123,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         composable(Routes.Home) {
             MainNavShell(
                 onNewTripClick = { navController.navigate(Routes.NewTrip) },
+                onTripClick    = { navController.navigate(Routes.TripCalendar) },
             )
         }
         composable(Routes.NewTrip) {
@@ -142,6 +143,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             AllTripsScreen(
                 onBackClick    = { navController.popBackStack() },
                 onNewTripClick = { navController.navigate(Routes.NewTrip) },
+                onTripClick    = { navController.navigate(Routes.TripCalendar) },
             )
         }
         composable(Routes.EditItinerary) {

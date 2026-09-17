@@ -80,6 +80,7 @@ private data class TripCard(
 fun AllTripsScreen(
     onBackClick: () -> Unit,
     onNewTripClick: () -> Unit = {},
+    onTripClick: () -> Unit = {},
 
     modifier: Modifier = Modifier,
 ) {
@@ -159,7 +160,7 @@ fun AllTripsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = if (index == 0) 0.dp else 12.dp)
-                        .clickable(onClick = {}),
+                        .clickable { onTripClick() },
                     cornerRadius = RadiusCard,
                 ) {
                     Row(
