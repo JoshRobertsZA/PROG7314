@@ -1,5 +1,7 @@
 package com.example.prog7314.core.common
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,16 +17,28 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.example.prog7314.R
 import com.example.prog7314.core.theme.RadiusButton
 import com.example.prog7314.core.theme.RadiusChip
@@ -114,6 +128,62 @@ fun StillOfflineBubble(onOkayClick: () -> Unit, modifier: Modifier = Modifier) {
             textAlign = TextAlign.Center,
         )
         OkayButton(onClick = onOkayClick)
+    }
+}
+
+/**
+ * Persistent header icon shown in place of the header's avatar while
+ * offline (Figma "NoWifiIcon", node 347:13/333:167) - appears once the
+ * first-drop [OfflineDialog] has been dismissed and connectivity is
+ * still down. Tapping it toggles the [StillOfflineBubble] popover
+ * (Figma "ReconnectBubble", node 347:9), anchored below the icon with a
+ * [BubbleTail] pointer. Renders nothing while online.
+ */
+@Composable
+fun OfflineHeaderIndicator(isOnline: Boolean, modifier: Modifier = Modifier, iconSize: Dp = 40.dp) {
+    var showBubble by remember { mutableStateOf(false) }
+    LaunchedEffect(isOnline) { if (isOnline) showBubble = false }
+
+    if (isOnline) return
+
+    val density = LocalDensity.current
+
+    Box(modifier = modifier) {
+        Image(
+            painter = painterResource(R.drawable.ic_no_wifi),
+            contentDescription = stringResource(R.string.tab_header_offline_cd),
+            modifier = Modifier
+                .size(iconSize)
+                .clickable { showBubble = !showBubble },
+        )
+
+        if (showBubble) {
+            Popup(
+                alignment = Alignment.TopEnd,
+                offset = IntOffset(0, with(density) { (iconSize + 6.dp).roundToPx() }),
+                onDismissRequest = { showBubble = false },
+                properties = PopupProperties(focusable = true),
+            ) {
+                Column(horizontalAlignment = Alignment.End) {
+                    BubbleTail(modifier = Modifier.padding(end = 8.dp))
+                    StillOfflineBubble(onOkayClick = { showBubble = false })
+                }
+            }
+        }
+    }
+}
+
+/** Small upward-pointing triangle connecting [StillOfflineBubble] to the header icon it's anchored to. */
+@Composable
+private fun BubbleTail(modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier.size(width = 20.dp, height = 10.dp)) {
+        val path = Path().apply {
+            moveTo(size.width / 2f, 0f)
+            lineTo(size.width, size.height)
+            lineTo(0f, size.height)
+            close()
+        }
+        drawPath(path, color = WaypointCard)
     }
 }
 

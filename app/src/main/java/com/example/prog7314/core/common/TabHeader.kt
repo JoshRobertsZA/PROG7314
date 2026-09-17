@@ -32,11 +32,17 @@ import com.example.prog7314.core.theme.WaypointTextPrimary
  * avatar) used by Home/Trips/Explore/Profile - each tab's own header in
  * Figma is this same layout, only Profile omits the avatar since the big
  * avatar below is that screen's own subject.
+ *
+ * While offline, the avatar slot is replaced by [OfflineHeaderIndicator]
+ * (Figma "Offline Mode" section, node 332:424) - tapping it surfaces the
+ * still-offline reminder bubble. [isOnline] defaults to true so existing
+ * callers that don't pass it keep their current (online) appearance.
  */
 @Composable
 fun TabHeader(
     onBellClick: () -> Unit = {},
     showAvatar: Boolean = true,
+    isOnline: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -53,15 +59,22 @@ fun TabHeader(
         Row(verticalAlignment = Alignment.CenterVertically) {
             BellWithBadge(onClick = onBellClick)
             if (showAvatar) {
-                Image(
-                    painter = painterResource(R.drawable.img_mock_avatar),
-                    contentDescription = stringResource(R.string.tab_header_avatar_cd),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .padding(start = 14.dp)
-                        .size(40.dp)
-                        .clip(CircleShape),
-                )
+                if (isOnline) {
+                    Image(
+                        painter = painterResource(R.drawable.img_mock_avatar),
+                        contentDescription = stringResource(R.string.tab_header_avatar_cd),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .padding(start = 14.dp)
+                            .size(40.dp)
+                            .clip(CircleShape),
+                    )
+                } else {
+                    OfflineHeaderIndicator(
+                        isOnline = false,
+                        modifier = Modifier.padding(start = 14.dp),
+                    )
+                }
             }
         }
     }
