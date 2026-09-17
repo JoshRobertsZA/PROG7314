@@ -46,3 +46,36 @@ data class DeviceLocation(
     val lat: Double,
     val lng: Double,
 )
+
+// ---------------------------------------------------------------------------
+// Explore / Places
+// ---------------------------------------------------------------------------
+
+/**
+ * A single point of interest returned by LocationIQ Nearby.
+ */
+data class ExplorePlace(
+    val id: String,              // OSM place_id from LocationIQ
+    val name: String,
+    val type: String,            // LocationIQ "type" field  (e.g. "restaurant")
+    val category: String,        // LocationIQ "class" field (e.g. "amenity")
+    val lat: Double,
+    val lon: Double,
+    val displayAddress: String,
+    val distanceMetres: Int,
+)
+
+/**
+ * Cached nearby-places result for a city. Treated as stale once the UTC
+ * calendar day rolls over (same policy as CurrencyCache).
+ */
+data class PlacesCache(
+    val city: String,
+    val fetchedDateUtc: String,  // "yyyy-MM-dd" UTC date at fetch time
+    val places: List<ExplorePlace>,
+) {
+    fun isStale(): Boolean {
+        val today = java.time.LocalDate.now(java.time.ZoneOffset.UTC).toString()
+        return fetchedDateUtc != today
+    }
+}
