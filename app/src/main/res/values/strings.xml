@@ -194,6 +194,7 @@
          screen's subject). -->
     <string name="tab_header_avatar_cd">Profile photo</string>
     <string name="tab_header_bell_cd">Notifications</string>
+    <string name="tab_header_offline_cd">Offline indicator</string>
 
     <!-- Profile screen (Figma node 281:20, "Core Navigation" section -
          the Profile tab root, replacing the old Settings screen that was
