@@ -82,7 +82,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             MainScreen(
                 onGoToWelcomeClick = { navController.navigate(Routes.Welcome) },
                 onGoToLoginClick = { navController.navigate(Routes.Login) },
-                onGoToTripCalendarClick = { navController.navigate(Routes.TripCalendar) },
+                onGoToTripCalendarClick = { navController.navigate(Routes.tripCalendar("__scratch__")) },
                 onGoToViewItineraryClick = { navController.navigate(Routes.ViewItinerary) },
                 onGoToEditItineraryClick = { navController.navigate(Routes.EditItinerary) },
                 onGoToAllTripsClick = { navController.navigate(Routes.AllTrips) },
@@ -123,7 +123,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         composable(Routes.Home) {
             MainNavShell(
                 onNewTripClick = { navController.navigate(Routes.NewTrip) },
-                onTripClick    = { tripId -> navController.navigate(Routes.TripCalendar) },
+                onTripClick    = { tripId -> navController.navigate(Routes.tripCalendar(tripId)) },
             )
         }
         composable(Routes.NewTrip) {
@@ -136,14 +136,17 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 },
             )
         }
-        composable(Routes.TripCalendar) {
+        composable(
+            route = Routes.TripCalendar,
+            arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }),
+        ) {
             TripCalendarScreen(onBackClick = { navController.popBackStack() })
         }
         composable(Routes.AllTrips) {
             AllTripsScreen(
                 onBackClick    = { navController.popBackStack() },
                 onNewTripClick = { navController.navigate(Routes.NewTrip) },
-                onTripClick    = { tripId -> navController.navigate(Routes.TripCalendar) },
+                onTripClick    = { tripId -> navController.navigate(Routes.tripCalendar(tripId)) },
             )
         }
         composable(Routes.EditItinerary) {
