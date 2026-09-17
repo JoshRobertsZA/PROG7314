@@ -45,3 +45,16 @@ data class CarRentalEntity(
     val pdfUri: String,
     val createdAtMs: Long,
 )
+
+/** A place (hotel, park, pub, or cinema) pinned to a specific itinerary day. */
+data class PlaceEntity(
+    val id: String,
+    val dayId: String,
+    val name: String,
+    /** One of: HOTELS, PARKS, PUBS, CINEMAS - matches ExploreFilter enum name. */
+    val category: String,
+    val lat: Double?,
+    val lng: Double?,
+    val note: String?,
+    val createdAtMs: Long,
+)

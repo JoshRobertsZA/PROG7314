@@ -114,8 +114,13 @@
     <string name="edit_itinerary_header_lodging">Lodging</string>
     <string name="edit_itinerary_header_car">Car rental</string>
     <string name="edit_itinerary_header_food">Restaurants &amp; cafes</string>
-    <string name="edit_itinerary_header_attractions">Attractions</string>
-    <string name="edit_itinerary_header_entertainment">Entertainment</string>
+    <string name="edit_itinerary_header_hotels">Hotels</string>
+    <string name="edit_itinerary_header_parks">Parks</string>
+    <string name="edit_itinerary_header_pubs">Pubs</string>
+    <string name="edit_itinerary_header_cinemas">Cinemas</string>
+    <string name="edit_itinerary_no_places">No places added yet</string>
+    <string name="edit_itinerary_remove_place_cd">Remove place</string>
+    <string name="edit_itinerary_note_hint">Add a note...</string>
     <string name="edit_itinerary_upload_chip">+ Upload</string>
     <string name="edit_itinerary_add_chip">+ Add</string>
     <string name="edit_itinerary_undo_glyph">↺</string>
@@ -128,8 +133,6 @@
     <string name="edit_itinerary_replace_car_doc_cd">Replace car rental document</string>
     <string name="edit_itinerary_remove_car_cd">Remove car rental</string>
     <string name="edit_itinerary_edit_place_cd">Edit place</string>
-    <string name="edit_itinerary_remove_place_cd">Remove place</string>
-    <string name="edit_itinerary_add_entertainment_placeholder">+ Add entertainment for these days</string>
     <string name="edit_itinerary_flight_number_hint">Flight number (e.g. SA 123)</string>
     <string name="edit_itinerary_no_pdf_uploaded">No PDF uploaded yet</string>
     <string name="edit_itinerary_day_label_cd">Day card</string>

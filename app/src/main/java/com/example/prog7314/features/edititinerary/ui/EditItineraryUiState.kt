@@ -59,6 +59,19 @@ data class CarRentalItem(
     val pdfUri: String,
 )
 
+
+/**
+ * A place (hotel, park, pub, cinema) saved for a specific itinerary day.
+ */
+data class PlaceItem(
+    val id: String,
+    val dayId: String,
+    val name: String,
+    /** One of: HOTELS, PARKS, PUBS, CINEMAS */
+    val category: String,
+    val note: String?,
+)
+
 data class EditItineraryUiState(
     val isLoading: Boolean = true,
     val days: List<DayItem> = emptyList(),
@@ -76,4 +89,9 @@ data class EditItineraryUiState(
      * Cleared after the picker result arrives (success or cancel).
      */
     val pendingUploadType: ItineraryUploadType? = null,
+    /**
+     * Places for the active day, grouped by category key
+     * (HOTELS, PARKS, PUBS, CINEMAS).
+     */
+    val placesForActiveDay: Map<String, List<PlaceItem>> = emptyMap(),
 )

@@ -246,19 +246,31 @@ fun EditItineraryScreen(
         )
         EmptyDocPlaceholder(label = "Restaurants and cafes coming soon")
 
-        // ── Places (Hotels/Parks/Pubs/Cinemas - commit 4/5) ──────────────────
-        // Placeholder sections for the Explore categories; fully wired in commit 4/5.
-        listOf(
-            stringResource(R.string.edit_itinerary_header_attractions),
-            stringResource(R.string.edit_itinerary_header_entertainment),
-        ).forEach { header ->
+        // ── Places: Hotels / Parks / Pubs / Cinemas ─────────────────────────
+        val placeCategories = listOf(
+            "HOTELS"  to stringResource(R.string.edit_itinerary_header_hotels),
+            "PARKS"   to stringResource(R.string.edit_itinerary_header_parks),
+            "PUBS"    to stringResource(R.string.edit_itinerary_header_pubs),
+            "CINEMAS" to stringResource(R.string.edit_itinerary_header_cinemas),
+        )
+        placeCategories.forEach { (categoryKey, header) ->
+            val items = state.placesForActiveDay[categoryKey].orEmpty()
             SectionHeader(
                 title       = header,
                 chipLabel   = stringResource(R.string.edit_itinerary_add_chip),
-                onChipClick = {},
+                onChipClick = { /* Add-place flow wired in a future commit */ },
                 topPadding  = 20.dp,
             )
-            EmptyDocPlaceholder(label = "Coming soon")
+            if (items.isEmpty()) {
+                EmptyDocPlaceholder(label = stringResource(R.string.edit_itinerary_no_places))
+            } else {
+                items.forEach { place ->
+                    PlaceCard(
+                        place        = place,
+                        onDeleteClick = { viewModel.onDeletePlace(place.id) },
+                    )
+                }
+            }
         }
     }
 }
@@ -451,6 +463,49 @@ private fun EmptyDocPlaceholder(
         contentAlignment = Alignment.Center,
     ) {
         Text(text = label, color = WaypointTextMuted, fontSize = 12.sp)
+    }
+}
+
+// ── Place card ───────────────────────────────────────────────────────────────
+
+@Composable
+private fun PlaceCard(
+    place: PlaceItem,
+    onDeleteClick: () -> Unit,
+) {
+    RowSurface(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+        Row(
+            modifier          = Modifier.padding(start = 10.dp, top = 10.dp, end = 12.dp, bottom = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ThumbnailBlock(
+                accentColor  = WaypointPlaceAccent1,
+                size         = 44.dp,
+                cornerRadius = RadiusThumbnail,
+            )
+            Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
+                Text(
+                    text       = place.name,
+                    color      = WaypointTextPrimary,
+                    fontSize   = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                if (!place.note.isNullOrBlank()) {
+                    Text(
+                        text     = place.note,
+                        color    = WaypointTextMuted,
+                        fontSize = 11.sp,
+                        modifier = Modifier.padding(top = 3.dp),
+                    )
+                }
+            }
+            IconActionButton(
+                glyph              = stringResource(R.string.edit_itinerary_close_glyph),
+                contentDescription = stringResource(R.string.edit_itinerary_remove_place_cd),
+                color              = WaypointTextMuted,
+                onClick            = onDeleteClick,
+            )
+        }
     }
 }
 

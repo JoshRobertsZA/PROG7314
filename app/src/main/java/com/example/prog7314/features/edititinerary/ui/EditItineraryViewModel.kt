@@ -46,6 +46,8 @@ class EditItineraryViewModel(
             val activeIndex = 0
             val flights     = if (days.isNotEmpty()) loadFlightsFor(days[activeIndex].dayId) else emptyList()
 
+            val places = if (days.isNotEmpty()) loadPlacesFor(days[activeIndex].dayId) else emptyMap()
+
             _uiState.update {
                 it.copy(
                     isLoading           = false,
@@ -54,6 +56,7 @@ class EditItineraryViewModel(
                     flightsForActiveDay = flights,
                     lodging             = lodging,
                     carRental           = car,
+                    placesForActiveDay  = places,
                 )
             }
         }
@@ -69,17 +72,36 @@ class EditItineraryViewModel(
             )
         }
 
+    private suspend fun loadPlacesFor(dayId: String): Map<String, List<PlaceItem>> {
+        val itinCategories = listOf("HOTELS", "PARKS", "PUBS", "CINEMAS")
+        val all = repo.getPlacesForDay(dayId).map { p ->
+            PlaceItem(
+                id       = p.id,
+                dayId    = p.dayId,
+                name     = p.name,
+                category = p.category,
+                note     = p.note,
+            )
+        }
+        return itinCategories.associateWith { cat ->
+            all.filter { it.category == cat }
+        }
+    }
+
     // ── Day scroller ──────────────────────────────────────────────────────────
 
     fun onDaySelected(index: Int) {
         val days = _uiState.value.days
         if (index < 0 || index >= days.size) return
         viewModelScope.launch {
-            val flights = loadFlightsFor(days[index].dayId)
+            val dayId   = days[index].dayId
+            val flights = loadFlightsFor(dayId)
+            val places  = loadPlacesFor(dayId)
             _uiState.update {
                 it.copy(
                     activeDayIndex      = index,
                     flightsForActiveDay = flights,
+                    placesForActiveDay  = places,
                 )
             }
         }
@@ -184,5 +206,18 @@ class EditItineraryViewModel(
             )
         }
         viewModelScope.launch { repo.updateFlightNumber(flightId, number) }
+    }
+
+    // ── Places ────────────────────────────────────────────────────────────────
+
+    fun onDeletePlace(placeId: String) {
+        val activeDayId = _uiState.value.days
+            .getOrNull(_uiState.value.activeDayIndex)
+            ?.dayId ?: return
+        viewModelScope.launch {
+            repo.deletePlace(placeId)
+            val places = loadPlacesFor(activeDayId)
+            _uiState.update { it.copy(placesForActiveDay = places) }
+        }
     }
 }

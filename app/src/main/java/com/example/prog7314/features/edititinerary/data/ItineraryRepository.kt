@@ -328,4 +328,80 @@ class ItineraryRepository(context: Context) {
                 arrayOf(tripId),
             )
         }
+
+    // ── Places ────────────────────────────────────────────────────────────────
+
+    /**
+     * Inserts a new place row for the given [dayId].
+     * [category] must be one of HOTELS, PARKS, PUBS, CINEMAS
+     * (matching [com.example.prog7314.features.explore.ui.ExploreFilter]).
+     */
+    suspend fun insertPlace(
+        dayId: String,
+        placeName: String,
+        category: String,
+        lat: Double? = null,
+        lng: Double? = null,
+        note: String? = null,
+    ): String = withContext(Dispatchers.IO) {
+        val id = UUID.randomUUID().toString()
+        val cv = ContentValues().apply {
+            put(WaypointDbHelper.COL_IPLACE_ID,       id)
+            put(WaypointDbHelper.COL_IPLACE_DAY_ID,   dayId)
+            put(WaypointDbHelper.COL_IPLACE_NAME,     placeName)
+            put(WaypointDbHelper.COL_IPLACE_CATEGORY, category)
+            if (lat != null) put(WaypointDbHelper.COL_IPLACE_LAT, lat)
+            if (lng != null) put(WaypointDbHelper.COL_IPLACE_LNG, lng)
+            if (note != null) put(WaypointDbHelper.COL_IPLACE_NOTE, note)
+            put(WaypointDbHelper.COL_IPLACE_CREATED, System.currentTimeMillis())
+        }
+        db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_PLACES, null, cv)
+        id
+    }
+
+    /**
+     * Returns all place rows for [dayId], sorted by creation time.
+     * Each row is returned as a raw map of column name to value.
+     */
+    suspend fun getPlacesForDay(dayId: String): List<PlaceEntity> =
+        withContext(Dispatchers.IO) {
+            val cursor = db.readableDatabase.query(
+                WaypointDbHelper.TABLE_ITIN_PLACES,
+                null,
+                "${WaypointDbHelper.COL_IPLACE_DAY_ID} = ?",
+                arrayOf(dayId),
+                null, null,
+                "${WaypointDbHelper.COL_IPLACE_CREATED} ASC",
+            )
+            val result = mutableListOf<PlaceEntity>()
+            cursor.use {
+                while (it.moveToNext()) {
+                    val latIdx = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_LAT)
+                    val lngIdx = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_LNG)
+                    result.add(
+                        PlaceEntity(
+                            id          = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_ID)),
+                            dayId       = dayId,
+                            name        = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_NAME)),
+                            category    = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_CATEGORY)),
+                            lat         = if (latIdx >= 0 && !it.isNull(latIdx)) it.getDouble(latIdx) else null,
+                            lng         = if (lngIdx >= 0 && !it.isNull(lngIdx)) it.getDouble(lngIdx) else null,
+                            note        = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_NOTE)),
+                            createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_CREATED)),
+                        )
+                    )
+                }
+            }
+            result
+        }
+
+    /** Deletes a single place row by its id. */
+    suspend fun deletePlace(placeId: String) =
+        withContext(Dispatchers.IO) {
+            db.writableDatabase.delete(
+                WaypointDbHelper.TABLE_ITIN_PLACES,
+                "${WaypointDbHelper.COL_IPLACE_ID} = ?",
+                arrayOf(placeId),
+            )
+        }
 }
