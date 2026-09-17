@@ -43,7 +43,9 @@ object LocationIQRepository {
         val path = placesPath(slug)
 
         val cached = readFromCache(path)
-        if (cached != null && !cached.isStale()) {
+        // Treat an empty cache as invalid so a previous failed/empty fetch
+        // does not permanently block the city from loading real places.
+        if (cached != null && !cached.isStale() && cached.places.isNotEmpty()) {
             Log.d(TAG, "Cache hit: $city (${cached.places.size} places)")
             return cached
         }
