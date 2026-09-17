@@ -277,7 +277,7 @@ fun TripCalendarScreen(
         }
 
         // Calendar grid (selected set empty for now - wired in commit 2)
-        val rows = buildCalendarGrid(uiState.displayMonth, uiState.startDate, uiState.endDate, emptySet())
+        val rows = buildCalendarGrid(uiState.displayMonth, uiState.startDate, uiState.endDate, uiState.selectedDays)
         Column(modifier = Modifier.fillMaxWidth().padding(top = 18.dp)) {
             rows.forEachIndexed { rowIndex, row ->
                 Row(
@@ -286,10 +286,27 @@ fun TripCalendarScreen(
                 ) {
                     row.forEach { day ->
                         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                            if (day.number != null) CalendarDayCell(day, onClick = {})
+                            if (day.number != null) CalendarDayCell(day, onClick = { day.date?.let { viewModel.onDayToggled(it) } })
                         }
                     }
                 }
+            }
+        }
+
+        // Selected days chip
+        if (uiState.selectionLabel.isNotBlank()) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .background(WaypointCard, RoundedCornerShape(RadiusButton))
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+            ) {
+                Text(
+                    text = uiState.selectionLabel,
+                    color = WaypointTextPrimary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                )
             }
         }
 

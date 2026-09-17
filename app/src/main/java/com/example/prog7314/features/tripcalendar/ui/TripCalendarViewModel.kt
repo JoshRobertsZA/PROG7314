@@ -107,6 +107,19 @@ class TripCalendarViewModel(
     fun onShowDestSearch() { _uiState.update { it.copy(showDestSearch = true) } }
     fun onDismissDestSearch() { _uiState.update { it.copy(showDestSearch = false) } }
 
+    // ── Day selection ────────────────────────────────────────────────────────────
+
+    fun onDayToggled(date: LocalDate) {
+        val state = _uiState.value
+        val start = state.startDate ?: return
+        val end   = state.endDate   ?: return
+        if (date.isBefore(start) || date.isAfter(end)) return  // only in-range days
+        val current = state.selectedDays
+        _uiState.update {
+            it.copy(selectedDays = if (date in current) current - date else current + date)
+        }
+    }
+
     fun onDestinationSelected(name: String) {
         _uiState.update { it.copy(showDestSearch = false, destination = name, isGeocodingDest = true) }
         viewModelScope.launch {

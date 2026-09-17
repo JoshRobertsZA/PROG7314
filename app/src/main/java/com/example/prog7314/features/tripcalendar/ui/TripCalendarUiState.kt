@@ -2,6 +2,7 @@ package com.example.prog7314.features.tripcalendar.ui
 
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 data class TripCalendarUiState(
     val isLoading: Boolean = true,
@@ -22,4 +23,17 @@ data class TripCalendarUiState(
     // Destination search
     val showDestSearch: Boolean = false,
     val isGeocodingDest: Boolean = false,
-)
+    // Day selection
+    val selectedDays: Set<LocalDate> = emptySet(),
+) {
+    /** "3 days selected · Jul 3 - Jul 5", or blank when nothing is selected. */
+    val selectionLabel: String
+        get() {
+            if (selectedDays.isEmpty()) return ""
+            val sorted = selectedDays.sorted()
+            val fmt    = DateTimeFormatter.ofPattern("MMM d")
+            val n      = sorted.size
+            return if (n == 1) "1 day selected · ${sorted.first().format(fmt)}"
+            else "$n days selected · ${sorted.first().format(fmt)} - ${sorted.last().format(fmt)}"
+        }
+}
