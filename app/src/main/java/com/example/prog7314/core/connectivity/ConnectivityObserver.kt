@@ -49,6 +49,10 @@ fun rememberIsOnline(): State<Boolean> {
 private fun ConnectivityManager.isCurrentlyOnline(): Boolean {
     val network = activeNetwork ?: return false
     val capabilities = getNetworkCapabilities(network) ?: return false
-    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    // NET_CAPABILITY_VALIDATED is unreliable on emulators and some real-device
+    // networks (captive-portal probe never completes). Checking INTERNET alone is
+    // sufficient: if there is truly no route the API calls will fail and show the
+    // correct error state via PlacesState.Error, without the offline dialog firing
+    // unnecessarily.
+    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }

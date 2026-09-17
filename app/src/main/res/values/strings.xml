@@ -183,8 +183,9 @@
     <string name="explore_filter_all">All</string>
     <string name="explore_filter_restaurants">Restaurants</string>
     <string name="explore_filter_cafes">Cafes</string>
-    <string name="explore_filter_attractions">Attractions</string>
-    <string name="explore_filter_entertainment">Entertainment</string>
+    <string name="explore_filter_parks">Parks</string>
+    <string name="explore_filter_pubs">Pubs</string>
+    <string name="explore_filter_cinemas">Cinemas</string>
     <string name="explore_filter_hotels">Hotels</string>
     <string name="explore_attribution">via LocationIQ</string>
 
@@ -193,7 +194,7 @@
          screen's subject). -->
     <string name="tab_header_avatar_cd">Profile photo</string>
     <string name="tab_header_bell_cd">Notifications</string>
-    <string name="tab_header_offline_cd">No internet connection</string>
+    <string name="tab_header_offline_cd">Offline indicator</string>
 
     <!-- Profile screen (Figma node 281:20, "Core Navigation" section -
          the Profile tab root, replacing the old Settings screen that was
@@ -221,13 +222,11 @@
          own string, since it's the same shared shell as the Currency
          Change modal. -->
     <string name="language_modal_title">Change language</string>
-    <!-- Offline dialog + still-offline bubble (core/common/OfflineDialog.kt,
-         Figma "Offline Mode" section, node 332:424). Text matches the
-         Figma copy exactly (OfflineModal 341:8, ReconnectBubble 347:9). -->
+    <!-- Offline dialog (core/common/OfflineDialog.kt) -->
     <string name="offline_dialog_title">No internet connection</string>
-    <string name="offline_dialog_body">We\'ve detected that your internet connection has dropped. Some features may be unavailable until it\'s back.</string>
+    <string name="offline_dialog_body">Check your connection and try again. Some features may be unavailable while you\'re offline.</string>
     <string name="offline_dialog_okay">Okay</string>
-    <string name="offline_bubble_body">You\'re still offline. Press the button below to try reconnecting to the network.</string>
+    <string name="offline_bubble_body">You\'re still offline. Some features may be unavailable until you reconnect.</string>
 
     <!-- Notifications screen (Figma section 312:1175) -->
     <string name="notifications_back_glyph">←</string>

@@ -24,6 +24,8 @@ import com.example.prog7314.core.theme.WaypointTheme
 import com.example.prog7314.features.alltrips.ui.AllTripsScreen
 import com.example.prog7314.features.edititinerary.ui.EditItineraryScreen
 import com.example.prog7314.features.explore.ui.ExploreScreen
+import com.example.prog7314.features.explore.ui.ExploreViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.prog7314.features.login.ui.LoginScreen
 import com.example.prog7314.features.main.ui.MainScreen
 import com.example.prog7314.features.newtrip.ui.NewTripScreen
@@ -142,7 +144,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             // ExploreScreen (the Explore tab root) has no back arrow of its
             // own, matching Figma - system back still pops this off the
             // stack when reached from the debug scratch hub.
-            ExploreScreen()
+            ExploreScreen(exploreViewModel = viewModel<ExploreViewModel>())
         }
         composable(Routes.Settings) {
             // SettingsScreen (the Profile tab root) has no back arrow of its
@@ -161,4 +163,5 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
     if (!isOnline && !offlineDialogDismissed) {
         OfflineDialog(onDismissRequest = { offlineDialogDismissed = true })
     }
+
 }
