@@ -59,6 +59,14 @@
     <string name="calendar_wd_fri">F</string>
     <string name="calendar_wd_sat">S</string>
     <string name="calendar_view_itinerary">View itinerary</string>
+    <string name="view_itinerary_title">View itinerary</string>
+    <string name="view_itinerary_back_glyph">&#8592;</string>
+    <string name="view_itinerary_back_cd">Back</string>
+    <string name="view_itinerary_no_flights">No flights uploaded</string>
+    <string name="view_itinerary_no_lodging">No lodging document</string>
+    <string name="view_itinerary_no_car">No car rental document</string>
+    <string name="view_itinerary_no_places">No places added</string>
+    <string name="view_itinerary_open_pdf_cd">Open PDF</string>
     <string name="calendar_edit_itinerary">Edit itinerary</string>
 
     <!-- Home screen (Figma node 47:30, "03 Waypoint — Home").
