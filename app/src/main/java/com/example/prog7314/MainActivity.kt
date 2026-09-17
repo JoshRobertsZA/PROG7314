@@ -15,7 +15,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavType
-import androidx.navigation.compose.navArgument
+import androidx.navigation.navArgument
 import androidx.navigation.compose.rememberNavController
 import com.example.prog7314.core.common.OfflineDialog
 import com.example.prog7314.core.connectivity.rememberIsOnline
@@ -140,7 +140,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         }
         composable(
             route = Routes.TripCalendar,
-            arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }),
+            arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
         ) {
             TripCalendarScreen(
                 onBackClick = { navController.popBackStack() },
