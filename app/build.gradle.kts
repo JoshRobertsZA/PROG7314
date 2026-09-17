@@ -125,6 +125,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.play.services.location)
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.converter.scalars)
     implementation(libs.okhttp)
