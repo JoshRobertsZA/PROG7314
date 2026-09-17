@@ -126,13 +126,23 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             )
         }
         composable(Routes.NewTrip) {
-            NewTripScreen(onCloseClick = { navController.popBackStack() })
+            NewTripScreen(
+                onCloseClick = { navController.popBackStack() },
+                onSaveSuccess = {
+                    navController.navigate(Routes.AllTrips) {
+                        popUpTo(Routes.NewTrip) { inclusive = true }
+                    }
+                },
+            )
         }
         composable(Routes.TripCalendar) {
             TripCalendarScreen(onBackClick = { navController.popBackStack() })
         }
         composable(Routes.AllTrips) {
-            AllTripsScreen(onBackClick = { navController.popBackStack() })
+            AllTripsScreen(
+                onBackClick    = { navController.popBackStack() },
+                onNewTripClick = { navController.navigate(Routes.NewTrip) },
+            )
         }
         composable(Routes.EditItinerary) {
             EditItineraryScreen(onBackClick = { navController.popBackStack() })

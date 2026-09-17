@@ -189,7 +189,7 @@ object LocationIQRepository {
                 return@withContext null
             }
 
-            val coords = geocodeCity(city, key) ?: return@withContext null
+            val coords = geocodeCityWithKey(city, key) ?: return@withContext null
             val (lat, lon) = coords
 
             val places = withContext(Dispatchers.IO) { fetchNearby(lat, lon, key) }
@@ -202,8 +202,19 @@ object LocationIQRepository {
             )
         }
 
+    /**
+     * Geocodes [city] using the LocationIQ search API.
+     * Returns (lat, lon) or null on failure.
+     * Fetches the API key from [RemoteSecrets] internally.
+     */
+    suspend fun geocodeCity(city: String): Pair<Double, Double>? {
+        val key = RemoteSecrets.get("LOCATIONIQ_API_KEY", BuildConfig.LOCATIONIQ_API_KEY)
+        if (key.isBlank()) return null
+        return withContext(Dispatchers.IO) { geocodeCityWithKey(city, key) }
+    }
+
     /** Returns (lat, lon) for the city, or null on failure. */
-    private fun geocodeCity(city: String, key: String): Pair<Double, Double>? {
+    private fun geocodeCityWithKey(city: String, key: String): Pair<Double, Double>? {
         return try {
             val encoded = URLEncoder.encode(city.trim(), "UTF-8")
             val url = "https://us1.locationiq.com/v1/search" +

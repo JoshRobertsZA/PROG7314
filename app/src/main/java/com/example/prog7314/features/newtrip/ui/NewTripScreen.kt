@@ -1,45 +1,45 @@
 package com.example.prog7314.features.newtrip.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.prog7314.R
+import com.example.prog7314.features.home.ui.CitySearchDialog
 import com.example.prog7314.core.common.AppButtonFilled
 import com.example.prog7314.core.common.CircleIconButton
 import com.example.prog7314.core.theme.RadiusButton
 import com.example.prog7314.core.theme.RadiusChip
-import com.example.prog7314.core.theme.RadiusThumbnail
+import com.example.prog7314.core.theme.RadiusHandle
 import com.example.prog7314.core.theme.WaypointBorderSoft
 import com.example.prog7314.core.theme.WaypointCard
 import com.example.prog7314.core.theme.WaypointCream
@@ -48,62 +48,82 @@ import com.example.prog7314.core.theme.WaypointTextMuted
 import com.example.prog7314.core.theme.WaypointTextPrimary
 import com.example.prog7314.core.theme.WaypointTripBadgeText
 import com.example.prog7314.core.theme.White
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-private enum class DayState { BLANK, PAST, TODAY, UNSELECTED, SELECTED }
-private data class Day(val number: Int?, val state: DayState)
+private val SUMMARY_FMT = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
 
 /**
- * New trip screen. Minimal skeleton whose only job is to display the
- * screen and let the user close it - the trip name field, month nav, day
- * grid, and save button are still static/mock content, not wired up yet.
+ * New trip screen. Wires [NewTripViewModel] to the custom [CalendarGrid]
+ * and [YearMonthPicker] composables.
  *
- * TODO: wire up the trip name field, prev/next month (change the
- * displayed month and regenerate the day grid from the real device date),
- * tapping a day (update the selected range + summary chip), and the save
- * button (create the trip and navigate to the edit-itinerary screen),
- * once the backend (trip storage) is wired up on its own branch.
+ * The persistent bottom summary bar shows the current selection at all
+ * times. Save is enabled only once both a name and a full date range are
+ * set. After a successful save the screen navigates to the All Trips screen via [onSaveSuccess].
  */
 @Composable
 fun NewTripScreen(
     onCloseClick: () -> Unit,
+    onSaveSuccess: () -> Unit = onCloseClick,
     modifier: Modifier = Modifier,
+    viewModel: NewTripViewModel = viewModel(),
 ) {
-    // July 2026 hardcoded to match the mock design. Jul 1, 2026 is a
-    // Wednesday, so row 0 leads with three blank slots. Days 1-24 are in
-    // the past (muted, not selectable). Day 25 is "today" (outlined).
-    // Days 26-27 are selectable future days with no selection yet. Days
-    // 28-31 are the currently selected range.
-    val rows: List<List<Day>> = listOf(
-        listOf(Day(null, DayState.BLANK), Day(null, DayState.BLANK), Day(null, DayState.BLANK)) +
-            (1..4).map { Day(it, DayState.PAST) },
-        (5..11).map { Day(it, DayState.PAST) },
-        (12..18).map { Day(it, DayState.PAST) },
-        (19..24).map { Day(it, DayState.PAST) } + Day(25, DayState.TODAY),
-        listOf(Day(26, DayState.UNSELECTED), Day(27, DayState.UNSELECTED), Day(28, DayState.SELECTED), Day(29, DayState.SELECTED), Day(30, DayState.SELECTED), Day(31, DayState.SELECTED), Day(null, DayState.BLANK)),
-    )
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Navigate back as soon as the trip is written to SQLite
+    LaunchedEffect(Unit) {
+        viewModel.tripSaved.collect { onSaveSuccess() }
+    }
+
+    // Destination city search dialog
+    if (uiState.showDestSearch) {
+        CitySearchDialog(
+            onCitySelected = viewModel::onDestinationSelected,
+            onDismiss      = viewModel::onDismissDestSearch,
+        )
+    }
+
+    // Year/month picker overlay — rendered above the main sheet
+    if (uiState.showYearPicker) {
+        YearMonthPicker(
+            currentDisplay = uiState.displayMonth,
+            onMonthPicked  = viewModel::onYearMonthPicked,
+            onDismiss      = viewModel::onDismissYearPicker,
+        )
+    }
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(WaypointCream)
-            .windowInsetsPadding(WindowInsets.systemBars)
-            .padding(start = 22.dp, top = 20.dp, end = 22.dp, bottom = 28.dp),
+            .windowInsetsPadding(WindowInsets.systemBars),
     ) {
+        // Scrollable main content — bottom padding reserves space for the
+        // sticky summary bar so it never hides the save button.
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .padding(start = 22.dp, top = 20.dp, end = 22.dp, bottom = 88.dp),
         ) {
-            // HandleWrap: decorative drag-handle bar, purely visual
+            // Decorative drag handle
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .size(width = 40.dp, height = 4.dp)
-                    .background(WaypointBorderSoft, RoundedCornerShape(com.example.prog7314.core.theme.RadiusHandle)),
+                    .padding(bottom = 4.dp)
+                    .background(
+                        WaypointBorderSoft,
+                        RoundedCornerShape(RadiusHandle),
+                    )
+                    .padding(horizontal = 20.dp, vertical = 2.dp),
             )
 
-            // TopBar: centered title, close button on the right
-            Box(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
+            // Top bar: title + close
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+            ) {
                 Text(
                     text = stringResource(R.string.new_trip_title),
                     color = WaypointTextPrimary,
@@ -111,7 +131,10 @@ fun NewTripScreen(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Center),
                 )
-                CircleIconButton(onClick = onCloseClick, modifier = Modifier.align(Alignment.CenterEnd)) {
+                CircleIconButton(
+                    onClick = onCloseClick,
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                ) {
                     Text(
                         text = stringResource(R.string.new_trip_close_glyph),
                         color = WaypointTerracotta,
@@ -121,23 +144,22 @@ fun NewTripScreen(
                 }
             }
 
-            // Trip name
+            // Trip name field
             Text(
                 text = stringResource(R.string.new_trip_name_label),
                 color = WaypointTextMuted,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = 20.dp),
             )
-            var tripName by remember { mutableStateOf("") }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp)
+                    .padding(top = 8.dp)
                     .background(WaypointCard, RoundedCornerShape(RadiusButton))
                     .padding(horizontal = 14.dp, vertical = 13.dp),
             ) {
-                if (tripName.isEmpty()) {
+                if (uiState.tripName.isEmpty()) {
                     Text(
                         text = stringResource(R.string.new_trip_name_hint),
                         color = WaypointTextMuted,
@@ -145,106 +167,87 @@ fun NewTripScreen(
                     )
                 }
                 BasicTextField(
-                    value = tripName,
-                    onValueChange = { tripName = it },
-                    textStyle = androidx.compose.ui.text.TextStyle(color = WaypointTextPrimary, fontSize = 13.sp),
+                    value = uiState.tripName,
+                    onValueChange = viewModel::onTripNameChanged,
+                    textStyle = TextStyle(color = WaypointTextPrimary, fontSize = 13.sp),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
 
-            // DatesLabel
+
+            // Destination field
+            Text(
+                text = "Destination",
+                color = WaypointTextMuted,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 20.dp),
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .background(WaypointCard, RoundedCornerShape(RadiusButton))
+                    .clickable(enabled = !uiState.isGeocodingDest) { viewModel.onShowDestSearch() }
+                    .padding(horizontal = 14.dp, vertical = 13.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "📍",
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(end = 8.dp),
+                )
+                if (uiState.isGeocodingDest) {
+                    CircularProgressIndicator(
+                        color    = WaypointTerracotta,
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Text(
+                        text = uiState.destinationName.ifBlank { "e.g. Cape Town, South Africa" },
+                        color = if (uiState.destinationName.isBlank()) WaypointTextMuted else WaypointTextPrimary,
+                        fontSize = 13.sp,
+                    )
+                }
+            }
+
+            // Dates section label
             Text(
                 text = stringResource(R.string.new_trip_dates_label),
                 color = WaypointTextMuted,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = 20.dp),
             )
             Text(
                 text = stringResource(R.string.new_trip_dates_subtitle),
                 color = WaypointTextMuted,
                 fontSize = 10.sp,
-                modifier = Modifier.padding(top = 2.dp).alpha(0.8f),
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .alpha(0.8f),
             )
 
-            // MonthNav. TODO: prev/next don't change the displayed month yet
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.new_trip_prev_month_glyph),
-                    color = WaypointTerracotta,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.size(32.dp).clickable(onClick = {}),
-                )
-                Text("July 2026", color = WaypointTextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                Text(
-                    text = stringResource(R.string.new_trip_next_month_glyph),
-                    color = WaypointTerracotta,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.size(32.dp).clickable(onClick = {}),
-                )
-            }
+            // Live calendar grid
+            CalendarGrid(
+                uiState      = uiState,
+                onDayTapped  = viewModel::onDayTapped,
+                onPrevMonth  = viewModel::onPrevMonth,
+                onNextMonth  = viewModel::onNextMonth,
+                onHeaderTap  = viewModel::onShowYearPicker,
+                modifier     = Modifier.padding(top = 16.dp),
+            )
 
-            // WeekdayRow
-            Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
-                listOf(
-                    R.string.new_trip_wd_sun, R.string.new_trip_wd_mon, R.string.new_trip_wd_tue,
-                    R.string.new_trip_wd_wed, R.string.new_trip_wd_thu, R.string.new_trip_wd_fri, R.string.new_trip_wd_sat,
-                ).forEach { res ->
-                    Text(
-                        text = stringResource(res),
-                        color = WaypointTextMuted,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-
-            // CalendarGrid
-            Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
-                rows.forEachIndexed { index, row ->
-                    Row(modifier = Modifier.fillMaxWidth().padding(top = if (index == 0) 0.dp else 8.dp)) {
-                        row.forEach { day ->
-                            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                                if (day.number != null) {
-                                    NewTripDayCell(day)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // SelectedSummary chip
-            Box(
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .background(WaypointCard, RoundedCornerShape(RadiusChip))
-                    .padding(horizontal = 14.dp, vertical = 8.dp),
-            ) {
-                Text(
-                    text = "4 days selected · Jul 28 – Jul 31, 2026",
-                    color = WaypointTripBadgeText,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-
-            // SaveButton. TODO: not wired to save/navigate yet
+            // Save button
             AppButtonFilled(
-                text = stringResource(R.string.new_trip_save_button),
-                onClick = {},
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                text     = if (uiState.isSaving) "Saving…" else stringResource(R.string.new_trip_save_button),
+                onClick  = viewModel::saveTrip,
+                enabled  = uiState.canSave && !uiState.isSaving,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp),
             )
 
             // Footer hint
@@ -255,40 +258,50 @@ fun NewTripScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 4.dp)
+                    .padding(top = 12.dp)
                     .alpha(0.85f),
             )
         }
+
+        // Persistent sticky summary bar pinned to the bottom
+        TripSummaryBar(
+            uiState  = uiState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
     }
 }
 
 @Composable
-private fun NewTripDayCell(day: Day) {
-    val modifier = Modifier.size(40.dp)
-    when (day.state) {
-        DayState.PAST -> Box(modifier = modifier.alpha(0.6f), contentAlignment = Alignment.Center) {
-            Text(day.number.toString(), color = com.example.prog7314.core.theme.WaypointDayMuted, fontSize = 13.sp)
+private fun TripSummaryBar(
+    uiState: NewTripUiState,
+    modifier: Modifier = Modifier,
+) {
+    val text = when {
+        uiState.startDate == null ->
+            "Tap a day to set your start date"
+        uiState.endDate == null ->
+            "${uiState.startDate.format(SUMMARY_FMT)} selected — tap another day for end date"
+        else -> {
+            val start = uiState.startDate.format(SUMMARY_FMT)
+            val end   = uiState.endDate.format(SUMMARY_FMT)
+            val days  = uiState.selectedDayCount
+            "$start – $end · $days ${if (days == 1) "day" else "days"}"
         }
-        DayState.TODAY -> Box(
-            modifier = modifier
-                .background(Color.Transparent, RoundedCornerShape(RadiusThumbnail))
-                .border(1.5.dp, WaypointTerracotta, RoundedCornerShape(RadiusThumbnail)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(day.number.toString(), color = WaypointTripBadgeText, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-        }
-        DayState.UNSELECTED -> Box(
-            modifier = modifier.background(WaypointCard, RoundedCornerShape(RadiusThumbnail)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(day.number.toString(), color = WaypointTextPrimary, fontSize = 13.sp)
-        }
-        DayState.SELECTED -> Box(
-            modifier = modifier.background(WaypointTerracotta, RoundedCornerShape(RadiusThumbnail)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(day.number.toString(), color = White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-        }
-        DayState.BLANK -> Unit
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(WaypointCard)
+            .padding(horizontal = 22.dp, vertical = 14.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            color = WaypointTripBadgeText,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+        )
     }
 }

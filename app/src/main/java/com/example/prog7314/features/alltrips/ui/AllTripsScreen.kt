@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -32,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.prog7314.R
+import com.example.prog7314.core.common.AppButtonFilled
 import com.example.prog7314.core.common.CardSurface
 import com.example.prog7314.core.common.CircleIconButton
 import com.example.prog7314.core.common.StatusBadge
@@ -76,6 +79,8 @@ private data class TripCard(
 @Composable
 fun AllTripsScreen(
     onBackClick: () -> Unit,
+    onNewTripClick: () -> Unit = {},
+
     modifier: Modifier = Modifier,
 ) {
     val trips = listOf(
@@ -191,6 +196,15 @@ fun AllTripsScreen(
                 }
             }
         }
+
+        // New trip button
+        AppButtonFilled(
+            text     = stringResource(R.string.home_new_trip),
+            onClick  = onNewTripClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp),
+        )
     }
 }
 

@@ -31,6 +31,7 @@ fun AppButtonFilled(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     fillColor: Color = WaypointTerracotta,
     textColor: Color = White,
     cornerRadius: Dp = RadiusButton,
@@ -39,8 +40,11 @@ fun AppButtonFilled(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .background(color = fillColor, shape = RoundedCornerShape(cornerRadius))
+            .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier)
+            .background(
+                color = if (enabled) fillColor else fillColor.copy(alpha = 0.4f),
+                shape = RoundedCornerShape(cornerRadius),
+            )
             .padding(contentPadding),
         contentAlignment = Alignment.Center,
     ) {

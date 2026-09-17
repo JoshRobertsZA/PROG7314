@@ -496,30 +496,6 @@ fun HomeScreen(
                 }
             }
 
-            // Map CTA banner
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 22.dp, bottom = 4.dp)
-                    .background(WaypointCard, RoundedCornerShape(RadiusRow))
-                    .clickable(onClick = {})
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.home_map_cta),
-                    color = WaypointTerracotta,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    text = stringResource(R.string.home_map_cta_arrow),
-                    color = WaypointTerracotta,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
         }
     }
 }
