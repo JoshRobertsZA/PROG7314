@@ -82,6 +82,8 @@ private fun buildCalendarGrid(
 @Composable
 fun TripCalendarScreen(
     onBackClick: () -> Unit,
+    onEditItineraryClick: () -> Unit = {},
+    onViewItineraryClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: TripCalendarViewModel = viewModel(),
 ) {
@@ -314,13 +316,13 @@ fun TripCalendarScreen(
         Row(modifier = Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 4.dp)) {
             AppButtonOutline(
                 text = stringResource(R.string.calendar_view_itinerary),
-                onClick = {},
+                onClick = onViewItineraryClick,
                 modifier = Modifier.weight(1f),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 14.dp),
             )
             AppButtonFilled(
                 text = stringResource(R.string.calendar_edit_itinerary),
-                onClick = {},
+                onClick = onEditItineraryClick,
                 modifier = Modifier.weight(1f).padding(start = 12.dp),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 14.dp),
             )

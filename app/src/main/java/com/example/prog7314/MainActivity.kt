@@ -140,7 +140,11 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             route = Routes.TripCalendar,
             arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }),
         ) {
-            TripCalendarScreen(onBackClick = { navController.popBackStack() })
+            TripCalendarScreen(
+                onBackClick = { navController.popBackStack() },
+                onEditItineraryClick = { navController.navigate(Routes.EditItinerary) },
+                onViewItineraryClick = { navController.navigate(Routes.ViewItinerary) },
+            )
         }
         composable(Routes.AllTrips) {
             AllTripsScreen(
