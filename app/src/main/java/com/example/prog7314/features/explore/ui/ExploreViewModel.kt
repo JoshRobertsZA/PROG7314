@@ -99,10 +99,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 it.type in setOf("cinema", "theatre", "nightclub", "bar", "pub", "casino",
                                  "arts_centre", "stadium", "sports_centre")
             }
-            ExploreFilter.HOTELS        -> cache.places.filter {
-                it.type in setOf("hotel", "hostel", "motel", "guest_house", "apartment") ||
-                it.category == "tourism"
-            }
+
         }
     }
 }
