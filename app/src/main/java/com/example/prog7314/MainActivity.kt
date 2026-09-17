@@ -83,8 +83,8 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 onGoToWelcomeClick = { navController.navigate(Routes.Welcome) },
                 onGoToLoginClick = { navController.navigate(Routes.Login) },
                 onGoToTripCalendarClick = { navController.navigate(Routes.tripCalendar("__scratch__")) },
-                onGoToViewItineraryClick = { navController.navigate(Routes.ViewItinerary) },
-                onGoToEditItineraryClick = { navController.navigate(Routes.EditItinerary) },
+                onGoToViewItineraryClick = { navController.navigate(Routes.viewItinerary("__scratch__")) },
+                onGoToEditItineraryClick = { navController.navigate(Routes.editItinerary("__scratch__")) },
                 onGoToAllTripsClick = { navController.navigate(Routes.AllTrips) },
                 onGoToSettingsClick = { navController.navigate(Routes.Settings) },
                 onGoToExploreClick = { navController.navigate(Routes.Explore) },
@@ -142,8 +142,8 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         ) {
             TripCalendarScreen(
                 onBackClick = { navController.popBackStack() },
-                onEditItineraryClick = { navController.navigate(Routes.EditItinerary) },
-                onViewItineraryClick = { navController.navigate(Routes.ViewItinerary) },
+                onEditItineraryClick = { tripId -> navController.navigate(Routes.editItinerary(tripId)) },
+                onViewItineraryClick = { tripId -> navController.navigate(Routes.viewItinerary(tripId)) },
             )
         }
         composable(Routes.AllTrips) {
@@ -153,11 +153,23 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 onTripClick    = { tripId -> navController.navigate(Routes.tripCalendar(tripId)) },
             )
         }
-        composable(Routes.EditItinerary) {
-            EditItineraryScreen(onBackClick = { navController.popBackStack() })
+        composable(
+            route = Routes.EditItinerary,
+            arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
+        ) {
+            EditItineraryScreen(
+                tripId = it.arguments?.getString("tripId") ?: "",
+                onBackClick = { navController.popBackStack() },
+            )
         }
-        composable(Routes.ViewItinerary) {
-            ViewItineraryScreen(onBackClick = { navController.popBackStack() })
+        composable(
+            route = Routes.ViewItinerary,
+            arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
+        ) {
+            ViewItineraryScreen(
+                tripId = it.arguments?.getString("tripId") ?: "",
+                onBackClick = { navController.popBackStack() },
+            )
         }
         composable(Routes.Explore) {
             // ExploreScreen (the Explore tab root) has no back arrow of its

@@ -59,6 +59,7 @@ private data class BookingRow(val title: String, val subtitle: String, val docLa
  */
 @Composable
 fun EditItineraryScreen(
+    tripId: String,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
