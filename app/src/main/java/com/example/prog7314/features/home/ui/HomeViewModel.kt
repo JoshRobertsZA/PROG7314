@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.prog7314.core.location.LocationProvider
 import com.example.prog7314.core.secrets.RemoteSecrets
+import com.example.prog7314.features.explore.data.LocationIQRepository
 import com.example.prog7314.features.home.data.CurrencyRepository
 import com.example.prog7314.features.home.data.WeatherRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +30,7 @@ private const val DEFAULT_CURR = "USD"
  * Data (weather / rate) is cache-first via the GitHub cache repo:
  *   - Weather: re-fetched only if the cached entry is older than 2 hours.
  *   - Currency: re-fetched only if the cache is from a previous calendar day.
+ * Nearby places are fetched once on the first GPS fix, showing the 3 closest POIs.
  */
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -41,6 +43,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         ),
     )
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    /** Guards against re-fetching nearby places on every location update. */
+    private var nearbyFetched = false
 
     init {
         viewModelScope.launch {
@@ -101,7 +106,27 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             LocationProvider.locationFlow(getApplication())
                 .catch { /* permission not granted or provider unavailable */ }
-                .collect { loc -> _uiState.update { it.copy(location = loc) } }
+                .collect { loc ->
+                    _uiState.update { it.copy(location = loc) }
+                    if (!nearbyFetched) {
+                        nearbyFetched = true
+                        loadNearbyPlaces(loc.lat, loc.lon)
+                    }
+                }
+        }
+    }
+
+    private fun loadNearbyPlaces(lat: Double, lon: Double) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(nearbyPlaces = NearbyState.Loading) }
+            val result = LocationIQRepository.getPlacesByCoords(lat, lon)
+            _uiState.update {
+                it.copy(
+                    nearbyPlaces = if (result != null && result.places.isNotEmpty())
+                        NearbyState.Success(result.places.take(3))
+                    else NearbyState.Error,
+                )
+            }
         }
     }
 }
