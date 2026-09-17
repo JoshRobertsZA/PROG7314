@@ -430,7 +430,47 @@ fun HomeScreen(
                             }
                         }
                     }
-                    else -> { /* Loading / Error / Idle — handled in commit 3 */ }
+                    is NearbyState.Loading -> {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 14.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            CircularProgressIndicator(
+                                color = WaypointTerracotta,
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Text(
+                                text = "Finding places near you...",
+                                color = WaypointTextMuted,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(start = 10.dp),
+                            )
+                        }
+                    }
+                    is NearbyState.Error -> {
+                        Text(
+                            text = "Could not load nearby places. Check your connection.",
+                            color = WaypointTextMuted,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 14.dp),
+                        )
+                    }
+                    else -> {
+                        Text(
+                            text = "Allow location access to see places near you.",
+                            color = WaypointTextMuted,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 14.dp),
+                        )
+                    }
                 }
             }
 
