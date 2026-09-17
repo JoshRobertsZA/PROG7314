@@ -1,6 +1,7 @@
 package com.example.prog7314.features.home.ui
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.prog7314.core.location.LocationProvider
@@ -14,29 +15,35 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+private const val PREFS_NAME  = "home_prefs"
+private const val KEY_CITY     = "selected_city"
+private const val KEY_CURRENCY = "selected_currency"
+private const val DEFAULT_CITY = "Cape Town"
+private const val DEFAULT_CURR = "USD"
+
 /**
  * ViewModel for the Home screen.
  *
- * Extends AndroidViewModel so it can hand the Application context to
- * LocationProvider without holding an Activity reference.
- *
- * On creation it:
- *   1. Triggers RemoteSecrets to load GITHUB_WRITE_TOKEN and other keys.
- *   2. Fetches weather for the default city (cache-first).
- *   3. Fetches the USD/ZAR rate (cache-first).
- *   4. Starts collecting the device's live location.
- *
- * The UI drives refreshes via selectCity(), selectFromCurrency(),
- * refreshWeather(), and refreshCurrency().
+ * Selections (city + FROM currency) are persisted in SharedPreferences so
+ * they survive process death and are restored on the next launch.
+ * Data (weather / rate) is cache-first via the GitHub cache repo:
+ *   - Weather: re-fetched only if the cached entry is older than 2 hours.
+ *   - Currency: re-fetched only if the cache is from a previous calendar day.
  */
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _uiState = MutableStateFlow(HomeUiState())
+    private val prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+    private val _uiState = MutableStateFlow(
+        HomeUiState(
+            selectedCity         = prefs.getString(KEY_CITY,     DEFAULT_CITY) ?: DEFAULT_CITY,
+            selectedFromCurrency = prefs.getString(KEY_CURRENCY, DEFAULT_CURR) ?: DEFAULT_CURR,
+        ),
+    )
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            // Load remote keys first so the write token is ready for cache writes
             RemoteSecrets.ensureLoaded()
             val s = _uiState.value
             loadWeather(s.selectedCity)
@@ -47,19 +54,19 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     // ── Public surface ─────────────────────────────────────────────────────────
 
-    /** Called when the user picks a new city from the city-search dialog. */
     fun selectCity(city: String) {
+        prefs.edit().putString(KEY_CITY, city).apply()
         _uiState.update { it.copy(selectedCity = city) }
         loadWeather(city)
     }
 
-    /** Called when the user changes the source currency in the currency modal. */
     fun selectFromCurrency(code: String) {
+        prefs.edit().putString(KEY_CURRENCY, code).apply()
         _uiState.update { it.copy(selectedFromCurrency = code) }
         loadCurrency(code)
     }
 
-    fun refreshWeather() = loadWeather(_uiState.value.selectedCity)
+    fun refreshWeather()  = loadWeather(_uiState.value.selectedCity)
     fun refreshCurrency() = loadCurrency(_uiState.value.selectedFromCurrency)
 
     // ── Private helpers ────────────────────────────────────────────────────────
@@ -93,7 +100,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private fun startLocationUpdates() {
         viewModelScope.launch {
             LocationProvider.locationFlow(getApplication())
-                .catch { /* permission not granted or provider error — stay silent */ }
+                .catch { /* permission not granted or provider unavailable */ }
                 .collect { loc -> _uiState.update { it.copy(location = loc) } }
         }
     }
