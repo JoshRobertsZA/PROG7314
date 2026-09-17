@@ -110,7 +110,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     _uiState.update { it.copy(location = loc) }
                     if (!nearbyFetched) {
                         nearbyFetched = true
-                        loadNearbyPlaces(loc.lat, loc.lon)
+                        loadNearbyPlaces(loc.lat, loc.lng)
                     }
                 }
         }
