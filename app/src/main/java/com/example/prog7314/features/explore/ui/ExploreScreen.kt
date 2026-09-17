@@ -1,7 +1,9 @@
 package com.example.prog7314.features.explore.ui
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -269,12 +271,21 @@ fun ExploreScreen(
 
 @Composable
 private fun PlacesList(places: List<ExplorePlace>) {
+    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth()) {
         places.forEachIndexed { index, place ->
             RowSurface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = if (index == 0) 0.dp else 8.dp),
+                    .padding(top = if (index == 0) 0.dp else 8.dp)
+                    .clickable {
+                        val uri = Uri.parse(
+                            "https://www.google.com/maps/dir/?api=1" +
+                            "&destination=${place.lat},${place.lon}" +
+                            "&destination_place_id=${Uri.encode(place.name)}"
+                        )
+                        context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                    },
             ) {
                 Row(
                     modifier = Modifier.padding(
@@ -311,15 +322,6 @@ private fun PlacesList(places: List<ExplorePlace>) {
 
 private fun placeSubtitle(place: ExplorePlace): String {
 
-private fun placeTypeEmoji(type: String): String = when (type) {
-    "restaurant" -> "🍴"
-    "cafe"       -> "☕"
-    "hotel"      -> "🏨"
-    "pub"        -> "🍺"
-    "cinema"     -> "🎬"
-    "park"       -> "🌳"
-    else         -> "📍"
-}
     val kind = place.type
         .replace("_", " ")
         .replaceFirstChar { it.uppercase() }
@@ -331,6 +333,16 @@ private fun placeTypeEmoji(type: String): String = when (type) {
     } else {
         kind
     }
+}
+
+private fun placeTypeEmoji(type: String): String = when (type) {
+    "restaurant" -> "🍴"
+    "cafe"       -> "☕"
+    "hotel"      -> "🏨"
+    "pub"        -> "🍺"
+    "cinema"     -> "🎬"
+    "park"       -> "🌳"
+    else         -> "📍"
 }
 
 @Composable
