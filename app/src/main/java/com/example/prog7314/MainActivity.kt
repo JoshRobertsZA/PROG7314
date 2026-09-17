@@ -139,7 +139,10 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             TripCalendarScreen(onBackClick = { navController.popBackStack() })
         }
         composable(Routes.AllTrips) {
-            AllTripsScreen(onBackClick = { navController.popBackStack() })
+            AllTripsScreen(
+                onBackClick    = { navController.popBackStack() },
+                onNewTripClick = { navController.navigate(Routes.NewTrip) },
+            )
         }
         composable(Routes.EditItinerary) {
             EditItineraryScreen(onBackClick = { navController.popBackStack() })
