@@ -173,12 +173,11 @@ object LocationIQRepository {
      * Tags are chosen to cover every ExploreFilter category in ExploreViewModel.
      */
     private fun fetchNearby(lat: Double, lon: Double, key: String): List<ExplorePlace>? {
-        val tags = listOf(
-            "restaurant", "cafe", "bar", "pub",          // ExploreFilter.RESTAURANTS / CAFES / ENTERTAINMENT
-            "cinema", "theatre", "nightclub",             // ExploreFilter.ENTERTAINMENT
-            "attraction", "museum", "viewpoint", "gallery", // ExploreFilter.ATTRACTIONS
-            "hotel", "hostel", "motel", "guest_house",   // ExploreFilter.HOTELS
-        )
+        // Only these four tag values are confirmed valid for LocationIQ's /v1/nearby endpoint.
+        // Other OSM types (hotel, museum, cinema, etc.) return HTTP 404 because LocationIQ's
+        // nearby endpoint does not accept all OSM sub-types, only the ones their docs list.
+        // Using fewer tags also prevents hitting the per-minute rate limit (HTTP 429).
+        val tags = listOf("restaurant", "cafe", "bar", "attraction")
 
         val seen    = mutableSetOf<String>()
         val results = mutableListOf<ExplorePlace>()
