@@ -1,6 +1,8 @@
 package com.example.prog7314.features.home.ui
 
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -31,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -71,6 +74,16 @@ import com.example.prog7314.features.currencyexchange.ui.CurrencyExchangeModal
  * Currency widget: tap -> CurrencyExchangeModal with real ExchangeRate-API rate.
  * Location is requested on first launch and updates continuously in the background.
  */
+fun placeTypeEmoji(type: String): String = when (type) {
+    "restaurant" -> "🍴"
+    "cafe"       -> "☕"
+    "hotel"      -> "🏨"
+    "pub"        -> "🍺"
+    "cinema"     -> "🎬"
+    "park"       -> "🌳"
+    else         -> "📍"
+}
+
 @Composable
 fun HomeScreen(
     onNewTripClick: () -> Unit,
@@ -81,6 +94,7 @@ fun HomeScreen(
 ) {
     val state by homeViewModel.uiState.collectAsState()
     val isOnline by rememberIsOnline()
+    val context = LocalContext.current
 
     var showCitySearch by remember { mutableStateOf(false) }
     var showCurrencyModal by remember { mutableStateOf(false) }
@@ -395,29 +409,89 @@ fun HomeScreen(
                 )
             }
 
-            // Nearby places list (mock until LocationIQ feature branch)
-            val places = listOf(
-                Triple("Table Mountain", "Landmark · 2.1 km away", WaypointPlaceAccent1),
-                Triple("V&A Waterfront", "Shopping · 3.4 km away", WaypointPlaceAccent2),
-                Triple("Camps Bay Beach", "Beach · 4.8 km away", WaypointPlaceAccent3),
-            )
+            // Nearby places list — live from LocationIQ via HomeViewModel
+            val nearbyAccents = listOf(WaypointPlaceAccent1, WaypointPlaceAccent2, WaypointPlaceAccent3)
             Column(modifier = Modifier.padding(top = 10.dp)) {
-                places.forEachIndexed { index, (name, subtitle, accent) ->
-                    RowSurface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = if (index == 0) 0.dp else 8.dp),
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(start = 10.dp, top = 8.dp, end = 14.dp, bottom = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            ThumbnailBlock(accentColor = accent, cornerRadius = RadiusThumbnail)
-                            Column(modifier = Modifier.padding(start = 12.dp)) {
-                                Text(name, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                                Text(subtitle, color = WaypointTextMuted, fontSize = 11.sp, modifier = Modifier.padding(top = 3.dp))
+                when (val ns = state.nearbyPlaces) {
+                    is NearbyState.Success -> {
+                        ns.places.forEachIndexed { index, place ->
+                            val accent = nearbyAccents[index % nearbyAccents.size]
+                            RowSurface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = if (index == 0) 0.dp else 8.dp)
+                                    .clickable {
+                                        val uri = Uri.parse(
+                                            "https://www.google.com/maps/dir/?api=1" +
+                                            "&destination=${place.lat},${place.lon}" +
+                                            "&destination_place_id=${Uri.encode(place.name)}"
+                                        )
+                                        context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                                    },
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(start = 10.dp, top = 8.dp, end = 14.dp, bottom = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    ThumbnailBlock(accentColor = accent, cornerRadius = RadiusThumbnail, label = placeTypeEmoji(place.type))
+                                    Column(modifier = Modifier.padding(start = 12.dp)) {
+                                        Text(
+                                            text = place.name,
+                                            color = WaypointTextPrimary,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                        Text(
+                                            text = "${place.type.replaceFirstChar { it.uppercase() }} · ${"%.1f".format(place.distanceMetres / 1000.0)} km away",
+                                            color = WaypointTextMuted,
+                                            fontSize = 11.sp,
+                                            modifier = Modifier.padding(top = 3.dp),
+                                        )
+                                    }
+                                }
                             }
                         }
+                    }
+                    is NearbyState.Loading -> {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 14.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            CircularProgressIndicator(
+                                color = WaypointTerracotta,
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Text(
+                                text = "Finding places near you...",
+                                color = WaypointTextMuted,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(start = 10.dp),
+                            )
+                        }
+                    }
+                    is NearbyState.Error -> {
+                        Text(
+                            text = "Could not load nearby places. Check your connection.",
+                            color = WaypointTextMuted,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 14.dp),
+                        )
+                    }
+                    else -> {
+                        Text(
+                            text = "Allow location access to see places near you.",
+                            color = WaypointTextMuted,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 14.dp),
+                        )
                     }
                 }
             }

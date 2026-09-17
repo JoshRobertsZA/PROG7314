@@ -2,6 +2,7 @@ package com.example.prog7314.features.home.ui
 
 import com.example.prog7314.core.cache.CurrencyCache
 import com.example.prog7314.core.cache.DeviceLocation
+import com.example.prog7314.core.cache.ExplorePlace
 import com.example.prog7314.core.cache.WeatherCache
 
 /**
@@ -10,6 +11,7 @@ import com.example.prog7314.core.cache.WeatherCache
  * selectedCity         — last city the user picked (default: Cape Town)
  * selectedFromCurrency — currency to convert FROM; target is always ZAR
  * location             — live device position, null until first GPS fix
+ * nearbyPlaces         — 3 closest POIs fetched from LocationIQ on first GPS fix
  */
 data class HomeUiState(
     val weather: WeatherState = WeatherState.Idle,
@@ -17,6 +19,7 @@ data class HomeUiState(
     val location: DeviceLocation? = null,
     val selectedCity: String = "Cape Town",
     val selectedFromCurrency: String = "USD",
+    val nearbyPlaces: NearbyState = NearbyState.Idle,
 )
 
 sealed class WeatherState {
@@ -31,4 +34,11 @@ sealed class CurrencyState {
     object Loading : CurrencyState()
     data class Success(val data: CurrencyCache) : CurrencyState()
     object Error : CurrencyState()
+}
+
+sealed class NearbyState {
+    object Idle : NearbyState()
+    object Loading : NearbyState()
+    data class Success(val places: List<ExplorePlace>) : NearbyState()
+    object Error : NearbyState()
 }
