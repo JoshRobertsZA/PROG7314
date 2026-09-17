@@ -21,13 +21,9 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,10 +37,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import com.example.prog7314.R
 import com.example.prog7314.core.cache.ExplorePlace
@@ -64,6 +58,7 @@ import com.example.prog7314.core.theme.WaypointTerracotta
 import com.example.prog7314.core.theme.WaypointTextMuted
 import com.example.prog7314.core.theme.WaypointTextPrimary
 import com.example.prog7314.core.theme.White
+import com.example.prog7314.features.home.ui.CitySearchDialog
 
 private val accentCycle = listOf(
     WaypointPlaceAccent1,
@@ -81,7 +76,6 @@ fun ExploreScreen(
     val context = LocalContext.current
     var showCitySearch by remember { mutableStateOf(false) }
 
-    // Request location permission on first composition; retry fetch if granted.
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { perms ->
@@ -109,11 +103,11 @@ fun ExploreScreen(
 
     if (showCitySearch) {
         CitySearchDialog(
-            onDismiss = { showCitySearch = false },
-            onSearch  = { city ->
+            onCitySelected = { city ->
                 showCitySearch = false
                 exploreViewModel.searchCity(city)
             },
+            onDismiss = { showCitySearch = false },
         )
     }
 
@@ -132,7 +126,6 @@ fun ExploreScreen(
         ) {
             TabHeader()
 
-            // Location box -- tap to search a city manually
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -167,7 +160,6 @@ fun ExploreScreen(
                     .alpha(0.8f),
             )
 
-            // Filter chips
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -191,7 +183,6 @@ fun ExploreScreen(
                 }
             }
 
-            // Results header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -214,7 +205,6 @@ fun ExploreScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Results body
             when (val ps = state.placesState) {
                 PlacesState.Idle -> Unit
 
@@ -273,61 +263,6 @@ fun ExploreScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
-
-@Composable
-private fun CitySearchDialog(
-    onDismiss: () -> Unit,
-    onSearch: (String) -> Unit,
-) {
-    var query by remember { mutableStateOf("") }
-
-    Dialog(onDismissRequest = onDismiss) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(WaypointCard, RoundedCornerShape(16.dp))
-                .padding(20.dp),
-        ) {
-            Text(
-                text = "Search a city",
-                color = WaypointTextPrimary,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
-                placeholder = { Text("e.g. Cape Town", color = WaypointTextMuted) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(
-                    onSearch = { if (query.isNotBlank()) onSearch(query.trim()) }
-                ),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Spacer(modifier = Modifier.weight(1f))
-                TextButton(onClick = onDismiss) {
-                    Text("Cancel", color = WaypointTextMuted)
-                }
-                Box(
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .clickable { if (query.isNotBlank()) onSearch(query.trim()) }
-                        .background(WaypointTerracotta, RoundedCornerShape(RadiusButton))
-                        .padding(horizontal = 16.dp, vertical = 9.dp),
-                ) {
-                    Text("Search", color = White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                }
-            }
         }
     }
 }
