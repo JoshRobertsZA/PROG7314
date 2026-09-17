@@ -9,7 +9,6 @@ import com.example.prog7314.core.network.HttpClient
 import com.example.prog7314.core.secrets.RemoteSecrets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
@@ -211,17 +210,16 @@ object LocationIQRepository {
         """.trimIndent()
 
         return try {
-            val body = FormBody.Builder()
-                .add("data", query)
-                .build()
+            val encoded = URLEncoder.encode(query.trim(), "UTF-8")
             val req = Request.Builder()
-                .url("https://overpass-api.de/api/interpreter")
-                .post(body)
+                .url("https://overpass-api.de/api/interpreter?data=$encoded")
+                .get()
                 .build()
 
             overpassClient.newCall(req).execute().use { resp ->
                 if (!resp.isSuccessful) {
-                    Log.w(TAG, "Overpass HTTP ${resp.code}")
+                    val errBody = resp.body?.string()?.take(300) ?: ""
+                    Log.w(TAG, "Overpass HTTP ${resp.code}: $errBody")
                     return null
                 }
 
