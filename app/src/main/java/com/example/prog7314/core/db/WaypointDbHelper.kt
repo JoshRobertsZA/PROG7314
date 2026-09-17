@@ -21,16 +21,16 @@ class WaypointDbHelper private constructor(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Simple drop-and-recreate for version 1 -> future versions.
-        // Production migrations should use ALTER TABLE instead.
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_TRIPS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_ACCOUNTS")
-        onCreate(db)
+        if (oldVersion < 2) {
+            // Add destination lat/lng columns introduced in version 2.
+            db.execSQL("ALTER TABLE $TABLE_TRIPS ADD COLUMN $COL_TRIP_DEST_LAT REAL")
+            db.execSQL("ALTER TABLE $TABLE_TRIPS ADD COLUMN $COL_TRIP_DEST_LNG REAL")
+        }
     }
 
     companion object {
         private const val DB_NAME    = "waypoint.db"
-        private const val DB_VERSION = 1
+        private const val DB_VERSION = 2
 
         const val TABLE_ACCOUNTS = "accounts"
         const val COL_ACC_ID           = "id"
@@ -48,6 +48,8 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_TRIP_DESTINATION = "destination"
         const val COL_TRIP_CREATED     = "created_at_ms"
         const val COL_TRIP_UPDATED     = "updated_at_ms"
+        const val COL_TRIP_DEST_LAT    = "dest_lat"
+        const val COL_TRIP_DEST_LNG    = "dest_lng"
 
         private val CREATE_ACCOUNTS = """
             CREATE TABLE $TABLE_ACCOUNTS (
@@ -67,6 +69,8 @@ class WaypointDbHelper private constructor(context: Context) :
                 $COL_TRIP_START       TEXT NOT NULL,
                 $COL_TRIP_END         TEXT NOT NULL,
                 $COL_TRIP_DESTINATION TEXT,
+                $COL_TRIP_DEST_LAT    REAL,
+                $COL_TRIP_DEST_LNG    REAL,
                 $COL_TRIP_CREATED     INTEGER NOT NULL,
                 $COL_TRIP_UPDATED     INTEGER NOT NULL,
                 FOREIGN KEY ($COL_TRIP_ACCOUNT_ID) REFERENCES $TABLE_ACCOUNTS($COL_ACC_ID)

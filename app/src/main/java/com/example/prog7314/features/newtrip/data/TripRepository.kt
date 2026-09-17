@@ -13,6 +13,8 @@ import com.example.prog7314.core.db.WaypointDbHelper.Companion.COL_ACC_PHOTO_URL
 import com.example.prog7314.core.db.WaypointDbHelper.Companion.COL_TRIP_ACCOUNT_ID
 import com.example.prog7314.core.db.WaypointDbHelper.Companion.COL_TRIP_CREATED
 import com.example.prog7314.core.db.WaypointDbHelper.Companion.COL_TRIP_DESTINATION
+import com.example.prog7314.core.db.WaypointDbHelper.Companion.COL_TRIP_DEST_LAT
+import com.example.prog7314.core.db.WaypointDbHelper.Companion.COL_TRIP_DEST_LNG
 import com.example.prog7314.core.db.WaypointDbHelper.Companion.COL_TRIP_END
 import com.example.prog7314.core.db.WaypointDbHelper.Companion.COL_TRIP_ID
 import com.example.prog7314.core.db.WaypointDbHelper.Companion.COL_TRIP_NAME
@@ -61,6 +63,8 @@ class TripRepository(context: Context) {
         startDate: String,
         endDate: String,
         destination: String? = null,
+        destLat: Double? = null,
+        destLng: Double? = null,
     ): String = withContext(Dispatchers.IO) {
         val id  = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
@@ -71,6 +75,8 @@ class TripRepository(context: Context) {
             put(COL_TRIP_START,       startDate)
             put(COL_TRIP_END,         endDate)
             put(COL_TRIP_DESTINATION, destination)
+            if (destLat != null) put(COL_TRIP_DEST_LAT, destLat)
+            if (destLng != null) put(COL_TRIP_DEST_LNG, destLng)
             put(COL_TRIP_CREATED,     now)
             put(COL_TRIP_UPDATED,     now)
         }
@@ -101,6 +107,8 @@ class TripRepository(context: Context) {
                         startDate   = it.getString(it.getColumnIndexOrThrow(COL_TRIP_START)),
                         endDate     = it.getString(it.getColumnIndexOrThrow(COL_TRIP_END)),
                         destination = it.getString(it.getColumnIndexOrThrow(COL_TRIP_DESTINATION)),
+                        destLat     = it.getColumnIndex(COL_TRIP_DEST_LAT).let { idx -> if (idx >= 0 && !it.isNull(idx)) it.getDouble(idx) else null },
+                        destLng     = it.getColumnIndex(COL_TRIP_DEST_LNG).let { idx -> if (idx >= 0 && !it.isNull(idx)) it.getDouble(idx) else null },
                         createdAtMs = it.getLong(it.getColumnIndexOrThrow(COL_TRIP_CREATED)),
                         updatedAtMs = it.getLong(it.getColumnIndexOrThrow(COL_TRIP_UPDATED)),
                     )

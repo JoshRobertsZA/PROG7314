@@ -1,7 +1,11 @@
 package com.example.prog7314.features.newtrip.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.prog7314.R
+import com.example.prog7314.features.home.ui.CitySearchDialog
 import com.example.prog7314.core.common.AppButtonFilled
 import com.example.prog7314.core.common.CircleIconButton
 import com.example.prog7314.core.theme.RadiusButton
@@ -68,6 +73,14 @@ fun NewTripScreen(
     // Navigate back as soon as the trip is written to SQLite
     LaunchedEffect(Unit) {
         viewModel.tripSaved.collect { onSaveSuccess() }
+    }
+
+    // Destination city search dialog
+    if (uiState.showDestSearch) {
+        CitySearchDialog(
+            onCitySelected = viewModel::onDestinationSelected,
+            onDismiss      = viewModel::onDismissDestSearch,
+        )
     }
 
     // Year/month picker overlay — rendered above the main sheet
@@ -160,6 +173,44 @@ fun NewTripScreen(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
+
+
+            // Destination field
+            Text(
+                text = "Destination",
+                color = WaypointTextMuted,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 20.dp),
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .background(WaypointCard, RoundedCornerShape(RadiusButton))
+                    .clickable(enabled = !uiState.isGeocodingDest) { viewModel.onShowDestSearch() }
+                    .padding(horizontal = 14.dp, vertical = 13.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "📍",
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(end = 8.dp),
+                )
+                if (uiState.isGeocodingDest) {
+                    CircularProgressIndicator(
+                        color    = WaypointTerracotta,
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Text(
+                        text = uiState.destinationName.ifBlank { "e.g. Cape Town, South Africa" },
+                        color = if (uiState.destinationName.isBlank()) WaypointTextMuted else WaypointTextPrimary,
+                        fontSize = 13.sp,
+                    )
+                }
             }
 
             // Dates section label

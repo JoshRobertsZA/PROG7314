@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.prog7314.core.db.SessionManager
+import com.example.prog7314.features.explore.data.LocationIQRepository
 import com.example.prog7314.features.newtrip.data.TripRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -118,6 +119,35 @@ class NewTripViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+
+    // ── Destination ───────────────────────────────────────────────────────────
+
+    fun onShowDestSearch() {
+        _uiState.update { it.copy(showDestSearch = true) }
+    }
+
+    fun onDismissDestSearch() {
+        _uiState.update { it.copy(showDestSearch = false) }
+    }
+
+    /**
+     * Called when the user picks a city from the search dialog.
+     * Geocodes the name via LocationIQ to get the coordinates.
+     */
+    fun onDestinationSelected(name: String) {
+        _uiState.update { it.copy(showDestSearch = false, destinationName = name, isGeocodingDest = true) }
+        viewModelScope.launch {
+            val coords = LocationIQRepository.geocodeCity(name)
+            _uiState.update {
+                it.copy(
+                    isGeocodingDest = false,
+                    destLat = coords?.first,
+                    destLng = coords?.second,
+                )
+            }
+        }
+    }
+
     // ── Save ──────────────────────────────────────────────────────────────────
 
     fun saveTrip() {
@@ -131,6 +161,9 @@ class NewTripViewModel(application: Application) : AndroidViewModel(application)
                 name        = state.tripName.trim(),
                 startDate   = state.startDate!!.toString(),   // "yyyy-MM-dd"
                 endDate     = state.endDate!!.toString(),
+                destination = state.destinationName.ifBlank { null },
+                destLat     = state.destLat,
+                destLng     = state.destLng,
             )
             _uiState.update { it.copy(isSaving = false) }
             _tripSaved.emit(id)

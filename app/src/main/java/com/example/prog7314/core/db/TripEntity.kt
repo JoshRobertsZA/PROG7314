@@ -15,7 +15,9 @@ data class TripEntity(
     val name: String,
     val startDate: String,     // "yyyy-MM-dd"
     val endDate: String,       // "yyyy-MM-dd"
-    val destination: String?,  // nullable; city name added in a later feature
+    val destination: String?,  // nullable; display name of the destination city
+    val destLat: Double?,       // nullable; latitude of destination
+    val destLng: Double?,       // nullable; longitude of destination
     val createdAtMs: Long,
     val updatedAtMs: Long,
 )

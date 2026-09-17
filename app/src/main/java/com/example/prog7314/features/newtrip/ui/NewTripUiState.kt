@@ -6,11 +6,15 @@ import java.time.YearMonth
 /**
  * UI state for the New Trip screen.
  *
- * [displayMonth]   — the month currently shown in the calendar grid.
- * [startDate]      — first selected day (null = nothing picked yet).
- * [endDate]        — last selected day (null = only one day picked so far).
- * [showYearPicker] — true while the year/month overlay is open.
- * [isSaving]       — true while the repository insert is in flight.
+ * [displayMonth]      — the month currently shown in the calendar grid.
+ * [startDate]         — first selected day (null = nothing picked yet).
+ * [endDate]           — last selected day (null = only one day picked so far).
+ * [showYearPicker]    — true while the year/month overlay is open.
+ * [destinationName]   — display name of the chosen destination (empty = none).
+ * [destLat]/[destLng] — coordinates of the destination, set after geocoding.
+ * [showDestSearch]    — true while the city search dialog is open.
+ * [isGeocodingDest]   — true while LocationIQ geocode call is in flight.
+ * [isSaving]          — true while the repository insert is in flight.
  */
 data class NewTripUiState(
     val tripName: String = "",
@@ -18,6 +22,11 @@ data class NewTripUiState(
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
     val showYearPicker: Boolean = false,
+    val destinationName: String = "",
+    val destLat: Double? = null,
+    val destLng: Double? = null,
+    val showDestSearch: Boolean = false,
+    val isGeocodingDest: Boolean = false,
     val isSaving: Boolean = false,
 ) {
     /** True only when both dates are set and the name is non-blank. */
