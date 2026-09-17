@@ -117,6 +117,32 @@ class TripRepository(context: Context) {
             trips
         }
 
+
+    /**
+     * Update the mutable fields of an existing trip (name and destination).
+     */
+    suspend fun updateTripDetails(
+        id: String,
+        name: String,
+        destination: String? = null,
+        destLat: Double? = null,
+        destLng: Double? = null,
+    ) = withContext(Dispatchers.IO) {
+        val now = System.currentTimeMillis()
+        val cv  = ContentValues().apply {
+            put(COL_TRIP_NAME,        name)
+            put(COL_TRIP_DESTINATION, destination)
+            if (destLat != null) put(COL_TRIP_DEST_LAT, destLat) else putNull(COL_TRIP_DEST_LAT)
+            if (destLng != null) put(COL_TRIP_DEST_LNG, destLng) else putNull(COL_TRIP_DEST_LNG)
+            put(COL_TRIP_UPDATED,     now)
+        }
+        db.writableDatabase.update(
+            TABLE_TRIPS, cv,
+            "$COL_TRIP_ID = ?",
+            arrayOf(id),
+        )
+    }
+
     /**
      * Delete a single trip by id (only if it belongs to [accountId]).
      */

@@ -5,13 +5,21 @@ import java.time.YearMonth
 
 data class TripCalendarUiState(
     val isLoading: Boolean = true,
+    val tripId: String = "",
     val tripName: String = "",
+    val destination: String? = null,
+    val destLat: Double? = null,
+    val destLng: Double? = null,
+    val nightCount: Int = 0,
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
-    /** The month currently shown in the calendar grid. */
     val displayMonth: YearMonth = YearMonth.now(),
-    /** "Aug 2 - Aug 9, 2026" */
     val dateRangeLabel: String = "",
-    /** "8 days" */
     val dayCountLabel: String = "",
+    // Edit name dialog
+    val showNameDialog: Boolean = false,
+    val nameInput: String = "",
+    // Destination search
+    val showDestSearch: Boolean = false,
+    val isGeocodingDest: Boolean = false,
 )
