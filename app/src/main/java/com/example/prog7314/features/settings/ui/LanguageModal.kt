@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -25,16 +24,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.prog7314.R
+import com.example.prog7314.core.common.SelectionModal
 import com.example.prog7314.core.locale.AppLanguage
 import com.example.prog7314.core.theme.RadiusButton
-import com.example.prog7314.core.theme.RadiusDeco
 import com.example.prog7314.core.theme.WaypointCard
 import com.example.prog7314.core.theme.WaypointCream
 import com.example.prog7314.core.theme.WaypointModalScrim
 import com.example.prog7314.core.theme.WaypointRadioBorderUnselected
 import com.example.prog7314.core.theme.WaypointTerracotta
 import com.example.prog7314.core.theme.WaypointTextPrimary
-import com.example.prog7314.core.theme.White
 
 /**
  * "Change language" modal, launched from the Language row on the Profile
@@ -50,6 +48,10 @@ import com.example.prog7314.core.theme.White
  * centered here rather than matching Figma's exact (non-centered) canvas
  * offset, which is standard modal placement, not a meaningful design
  * detail to preserve.
+ * The card itself is core/common/SelectionModal - the same shell the
+ * Currency Change modal uses (Figma 392:12 vs this modal's 394:62 are
+ * the same title+content+Save-button card) - only the content slot
+ * (the language rows below) differs.
  */
 @Composable
 fun LanguageModal(
@@ -70,20 +72,10 @@ fun LanguageModal(
                 .padding(horizontal = 35.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(WaypointCard, RoundedCornerShape(RadiusDeco))
-                    .padding(horizontal = 22.dp, vertical = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp),
+            SelectionModal(
+                title = stringResource(R.string.language_modal_title),
+                onSaveClick = onSaveClick,
             ) {
-                Text(
-                    text = stringResource(R.string.language_modal_title),
-                    color = WaypointTextPrimary,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     AppLanguage.entries.forEach { language ->
                         LanguageOptionRow(
@@ -92,23 +84,6 @@ fun LanguageModal(
                             onClick = { onLanguageSelected(language) },
                         )
                     }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .background(WaypointTerracotta, RoundedCornerShape(RadiusButton))
-                        .clickable(onClick = onSaveClick),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = stringResource(R.string.language_modal_save),
-                        color = White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    )
                 }
             }
         }

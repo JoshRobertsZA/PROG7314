@@ -215,9 +215,11 @@
          Option labels come from AppLanguage.displayName, not string
          resources - language names are shown in their own native form
          regardless of the app's current locale, so they aren't
-         translated the way language_modal_title/save are. -->
+         translated the way language_modal_title is. Its Save button
+         reuses modal_save_button (see SelectionModal) rather than its
+         own string, since it's the same shared shell as the Currency
+         Change modal. -->
     <string name="language_modal_title">Change language</string>
-    <string name="language_modal_save">Save</string>
     <!-- Offline dialog (core/common/OfflineDialog.kt) -->
     <string name="offline_dialog_title">No internet connection</string>
     <string name="offline_dialog_body">Check your connection and try again. Some features may be unavailable while you\'re offline.</string>
