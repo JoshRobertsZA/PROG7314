@@ -146,15 +146,16 @@ object LocationIQRepository {
             val url = "https://us1.locationiq.com/v1/search" +
                       "?key=$key&q=$encoded&format=json&limit=1"
             val req = Request.Builder().url(url).get().build()
-            val resp = HttpClient.instance.newCall(req).execute()
-            if (!resp.isSuccessful) {
-                Log.w(TAG, "Geocode HTTP ${resp.code} for $city")
-                return null
+            HttpClient.instance.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) {
+                    Log.w(TAG, "Geocode HTTP ${resp.code} for $city")
+                    return null
+                }
+                val arr = JSONArray(resp.body?.string() ?: return null)
+                if (arr.length() == 0) return null
+                val first = arr.getJSONObject(0)
+                Pair(first.getString("lat").toDouble(), first.getString("lon").toDouble())
             }
-            val arr = JSONArray(resp.body?.string() ?: return null)
-            if (arr.length() == 0) return null
-            val first = arr.getJSONObject(0)
-            Pair(first.getString("lat").toDouble(), first.getString("lon").toDouble())
         } catch (e: Exception) {
             Log.w(TAG, "Geocode failed for $city: ${e.message}")
             null
@@ -168,33 +169,34 @@ object LocationIQRepository {
                       "?key=$key" +
                       "&lat=$lat" +
                       "&lon=$lon" +
-                      "&tag=" +
                       "&radius=$NEARBY_RADIUS_METRES" +
                       "&format=json"
             val req = Request.Builder().url(url).get().build()
-            val resp = HttpClient.instance.newCall(req).execute()
-            if (!resp.isSuccessful) {
-                Log.w(TAG, "Nearby HTTP ${resp.code}")
-                return null
-            }
-            val arr = JSONArray(resp.body?.string() ?: return null)
-            (0 until arr.length()).mapNotNull { i ->
-                try {
-                    val p = arr.getJSONObject(i)
-                    val rawName = p.optString("name").ifBlank { p.optString("display_name", "") }
-                    if (rawName.isBlank()) return@mapNotNull null
-                    ExplorePlace(
-                        id             = p.optString("place_id", "$i"),
-                        name           = rawName.lines().first().trim(),
-                        type           = p.optString("type", ""),
-                        category       = p.optString("class", ""),
-                        lat            = p.getString("lat").toDouble(),
-                        lon            = p.getString("lon").toDouble(),
-                        displayAddress = p.optString("display_name", ""),
-                        distanceMetres = p.optInt("distance", 0),
-                    )
-                } catch (e: Exception) {
-                    null
+            HttpClient.instance.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) {
+                    Log.w(TAG, "Nearby HTTP ${resp.code}")
+                    return@use null
+                }
+                val body = resp.body?.string() ?: return@use null
+                val arr = JSONArray(body)
+                (0 until arr.length()).mapNotNull { i ->
+                    try {
+                        val p = arr.getJSONObject(i)
+                        val rawName = p.optString("name").ifBlank { p.optString("display_name", "") }
+                        if (rawName.isBlank()) return@mapNotNull null
+                        ExplorePlace(
+                            id             = p.optString("place_id", "$i"),
+                            name           = rawName.lines().first().trim(),
+                            type           = p.optString("type", ""),
+                            category       = p.optString("class", ""),
+                            lat            = p.getString("lat").toDouble(),
+                            lon            = p.getString("lon").toDouble(),
+                            displayAddress = p.optString("display_name", ""),
+                            distanceMetres = p.optInt("distance", 0),
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
                 }
             }
         } catch (e: Exception) {
