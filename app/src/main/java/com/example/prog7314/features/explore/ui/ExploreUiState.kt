@@ -16,7 +16,7 @@ sealed interface PlacesState {
 }
 
 data class ExploreUiState(
-    val selectedCity  : String        = "Cape Town",
+    val locationLabel : String        = "Locating...",
     val placesState   : PlacesState   = PlacesState.Idle,
     val activeFilter  : ExploreFilter = ExploreFilter.ALL,
     /** Subset of the cache's places list after applying [activeFilter]. */

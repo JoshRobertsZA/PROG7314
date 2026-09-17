@@ -53,7 +53,6 @@ import com.example.prog7314.core.theme.WaypointTerracotta
 import com.example.prog7314.core.theme.WaypointTextMuted
 import com.example.prog7314.core.theme.WaypointTextPrimary
 import com.example.prog7314.core.theme.White
-import com.example.prog7314.features.home.ui.CitySearchDialog
 
 private val accentCycle = listOf(
     WaypointPlaceAccent1,
@@ -68,17 +67,7 @@ fun ExploreScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by exploreViewModel.uiState.collectAsState()
-    var showCitySearch by remember { mutableStateOf(false) }
 
-    if (showCitySearch) {
-        CitySearchDialog(
-            onCitySelected = { city ->
-                exploreViewModel.selectCity(city)
-                showCitySearch = false
-            },
-            onDismiss = { showCitySearch = false },
-        )
-    }
 
     Column(
         modifier = modifier
@@ -101,12 +90,11 @@ fun ExploreScreen(
                     .fillMaxWidth()
                     .padding(top = 16.dp)
                     .background(WaypointCard, RoundedCornerShape(RadiusButton))
-                    .clickable { showCitySearch = true }
                     .padding(horizontal = 14.dp, vertical = 13.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = state.selectedCity,
+                        text = state.locationLabel,
                         color = WaypointTextPrimary,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
@@ -162,7 +150,7 @@ fun ExploreScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Results near ${state.selectedCity}",
+                    text = "Results near ${state.locationLabel}",
                     color = WaypointTextPrimary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,

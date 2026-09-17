@@ -63,6 +63,67 @@ object LocationIQRepository {
         return cached
     }
 
+    /**
+     * Entry point when lat/lon are already known (e.g. from device GPS).
+     * Skips geocoding, uses rounded coords as cache slug.
+     */
+    suspend fun getPlacesByCoords(lat: Double, lon: Double): PlacesCache? {
+        val slug = coordSlug(lat, lon)
+        val path = placesPath(slug)
+
+        val cached = readFromCache(path)
+        if (cached != null && !cached.isStale() && cached.places.isNotEmpty()) {
+            Log.d(TAG, "Cache hit: $slug (${cached.places.size} places)")
+            return cached
+        }
+
+        val key = RemoteSecrets.get("LOCATIONIQ_API_KEY", BuildConfig.LOCATIONIQ_API_KEY)
+        if (key.isBlank()) return null
+
+        val places = fetchNearby(lat, lon, key)
+        if (places != null) {
+            val fresh = PlacesCache(
+                city           = slug,
+                fetchedDateUtc = java.time.LocalDate.now(java.time.ZoneOffset.UTC).toString(),
+                places         = places,
+            )
+            writeToCache(path, fresh)
+            incrementCounter()
+            return fresh
+        }
+
+        return cached
+    }
+
+    /** Reverse geocodes lat/lon to a human-readable suburb/city string, or null on failure. */
+    suspend fun reverseGeocode(lat: Double, lon: Double, key: String): String? =
+        withContext(Dispatchers.IO) {
+            try {
+                val url = "https://us1.locationiq.com/v1/reverse" +
+                          "?key=$key&lat=$lat&lon=$lon&format=json"
+                val req = Request.Builder().url(url).get().build()
+                HttpClient.instance.newCall(req).execute().use { resp ->
+                    if (!resp.isSuccessful) return@withContext null
+                    val obj  = JSONObject(resp.body?.string() ?: return@withContext null)
+                    val addr = obj.optJSONObject("address") ?: return@withContext null
+                    val suburb = addr.optString("suburb").ifBlank { null }
+                    val city   = addr.optString("city").ifBlank {
+                        addr.optString("town").ifBlank {
+                            addr.optString("county").ifBlank { null }
+                        }
+                    }
+                    listOfNotNull(suburb, city).joinToString(", ").ifBlank { null }
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Reverse geocode failed: ${e.message}")
+                null
+            }
+        }
+
+    /** Cache slug from GPS coordinates rounded to ~1 km grid. */
+    private fun coordSlug(lat: Double, lon: Double) =
+        "%.2f_%.2f".format(lat, lon).replace('-', 'n').replace('.', 'd')
+
     // ── Cache ───────────────────────────────────────────────────────────────
 
     private suspend fun readFromCache(path: String): PlacesCache? {
