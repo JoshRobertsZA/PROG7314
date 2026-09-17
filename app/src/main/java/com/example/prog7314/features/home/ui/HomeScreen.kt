@@ -395,30 +395,42 @@ fun HomeScreen(
                 )
             }
 
-            // Nearby places list (mock until LocationIQ feature branch)
-            val places = listOf(
-                Triple("Table Mountain", "Landmark · 2.1 km away", WaypointPlaceAccent1),
-                Triple("V&A Waterfront", "Shopping · 3.4 km away", WaypointPlaceAccent2),
-                Triple("Camps Bay Beach", "Beach · 4.8 km away", WaypointPlaceAccent3),
-            )
+            // Nearby places list — live from LocationIQ via HomeViewModel
+            val nearbyAccents = listOf(WaypointPlaceAccent1, WaypointPlaceAccent2, WaypointPlaceAccent3)
             Column(modifier = Modifier.padding(top = 10.dp)) {
-                places.forEachIndexed { index, (name, subtitle, accent) ->
-                    RowSurface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = if (index == 0) 0.dp else 8.dp),
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(start = 10.dp, top = 8.dp, end = 14.dp, bottom = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            ThumbnailBlock(accentColor = accent, cornerRadius = RadiusThumbnail)
-                            Column(modifier = Modifier.padding(start = 12.dp)) {
-                                Text(name, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                                Text(subtitle, color = WaypointTextMuted, fontSize = 11.sp, modifier = Modifier.padding(top = 3.dp))
+                when (val ns = state.nearbyPlaces) {
+                    is NearbyState.Success -> {
+                        ns.places.forEachIndexed { index, place ->
+                            val accent = nearbyAccents[index % nearbyAccents.size]
+                            RowSurface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = if (index == 0) 0.dp else 8.dp),
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(start = 10.dp, top = 8.dp, end = 14.dp, bottom = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    ThumbnailBlock(accentColor = accent, cornerRadius = RadiusThumbnail)
+                                    Column(modifier = Modifier.padding(start = 12.dp)) {
+                                        Text(
+                                            text = place.name,
+                                            color = WaypointTextPrimary,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                        Text(
+                                            text = "${place.type.replaceFirstChar { it.uppercase() }} · ${"%.1f".format(place.distanceMetres / 1000.0)} km away",
+                                            color = WaypointTextMuted,
+                                            fontSize = 11.sp,
+                                            modifier = Modifier.padding(top = 3.dp),
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
+                    else -> { /* Loading / Error / Idle — handled in commit 3 */ }
                 }
             }
 
