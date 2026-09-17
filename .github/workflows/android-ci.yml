@@ -63,3 +63,29 @@ jobs:
           name: app-debug
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 7
+
+      - name: Notify Discord
+        if: always()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          STATUS: ${{ job.status }}
+          BRANCH: ${{ github.ref_name }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ "$STATUS" = "success" ]; then
+            COLOR=3066993
+            EMOJI="✅"
+          else
+            COLOR=15158332
+            EMOJI="❌"
+          fi
+          curl -s -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"embeds\": [{
+                \"title\": \"$EMOJI Android CI — $STATUS\",
+                \"description\": \"**Branch:** $BRANCH\\n**Triggered by:** $ACTOR\\n[View run]($RUN_URL)\",
+                \"color\": $COLOR
+              }]
+            }"

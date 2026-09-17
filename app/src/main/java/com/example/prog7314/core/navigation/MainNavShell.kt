@@ -40,6 +40,7 @@ import com.example.prog7314.features.settings.ui.SettingsScreen
 @Composable
 fun MainNavShell(
     onNewTripClick: () -> Unit,
+    onTripClick: (tripId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabNavController = rememberNavController()
@@ -82,7 +83,11 @@ fun MainNavShell(
                 )
             }
             composable(NavTab.TRIPS.route) {
-                AllTripsScreen(onBackClick = goHome)
+                AllTripsScreen(
+                    onBackClick    = goHome,
+                    onNewTripClick = onNewTripClick,
+                    onTripClick    = onTripClick,
+                )
             }
             composable(NavTab.EXPLORE.route) { ExploreScreen(exploreViewModel = exploreViewModel) }
             composable(NavTab.PROFILE.route) { SettingsScreen() }
