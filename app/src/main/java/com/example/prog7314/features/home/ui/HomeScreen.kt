@@ -43,8 +43,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.prog7314.R
 import com.example.prog7314.core.common.AppButtonFilled
 import com.example.prog7314.core.common.AppButtonOutline
+import com.example.prog7314.core.common.OfflineHeaderIndicator
 import com.example.prog7314.core.common.RowSurface
 import com.example.prog7314.core.common.ThumbnailBlock
+import com.example.prog7314.core.connectivity.rememberIsOnline
 import com.example.prog7314.core.theme.RadiusButton
 import com.example.prog7314.core.theme.RadiusHero
 import com.example.prog7314.core.theme.RadiusRow
@@ -78,6 +80,7 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = viewModel(),
 ) {
     val state by homeViewModel.uiState.collectAsState()
+    val isOnline by rememberIsOnline()
 
     var showCitySearch by remember { mutableStateOf(false) }
     var showCurrencyModal by remember { mutableStateOf(false) }
@@ -144,14 +147,24 @@ fun HomeScreen(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                 )
-                Icon(
-                    painter = painterResource(R.drawable.ic_settings),
-                    contentDescription = stringResource(R.string.home_settings_cd),
-                    tint = WaypointTextPrimary,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable(onClick = onSettingsClick),
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Persistent "no internet" badge (Figma "Offline Mode",
+                    // node 332:424) - appears once the first-drop OfflineDialog
+                    // is dismissed and connectivity is still down.
+                    OfflineHeaderIndicator(
+                        isOnline = isOnline,
+                        iconSize = 28.dp,
+                        modifier = Modifier.padding(end = 12.dp),
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_settings),
+                        contentDescription = stringResource(R.string.home_settings_cd),
+                        tint = WaypointTextPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable(onClick = onSettingsClick),
+                    )
+                }
             }
 
             Text(
