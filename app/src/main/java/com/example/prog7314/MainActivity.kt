@@ -163,7 +163,5 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
     if (!isOnline && !offlineDialogDismissed) {
         OfflineDialog(onDismissRequest = { offlineDialogDismissed = true })
     }
-    if (!isOnline && !offlineDialogDismissed) {
-        OfflineDialog(onDismissRequest = { offlineDialogDismissed = true })
-    }
+
 }
