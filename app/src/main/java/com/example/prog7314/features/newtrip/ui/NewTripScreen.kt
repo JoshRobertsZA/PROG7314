@@ -54,11 +54,12 @@ private val SUMMARY_FMT = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault
  *
  * The persistent bottom summary bar shows the current selection at all
  * times. Save is enabled only once both a name and a full date range are
- * set. After a successful save the screen closes via [onCloseClick].
+ * set. After a successful save the screen navigates to the All Trips screen via [onSaveSuccess].
  */
 @Composable
 fun NewTripScreen(
     onCloseClick: () -> Unit,
+    onSaveSuccess: () -> Unit = onCloseClick,
     modifier: Modifier = Modifier,
     viewModel: NewTripViewModel = viewModel(),
 ) {
@@ -66,7 +67,7 @@ fun NewTripScreen(
 
     // Navigate back as soon as the trip is written to SQLite
     LaunchedEffect(Unit) {
-        viewModel.tripSaved.collect { onCloseClick() }
+        viewModel.tripSaved.collect { onSaveSuccess() }
     }
 
     // Year/month picker overlay — rendered above the main sheet
