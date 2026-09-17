@@ -5,7 +5,7 @@ import com.example.prog7314.core.cache.PlacesCache
 
 /** Filter categories shown in the Explore screen chip row. */
 enum class ExploreFilter {
-    ALL, RESTAURANTS, CAFES, ATTRACTIONS, ENTERTAINMENT;
+    ALL, RESTAURANTS, CAFES, HOTELS, ATTRACTIONS, ENTERTAINMENT;
 }
 
 sealed interface PlacesState {

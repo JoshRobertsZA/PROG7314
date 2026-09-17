@@ -172,13 +172,17 @@ object LocationIQRepository {
      * Using only four tags also keeps us well under the per-minute rate limit.
      */
     private fun fetchNearby(lat: Double, lon: Double, key: String): List<ExplorePlace>? {
-        val tags = listOf("restaurant", "cafe", "bar", "attraction")
+        // Valid tag values from the LocationIQ tag list.
+        // bar/attraction are NOT in the list and return HTTP 404.
+        // A 400ms delay between calls prevents HTTP 429 rate limiting.
+        val tags = listOf("restaurant", "cafe", "hotel", "pub", "cinema", "park")
 
         val seen    = mutableSetOf<String>()
         val results = mutableListOf<ExplorePlace>()
         var anySucceeded = false
 
-        for (tag in tags) {
+        for ((index, tag) in tags.withIndex()) {
+            if (index > 0) Thread.sleep(400)
             try {
                 val url = "https://us1.locationiq.com/v1/nearby" +
                           "?key=$key" +
@@ -196,6 +200,7 @@ object LocationIQRepository {
                     anySucceeded = true
                     val body = resp.body?.string() ?: return@use
                     val arr  = JSONArray(body)
+                    Log.d(TAG, "Nearby[$tag] returned ${arr.length()} results")
                     for (i in 0 until arr.length()) {
                         try {
                             val p       = arr.getJSONObject(i)
