@@ -193,21 +193,22 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
     }
 
     if (showLanguageModal) {
-        LanguageModal(
-            selectedLanguage = selectedLanguage,
-            onLanguageSelected = { selectedLanguage = it },
-            onSaveClick = {
-                // This is what actually switches the app's locale.
-                // AppCompat recreates the activity to apply it immediately,
-                // and persists the choice across restarts on its own - no
-                // manual SharedPreferences/DataStore needed.
-                AppCompatDelegate.setApplicationLocales(
-                    LocaleListCompat.forLanguageTags(selectedLanguage.localeTag),
-                )
-                showLanguageModal = false
-            },
-            onDismissRequest = { showLanguageModal = false },
-        )
+        Dialog(onDismissRequest = { showLanguageModal = false }) {
+            LanguageModal(
+                selectedLanguage = selectedLanguage,
+                onLanguageSelected = { selectedLanguage = it },
+                onSaveClick = {
+                    // This is what actually switches the app's locale.
+                    // AppCompat recreates the activity to apply it immediately,
+                    // and persists the choice across restarts on its own - no
+                    // manual SharedPreferences/DataStore needed.
+                    AppCompatDelegate.setApplicationLocales(
+                        LocaleListCompat.forLanguageTags(selectedLanguage.localeTag),
+                    )
+                    showLanguageModal = false
+                },
+            )
+        }
     }
 }
 
