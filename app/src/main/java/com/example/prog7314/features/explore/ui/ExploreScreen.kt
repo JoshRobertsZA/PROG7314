@@ -1,5 +1,9 @@
 package com.example.prog7314.features.explore.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,6 +26,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,10 +36,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import com.example.prog7314.R
 import com.example.prog7314.core.cache.ExplorePlace
 import com.example.prog7314.core.common.RowSurface
@@ -67,7 +74,33 @@ fun ExploreScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by exploreViewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
+    // Request location permission on first composition; retry fetch if granted.
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { perms ->
+        val granted = perms[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                      perms[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) exploreViewModel.retry()
+    }
+
+    LaunchedEffect(Unit) {
+        val fine = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val coarse = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!fine && !coarse) {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                )
+            )
+        }
+    }
 
     Column(
         modifier = modifier
@@ -84,7 +117,7 @@ fun ExploreScreen(
         ) {
             TabHeader()
 
-            // City search button — tapping opens CitySearchDialog
+            // Location label (read-only, driven by GPS)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -128,10 +161,10 @@ fun ExploreScreen(
                     stringResource(R.string.explore_filter_all)           to ExploreFilter.ALL,
                     stringResource(R.string.explore_filter_restaurants)   to ExploreFilter.RESTAURANTS,
                     stringResource(R.string.explore_filter_cafes)         to ExploreFilter.CAFES,
-                    stringResource(R.string.explore_filter_hotels)      to ExploreFilter.HOTELS,
-                    stringResource(R.string.explore_filter_parks)       to ExploreFilter.PARKS,
-                    stringResource(R.string.explore_filter_pubs)        to ExploreFilter.PUBS,
-                    stringResource(R.string.explore_filter_cinemas)     to ExploreFilter.CINEMAS,
+                    stringResource(R.string.explore_filter_hotels)        to ExploreFilter.HOTELS,
+                    stringResource(R.string.explore_filter_parks)         to ExploreFilter.PARKS,
+                    stringResource(R.string.explore_filter_pubs)          to ExploreFilter.PUBS,
+                    stringResource(R.string.explore_filter_cinemas)       to ExploreFilter.CINEMAS,
                 ).forEach { (label, filter) ->
                     ExploreFilterChip(
                         label    = label,
@@ -194,12 +227,32 @@ fun ExploreScreen(
                 }
 
                 PlacesState.Error -> {
-                    Text(
-                        text = "Could not load places. Check your connection and try again.",
-                        color = WaypointTextMuted,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(vertical = 16.dp),
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            text = "Could not load places. Check your connection and try again.",
+                            color = WaypointTextMuted,
+                            fontSize = 12.sp,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Box(
+                            modifier = Modifier
+                                .clickable { exploreViewModel.retry() }
+                                .background(WaypointTerracotta, RoundedCornerShape(RadiusButton))
+                                .padding(horizontal = 20.dp, vertical = 10.dp),
+                        ) {
+                            Text(
+                                text = "Try Again",
+                                color = White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    }
                 }
             }
 
