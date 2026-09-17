@@ -18,7 +18,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -29,14 +28,13 @@ import com.example.prog7314.core.theme.WaypointTerracotta
 import com.example.prog7314.core.theme.WaypointTextMuted
 import com.example.prog7314.core.theme.WaypointTextPrimary
 import com.example.prog7314.features.home.data.WikipediaCitySearch
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
- * Full-screen-style dialog that lets the user search for a city via the
- * Wikipedia OpenSearch API. Results appear 300 ms after typing stops.
- * Tapping a result calls [onCitySelected] and dismisses the dialog.
+ * Dialog that lets the user search for a city via the Wikipedia OpenSearch
+ * API. LaunchedEffect(query) handles debouncing natively: it cancels the
+ * previous coroutine whenever query changes, so the delay(300) effectively
+ * debounces without needing a separate scope or Job reference.
  */
 @Composable
 fun CitySearchDialog(
@@ -46,22 +44,24 @@ fun CitySearchDialog(
     var query by remember { mutableStateOf("") }
     var suggestions by remember { mutableStateOf(emptyList<String>()) }
     var isSearching by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    var debounceJob by remember { mutableStateOf<Job?>(null) }
+    var searchAttempted by remember { mutableStateOf(false) }
 
+    // LaunchedEffect cancels and restarts on every query change, giving us
+    // free debouncing: the delay(300) is interrupted on each keystroke.
     LaunchedEffect(query) {
-        debounceJob?.cancel()
         if (query.length < 2) {
             suggestions = emptyList()
             isSearching = false
+            searchAttempted = false
             return@LaunchedEffect
         }
-        debounceJob = scope.launch {
-            delay(300)
-            isSearching = true
-            suggestions = WikipediaCitySearch.search(query)
-            isSearching = false
-        }
+        delay(300)
+        isSearching = true
+        searchAttempted = false
+        val results = WikipediaCitySearch.search(query)
+        suggestions = results
+        isSearching = false
+        searchAttempted = true
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -88,8 +88,15 @@ fun CitySearchDialog(
                     CircularProgressIndicator(
                         color = WaypointTerracotta,
                         modifier = Modifier
-                            .padding(8.dp)
+                            .padding(top = 8.dp)
                             .size(24.dp),
+                    )
+                } else if (searchAttempted && suggestions.isEmpty()) {
+                    Text(
+                        text = "No results found",
+                        color = WaypointTextMuted,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(top = 8.dp),
                     )
                 }
                 LazyColumn(
