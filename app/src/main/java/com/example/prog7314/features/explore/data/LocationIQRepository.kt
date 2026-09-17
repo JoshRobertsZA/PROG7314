@@ -29,7 +29,7 @@ import java.time.ZoneOffset
 object LocationIQRepository {
 
     private const val TAG = "LocationIQRepo"
-    private const val NEARBY_RADIUS_METRES = 5000
+    private const val NEARBY_RADIUS_METRES = 15000
 
     fun citySlug(city: String): String =
         city.trim().lowercase().replace(Regex("[^a-z0-9]+"), "_")
@@ -163,19 +163,20 @@ object LocationIQRepository {
     }
 
     /**
-     * Fetches nearby places within [NEARBY_RADIUS_METRES].
+     * Fetches nearby places from LocationIQ /v1/nearby.
      *
-     * LocationIQ's /v1/nearby endpoint requires a mandatory `tag` parameter (an OSM
-     * primary-feature key). Omitting it returns HTTP 404. We make one request per
-     * relevant tag, merge, and deduplicate by place_id so every filter category in
-     * ExploreViewModel has data to show.
+     * The `tag` parameter must be a specific OSM type value (e.g. "restaurant", "cafe"),
+     * NOT a primary OSM key like "amenity" or "tourism" - those return HTTP 404.
+     * One request is made per tag; results are merged and deduplicated by place_id.
+     * Tags are chosen to cover every ExploreFilter category in ExploreViewModel.
      */
     private fun fetchNearby(lat: Double, lon: Double, key: String): List<ExplorePlace>? {
-        // OSM tags that cover every ExploreFilter category used in ExploreViewModel.
-        // amenity  -> restaurants, cafes, bars, pubs, cinemas, theatres, nightclubs, sports_centre
-        // tourism  -> hotels, hostels, museums, attractions, viewpoints, galleries, theme_parks
-        // leisure  -> parks, sports facilities
-        val tags = listOf("amenity", "tourism", "leisure")
+        val tags = listOf(
+            "restaurant", "cafe", "bar", "pub",          // ExploreFilter.RESTAURANTS / CAFES / ENTERTAINMENT
+            "cinema", "theatre", "nightclub",             // ExploreFilter.ENTERTAINMENT
+            "attraction", "museum", "viewpoint", "gallery", // ExploreFilter.ATTRACTIONS
+            "hotel", "hostel", "motel", "guest_house",   // ExploreFilter.HOTELS
+        )
 
         val seen    = mutableSetOf<String>()
         val results = mutableListOf<ExplorePlace>()
@@ -189,8 +190,7 @@ object LocationIQRepository {
                           "&lon=$lon" +
                           "&tag=$tag" +
                           "&radius=$NEARBY_RADIUS_METRES" +
-                          "&format=json" +
-                          "&limit=50"
+                          "&format=json"
                 val req = Request.Builder().url(url).get().build()
                 HttpClient.instance.newCall(req).execute().use { resp ->
                     if (!resp.isSuccessful) {
@@ -212,7 +212,7 @@ object LocationIQRepository {
                                     id             = id,
                                     name           = rawName.lines().first().trim(),
                                     type           = p.optString("type", tag),
-                                    category       = p.optString("class", tag),
+                                    category       = p.optString("class", ""),
                                     lat            = p.getString("lat").toDouble(),
                                     lon            = p.getString("lon").toDouble(),
                                     displayAddress = p.optString("display_name", ""),
