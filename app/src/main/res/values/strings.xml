@@ -183,8 +183,9 @@
     <string name="explore_filter_all">All</string>
     <string name="explore_filter_restaurants">Restaurants</string>
     <string name="explore_filter_cafes">Cafes</string>
-    <string name="explore_filter_attractions">Attractions</string>
-    <string name="explore_filter_entertainment">Entertainment</string>
+    <string name="explore_filter_parks">Parks</string>
+    <string name="explore_filter_pubs">Pubs</string>
+    <string name="explore_filter_cinemas">Cinemas</string>
     <string name="explore_filter_hotels">Hotels</string>
     <string name="explore_attribution">via LocationIQ</string>
 

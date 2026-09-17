@@ -92,12 +92,9 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             ExploreFilter.RESTAURANTS   -> cache.places.filter { it.type == "restaurant" }
             ExploreFilter.CAFES         -> cache.places.filter { it.type == "cafe" }
             ExploreFilter.HOTELS        -> cache.places.filter { it.type == "hotel" }
-            ExploreFilter.ATTRACTIONS   -> cache.places.filter {
-                it.type in setOf("park", "museum", "viewpoint", "gallery", "theme_park")
-            }
-            ExploreFilter.ENTERTAINMENT -> cache.places.filter {
-                it.type in setOf("pub", "cinema", "theatre", "nightclub", "stadium")
-            }
+            ExploreFilter.PARKS       -> cache.places.filter { it.type == "park" }
+            ExploreFilter.PUBS        -> cache.places.filter { it.type == "pub" }
+            ExploreFilter.CINEMAS     -> cache.places.filter { it.type == "cinema" }
         }
     }
 }
