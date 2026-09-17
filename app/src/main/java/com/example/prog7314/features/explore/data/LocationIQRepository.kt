@@ -80,7 +80,7 @@ object LocationIQRepository {
         val key = RemoteSecrets.get("LOCATIONIQ_API_KEY", BuildConfig.LOCATIONIQ_API_KEY)
         if (key.isBlank()) return null
 
-        val places = fetchNearby(lat, lon, key)
+        val places = withContext(Dispatchers.IO) { fetchNearby(lat, lon, key) }
         if (places != null) {
             val fresh = PlacesCache(
                 city           = slug,
@@ -192,7 +192,7 @@ object LocationIQRepository {
             val coords = geocodeCity(city, key) ?: return@withContext null
             val (lat, lon) = coords
 
-            val places = fetchNearby(lat, lon, key)
+            val places = withContext(Dispatchers.IO) { fetchNearby(lat, lon, key) }
             if (places == null) return@withContext null
 
             PlacesCache(
