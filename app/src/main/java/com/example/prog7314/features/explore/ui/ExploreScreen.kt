@@ -285,7 +285,10 @@ private fun PlacesList(places: List<ExplorePlace>) {
                     ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    ThumbnailBlock(accentColor = accentCycle[index % accentCycle.size])
+                    ThumbnailBlock(
+                        accentColor = accentCycle[index % accentCycle.size],
+                        label       = placeTypeEmoji(place.type),
+                    )
                     Column(modifier = Modifier.padding(start = 12.dp)) {
                         Text(
                             text       = place.name,
@@ -307,6 +310,16 @@ private fun PlacesList(places: List<ExplorePlace>) {
 }
 
 private fun placeSubtitle(place: ExplorePlace): String {
+
+private fun placeTypeEmoji(type: String): String = when (type) {
+    "restaurant" -> "🍴"
+    "cafe"       -> "☕"
+    "hotel"      -> "🏨"
+    "pub"        -> "🍺"
+    "cinema"     -> "🎬"
+    "park"       -> "🌳"
+    else         -> "📍"
+}
     val kind = place.type
         .replace("_", " ")
         .replaceFirstChar { it.uppercase() }
