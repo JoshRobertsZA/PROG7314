@@ -52,6 +52,24 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch { loadPlacesFromGps() }
     }
 
+    fun searchCity(city: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(placesState = PlacesState.Loading, locationLabel = city, visiblePlaces = emptyList()) }
+            val result = LocationIQRepository.getPlaces(city)
+            _uiState.update { state ->
+                if (result != null) {
+                    state.copy(
+                        locationLabel = city,
+                        placesState   = PlacesState.Success(result),
+                        visiblePlaces = applyFilter(result, state.activeFilter),
+                    )
+                } else {
+                    state.copy(placesState = PlacesState.Error)
+                }
+            }
+        }
+    }
+
     fun setFilter(filter: ExploreFilter) {
         val current = _uiState.value.placesState
         val cache = (current as? PlacesState.Success)?.cache ?: return
