@@ -18,6 +18,7 @@ import com.example.prog7314.core.common.NavTab
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.prog7314.features.alltrips.ui.AllTripsScreen
 import com.example.prog7314.features.home.ui.HomeViewModel
+import com.example.prog7314.features.explore.ui.ExploreViewModel
 import com.example.prog7314.features.explore.ui.ExploreScreen
 import com.example.prog7314.features.home.ui.HomeScreen
 import com.example.prog7314.features.settings.ui.SettingsScreen
@@ -43,6 +44,7 @@ fun MainNavShell(
 ) {
     val tabNavController = rememberNavController()
     val homeViewModel: HomeViewModel = viewModel()
+    val exploreViewModel: ExploreViewModel = viewModel()
     val backStackEntry by tabNavController.currentBackStackEntryAsState()
     val selectedTab = NavTab.entries.firstOrNull { it.route == backStackEntry?.destination?.route } ?: NavTab.HOME
     val goHome = { tabNavController.navigate(NavTab.HOME.route) { launchSingleTop = true } }
@@ -82,7 +84,7 @@ fun MainNavShell(
             composable(NavTab.TRIPS.route) {
                 AllTripsScreen(onBackClick = goHome)
             }
-            composable(NavTab.EXPLORE.route) { ExploreScreen() }
+            composable(NavTab.EXPLORE.route) { ExploreScreen(exploreViewModel = exploreViewModel) }
             composable(NavTab.PROFILE.route) { SettingsScreen() }
         }
     }
