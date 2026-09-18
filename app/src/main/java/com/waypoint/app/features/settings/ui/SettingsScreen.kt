@@ -1,4 +1,4 @@
-package com.example.prog7314.features.settings.ui
+package com.waypoint.app.features.settings.ui
 
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.Image
@@ -37,19 +37,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.os.LocaleListCompat
-import com.example.prog7314.R
-import com.example.prog7314.core.common.TabHeader
-import com.example.prog7314.core.locale.AppLanguage
-import com.example.prog7314.core.theme.RadiusButton
-import com.example.prog7314.core.theme.RadiusRow
-import com.example.prog7314.core.theme.WaypointBorderSoft
-import com.example.prog7314.core.theme.WaypointCard
-import com.example.prog7314.core.theme.WaypointCream
-import com.example.prog7314.core.theme.WaypointLogoutBorder
-import com.example.prog7314.core.theme.WaypointTerracotta
-import com.example.prog7314.core.theme.WaypointTextMuted
-import com.example.prog7314.core.theme.WaypointTextPrimary
-import com.example.prog7314.features.currencyexchange.ui.CurrencyExchangeModal
+import com.waypoint.app.R
+import com.waypoint.app.core.common.TabHeader
+import com.waypoint.app.core.db.SessionManager
+import com.waypoint.app.core.locale.AppLanguage
+import com.waypoint.app.core.theme.RadiusButton
+import com.waypoint.app.core.theme.RadiusRow
+import com.waypoint.app.core.theme.WaypointBorderSoft
+import com.waypoint.app.core.theme.WaypointCard
+import com.waypoint.app.core.theme.WaypointCream
+import com.waypoint.app.core.theme.WaypointLogoutBorder
+import com.waypoint.app.core.theme.WaypointTerracotta
+import com.waypoint.app.core.theme.WaypointTextMuted
+import com.waypoint.app.core.theme.WaypointTextPrimary
+import com.waypoint.app.features.currencyexchange.ui.CurrencyExchangeModal
 
 /**
  * Profile screen - the Profile tab root (Figma node 281:20, "Core
@@ -66,7 +67,7 @@ import com.example.prog7314.features.currencyexchange.ui.CurrencyExchangeModal
  * AppCompatDelegate on save, but isn't persisted across restarts yet.
  */
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier) {
+fun SettingsScreen(modifier: Modifier = Modifier, onLogoutClick: () -> Unit = {}) {
     var showCurrencyModal by remember { mutableStateOf(false) }
     var selectedLanguage by remember { mutableStateOf(AppLanguage.current()) }
     var showLanguageModal by remember { mutableStateOf(false) }
@@ -100,7 +101,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                     .clip(CircleShape),
             )
             Text(
-                text = "Alex Carter",
+                text = SessionManager.displayName.ifBlank { "Alex Carter" },
                 color = WaypointTextPrimary,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
@@ -108,7 +109,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 modifier = Modifier.padding(top = 12.dp).fillMaxWidth(),
             )
             Text(
-                text = "alex.carter@email.com",
+                text = SessionManager.email.ifBlank { "alex.carter@email.com" },
                 color = WaypointTextMuted,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center,
@@ -165,14 +166,13 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 ChevronValue(value = "ZAR")
             }
 
-            // TODO: not wired to a real sign-out flow yet
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp, bottom = 16.dp)
                     .background(WaypointCard, RoundedCornerShape(RadiusRow))
                     .border(1.dp, WaypointLogoutBorder, RoundedCornerShape(RadiusRow))
-                    .clickable(onClick = {})
+                    .clickable(onClick = onLogoutClick)
                     .padding(vertical = 12.dp),
                 contentAlignment = Alignment.Center,
             ) {

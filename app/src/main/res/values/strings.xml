@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PROG7314</string>
+    <string name="app_name">Waypoint</string>
 
     <!-- Temporary nav on MainActivity until the real home/first screen is decided -->
     <string name="main_go_to_login">Go to Login</string>
@@ -109,6 +109,9 @@
     <string name="welcome_destinations_heading">Popular destinations</string>
     <string name="welcome_google_cta">Continue with Google</string>
     <string name="welcome_disclaimer">By continuing, you agree to our Terms of Service and Privacy Policy.</string>
+
+    <!-- Shared Firebase Google Sign-In state (Welcome/Login/Register), see AuthViewModel -->
+    <string name="auth_signing_in">Signing in…</string>
 
     <!-- Edit itinerary screen (Figma node 59:2, "06 Waypoint — Edit Itinerary").
          Trip name/dates, per-day weather, and every booking/place row's

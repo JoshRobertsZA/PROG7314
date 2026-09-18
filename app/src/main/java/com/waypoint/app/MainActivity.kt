@@ -1,4 +1,4 @@
-package com.example.prog7314
+package com.waypoint.app
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -6,38 +6,42 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.navigation.compose.rememberNavController
-import com.example.prog7314.core.common.OfflineDialog
-import com.example.prog7314.core.connectivity.rememberIsOnline
-import com.example.prog7314.core.navigation.MainNavShell
-import com.example.prog7314.core.navigation.Routes
-import com.example.prog7314.core.secrets.RemoteSecrets
-import com.example.prog7314.core.theme.WaypointTheme
-import com.example.prog7314.features.alltrips.ui.AllTripsScreen
-import com.example.prog7314.features.edititinerary.ui.EditItineraryScreen
-import com.example.prog7314.features.explore.ui.ExploreScreen
-import com.example.prog7314.features.explore.ui.ExploreViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.prog7314.features.login.ui.LoginScreen
-import com.example.prog7314.features.main.ui.MainScreen
-import com.example.prog7314.features.newtrip.ui.NewTripScreen
-import com.example.prog7314.features.notifications.ui.NotificationsScreen
-import com.example.prog7314.features.placedetail.ui.PlaceDetailScreen
-import com.example.prog7314.features.register.ui.RegisterScreen
-import com.example.prog7314.features.settings.ui.SettingsScreen
-import com.example.prog7314.features.tripcalendar.ui.TripCalendarScreen
-import com.example.prog7314.features.viewitinerary.ui.ViewItineraryScreen
-import com.example.prog7314.features.welcome.WelcomeScreen
+import com.waypoint.app.core.auth.AuthRepository
+import com.waypoint.app.core.auth.AuthViewModel
+import com.waypoint.app.core.common.OfflineDialog
+import com.waypoint.app.core.connectivity.rememberIsOnline
+import com.waypoint.app.core.navigation.MainNavShell
+import com.waypoint.app.core.navigation.Routes
+import com.waypoint.app.core.secrets.RemoteSecrets
+import com.waypoint.app.core.theme.WaypointTheme
+import com.waypoint.app.features.alltrips.ui.AllTripsScreen
+import com.waypoint.app.features.edititinerary.ui.EditItineraryScreen
+import com.waypoint.app.features.explore.ui.ExploreScreen
+import com.waypoint.app.features.explore.ui.ExploreViewModel
+import com.waypoint.app.features.login.ui.LoginScreen
+import com.waypoint.app.features.main.ui.MainScreen
+import com.waypoint.app.features.newtrip.ui.NewTripScreen
+import com.waypoint.app.features.notifications.ui.NotificationsScreen
+import com.waypoint.app.features.placedetail.ui.PlaceDetailScreen
+import com.waypoint.app.features.register.ui.RegisterScreen
+import com.waypoint.app.features.settings.ui.SettingsScreen
+import com.waypoint.app.features.tripcalendar.ui.TripCalendarScreen
+import com.waypoint.app.features.viewitinerary.ui.ViewItineraryScreen
+import com.waypoint.app.features.welcome.WelcomeScreen
 import kotlinx.coroutines.launch
 
 /**
@@ -76,6 +80,23 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         if (isOnline) offlineDialogDismissed = false
     }
 
+    // Shared across Welcome/Login/Register - all three drive the same
+    // Firebase Google Sign-In flow, see AuthViewModel.
+    val authViewModel: AuthViewModel = viewModel()
+    val authUiState by authViewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    // Skip straight past onboarding if Firebase already has a session
+    // from a previous launch (e.g. app was killed and reopened).
+    LaunchedEffect(Unit) {
+        authViewModel.restoreSessionIfSignedIn()
+        if (AuthRepository.isSignedIn) {
+            navController.navigate(Routes.Home) {
+                popUpTo(Routes.Login) { inclusive = true }
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = Routes.Login,
@@ -96,30 +117,44 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             )
         }
         composable(Routes.Welcome) {
-            // TODO: onGoogleContinueClick currently navigates straight to
-            // Home as a placeholder, same as Login's stub. Replace with a
-            // real Google Sign-In flow (and only navigate to Home on
-            // success) once auth is implemented.
             WelcomeScreen(
-                onGoogleContinueClick = { navController.navigate(Routes.Home) },
+                onGoogleContinueClick = {
+                    authViewModel.signInWithGoogle(context) {
+                        navController.navigate(Routes.Home) {
+                            popUpTo(Routes.Welcome) { inclusive = true }
+                        }
+                    }
+                },
+                isLoading = authUiState.isLoading,
+                errorMessage = authUiState.errorMessage,
             )
         }
         composable(Routes.Login) {
             LoginScreen(
-                // TODO: onGoogleSignInClick currently navigates straight to
-                // Home as a placeholder. Replace with a real Google Sign-In
-                // flow (and only navigate to Home on success) once auth is
-                // implemented.
-                onGoogleSignInClick = { navController.navigate(Routes.Home) },
+                onGoogleSignInClick = {
+                    authViewModel.signInWithGoogle(context) {
+                        navController.navigate(Routes.Home) {
+                            popUpTo(Routes.Login) { inclusive = true }
+                        }
+                    }
+                },
                 onCreateAccountClick = { navController.navigate(Routes.Register) },
+                isLoading = authUiState.isLoading,
+                errorMessage = authUiState.errorMessage,
             )
         }
         composable(Routes.Register) {
             RegisterScreen(
-                // Google sign-up is still a stub; log in is real navigation
-                // back to Login.
-                onGoogleSignUpClick = {},
+                onGoogleSignUpClick = {
+                    authViewModel.signInWithGoogle(context) {
+                        navController.navigate(Routes.Home) {
+                            popUpTo(Routes.Login) { inclusive = true }
+                        }
+                    }
+                },
                 onLogInClick = { navController.popBackStack() },
+                isLoading = authUiState.isLoading,
+                errorMessage = authUiState.errorMessage,
             )
         }
         composable(Routes.Home) {
@@ -183,7 +218,14 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             // SettingsScreen (the Profile tab root) has no back arrow of its
             // own, matching Figma - system back still pops this off the
             // stack when reached from the debug scratch hub.
-            SettingsScreen()
+            SettingsScreen(
+                onLogoutClick = {
+                    authViewModel.signOut()
+                    navController.navigate(Routes.Login) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+            )
         }
         composable(Routes.PlaceDetail) {
             PlaceDetailScreen(onBackClick = { navController.popBackStack() })

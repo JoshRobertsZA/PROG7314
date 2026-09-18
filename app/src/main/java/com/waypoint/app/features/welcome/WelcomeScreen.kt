@@ -1,4 +1,4 @@
-package com.example.prog7314.features.welcome
+package com.waypoint.app.features.welcome
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,33 +33,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.prog7314.R
-import com.example.prog7314.core.theme.RadiusButton
-import com.example.prog7314.core.theme.RadiusCard
-import com.example.prog7314.core.theme.WaypointGoogleBlue
-import com.example.prog7314.core.theme.WaypointGoogleText
-import com.example.prog7314.core.theme.WelcomeCardAccent1
-import com.example.prog7314.core.theme.WelcomeCardAccent2
-import com.example.prog7314.core.theme.WelcomeCardAccent3
-import com.example.prog7314.core.theme.WelcomeCardAccent4
-import com.example.prog7314.core.theme.WelcomeCardScrim
-import com.example.prog7314.core.theme.WelcomeGradientBottom
-import com.example.prog7314.core.theme.WelcomeGradientMid
-import com.example.prog7314.core.theme.WelcomeGradientLowerMid
-import com.example.prog7314.core.theme.WelcomeGradientTop
-import com.example.prog7314.core.theme.WelcomeGradientUpperMid
-import com.example.prog7314.core.theme.WelcomePinCircleBg
-import com.example.prog7314.core.theme.White
+import com.waypoint.app.R
+import com.waypoint.app.core.theme.RadiusButton
+import com.waypoint.app.core.theme.RadiusCard
+import com.waypoint.app.core.theme.WaypointGoogleBlue
+import com.waypoint.app.core.theme.WaypointGoogleText
+import com.waypoint.app.core.theme.WelcomeCardAccent1
+import com.waypoint.app.core.theme.WelcomeCardAccent2
+import com.waypoint.app.core.theme.WelcomeCardAccent3
+import com.waypoint.app.core.theme.WelcomeCardAccent4
+import com.waypoint.app.core.theme.WelcomeCardScrim
+import com.waypoint.app.core.theme.WelcomeGradientBottom
+import com.waypoint.app.core.theme.WelcomeGradientMid
+import com.waypoint.app.core.theme.WelcomeGradientLowerMid
+import com.waypoint.app.core.theme.WelcomeGradientTop
+import com.waypoint.app.core.theme.WelcomeGradientUpperMid
+import com.waypoint.app.core.theme.WelcomePinCircleBg
+import com.waypoint.app.core.theme.White
 
 /**
- * Welcome / account-setup screen. Frontend skeleton only, no auth logic
- * wired up yet — mirrors the click-stub pattern used by LoginScreen and
- * RegisterScreen.
+ * Welcome / account-setup screen. [onGoogleContinueClick] drives the same
+ * Firebase Google Sign-In flow as Login/Register (see AuthViewModel).
  *
  * Source: Waypoint Figma node 363:20, "Account Setup (No Biometric) —
  * Animation 1". Sits ahead of Login/Register in the nav graph; the single
  * "Continue with Google" CTA is the one entry point into the app from
- * here (see MainActivity's NavHost for how it currently routes to Home).
+ * here (see MainActivity's NavHost).
  *
  * No real destination photos exist in this codebase yet, so the carousel
  * cards use flat color placeholders instead of the photographic cards
@@ -70,6 +69,8 @@ import com.example.prog7314.core.theme.White
 fun WelcomeScreen(
     onGoogleContinueClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
 ) {
     Box(
         modifier = modifier
@@ -151,7 +152,7 @@ fun WelcomeScreen(
                     .height(60.dp)
                     .clip(RoundedCornerShape(RadiusButton))
                     .background(White)
-                    .clickable(onClick = onGoogleContinueClick),
+                    .clickable(enabled = !isLoading, onClick = onGoogleContinueClick),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -169,10 +170,25 @@ fun WelcomeScreen(
                     )
                 }
                 Text(
-                    text = stringResource(R.string.welcome_google_cta),
+                    text = if (isLoading) {
+                        stringResource(R.string.auth_signing_in)
+                    } else {
+                        stringResource(R.string.welcome_google_cta)
+                    },
                     color = WaypointGoogleText,
                     fontSize = 15.sp,
                     modifier = Modifier.padding(start = 10.dp),
+                )
+            }
+
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 12.dp),
                 )
             }
 
