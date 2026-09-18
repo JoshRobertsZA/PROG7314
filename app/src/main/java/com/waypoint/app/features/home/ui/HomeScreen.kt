@@ -184,6 +184,8 @@ fun HomeScreen(
                     color = WaypointTerracotta,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
+                    // Top-aligned to match TabHeader on the other tabs.
+                    modifier = Modifier.align(Alignment.Top),
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     // Persistent "no internet" badge (Figma "Offline Mode",

@@ -43,6 +43,9 @@ import com.waypoint.app.core.common.ThumbnailBlock
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import coil.compose.AsyncImage
 import com.waypoint.app.core.theme.RadiusButton
 import com.waypoint.app.core.theme.RadiusCard
@@ -172,10 +175,20 @@ fun AllTripsScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     if (trip.photoUrl != null) {
-                                        AsyncImage(
+                                        // Fall back to the colour block if the image fails.
+                                        var failed by remember(trip.photoUrl) { mutableStateOf(false) }
+                                        if (failed) {
+                                            ThumbnailBlock(
+                                                accentColor = trip.thumbColor,
+                                                size = 56.dp,
+                                                cornerRadius = RadiusButton,
+                                                modifier = Modifier.alpha(trip.thumbAlpha),
+                                            )
+                                        } else AsyncImage(
                                             model = trip.photoUrl,
                                             contentDescription = trip.destination,
                                             contentScale = ContentScale.Crop,
+                                            onError = { failed = true },
                                             modifier = Modifier
                                                 .size(56.dp)
                                                 .clip(RoundedCornerShape(RadiusButton))
