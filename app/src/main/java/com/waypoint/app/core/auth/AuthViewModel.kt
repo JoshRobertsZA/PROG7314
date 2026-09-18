@@ -10,6 +10,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.waypoint.app.core.db.AccountEntity
 import com.waypoint.app.core.db.SessionManager
+import com.waypoint.app.core.notifications.WelcomeNotifier
 import com.waypoint.app.core.secrets.RemoteSecrets
 import com.waypoint.app.features.newtrip.data.TripRepository
 import com.google.firebase.auth.FirebaseAuthWebException
@@ -128,6 +129,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             displayName = user.displayName.orEmpty(),
             photoUrl = user.photoUrl?.toString().orEmpty(),
         )
+        WelcomeNotifier.notifyIfNeeded(getApplication())
         viewModelScope.launch(Dispatchers.IO) {
             tripRepository.upsertAccount(
                 AccountEntity(
@@ -144,6 +146,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     fun signOut() {
         AuthRepository.signOut()
         SessionManager.signOut()
+        WelcomeNotifier.reset()
     }
 
     private companion object {

@@ -18,6 +18,8 @@ data class FlightEntity(
     /** content:// URI string (persisted permission already taken). */
     val pdfUri: String,
     val createdAtMs: Long,
+    /** Local departure time "HH:mm"; null until the user sets it or AirLabs resolves it. */
+    val departureTime: String? = null,
 )
 
 /**

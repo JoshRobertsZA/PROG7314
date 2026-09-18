@@ -1,6 +1,7 @@
 package com.waypoint.app.features.viewitinerary.ui
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
@@ -266,15 +267,28 @@ private fun ViewDayScroller(
 
 @Composable
 private fun ViewFlightCard(flight: ViewFlightItem) {
-    RowSurface(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+    val context = LocalContext.current
+    RowSurface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+            .clickable { openPdf(context, flight.pdfUri) },
+    ) {
         Row(
             modifier          = Modifier.padding(start = 10.dp, top = 10.dp, end = 12.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail)
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
-                val label = flight.flightNumber?.takeIf { it.isNotBlank() } ?: "Flight"
+                val label = flight.flightNumber?.takeIf { it.isNotBlank() } ?: stringResource(R.string.reminder_flight_unnamed)
                 Text(label, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text     = flight.departureTime?.let { stringResource(R.string.edit_itinerary_flight_departs, it) }
+                               ?: stringResource(R.string.view_itinerary_flight_no_time),
+                    color    = WaypointTextMuted,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 3.dp),
+                )
                 Text(
                     text     = pdfLabel(flight.pdfUri),
                     color    = WaypointTripBadgeText,
@@ -295,7 +309,13 @@ private fun ViewDocCard(
     subtitle: String,
     pdfUri: String,
 ) {
-    RowSurface(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+    val context = LocalContext.current
+    RowSurface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+            .clickable { openPdf(context, pdfUri) },
+    ) {
         Row(
             modifier          = Modifier.padding(start = 10.dp, top = 10.dp, end = 12.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -573,6 +593,23 @@ private fun ViewEmptyPlaceholder(label: String) {
 }
 
 // ── Helper ────────────────────────────────────────────────────────────────────
+
+/**
+ * Opens the uploaded PDF in whatever viewer the device has. The content://
+ * URI already has a persisted read grant (taken at upload), and the flag
+ * forwards that grant to the viewer app.
+ */
+private fun openPdf(context: android.content.Context, pdfUri: String) {
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(Uri.parse(pdfUri), "application/pdf")
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    try {
+        context.startActivity(Intent.createChooser(intent, null))
+    } catch (e: Exception) {
+        Toast.makeText(context, R.string.view_itinerary_no_pdf_viewer, Toast.LENGTH_SHORT).show()
+    }
+}
 
 private fun pdfLabel(uri: String): String {
     val decoded = Uri.parse(uri).lastPathSegment ?: uri

@@ -11,6 +11,8 @@ data class ViewFlightItem(
     val id: String,
     val flightNumber: String?,
     val pdfUri: String,
+    /** "HH:mm" local, null if never set or resolved. */
+    val departureTime: String? = null,
 )
 
 data class ViewLodgingItem(

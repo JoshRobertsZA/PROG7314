@@ -1,7 +1,10 @@
 package com.waypoint.app
 
+import android.Manifest
 import android.app.Activity
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -27,6 +30,9 @@ import com.waypoint.app.core.common.OfflineDialog
 import com.waypoint.app.core.connectivity.rememberIsOnline
 import com.waypoint.app.core.navigation.MainNavShell
 import com.waypoint.app.core.navigation.Routes
+import com.waypoint.app.core.notifications.PushNotifier
+import com.waypoint.app.core.notifications.PushTokenManager
+import com.waypoint.app.core.notifications.WelcomeNotifier
 import com.waypoint.app.core.secrets.RemoteSecrets
 import com.waypoint.app.core.theme.WaypointTheme
 import com.waypoint.app.features.alltrips.ui.AllTripsScreen
@@ -52,9 +58,24 @@ import kotlinx.coroutines.launch
  * per-screen Activity + Intent navigation entirely.
  */
 class MainActivity : AppCompatActivity() {
+
+    // Android 13+ needs explicit consent before any notification shows.
+    // If a restored session already tried to post the welcome greeting
+    // before the user answered, retry it now that we know the answer.
+    private val notificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) WelcomeNotifier.notifyIfNeeded(applicationContext)
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !PushNotifier.hasPermission(this)) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        // Logs the FCM token (tag WaypointFCM) for Firebase Console test sends.
+        lifecycleScope.launch { PushTokenManager.fetchToken() }
 
         // Kick off the shared-key fetch as early as possible, in the
         // background. Screens that need a key call RemoteSecrets.get(),

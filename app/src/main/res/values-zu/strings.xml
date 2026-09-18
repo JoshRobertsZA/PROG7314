@@ -116,6 +116,10 @@
 
     <string name="profile_stat_planned_label">Kuhleliwe kulo nyaka</string>
     <string name="profile_stat_created_label">Kwenziwe kuWaypoint</string>
+    <plurals name="profile_stat_trips">
+        <item quantity="one">%d uhambo</item>
+        <item quantity="other">%d izinhambo</item>
+    </plurals>
     <string name="profile_preferences_header">Okuncanyelwayo</string>
     <string name="profile_notifications_title">Izaziso</string>
     <string name="profile_notifications_subtitle">Izexwayiso zendiza, isimo sezulu, nohambo</string>
@@ -123,8 +127,6 @@
     <string name="profile_language_subtitle">Ulimi lokubonisa lohlelo lokusebenza</string>
     <string name="profile_biometric_title">Ukungena nge-biometric</string>
     <string name="profile_biometric_subtitle">Ukungena nge-Face ID noma izigxivizo zeminwe</string>
-    <string name="profile_currency_title">Imali</string>
-    <string name="profile_currency_subtitle">Imali ezenzakalelayo yokuguqula</string>
     <string name="profile_logout">Phuma</string>
 
     <string name="language_modal_title">Shintsha ulimi</string>
@@ -136,6 +138,7 @@
 
     <string name="notifications_title">Izaziso</string>
     <string name="notifications_mark_all_read">Phawula konke njengokufundiwe</string>
+    <string name="notifications_clear_all">Sula konke</string>
     <string name="notifications_empty_title">Usulandele konke</string>
     <string name="notifications_empty_subtitle">Izaziso ezintsha zizovela lapha</string>
     <string name="notifications_empty_check_cd">Konke kulandelwe</string>
@@ -150,4 +153,38 @@
     <string name="modal_save_button">Londoloza</string>
 
     <string name="currency_modal_title">Ukushintsha imali</string>
+
+    <!-- Push notifications (Firebase Cloud Messaging) -->
+    <string name="notification_channel_name">Izibuyekezo zohambo</string>
+    <string name="notification_channel_description">Izikhumbuzi nezexwayiso ngezinhambo zakho</string>
+    <string name="notification_welcome_title">Siyakwamukela futhi!</string>
+    <string name="notification_welcome_title_named">Siyakwamukela futhi, %1$s!</string>
+    <string name="notification_welcome_body">Izinhambo zakho zilungile noma nini lapho usulungile.</string>
+    <!-- Flight departure time (Edit Itinerary) -->
+    <string name="edit_itinerary_flight_set_time">Setha isikhathi sokuhamba</string>
+    <string name="edit_itinerary_flight_departs">Iyahamba %1$s</string>
+
+    <!-- Scheduled trip reminders (TripReminderWorker) -->
+    <string name="reminder_countdown_title">Kusele izinsuku ezingu-%1$d!</string>
+    <string name="reminder_countdown_body">%1$s eya e-%2$s iyeza. Isikhathi sokubheka uhlelo lwakho.</string>
+    <string name="reminder_no_plan_title">%1$s ezinsukwini ezi-5</string>
+    <string name="reminder_no_plan_body">Awukahleli lutho lwe-%1$s. Vula uWaypoint ukwengeza uhlelo lwakho.</string>
+    <string name="reminder_start_title">%1$s iqala namuhla!</string>
+    <string name="reminder_start_body">Jabulela e-%1$s. Uhlelo lwakho lulungile ku-app.</string>
+    <string name="reminder_digest_title">Usuku %1$d lwe-%2$s</string>
+    <string name="reminder_digest_places">Namuhla: %1$s.</string>
+    <string name="reminder_digest_lodging">Ngena endaweni yakho yokuhlala namuhla.</string>
+    <string name="reminder_digest_car">Thatha imoto yakho eqashiwe namuhla.</string>
+    <string name="reminder_digest_empty">Akukho lutho oluhleliwe losuku %1$d e-%2$s. Vula i-app ukwengeza okuthile.</string>
+    <string name="reminder_flight_title">Isikhumbuzi sendiza</string>
+    <string name="reminder_flight_unnamed">Indiza yakho</string>
+    <string name="reminder_flight_today_body">%1$s iyahamba namuhla ngo-%2$s. Bhalisa futhi ulungise amadokhumenti akho.</string>
+    <string name="reminder_flight_today_body_no_time">%1$s iyahamba namuhla. Bheka isikhathi ekubhukeni kwakho.</string>
+    <string name="reminder_flight_tomorrow_body">Ukuqala kusenesikhathi: %1$s iyahamba kusasa ngo-%2$s. Pakisha namuhla ebusuku.</string>
+    <string name="reminder_ended_title">Bekunjani e-%1$s?</string>
+    <string name="reminder_ended_body">Siyakwamukela ekhaya. Siyabonga ngokuhlela noWaypoint.</string>
+    <string name="reminder_weather_title">Isimo sezulu e-%1$s</string>
+    <string name="reminder_weather_body">%1$s kanye no-%2$d°C lapho uya khona. Hlela kusasa ngokufanele.</string>
+    <string name="view_itinerary_flight_no_time">Isikhathi sokuhamba asisethiwe</string>
+    <string name="view_itinerary_no_pdf_viewer">Ayikho i-app yokuvula ama-PDF</string>
 </resources>

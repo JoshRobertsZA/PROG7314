@@ -21,6 +21,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,10 +41,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.waypoint.app.R
 import com.waypoint.app.core.common.TabHeader
 import com.waypoint.app.core.db.SessionManager
+import com.waypoint.app.core.notifications.NotificationPreferences
 import com.waypoint.app.core.locale.AppLanguage
+import com.waypoint.app.features.notifications.ui.NotificationHistoryModal
 import com.waypoint.app.core.theme.RadiusButton
 import com.waypoint.app.core.theme.RadiusRow
 import com.waypoint.app.core.theme.WaypointBorderSoft
@@ -50,7 +57,6 @@ import com.waypoint.app.core.theme.WaypointLogoutBorder
 import com.waypoint.app.core.theme.WaypointTerracotta
 import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
-import com.waypoint.app.features.currencyexchange.ui.CurrencyExchangeModal
 
 /**
  * Profile screen - the Profile tab root (Figma node 281:20, "Core
@@ -60,17 +66,26 @@ import com.waypoint.app.features.currencyexchange.ui.CurrencyExchangeModal
  *
  * Replaces the previous Settings skeleton, which was built against the
  * wrong Figma node (83:2) and was missing the avatar/name/email header,
- * trip-count stat cards, and the currency/biometric rows entirely.
+ * trip-count stat cards, and the biometric row entirely.
  *
  * The language row opens LanguageModal (see LanguageModal.kt); the
  * selected language is held in local state here and applied via
  * AppCompatDelegate on save, but isn't persisted across restarts yet.
  */
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier, onLogoutClick: () -> Unit = {}) {
-    var showCurrencyModal by remember { mutableStateOf(false) }
+fun SettingsScreen(
+    modifier: Modifier = Modifier,
+    onLogoutClick: () -> Unit = {},
+    viewModel: SettingsViewModel = viewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    // Re-count every time the tab is opened so a trip created elsewhere
+    // in the app is reflected without restarting.
+    LaunchedEffect(Unit) { viewModel.loadTripCounts() }
+
     var selectedLanguage by remember { mutableStateOf(AppLanguage.current()) }
     var showLanguageModal by remember { mutableStateOf(false) }
+    var showNotificationHistory by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -87,7 +102,7 @@ fun SettingsScreen(modifier: Modifier = Modifier, onLogoutClick: () -> Unit = {}
         ) {
             // Header: brand name + bell (no avatar here - the big avatar
             // below is this screen's own subject).
-            TabHeader(showAvatar = false)
+            TabHeader(showAvatar = false, onBellClick = { showNotificationHistory = true })
 
             // Avatar + name + email, centered.
             AsyncImage(
@@ -119,10 +134,19 @@ fun SettingsScreen(modifier: Modifier = Modifier, onLogoutClick: () -> Unit = {}
                 modifier = Modifier.padding(top = 4.dp).fillMaxWidth(),
             )
 
-            // StatsRow: trips planned / trips created, mock counts.
+            // StatsRow: trips starting this calendar year / every trip this
+            // account has created, both scoped to SessionManager.accountId.
             Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-                StatCard(value = "4 trips", label = stringResource(R.string.profile_stat_planned_label), modifier = Modifier.weight(1f))
-                StatCard(value = "4 trips", label = stringResource(R.string.profile_stat_created_label), modifier = Modifier.weight(1f).padding(start = 10.dp))
+                StatCard(
+                    value = pluralStringResource(R.plurals.profile_stat_trips, uiState.plannedThisYear, uiState.plannedThisYear),
+                    label = stringResource(R.string.profile_stat_planned_label),
+                    modifier = Modifier.weight(1f),
+                )
+                StatCard(
+                    value = pluralStringResource(R.plurals.profile_stat_trips, uiState.totalTrips, uiState.totalTrips),
+                    label = stringResource(R.string.profile_stat_created_label),
+                    modifier = Modifier.weight(1f).padding(start = 10.dp),
+                )
             }
 
             Text(
@@ -133,13 +157,22 @@ fun SettingsScreen(modifier: Modifier = Modifier, onLogoutClick: () -> Unit = {}
                 modifier = Modifier.padding(top = 20.dp),
             )
 
-            var notificationsEnabled by remember { mutableStateOf(true) }
+            // Backed by SharedPreferences so the choice survives app restarts;
+            // PushNotifier.show() reads the same flag before posting anything.
+            val context = LocalContext.current
+            var notificationsEnabled by remember { mutableStateOf(NotificationPreferences.isEnabled(context)) }
             PreferenceRow(
                 title = stringResource(R.string.profile_notifications_title),
                 subtitle = stringResource(R.string.profile_notifications_subtitle),
                 modifier = Modifier.padding(top = 12.dp),
             ) {
-                PreferenceToggle(checked = notificationsEnabled, onCheckedChange = { notificationsEnabled = it })
+                PreferenceToggle(
+                    checked = notificationsEnabled,
+                    onCheckedChange = {
+                        notificationsEnabled = it
+                        NotificationPreferences.setEnabled(context, it)
+                    },
+                )
             }
 
             PreferenceRow(
@@ -158,15 +191,6 @@ fun SettingsScreen(modifier: Modifier = Modifier, onLogoutClick: () -> Unit = {}
                 modifier = Modifier.padding(top = 12.dp),
             ) {
                 PreferenceToggle(checked = biometricEnabled, onCheckedChange = { biometricEnabled = it })
-            }
-
-            PreferenceRow(
-                title = stringResource(R.string.profile_currency_title),
-                subtitle = stringResource(R.string.profile_currency_subtitle),
-                onClick = { showCurrencyModal = true },
-                modifier = Modifier.padding(top = 12.dp),
-            ) {
-                ChevronValue(value = "ZAR")
             }
 
             Box(
@@ -189,9 +213,9 @@ fun SettingsScreen(modifier: Modifier = Modifier, onLogoutClick: () -> Unit = {}
         }
     }
 
-    if (showCurrencyModal) {
-        Dialog(onDismissRequest = { showCurrencyModal = false }) {
-            CurrencyExchangeModal(onSaveClick = { showCurrencyModal = false })
+    if (showNotificationHistory) {
+        Dialog(onDismissRequest = { showNotificationHistory = false }) {
+            NotificationHistoryModal()
         }
     }
 
