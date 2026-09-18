@@ -25,6 +25,7 @@ data class NewTripUiState(
     val destinationName: String = "",
     val destLat: Double? = null,
     val destLng: Double? = null,
+    val destPhotoUrl: String? = null,
     val showDestSearch: Boolean = false,
     val isGeocodingDest: Boolean = false,
     val isSaving: Boolean = false,

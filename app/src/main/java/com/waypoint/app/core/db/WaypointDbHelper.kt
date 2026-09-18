@@ -16,6 +16,7 @@ import android.database.sqlite.SQLiteOpenHelper
  *   4 — added photo_url column to itinerary_places
  *   5 — added notifications table (per-account push history)
  *   6 — added departure_time to itinerary_flights; reminder_log table
+ *   7 — added dest_photo_url to trips
  */
 class WaypointDbHelper private constructor(context: Context) :
     SQLiteOpenHelper(context.applicationContext, DB_NAME, null, DB_VERSION) {
@@ -72,11 +73,15 @@ class WaypointDbHelper private constructor(context: Context) :
             db.execSQL("ALTER TABLE $TABLE_ITIN_FLIGHTS ADD COLUMN $COL_IFLIGHT_DEPARTURE TEXT")
             db.execSQL(CREATE_REMINDER_LOG)
         }
+        if (oldVersion < 7) {
+            // v7: destination thumbnail on trips.
+            db.execSQL("ALTER TABLE $TABLE_TRIPS ADD COLUMN $COL_TRIP_DEST_PHOTO TEXT")
+        }
     }
 
     companion object {
         private const val DB_NAME    = "waypoint.db"
-        private const val DB_VERSION = 6
+        private const val DB_VERSION = 7
 
         // ── accounts ─────────────────────────────────────────────────────────
         const val TABLE_ACCOUNTS       = "accounts"
@@ -98,6 +103,7 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_TRIP_UPDATED     = "updated_at_ms"
         const val COL_TRIP_DEST_LAT    = "dest_lat"
         const val COL_TRIP_DEST_LNG    = "dest_lng"
+        const val COL_TRIP_DEST_PHOTO  = "dest_photo_url" // nullable, Wikipedia thumbnail
 
         // ── itinerary_days ────────────────────────────────────────────────────
         const val TABLE_ITIN_DAYS      = "itinerary_days"
@@ -180,6 +186,7 @@ class WaypointDbHelper private constructor(context: Context) :
                 $COL_TRIP_DESTINATION TEXT,
                 $COL_TRIP_DEST_LAT    REAL,
                 $COL_TRIP_DEST_LNG    REAL,
+                $COL_TRIP_DEST_PHOTO  TEXT,
                 $COL_TRIP_CREATED     INTEGER NOT NULL,
                 $COL_TRIP_UPDATED     INTEGER NOT NULL,
                 FOREIGN KEY ($COL_TRIP_ACCOUNT_ID) REFERENCES $TABLE_ACCOUNTS($COL_ACC_ID)

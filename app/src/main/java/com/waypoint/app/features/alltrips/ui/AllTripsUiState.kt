@@ -30,6 +30,7 @@ data class TripRow(
     val titleColor: Color,
     val thumbColor: Color,
     val thumbAlpha: Float,
+    val photoUrl: String? = null,
 )
 
 data class AllTripsUiState(
@@ -95,6 +96,7 @@ fun TripEntity.toRow(index: Int, today: LocalDate = LocalDate.now()): TripRow {
         id            = id,
         name          = name,
         destination   = destination ?: "",
+        photoUrl      = destPhotoUrl,
         dates         = dateStr,
         status        = status,
         badgeText     = badge,

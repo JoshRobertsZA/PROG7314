@@ -40,6 +40,10 @@ import com.waypoint.app.core.common.CardSurface
 import com.waypoint.app.core.common.CircleIconButton
 import com.waypoint.app.core.common.StatusBadge
 import com.waypoint.app.core.common.ThumbnailBlock
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.size
+import coil.compose.AsyncImage
 import com.waypoint.app.core.theme.RadiusButton
 import com.waypoint.app.core.theme.RadiusCard
 import com.waypoint.app.core.theme.WaypointBorderSoft
@@ -167,12 +171,24 @@ fun AllTripsScreen(
                                     modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 14.dp, bottom = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    ThumbnailBlock(
-                                        accentColor = trip.thumbColor,
-                                        size = 56.dp,
-                                        cornerRadius = RadiusButton,
-                                        modifier = Modifier.alpha(trip.thumbAlpha),
-                                    )
+                                    if (trip.photoUrl != null) {
+                                        AsyncImage(
+                                            model = trip.photoUrl,
+                                            contentDescription = trip.destination,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .size(56.dp)
+                                                .clip(RoundedCornerShape(RadiusButton))
+                                                .alpha(trip.thumbAlpha),
+                                        )
+                                    } else {
+                                        ThumbnailBlock(
+                                            accentColor = trip.thumbColor,
+                                            size = 56.dp,
+                                            cornerRadius = RadiusButton,
+                                            modifier = Modifier.alpha(trip.thumbAlpha),
+                                        )
+                                    }
                                     Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             Text(

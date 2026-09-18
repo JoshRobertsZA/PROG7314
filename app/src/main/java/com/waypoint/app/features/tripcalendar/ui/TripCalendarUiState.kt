@@ -11,6 +11,7 @@ data class TripCalendarUiState(
     val destination: String? = null,
     val destLat: Double? = null,
     val destLng: Double? = null,
+    val destPhotoUrl: String? = null,
     val nightCount: Int = 0,
     // Overview counts, derived from itinerary rows for this trip
     val flightCount: Int = 0,

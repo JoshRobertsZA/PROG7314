@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.waypoint.app.core.db.SessionManager
 import com.waypoint.app.features.explore.data.LocationIQRepository
+import com.waypoint.app.features.home.data.WikipediaCitySearch
 import com.waypoint.app.features.newtrip.data.TripRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -74,6 +75,7 @@ class TripCalendarViewModel(
                     destination    = trip.destination,
                     destLat        = trip.destLat,
                     destLng        = trip.destLng,
+                    destPhotoUrl   = trip.destPhotoUrl,
                     nightCount     = nights,
                     flightCount    = flights,
                     stayCount      = stays,
@@ -118,6 +120,7 @@ class TripCalendarViewModel(
                 destination = state.destination,
                 destLat     = state.destLat,
                 destLng     = state.destLng,
+                destPhotoUrl = state.destPhotoUrl,
             )
         }
     }
@@ -180,12 +183,14 @@ class TripCalendarViewModel(
         _uiState.update { it.copy(showDestSearch = false, destination = name, isGeocodingDest = true) }
         viewModelScope.launch {
             val coords = LocationIQRepository.geocodeCity(name)
+            val photo  = WikipediaCitySearch.thumbnailUrl(name)
             val state  = _uiState.value
             _uiState.update {
                 it.copy(
                     isGeocodingDest = false,
                     destLat         = coords?.first,
                     destLng         = coords?.second,
+                    destPhotoUrl    = photo,
                 )
             }
             repo.updateTripDetails(
@@ -194,6 +199,7 @@ class TripCalendarViewModel(
                 destination = name,
                 destLat     = coords?.first,
                 destLng     = coords?.second,
+                destPhotoUrl = photo,
             )
         }
     }
