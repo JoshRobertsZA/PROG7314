@@ -77,8 +77,9 @@ class PlacePickerViewModel(
     companion object {
         /** Maps DB category key to the LocationIQ OSM type string. */
         fun categoryToType(category: String): String = when (category) {
-            "HOTELS"  -> "hotel"
-            "PARKS"   -> "park"
+            "HOTELS"       -> "hotel"
+            "RESTAURANTS"  -> "restaurant"
+            "PARKS"        -> "park"
             "PUBS"    -> "pub"
             "CINEMAS" -> "cinema"
             else      -> category.lowercase()
@@ -86,8 +87,9 @@ class PlacePickerViewModel(
 
         /** Human-readable header label for the picker screen. */
         fun categoryLabel(category: String): String = when (category) {
-            "HOTELS"  -> "Hotels"
-            "PARKS"   -> "Parks"
+            "HOTELS"       -> "Hotels"
+            "RESTAURANTS"  -> "Restaurants & Cafes"
+            "PARKS"        -> "Parks"
             "PUBS"    -> "Pubs"
             "CINEMAS" -> "Cinemas"
             else      -> category.lowercase().replaceFirstChar { it.uppercase() }

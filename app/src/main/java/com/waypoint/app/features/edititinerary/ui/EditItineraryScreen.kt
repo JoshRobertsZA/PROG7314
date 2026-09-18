@@ -238,16 +238,29 @@ fun EditItineraryScreen(
             )
         }
 
-        // ── Food (mock - commit 4/5) ──────────────────────────────────────────
+        // ── Food ─────────────────────────────────────────────────────────────
+        val foodItems = state.placesForActiveDay["RESTAURANTS"].orEmpty()
         SectionHeader(
             title     = stringResource(R.string.edit_itinerary_header_food),
             chipLabel = stringResource(R.string.edit_itinerary_add_chip),
-            onChipClick = {},
+            onChipClick = {
+                val dayId = state.days.getOrNull(state.activeDayIndex)?.dayId
+                if (dayId != null) onAddPlaceClick("RESTAURANTS")
+            },
             topPadding  = 20.dp,
         )
-        EmptyDocPlaceholder(label = "Restaurants and cafes coming soon")
+        if (foodItems.isEmpty()) {
+            EmptyDocPlaceholder(label = stringResource(R.string.edit_itinerary_no_places))
+        } else {
+            foodItems.forEach { place ->
+                PlaceCard(
+                    place         = place,
+                    onDeleteClick = { viewModel.onDeletePlace(place.id) },
+                )
+            }
+        }
 
-        // ── Places: Hotels / Parks / Pubs / Cinemas ─────────────────────────
+        // ── Places: Parks / Pubs / Cinemas ───────────────────────────────────
         val placeCategories = listOf(
             "PARKS"   to stringResource(R.string.edit_itinerary_header_parks),
             "PUBS"    to stringResource(R.string.edit_itinerary_header_pubs),

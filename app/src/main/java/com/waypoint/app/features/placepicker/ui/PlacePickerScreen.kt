@@ -110,7 +110,7 @@ fun PlacePickerScreen(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            text     = "Could not load places. Check your trip destination.",
+                            text     = "This trip has no destination set. Edit your trip to add one.",
                             color    = WaypointTextMuted,
                             fontSize = 13.sp,
                         )
@@ -206,7 +206,8 @@ private fun placeSubtitle(place: ExplorePlace): String {
 }
 
 private fun placeTypeEmoji(type: String): String = when (type) {
-    "hotel"  -> "🏨"  // 🏨
+    "hotel"      -> "🏨"  // 🏨
+    "restaurant" -> "🍽"  // 🍽️
     "pub"    -> "🍺"  // 🍺
     "cinema" -> "🎬"  // 🎬
     "park"   -> "🌳"  // 🌳

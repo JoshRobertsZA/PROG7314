@@ -163,7 +163,8 @@ fun ViewItineraryScreen(
 
         // Places by category
         listOf(
-            "PARKS"   to stringResource(R.string.edit_itinerary_header_parks),
+            "RESTAURANTS" to stringResource(R.string.edit_itinerary_header_food),
+            "PARKS"       to stringResource(R.string.edit_itinerary_header_parks),
             "PUBS"    to stringResource(R.string.edit_itinerary_header_pubs),
             "CINEMAS" to stringResource(R.string.edit_itinerary_header_cinemas),
         ).forEach { (key, header) ->

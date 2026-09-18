@@ -31,7 +31,7 @@ data class NewTripUiState(
 ) {
     /** True only when both dates are set and the name is non-blank. */
     val canSave: Boolean
-        get() = tripName.isNotBlank() && startDate != null && endDate != null
+        get() = tripName.isNotBlank() && startDate != null && endDate != null && destinationName.isNotBlank()
 
     /** Number of inclusive days in the selected range, or 0 if incomplete. */
     val selectedDayCount: Int
