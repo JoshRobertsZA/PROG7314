@@ -23,6 +23,7 @@ import com.waypoint.app.R
 object PushNotifier {
 
     fun show(context: Context, title: String, body: String, extras: Map<String, String> = emptyMap()) {
+        if (!NotificationPreferences.isEnabled(context)) return   // user switched them off in Profile
         if (!hasPermission(context)) return
 
         val launch = Intent(context, MainActivity::class.java).apply {

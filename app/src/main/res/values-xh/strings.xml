@@ -142,8 +142,6 @@
     <string name="profile_language_subtitle">Ulwimi lokubonisa le-app</string>
     <string name="profile_biometric_title">Ukungena nge-biometric</string>
     <string name="profile_biometric_subtitle">Ukungena nge-Face ID okanye izikhonkwane zeminwe</string>
-    <string name="profile_currency_title">Imali</string>
-    <string name="profile_currency_subtitle">Imali emiselweyo yokuguqula</string>
     <string name="profile_logout">Phuma</string>
 
     <string name="language_modal_title">Tshintsha ulwimi</string>

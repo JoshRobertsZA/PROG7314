@@ -143,8 +143,6 @@
     <string name="profile_language_subtitle">Ulimi lokubonisa lohlelo lokusebenza</string>
     <string name="profile_biometric_title">Ukungena nge-biometric</string>
     <string name="profile_biometric_subtitle">Ukungena nge-Face ID noma izigxivizo zeminwe</string>
-    <string name="profile_currency_title">Imali</string>
-    <string name="profile_currency_subtitle">Imali ezenzakalelayo yokuguqula</string>
     <string name="profile_logout">Phuma</string>
 
     <string name="language_modal_title">Shintsha ulimi</string>
