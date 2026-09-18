@@ -30,14 +30,41 @@ class ItineraryRepository(context: Context) {
         val write = db.writableDatabase
         write.beginTransaction()
         try {
-            // Clear existing days for this trip
-            write.delete(
-                WaypointDbHelper.TABLE_ITIN_DAYS,
-                "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ?",
-                arrayOf(tripId),
-            )
-            // Insert each selected day
-            for (date in days) {
+            // Load the existing date → id mapping so we can preserve IDs for
+            // dates that are still selected. This keeps place/flight rows valid.
+            val existing: Map<LocalDate, String> = run {
+                val cursor = db.readableDatabase.query(
+                    WaypointDbHelper.TABLE_ITIN_DAYS,
+                    arrayOf(WaypointDbHelper.COL_IDAY_ID, WaypointDbHelper.COL_IDAY_DATE),
+                    "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ?",
+                    arrayOf(tripId),
+                    null, null, null,
+                )
+                val map = mutableMapOf<LocalDate, String>()
+                cursor.use { c ->
+                    while (c.moveToNext()) {
+                        runCatching {
+                            map[LocalDate.parse(c.getString(1))] = c.getString(0)
+                        }
+                    }
+                }
+                map
+            }
+
+            // Delete rows for dates no longer in the selection.
+            val datesToRemove = existing.keys - days
+            for (date in datesToRemove) {
+                val id = existing[date] ?: continue
+                write.delete(
+                    WaypointDbHelper.TABLE_ITIN_DAYS,
+                    "${WaypointDbHelper.COL_IDAY_ID} = ?",
+                    arrayOf(id),
+                )
+            }
+
+            // Insert rows only for dates that are genuinely new.
+            val datesToAdd = days - existing.keys
+            for (date in datesToAdd) {
                 val cv = ContentValues().apply {
                     put(WaypointDbHelper.COL_IDAY_ID,      UUID.randomUUID().toString())
                     put(WaypointDbHelper.COL_IDAY_TRIP_ID, tripId)
@@ -45,6 +72,7 @@ class ItineraryRepository(context: Context) {
                 }
                 write.insert(WaypointDbHelper.TABLE_ITIN_DAYS, null, cv)
             }
+
             write.setTransactionSuccessful()
         } finally {
             write.endTransaction()
