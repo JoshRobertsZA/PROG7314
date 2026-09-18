@@ -17,12 +17,16 @@ class EditItineraryViewModel(
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
 
-    private val tripId: String = checkNotNull(savedStateHandle["tripId"])
+    val tripId: String = checkNotNull(savedStateHandle["tripId"])
 
     private val repo = ItineraryRepository(application)
 
     private val _uiState = MutableStateFlow(EditItineraryUiState())
     val uiState: StateFlow<EditItineraryUiState> = _uiState.asStateFlow()
+
+    /** The Room ID of the currently displayed day, or null when days haven't loaded yet. */
+    val activeDayId: String?
+        get() = _uiState.value.days.getOrNull(_uiState.value.activeDayIndex)?.dayId
 
     init {
         loadAll()

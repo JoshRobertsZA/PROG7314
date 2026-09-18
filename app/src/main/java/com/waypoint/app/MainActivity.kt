@@ -30,6 +30,9 @@ import com.waypoint.app.core.secrets.RemoteSecrets
 import com.waypoint.app.core.theme.WaypointTheme
 import com.waypoint.app.features.alltrips.ui.AllTripsScreen
 import com.waypoint.app.features.edititinerary.ui.EditItineraryScreen
+import com.waypoint.app.features.edititinerary.ui.EditItineraryViewModel
+import com.waypoint.app.features.placepicker.ui.PlaceDetailPickerScreen
+import com.waypoint.app.features.placepicker.ui.PlacePickerScreen
 import com.waypoint.app.features.explore.ui.ExploreScreen
 import com.waypoint.app.features.explore.ui.ExploreViewModel
 import com.waypoint.app.features.login.ui.LoginScreen
@@ -193,10 +196,17 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         composable(
             route = Routes.EditItinerary,
             arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
-        ) {
+        ) { backStackEntry ->
+            val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+            val editVm: EditItineraryViewModel = viewModel()
             EditItineraryScreen(
-                tripId = it.arguments?.getString("tripId") ?: "",
+                tripId = tripId,
                 onBackClick = { navController.popBackStack() },
+                onAddPlaceClick = { category ->
+                    val dayId = editVm.activeDayId ?: return@EditItineraryScreen
+                    navController.navigate(Routes.placePicker(tripId, dayId, category))
+                },
+                viewModel = editVm,
             )
         }
         composable(
@@ -232,6 +242,47 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         }
         composable(Routes.Notifications) {
             NotificationsScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable(
+            route = Routes.PlacePicker,
+            arguments = listOf(
+                navArgument("tripId")   { type = NavType.StringType },
+                navArgument("dayId")    { type = NavType.StringType },
+                navArgument("category") { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val args = backStackEntry.arguments!!
+            val tripId   = args.getString("tripId")   ?: ""
+            val dayId    = args.getString("dayId")    ?: ""
+            val category = args.getString("category") ?: ""
+            PlacePickerScreen(
+                tripId          = tripId,
+                dayId           = dayId,
+                category        = category,
+                onBackClick     = { navController.popBackStack() },
+                onPlaceSelected = { placeId ->
+                    navController.navigate(Routes.placeDetailPicker(tripId, dayId, category, placeId))
+                },
+            )
+        }
+        composable(
+            route = Routes.PlaceDetailPicker,
+            arguments = listOf(
+                navArgument("tripId")   { type = NavType.StringType },
+                navArgument("dayId")    { type = NavType.StringType },
+                navArgument("category") { type = NavType.StringType },
+                navArgument("placeId")  { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val args = backStackEntry.arguments!!
+            PlaceDetailPickerScreen(
+                tripId      = args.getString("tripId")   ?: "",
+                dayId       = args.getString("dayId")    ?: "",
+                category    = args.getString("category") ?: "",
+                placeId     = args.getString("placeId")  ?: "",
+                onBackClick = { navController.popBackStack() },
+                onPlaceAdded = { navController.popBackStack(); navController.popBackStack() },
+            )
         }
     }
 

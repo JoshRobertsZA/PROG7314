@@ -71,6 +71,7 @@ import com.waypoint.app.core.theme.WaypointTripBadgeText
 fun EditItineraryScreen(
     tripId: String,
     onBackClick: () -> Unit,
+    onAddPlaceClick: (category: String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: EditItineraryViewModel = viewModel(),
 ) {
@@ -258,7 +259,10 @@ fun EditItineraryScreen(
             SectionHeader(
                 title       = header,
                 chipLabel   = stringResource(R.string.edit_itinerary_add_chip),
-                onChipClick = { /* Add-place flow wired in a future commit */ },
+                onChipClick = {
+                    val dayId = state.days.getOrNull(state.activeDayIndex)?.dayId
+                    if (dayId != null) onAddPlaceClick(categoryKey)
+                },
                 topPadding  = 20.dp,
             )
             if (items.isEmpty()) {
