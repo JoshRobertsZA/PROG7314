@@ -34,7 +34,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.AsyncImagePainter
 import androidx.compose.ui.layout.ContentScale
 import com.waypoint.app.R
 import com.waypoint.app.core.common.CircleIconButton
@@ -78,16 +79,25 @@ fun PlaceDetailPickerScreen(
                 .background(WaypointPlaceAccent2),
             contentAlignment = Alignment.Center,
         ) {
-            val thumb = state.wikiSummary?.thumbnailUrl
+            val thumb = if (!state.isLoadingWiki) state.wikiSummary?.thumbnailUrl else null
+            val emoji = state.placeEmoji.ifEmpty { "📍" }
             if (!thumb.isNullOrBlank()) {
-                AsyncImage(
-                    model             = thumb,
+                // Show Wikipedia thumbnail; fall back to emoji on load failure
+                SubcomposeAsyncImage(
+                    model              = thumb,
                     contentDescription = state.placeName,
-                    contentScale      = ContentScale.Crop,
-                    modifier          = Modifier.fillMaxSize(),
+                    contentScale       = ContentScale.Crop,
+                    modifier           = Modifier.fillMaxSize(),
+                    loading = {
+                        Text(text = emoji, fontSize = 72.sp)
+                    },
+                    error = {
+                        Text(text = emoji, fontSize = 72.sp)
+                    },
                 )
-            } else if (state.placeEmoji.isNotEmpty()) {
-                Text(text = state.placeEmoji, fontSize = 72.sp)
+            } else {
+                // No thumbnail (or still loading wiki) — show category emoji
+                Text(text = emoji, fontSize = 72.sp)
             }
         }
 
