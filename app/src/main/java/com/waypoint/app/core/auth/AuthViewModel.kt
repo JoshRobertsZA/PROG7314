@@ -1,5 +1,6 @@
 package com.waypoint.app.core.auth
 
+import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.util.Log
@@ -12,6 +13,7 @@ import com.waypoint.app.core.db.SessionManager
 import com.waypoint.app.core.notifications.WelcomeNotifier
 import com.waypoint.app.core.secrets.RemoteSecrets
 import com.waypoint.app.features.newtrip.data.TripRepository
+import com.google.firebase.auth.FirebaseAuthWebException
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,8 +22,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+enum class AuthProvider {
+    GOOGLE, GITHUB
+}
+
 data class AuthUiState(
     val isLoading: Boolean = false,
+    val loadingProvider: AuthProvider? = null,
     val errorMessage: String? = null,
 )
 
@@ -43,36 +50,60 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Called once on app start. If Firebase already has a signed-in user
      * (a previous session), restores [SessionManager] from it so the app
-     * can skip straight past onboarding.
+     * can skip straight past onboarding. Also recovers an in-flight GitHub
+     * sign-in if the process died mid-redirect - see
+     * AuthRepository.recoverPendingGitHubSignIn.
+     *
+     * Suspends until any recovery is resolved, so callers that check
+     * AuthRepository.isSignedIn right after awaiting this see the correct
+     * result rather than racing a fire-and-forget coroutine.
      */
-    fun restoreSessionIfSignedIn() {
-        val user = AuthRepository.currentUser ?: return
-        applySignedInUser(user)
+    suspend fun restoreSessionIfSignedIn() {
+        AuthRepository.currentUser?.let { applySignedInUser(it); return }
+        try {
+            AuthRepository.recoverPendingGitHubSignIn()?.let { applySignedInUser(it) }
+        } catch (e: Exception) {
+            Log.w(TAG, "No recoverable GitHub sign-in", e)
+        }
     }
 
     fun signInWithGoogle(context: Context, onSuccess: () -> Unit) {
         if (_uiState.value.isLoading) return
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            _uiState.update { it.copy(isLoading = true, loadingProvider = AuthProvider.GOOGLE, errorMessage = null) }
             try {
-                // FIREBASE_WEB_CLIENT_ID may come from the shared remote key
-                // cache rather than a local override (see apikey.properties.example),
-                // which is fetched async on app start - make sure that fetch
-                // has actually resolved before requesting a credential, so a
-                // fast tap right after launch doesn't race an empty client id.
                 RemoteSecrets.ensureLoaded()
                 val idToken = fetchGoogleIdToken(context)
                 val user = AuthRepository.signInWithGoogleIdToken(idToken)
                 applySignedInUser(user)
-                _uiState.update { it.copy(isLoading = false) }
+                _uiState.update { it.copy(isLoading = false, loadingProvider = null) }
                 onSuccess()
             } catch (e: GetCredentialCancellationException) {
-                // User dismissed the account picker - not an error worth showing.
-                _uiState.update { it.copy(isLoading = false) }
+                _uiState.update { it.copy(isLoading = false, loadingProvider = null) }
             } catch (e: Exception) {
                 Log.w(TAG, "Google sign-in failed", e)
                 _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Couldn't sign in with Google. Please try again.")
+                    it.copy(isLoading = false, loadingProvider = null, errorMessage = "Couldn't sign in with Google. Please try again.")
+                }
+            }
+        }
+    }
+
+    fun signInWithGitHub(activity: Activity, onSuccess: () -> Unit) {
+        if (_uiState.value.isLoading) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, loadingProvider = AuthProvider.GITHUB, errorMessage = null) }
+            try {
+                val user = AuthRepository.signInWithGitHub(activity)
+                applySignedInUser(user)
+                _uiState.update { it.copy(isLoading = false, loadingProvider = null) }
+                onSuccess()
+            } catch (e: FirebaseAuthWebException) {
+                _uiState.update { it.copy(isLoading = false, loadingProvider = null) }
+            } catch (e: Exception) {
+                Log.w(TAG, "GitHub sign-in failed", e)
+                _uiState.update {
+                    it.copy(isLoading = false, loadingProvider = null, errorMessage = "Couldn't sign in with GitHub. Please try again.")
                 }
             }
         }

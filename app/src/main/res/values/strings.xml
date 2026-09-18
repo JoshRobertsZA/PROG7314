@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">Waypoint</string>
 
+    <!-- Shared branding, used by TabHeader and HomeScreen -->
+    <string name="brand_name">Waypoint</string>
+    <string name="brand_tagline">Plan the route. Keep the story.</string>
+
     <!-- Temporary nav on MainActivity until the real home/first screen is decided -->
-    <string name="main_go_to_login">Go to Login</string>
     <string name="main_go_to_trip_calendar">Go to Trip Calendar</string>
     <string name="main_go_to_view_itinerary">Go to View Itinerary</string>
     <string name="main_go_to_edit_itinerary">Go to Edit Itinerary</string>
@@ -10,19 +13,6 @@
     <string name="main_go_to_settings">Go to Settings</string>
     <string name="main_go_to_nearby_places">Go to Nearby Places</string>
     <string name="main_go_to_home">Go to Home</string>
-
-    <!-- Login screen (Figma node 64:2, "01 Waypoint — Login") -->
-    <string name="login_logo_glyph">W</string>
-    <string name="login_brand_name">Waypoint</string>
-    <string name="login_tagline">Plan the route. Keep the story.</string>
-    <string name="login_welcome_back">Welcome back</string>
-    <string name="login_subtitle">Sign in to continue planning your trips.</string>
-    <string name="login_google_glyph">G</string>
-    <string name="login_google_cta">Continue with Google</string>
-    <string name="login_disclaimer">By continuing, you agree to Waypoint’s Terms of Service and Privacy Policy.</string>
-    <string name="login_deco_text">Every trip, well kept.</string>
-    <string name="login_footer_prompt">New to Waypoint?</string>
-    <string name="login_footer_cta">Create account</string>
 
     <!-- View itinerary screen (Figma node 58:2, "05 Waypoint — View Itinerary").
          Trip name/dates, per-day weather, and every booking/place row's
@@ -92,25 +82,13 @@
     <string name="home_nav_explore">Explore</string>
     <string name="home_nav_profile">Profile</string>
 
-    <!-- Register screen (Figma node 64:23, "02 Waypoint — Register") -->
-    <string name="register_logo_glyph">W</string>
-    <string name="register_brand_name">Waypoint</string>
-    <string name="register_tagline">Plan the route. Keep the story.</string>
-    <string name="register_deco_text">Every trip, well kept.</string>
-    <string name="register_heading">Create your account</string>
-    <string name="register_subtitle">Sign up to start planning your trips.</string>
-    <string name="register_google_glyph">G</string>
-    <string name="register_google_cta">Sign up with Google</string>
-    <string name="register_disclaimer">By continuing, you agree to Waypoint’s Terms of Service and Privacy Policy.</string>
-    <string name="register_footer_prompt">Already have an account?</string>
-    <string name="register_footer_cta">Log in</string>
-
     <!-- Welcome screen (Figma node 363:20, "Account Setup") -->
     <string name="welcome_pin_cd">Location pin</string>
     <string name="welcome_heading">Welcome</string>
     <string name="welcome_subtitle">Sign in or create an account to start planning your trips.</string>
     <string name="welcome_destinations_heading">Popular destinations</string>
     <string name="welcome_google_cta">Continue with Google</string>
+    <string name="welcome_github_cta">Continue with GitHub</string>
     <string name="welcome_disclaimer">By continuing, you agree to our Terms of Service and Privacy Policy.</string>
 
     <!-- Shared Firebase Google Sign-In state (Welcome/Login/Register), see AuthViewModel -->

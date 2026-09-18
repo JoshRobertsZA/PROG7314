@@ -12,15 +12,17 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,7 +32,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,18 +44,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,296 +62,197 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.waypoint.app.R
-import com.waypoint.app.core.theme.RadiusButton
+import com.waypoint.app.core.auth.AuthProvider
 import com.waypoint.app.core.theme.RadiusCard
-import com.waypoint.app.core.theme.WaypointGoogleBlue
 import com.waypoint.app.core.theme.WaypointGoogleText
-import com.waypoint.app.core.theme.WelcomeCardScrim
-import com.waypoint.app.core.theme.WelcomeGradientBottom
-import com.waypoint.app.core.theme.WelcomeGradientDayBottom
-import com.waypoint.app.core.theme.WelcomeGradientDayLowerMid
-import com.waypoint.app.core.theme.WelcomeGradientDayMid
-import com.waypoint.app.core.theme.WelcomeGradientDayTop
-import com.waypoint.app.core.theme.WelcomeGradientDayUpperMid
-import com.waypoint.app.core.theme.WelcomeGradientDuskBottom
-import com.waypoint.app.core.theme.WelcomeGradientDuskLowerMid
-import com.waypoint.app.core.theme.WelcomeGradientDuskMid
-import com.waypoint.app.core.theme.WelcomeGradientDuskTop
-import com.waypoint.app.core.theme.WelcomeGradientDuskUpperMid
-import com.waypoint.app.core.theme.WelcomeGradientMid
-import com.waypoint.app.core.theme.WelcomeGradientLowerMid
-import com.waypoint.app.core.theme.WelcomeGradientNightBottom
-import com.waypoint.app.core.theme.WelcomeGradientNightLowerMid
-import com.waypoint.app.core.theme.WelcomeGradientNightMid
-import com.waypoint.app.core.theme.WelcomeGradientNightTop
-import com.waypoint.app.core.theme.WelcomeGradientNightUpperMid
-import com.waypoint.app.core.theme.WelcomeGradientTop
-import com.waypoint.app.core.theme.WelcomeGradientUpperMid
-import com.waypoint.app.core.theme.White
 import com.waypoint.app.core.theme.WaypointTerracotta
-import androidx.compose.ui.graphics.lerp
+import com.waypoint.app.core.theme.WelcomeCardScrim
+import com.waypoint.app.core.theme.White
 
-/**
- * Welcome / account-setup screen. [onGoogleContinueClick] drives the same
- * Firebase Google Sign-In flow as Login/Register (see AuthViewModel).
- *
- * Source: Waypoint Figma node 363:20, "Account Setup (No Biometric) —
- * Animation 1". Sits ahead of Login/Register in the nav graph; the single
- * "Continue with Google" CTA is the one entry point into the app from
- * here (see MainActivity's NavHost).
- *
- * No real destination photos exist in this codebase yet, so the carousel
- * cards use flat color placeholders instead of the photographic cards
- * from Figma — swap DestinationCard's background for an Image/painter
- * once real assets are added.
- */
-/** Entrance stagger - each section starts this many ms after the previous one. */
 private const val StaggerStepMs = 90
 private const val EnterDurationMs = 450
 
-/** One gradient stop set for a time-of-day phase ("Animation 1-4" in Figma). */
-private data class SkyPhase(
-    val top: Color,
-    val upperMid: Color,
-    val mid: Color,
-    val lowerMid: Color,
-    val bottom: Color,
-)
-
-private val skyPhases = listOf(
-    SkyPhase(WelcomeGradientTop, WelcomeGradientUpperMid, WelcomeGradientMid, WelcomeGradientLowerMid, WelcomeGradientBottom), // morning
-    SkyPhase(WelcomeGradientDayTop, WelcomeGradientDayUpperMid, WelcomeGradientDayMid, WelcomeGradientDayLowerMid, WelcomeGradientDayBottom), // day
-    SkyPhase(WelcomeGradientDuskTop, WelcomeGradientDuskUpperMid, WelcomeGradientDuskMid, WelcomeGradientDuskLowerMid, WelcomeGradientDuskBottom), // dusk
-    SkyPhase(WelcomeGradientNightTop, WelcomeGradientNightUpperMid, WelcomeGradientNightMid, WelcomeGradientNightLowerMid, WelcomeGradientNightBottom), // night
-)
-
-/** Total time to cycle through all four phases once, before looping. */
-private const val SkyCycleDurationMs = 24_000
+private const val CarouselPxPerSecond = 40f
+private val DestinationCardWidth = 120.dp
+private val DestinationCardSpacing = 10.dp
 
 @Composable
-private fun rememberAnimatedSkyGradient(): Brush {
-    val infiniteTransition = rememberInfiniteTransition(label = "sky_cycle")
-    val phaseProgress by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = skyPhases.size.toFloat(),
+private fun CinematicHeroBackground(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition(label = "ken_burns")
+    val heroScale by infiniteTransition.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 1.08f,
         animationSpec = infiniteRepeatable(
-            animation = tween(SkyCycleDurationMs, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
+            animation = tween(12_000, easing = EaseInOut),
+            repeatMode = RepeatMode.Reverse,
         ),
-        label = "sky_phase_progress",
+        label = "hero_scale",
     )
 
-    val phaseIndex = phaseProgress.toInt().coerceIn(0, skyPhases.size - 1)
-    val nextIndex = (phaseIndex + 1) % skyPhases.size
-    val fraction = phaseProgress - phaseIndex
+    Box(modifier = modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(R.drawable.welcome_bg),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .scale(heroScale),
+        )
 
-    val from = skyPhases[phaseIndex]
-    val to = skyPhases[nextIndex]
-
-    return Brush.verticalGradient(
-        colors = listOf(
-            lerp(from.top, to.top, fraction),
-            lerp(from.upperMid, to.upperMid, fraction),
-            lerp(from.mid, to.mid, fraction),
-            lerp(from.lowerMid, to.lowerMid, fraction),
-            lerp(from.bottom, to.bottom, fraction),
-        ),
-    )
+        // Vignette & dark bottom scrim overlay
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xCC0F172A),
+                            Color(0x66090D16),
+                            Color(0xEB070A10),
+                            Color(0xFA04060A),
+                        ),
+                    ),
+                ),
+        )
+    }
 }
 
 @Composable
 fun WelcomeScreen(
     onGoogleContinueClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onGitHubContinueClick: (() -> Unit)? = null,
     isLoading: Boolean = false,
+    loadingProvider: AuthProvider? = null,
     errorMessage: String? = null,
 ) {
-    // Drives the staggered entrance below - starts false so every section is
-    // off-screen/invisible on first composition, then flips true one frame
-    // later so AnimatedVisibility actually animates in rather than snapping.
     var contentVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { contentVisible = true }
 
-    val skyGradient = rememberAnimatedSkyGradient()
-
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(skyGradient),
+        modifier = modifier.fillMaxSize(),
     ) {
-        DotGridOverlay(modifier = Modifier.fillMaxSize())
+        CinematicHeroBackground()
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.systemBars)
-                .padding(start = 28.dp, top = 64.dp, end = 28.dp, bottom = 32.dp),
+                .padding(start = 20.dp, top = 36.dp, end = 20.dp, bottom = 20.dp),
         ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            EnterSection(visible = contentVisible, delayMs = 0) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    // Soft ambient glow behind the logo - purely decorative
-                    // texture, sits underneath PulsingPinBadge's own halo.
-                    // BlurredEdgeTreatment.Unbounded matters here: the
-                    // default (Rectangle) clips the blur to this Box's own
-                    // 100dp square, which shows up as a hard-edged square
-                    // instead of a glow that actually fades to nothing.
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .blur(radius = 32.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
-                            .background(WaypointTerracotta.copy(alpha = 0.3f), CircleShape),
-                    )
-                    PulsingPinBadge()
-                }
-            }
-
-            EnterSection(visible = contentVisible, delayMs = StaggerStepMs) {
-                Column {
-                    Text(
-                        text = stringResource(R.string.welcome_heading),
-                        color = White,
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 24.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.welcome_subtitle),
-                        color = White,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(top = 8.dp),
-                    )
-                }
-            }
-
-            EnterSection(visible = contentVisible, delayMs = StaggerStepMs * 2) {
-                Column {
-                    Text(
-                        text = stringResource(R.string.welcome_destinations_heading),
-                        color = White,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 32.dp),
-                    )
-
-                    val carouselScrollState = rememberScrollState()
-                    val density = LocalDensity.current
-                    // Width of exactly one lap of destinations, in px - the
-                    // point AutoSlide instantly rewinds to 0 at. The second
-                    // (looped) copy of the list below is what makes that
-                    // rewind invisible: the pixels on screen right before
-                    // and right after the jump are identical.
-                    val singleLapWidthPx = remember(density) {
-                        with(density) {
-                            val cardWidthPx = DestinationCardWidth.toPx()
-                            val spacingPx = DestinationCardSpacing.toPx()
-                            (destinations.size * cardWidthPx + (destinations.size - 1) * spacingPx).toInt()
-                        }
-                    }
-                    AutoSlide(carouselScrollState, singleLapWidthPx)
-
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 12.dp)
-                            // enabled = false: this carousel is a purely
-                            // ambient, always-moving visual, not something
-                            // the user drives - a manual swipe would fight
-                            // AutoSlide's own animateScrollTo calls.
-                            .horizontalScroll(carouselScrollState, enabled = false),
-                        horizontalArrangement = Arrangement.spacedBy(DestinationCardSpacing),
-                    ) {
-                        // Looped twice back-to-back so AutoSlide can wrap
-                        // from the end of the first copy straight into the
-                        // start of the second, seamlessly, instead of
-                        // reversing direction at the true end of the list.
-                        (destinations + destinations).forEach { destination ->
-                            DestinationCard(destination)
-                        }
-                    }
-                }
-            }
-
-            EnterSection(visible = contentVisible, delayMs = StaggerStepMs * 3) {
-                ValuePropRow(modifier = Modifier.padding(top = 40.dp))
-            }
-        }
-
-        // Google CTA + terms, pinned to the bottom of the screen
-        EnterSection(
-            visible = contentVisible,
-            delayMs = StaggerStepMs * 4,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth(),
-        ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .clip(RoundedCornerShape(RadiusButton))
-                    .background(White)
-                    .clickable(enabled = !isLoading, onClick = onGoogleContinueClick),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(20.dp)
-                        .background(White, CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = stringResource(R.string.login_google_glyph),
-                        color = WaypointGoogleBlue,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
+                // Top Logo & App Title
+                EnterSection(visible = contentVisible, delayMs = 0) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Box(
+                                modifier = Modifier
+                                    .size(88.dp)
+                                    .blur(radius = 32.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                                    .background(WaypointTerracotta.copy(alpha = 0.35f), CircleShape),
+                            )
+                            PulsingPinBadge()
+                        }
+                        Text(
+                            text = "WAYPOINT",
+                            color = White.copy(alpha = 0.9f),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 3.sp,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
                 }
-                Text(
-                    text = if (isLoading) {
-                        stringResource(R.string.auth_signing_in)
-                    } else {
-                        stringResource(R.string.welcome_google_cta)
-                    },
-                    color = WaypointGoogleText,
-                    fontSize = 15.sp,
-                    modifier = Modifier.padding(start = 10.dp),
-                )
+
+                // Main Heading & Subtitle
+                EnterSection(visible = contentVisible, delayMs = StaggerStepMs) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.welcome_heading),
+                            color = White,
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(top = 16.dp),
+                        )
+                        Text(
+                            text = stringResource(R.string.welcome_subtitle),
+                            color = White.copy(alpha = 0.85f),
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(top = 6.dp, start = 8.dp, end = 8.dp),
+                        )
+                    }
+                }
+
+                // Image Slider Carousel (Placed ABOVE offline sync / feature highlights)
+                EnterSection(visible = contentVisible, delayMs = StaggerStepMs * 2) {
+                    Column(
+                        modifier = Modifier.padding(top = 36.dp),
+                        horizontalAlignment = Alignment.Start,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.welcome_destinations_heading),
+                            color = White,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(bottom = 8.dp),
+                        )
+
+                        val carouselScrollState = rememberScrollState()
+                        val density = LocalDensity.current
+                        val singleLapWidthPx = remember(density) {
+                            with(density) {
+                                val cardWidthPx = DestinationCardWidth.toPx()
+                                val spacingPx = DestinationCardSpacing.toPx()
+                                (destinations.size * cardWidthPx + (destinations.size - 1) * spacingPx).toInt()
+                            }
+                        }
+                        AutoSlide(carouselScrollState, singleLapWidthPx)
+
+                        Row(
+                            modifier = Modifier.horizontalScroll(carouselScrollState, enabled = false),
+                            horizontalArrangement = Arrangement.spacedBy(DestinationCardSpacing),
+                        ) {
+                            (destinations + destinations).forEach { destination ->
+                                DestinationCard(destination)
+                            }
+                        }
+                    }
+                }
+
+                // Feature Highlights Row (Placed directly BELOW the image slider)
+                EnterSection(visible = contentVisible, delayMs = StaggerStepMs * 3) {
+                    FeatureHighlightsRow(modifier = Modifier.padding(top = 18.dp))
+                }
             }
 
-            if (errorMessage != null) {
-                Text(
-                    text = errorMessage,
-                    color = White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 12.dp),
+            // Bottom Frosted Glass Card (Google + GitHub SSO)
+            EnterSection(
+                visible = contentVisible,
+                delayMs = StaggerStepMs * 4,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth(),
+            ) {
+                FrostedGlassContainerCard(
+                    onGoogleContinueClick = onGoogleContinueClick,
+                    onGitHubContinueClick = onGitHubContinueClick,
+                    isLoading = isLoading,
+                    loadingProvider = loadingProvider,
+                    errorMessage = errorMessage,
                 )
             }
-
-            Text(
-                text = stringResource(R.string.welcome_disclaimer),
-                color = White,
-                fontSize = 11.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 12.dp),
-            )
-        }
-        }
         }
     }
 }
 
-/**
- * Wraps [content] in a fade + slide-up entrance, delayed by [delayMs] so
- * sections cascade in one after another instead of all popping in at once.
- */
 @Composable
 private fun EnterSection(
     visible: Boolean,
@@ -373,22 +274,6 @@ private fun EnterSection(
     }
 }
 
-/** Auto-slide speed for the destinations carousel, in dp per second. */
-private const val CarouselPxPerSecond = 40f
-private val DestinationCardWidth = 130.dp
-private val DestinationCardSpacing = 12.dp
-
-/**
- * Continuously scrolls [scrollState] forward in one direction only, and
- * once it passes [oneLapPx] (the width of exactly one copy of the
- * destinations list), instantly rewinds to 0 rather than reversing
- * direction. The Row this drives renders the destinations list twice
- * back-to-back, so the pixels right before and right after that rewind are
- * identical - the loop reads as infinite rather than "bouncing back".
- *
- * User scrolling is disabled on the Row (`horizontalScroll(..., enabled =
- * false)`), so there's no gesture to fight with here.
- */
 @Composable
 private fun AutoSlide(scrollState: ScrollState, oneLapPx: Int) {
     LaunchedEffect(oneLapPx) {
@@ -399,97 +284,161 @@ private fun AutoSlide(scrollState: ScrollState, oneLapPx: Int) {
         scrollState.scrollTo(0)
         while (true) {
             scrollState.animateScrollTo(oneLapPx, animationSpec = tween(durationMs, easing = LinearEasing))
-            // Instant, not animated - imperceptible since the content at
-            // this scroll position is identical to position 0 (start of
-            // the second, looped copy of the list).
             scrollState.scrollTo(0)
         }
     }
 }
 
-/** Spacing between dots in [DotGridOverlay], and their radius. */
-private val DotGridSpacing = 28.dp
-private val DotGridRadius = 1.2.dp
-
-/**
- * A faint, evenly-spaced dot grid drawn across the whole screen - cheap
- * texture that breaks up what would otherwise be a completely flat
- * gradient fill, without needing any image assets.
- */
 @Composable
-private fun DotGridOverlay(modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier) {
-        val spacingPx = DotGridSpacing.toPx()
-        val radiusPx = DotGridRadius.toPx()
-        var y = 0f
-        while (y < size.height) {
-            var x = 0f
-            while (x < size.width) {
-                drawCircle(
-                    color = White.copy(alpha = 0.08f),
-                    radius = radiusPx,
-                    center = Offset(x, y),
-                )
-                x += spacingPx
-            }
-            y += spacingPx
-        }
-    }
-}
-
-private data class ValueProp(val emoji: String, val label: String)
-
-private val valueProps = listOf(
-    ValueProp("📶", "Offline sync"),
-    ValueProp("🗓️", "Smart itineraries"),
-    ValueProp("⛅", "Live weather"),
-)
-
-/**
- * Three lightweight feature callouts that fill the gap between the
- * destinations carousel and the CTA button - that space used to just be
- * empty, which read as unfinished rather than intentional.
- */
-@Composable
-private fun ValuePropRow(modifier: Modifier = Modifier) {
+private fun FeatureHighlightsRow(modifier: Modifier = Modifier) {
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(White.copy(alpha = 0.12f))
+            .border(1.dp, White.copy(alpha = 0.22f), RoundedCornerShape(20.dp))
+            .padding(vertical = 10.dp, horizontal = 14.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        valueProps.forEach { prop ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        listOf(
+            "Offline Sync",
+            "Itineraries",
+            "Weather",
+        ).forEachIndexed { index, feature ->
+            if (index > 0) {
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
-                        .background(White.copy(alpha = 0.14f), CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(text = prop.emoji, fontSize = 18.sp)
-                }
-                Text(
-                    text = prop.label,
-                    color = White,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(top = 8.dp)
-                        .width(76.dp),
+                        .height(14.dp)
+                        .width(1.dp)
+                        .background(White.copy(alpha = 0.25f)),
                 )
             }
+            Text(
+                text = feature,
+                color = White,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
         }
     }
 }
 
-/**
- * The real Waypoint logo (waypoint.svg - a pin with a pulsing halo behind
- * it) plus its animated halo, reimplemented natively here since Android's
- * vector drawables can't run the source file's CSS @keyframes. The static
- * pin/circle artwork lives in ic_waypoint_pin.xml; the halo's scale
- * (.92 -> 1.0) and opacity (.12 -> .25) below match that file's `pulse`
- * keyframes exactly - 2.4s ease-in-out, reversing rather than restarting,
- * so a full cycle is .92 -> 1.0 -> .92, same as 0%/50%/100% in CSS.
- */
+@Composable
+private fun FrostedGlassContainerCard(
+    onGoogleContinueClick: () -> Unit,
+    onGitHubContinueClick: (() -> Unit)?,
+    isLoading: Boolean,
+    loadingProvider: AuthProvider?,
+    errorMessage: String?,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(elevation = 16.dp, shape = RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(28.dp))
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        White.copy(alpha = 0.22f),
+                        White.copy(alpha = 0.12f),
+                    ),
+                ),
+            )
+            .border(1.dp, White.copy(alpha = 0.3f), RoundedCornerShape(28.dp))
+            .padding(18.dp),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            // Google SSO Button
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(White)
+                    .clickable(enabled = !isLoading, onClick = onGoogleContinueClick),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_google),
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(20.dp),
+                )
+                Text(
+                    text = if (isLoading && loadingProvider == AuthProvider.GOOGLE) {
+                        stringResource(R.string.auth_signing_in)
+                    } else {
+                        stringResource(R.string.welcome_google_cta)
+                    },
+                    color = WaypointGoogleText,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(start = 10.dp),
+                )
+            }
+
+            if (onGitHubContinueClick != null) {
+                Spacer(modifier = Modifier.height(10.dp))
+                // GitHub SSO Button
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFF24292E))
+                        .border(1.dp, White.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                        .clickable(enabled = !isLoading, onClick = onGitHubContinueClick),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_github),
+                        contentDescription = null,
+                        tint = White,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Text(
+                        text = if (isLoading && loadingProvider == AuthProvider.GITHUB) {
+                            stringResource(R.string.auth_signing_in)
+                        } else {
+                            stringResource(R.string.welcome_github_cta)
+                        },
+                        color = White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(start = 10.dp),
+                    )
+                }
+            }
+
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = Color(0xFFFF8A8A),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 10.dp),
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.welcome_disclaimer),
+                color = White.copy(alpha = 0.8f),
+                fontSize = 11.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 10.dp),
+            )
+        }
+    }
+}
+
 @Composable
 private fun PulsingPinBadge(modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "pin_pulse")
@@ -512,10 +461,10 @@ private fun PulsingPinBadge(modifier: Modifier = Modifier) {
         label = "pin_pulse_alpha",
     )
 
-    Box(modifier = modifier.size(64.dp), contentAlignment = Alignment.Center) {
+    Box(modifier = modifier.size(56.dp), contentAlignment = Alignment.Center) {
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(42.dp)
                 .scale(pulseScale)
                 .alpha(pulseAlpha)
                 .background(WaypointTerracotta, CircleShape),
@@ -524,7 +473,7 @@ private fun PulsingPinBadge(modifier: Modifier = Modifier) {
             painter = painterResource(R.drawable.ic_waypoint_pin),
             contentDescription = stringResource(R.string.welcome_pin_cd),
             tint = Color.Unspecified,
-            modifier = Modifier.size(width = 46.dp, height = 58.dp),
+            modifier = Modifier.size(width = 40.dp, height = 50.dp),
         )
     }
 }
@@ -547,10 +496,8 @@ private fun DestinationCard(destination: WelcomeDestination, modifier: Modifier 
     Box(
         modifier = modifier
             .width(DestinationCardWidth)
-            .height(150.dp)
-            // Real elevation instead of a flat color block - a shadow is
-            // what actually reads as "card" rather than "colored rectangle".
-            .shadow(elevation = 10.dp, shape = RoundedCornerShape(RadiusCard))
+            .height(130.dp)
+            .shadow(elevation = 8.dp, shape = RoundedCornerShape(RadiusCard))
             .clip(RoundedCornerShape(RadiusCard)),
     ) {
         Image(
@@ -571,11 +518,11 @@ private fun DestinationCard(destination: WelcomeDestination, modifier: Modifier 
         Text(
             text = destination.name,
             color = White,
-            fontSize = 14.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(12.dp),
+                .padding(10.dp),
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.waypoint.app
 
 import android.Manifest
+import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,12 +42,10 @@ import com.waypoint.app.features.placepicker.ui.PlaceDetailPickerScreen
 import com.waypoint.app.features.placepicker.ui.PlacePickerScreen
 import com.waypoint.app.features.explore.ui.ExploreScreen
 import com.waypoint.app.features.explore.ui.ExploreViewModel
-import com.waypoint.app.features.login.ui.LoginScreen
 import com.waypoint.app.features.main.ui.MainScreen
 import com.waypoint.app.features.newtrip.ui.NewTripScreen
 import com.waypoint.app.features.notifications.ui.NotificationsScreen
 import com.waypoint.app.features.placedetail.ui.PlaceDetailScreen
-import com.waypoint.app.features.register.ui.RegisterScreen
 import com.waypoint.app.features.settings.ui.SettingsScreen
 import com.waypoint.app.features.tripcalendar.ui.TripCalendarScreen
 import com.waypoint.app.features.viewitinerary.ui.ViewItineraryScreen
@@ -128,7 +127,6 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         composable(Routes.Main) {
             MainScreen(
                 onGoToWelcomeClick = { navController.navigate(Routes.Welcome) },
-                onGoToLoginClick = { navController.navigate(Routes.Login) },
                 onGoToTripCalendarClick = { navController.navigate(Routes.tripCalendar("__scratch__")) },
                 onGoToViewItineraryClick = { navController.navigate(Routes.viewItinerary("__scratch__")) },
                 onGoToEditItineraryClick = { navController.navigate(Routes.editItinerary("__scratch__")) },
@@ -149,35 +147,15 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                         }
                     }
                 },
-                isLoading = authUiState.isLoading,
-                errorMessage = authUiState.errorMessage,
-            )
-        }
-        composable(Routes.Login) {
-            LoginScreen(
-                onGoogleSignInClick = {
-                    authViewModel.signInWithGoogle(context) {
+                onGitHubContinueClick = {
+                    authViewModel.signInWithGitHub(context as Activity) {
                         navController.navigate(Routes.Home) {
-                            popUpTo(Routes.Login) { inclusive = true }
+                            popUpTo(Routes.Welcome) { inclusive = true }
                         }
                     }
                 },
-                onCreateAccountClick = { navController.navigate(Routes.Register) },
                 isLoading = authUiState.isLoading,
-                errorMessage = authUiState.errorMessage,
-            )
-        }
-        composable(Routes.Register) {
-            RegisterScreen(
-                onGoogleSignUpClick = {
-                    authViewModel.signInWithGoogle(context) {
-                        navController.navigate(Routes.Home) {
-                            popUpTo(Routes.Login) { inclusive = true }
-                        }
-                    }
-                },
-                onLogInClick = { navController.popBackStack() },
-                isLoading = authUiState.isLoading,
+                loadingProvider = authUiState.loadingProvider,
                 errorMessage = authUiState.errorMessage,
             )
         }
@@ -258,7 +236,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             SettingsScreen(
                 onLogoutClick = {
                     authViewModel.signOut()
-                    navController.navigate(Routes.Login) {
+                    navController.navigate(Routes.Welcome) {
                         popUpTo(0) { inclusive = true }
                     }
                 },

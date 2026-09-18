@@ -22,15 +22,14 @@ import com.waypoint.app.core.theme.WaypointCream
  * Entry screen. Frontend skeleton only: static/mock content, no real
  * home/first screen decided yet.
  *
- * TODO: btnGoToLogin/etc. are all temporary scratch navigation for
- * testing individual screens, bypassing the real login/home flow. Remove
+ * TODO: these buttons are all temporary scratch navigation for testing
+ * individual screens, bypassing the real onboarding/home flow. Remove
  * once every screen has a real nav path into it from elsewhere in the
  * app (see the TODOs on each individual button below, carried over
  * verbatim from MainActivity.kt).
  */
 @Composable
 fun MainScreen(
-    onGoToLoginClick: () -> Unit,
     onGoToTripCalendarClick: () -> Unit,
     onGoToViewItineraryClick: () -> Unit,
     onGoToEditItineraryClick: () -> Unit,
@@ -53,10 +52,6 @@ fun MainScreen(
         verticalArrangement = Arrangement.Center,
     ) {
         Text("Hello World!")
-
-        // Temporary: navigate to the login screen until the real home/first
-        // screen for the app is decided.
-        AppButtonFilled(text = "Go to Login", onClick = onGoToLoginClick, modifier = Modifier.padding(top = 16.dp))
 
         // Temporary: jump straight to the trip calendar screen for testing,
         // bypassing login/home. Remove once there's a real nav path to it.
