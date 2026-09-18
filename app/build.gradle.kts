@@ -6,6 +6,15 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+// google-services.json isn't committed until the team's Firebase project is
+// set up (it's per-project config, downloaded from the Firebase console).
+// Only apply the Google Services plugin once that file actually exists, so
+// a fresh clone without it still builds - see README for setup steps.
+val hasGoogleServicesConfig = rootProject.file("app/google-services.json").exists()
+if (hasGoogleServicesConfig) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 // Load local API keys from apikey.properties (gitignored, never committed).
 // Copy apikey.properties.example -> apikey.properties and fill in real values.
 val apikeyPropertiesFile = rootProject.file("apikey.properties")
@@ -17,13 +26,13 @@ if (apikeyPropertiesFile.exists()) {
 fun apiKey(name: String): String = apikeyProperties.getProperty(name, "")
 
 android {
-    namespace = "com.example.prog7314"
+    namespace = "com.waypoint.app"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.example.prog7314"
+        applicationId = "com.waypoint.app"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -38,6 +47,16 @@ android {
             "String",
             "OPENWEATHER_API_KEY",
             "\"${apiKey("OPENWEATHER_API_KEY")}\""
+        )
+
+        // OAuth "Web client ID" for Firebase Google Sign-In (Authentication ->
+        // Sign-in method -> Google -> Web SDK configuration in the Firebase
+        // console). See GoogleSignInHelper.kt for why this is a BuildConfig
+        // field instead of the usual google-services.json-generated resource.
+        buildConfigField(
+            "String",
+            "FIREBASE_WEB_CLIENT_ID",
+            "\"${apiKey("FIREBASE_WEB_CLIENT_ID")}\""
         )
 
 
@@ -146,4 +165,10 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 }

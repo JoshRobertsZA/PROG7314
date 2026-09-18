@@ -20,6 +20,9 @@ out/
 .gradle/
 build/
 
+# Kotlin compiler session files (local build cache, not project state)
+.kotlin/
+
 # Local configuration file (SDK path, etc.)
 local.properties
 

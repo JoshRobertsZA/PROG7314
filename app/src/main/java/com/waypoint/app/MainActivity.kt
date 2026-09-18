@@ -1,0 +1,242 @@
+package com.waypoint.app
+
+import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import androidx.navigation.compose.rememberNavController
+import com.waypoint.app.core.auth.AuthRepository
+import com.waypoint.app.core.auth.AuthViewModel
+import com.waypoint.app.core.common.OfflineDialog
+import com.waypoint.app.core.connectivity.rememberIsOnline
+import com.waypoint.app.core.navigation.MainNavShell
+import com.waypoint.app.core.navigation.Routes
+import com.waypoint.app.core.secrets.RemoteSecrets
+import com.waypoint.app.core.theme.WaypointTheme
+import com.waypoint.app.features.alltrips.ui.AllTripsScreen
+import com.waypoint.app.features.edititinerary.ui.EditItineraryScreen
+import com.waypoint.app.features.explore.ui.ExploreScreen
+import com.waypoint.app.features.explore.ui.ExploreViewModel
+import com.waypoint.app.features.login.ui.LoginScreen
+import com.waypoint.app.features.main.ui.MainScreen
+import com.waypoint.app.features.newtrip.ui.NewTripScreen
+import com.waypoint.app.features.notifications.ui.NotificationsScreen
+import com.waypoint.app.features.placedetail.ui.PlaceDetailScreen
+import com.waypoint.app.features.register.ui.RegisterScreen
+import com.waypoint.app.features.settings.ui.SettingsScreen
+import com.waypoint.app.features.tripcalendar.ui.TripCalendarScreen
+import com.waypoint.app.features.viewitinerary.ui.ViewItineraryScreen
+import com.waypoint.app.features.welcome.WelcomeScreen
+import kotlinx.coroutines.launch
+
+/**
+ * The app's only Activity. Hosts a single flat NavHost (see
+ * core/navigation/Routes.kt) covering every screen - replaces the old
+ * per-screen Activity + Intent navigation entirely.
+ */
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        // Kick off the shared-key fetch as early as possible, in the
+        // background. Screens that need a key call RemoteSecrets.get(),
+        // which falls back to "" until this finishes (or if it fails) -
+        // see RemoteSecrets.kt for the local-override behaviour.
+        lifecycleScope.launch { RemoteSecrets.ensureLoaded() }
+
+        setContent {
+            WaypointTheme {
+                WaypointNavHost()
+            }
+        }
+    }
+}
+
+@Composable
+private fun WaypointNavHost(navController: NavHostController = rememberNavController()) {
+    val isOnline by rememberIsOnline()
+    var offlineDialogDismissed by remember { mutableStateOf(false) }
+
+    // Reset dismissal once back online, so the dialog can show again the
+    // next time connectivity actually drops, rather than being
+    // permanently silenced after the first dismiss.
+    LaunchedEffect(isOnline) {
+        if (isOnline) offlineDialogDismissed = false
+    }
+
+    // Shared across Welcome/Login/Register - all three drive the same
+    // Firebase Google Sign-In flow, see AuthViewModel.
+    val authViewModel: AuthViewModel = viewModel()
+    val authUiState by authViewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    // Skip straight past onboarding if Firebase already has a session
+    // from a previous launch (e.g. app was killed and reopened).
+    LaunchedEffect(Unit) {
+        authViewModel.restoreSessionIfSignedIn()
+        if (AuthRepository.isSignedIn) {
+            navController.navigate(Routes.Home) {
+                popUpTo(Routes.Login) { inclusive = true }
+            }
+        }
+    }
+
+    NavHost(
+        navController = navController,
+        startDestination = Routes.Login,
+    ) {
+        composable(Routes.Main) {
+            MainScreen(
+                onGoToWelcomeClick = { navController.navigate(Routes.Welcome) },
+                onGoToLoginClick = { navController.navigate(Routes.Login) },
+                onGoToTripCalendarClick = { navController.navigate(Routes.tripCalendar("__scratch__")) },
+                onGoToViewItineraryClick = { navController.navigate(Routes.viewItinerary("__scratch__")) },
+                onGoToEditItineraryClick = { navController.navigate(Routes.editItinerary("__scratch__")) },
+                onGoToAllTripsClick = { navController.navigate(Routes.AllTrips) },
+                onGoToSettingsClick = { navController.navigate(Routes.Settings) },
+                onGoToExploreClick = { navController.navigate(Routes.Explore) },
+                onGoToHomeClick = { navController.navigate(Routes.Home) },
+                onGoToNotificationsClick = { navController.navigate(Routes.Notifications) },
+                onGoToPlaceDetailClick = { navController.navigate(Routes.PlaceDetail) },
+            )
+        }
+        composable(Routes.Welcome) {
+            WelcomeScreen(
+                onGoogleContinueClick = {
+                    authViewModel.signInWithGoogle(context) {
+                        navController.navigate(Routes.Home) {
+                            popUpTo(Routes.Welcome) { inclusive = true }
+                        }
+                    }
+                },
+                isLoading = authUiState.isLoading,
+                errorMessage = authUiState.errorMessage,
+            )
+        }
+        composable(Routes.Login) {
+            LoginScreen(
+                onGoogleSignInClick = {
+                    authViewModel.signInWithGoogle(context) {
+                        navController.navigate(Routes.Home) {
+                            popUpTo(Routes.Login) { inclusive = true }
+                        }
+                    }
+                },
+                onCreateAccountClick = { navController.navigate(Routes.Register) },
+                isLoading = authUiState.isLoading,
+                errorMessage = authUiState.errorMessage,
+            )
+        }
+        composable(Routes.Register) {
+            RegisterScreen(
+                onGoogleSignUpClick = {
+                    authViewModel.signInWithGoogle(context) {
+                        navController.navigate(Routes.Home) {
+                            popUpTo(Routes.Login) { inclusive = true }
+                        }
+                    }
+                },
+                onLogInClick = { navController.popBackStack() },
+                isLoading = authUiState.isLoading,
+                errorMessage = authUiState.errorMessage,
+            )
+        }
+        composable(Routes.Home) {
+            MainNavShell(
+                onNewTripClick = { navController.navigate(Routes.NewTrip) },
+                onTripClick    = { tripId -> navController.navigate(Routes.tripCalendar(tripId)) },
+            )
+        }
+        composable(Routes.NewTrip) {
+            NewTripScreen(
+                onCloseClick = { navController.popBackStack() },
+                onSaveSuccess = {
+                    navController.navigate(Routes.AllTrips) {
+                        popUpTo(Routes.NewTrip) { inclusive = true }
+                    }
+                },
+            )
+        }
+        composable(
+            route = Routes.TripCalendar,
+            arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
+        ) {
+            TripCalendarScreen(
+                onBackClick = { navController.popBackStack() },
+                onEditItineraryClick = { tripId -> navController.navigate(Routes.editItinerary(tripId)) },
+                onViewItineraryClick = { tripId -> navController.navigate(Routes.viewItinerary(tripId)) },
+            )
+        }
+        composable(Routes.AllTrips) {
+            AllTripsScreen(
+                onBackClick    = { navController.popBackStack() },
+                onNewTripClick = { navController.navigate(Routes.NewTrip) },
+                onTripClick    = { tripId -> navController.navigate(Routes.tripCalendar(tripId)) },
+            )
+        }
+        composable(
+            route = Routes.EditItinerary,
+            arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
+        ) {
+            EditItineraryScreen(
+                tripId = it.arguments?.getString("tripId") ?: "",
+                onBackClick = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.ViewItinerary,
+            arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
+        ) {
+            ViewItineraryScreen(
+                tripId = it.arguments?.getString("tripId") ?: "",
+                onBackClick = { navController.popBackStack() },
+            )
+        }
+        composable(Routes.Explore) {
+            // ExploreScreen (the Explore tab root) has no back arrow of its
+            // own, matching Figma - system back still pops this off the
+            // stack when reached from the debug scratch hub.
+            ExploreScreen(exploreViewModel = viewModel<ExploreViewModel>())
+        }
+        composable(Routes.Settings) {
+            // SettingsScreen (the Profile tab root) has no back arrow of its
+            // own, matching Figma - system back still pops this off the
+            // stack when reached from the debug scratch hub.
+            SettingsScreen(
+                onLogoutClick = {
+                    authViewModel.signOut()
+                    navController.navigate(Routes.Login) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+            )
+        }
+        composable(Routes.PlaceDetail) {
+            PlaceDetailScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable(Routes.Notifications) {
+            NotificationsScreen(onBackClick = { navController.popBackStack() })
+        }
+    }
+
+    if (!isOnline && !offlineDialogDismissed) {
+        OfflineDialog(onDismissRequest = { offlineDialogDismissed = true })
+    }
+
+}
