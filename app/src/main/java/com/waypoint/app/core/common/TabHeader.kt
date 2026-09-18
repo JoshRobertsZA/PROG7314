@@ -50,6 +50,8 @@ fun TabHeader(
     /** Null (the default) opens the shared notification-history modal. */
     onBellClick: (() -> Unit)? = null,
     showAvatar: Boolean = true,
+    /** Tapping the avatar; Home uses it to jump to Profile. */
+    onAvatarClick: () -> Unit = {},
     isOnline: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
@@ -86,7 +88,8 @@ fun TabHeader(
                         modifier = Modifier
                             .padding(start = 14.dp)
                             .size(40.dp)
-                            .clip(CircleShape),
+                            .clip(CircleShape)
+                            .clickable(onClick = onAvatarClick),
                     )
                 } else {
                     OfflineHeaderIndicator(

@@ -38,12 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import coil.compose.AsyncImage
-import com.waypoint.app.core.db.SessionManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -53,7 +47,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.waypoint.app.R
 import com.waypoint.app.core.common.AppButtonFilled
 import com.waypoint.app.core.common.AppButtonOutline
-import com.waypoint.app.core.common.OfflineHeaderIndicator
+import com.waypoint.app.core.common.TabHeader
 import com.waypoint.app.core.common.RowSurface
 import com.waypoint.app.core.common.ThumbnailBlock
 import com.waypoint.app.core.connectivity.rememberIsOnline
@@ -173,46 +167,9 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
         ) {
-            // Header: brand name + avatar (opens Profile)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.brand_name),
-                    color = WaypointTerracotta,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    // Top-aligned to match TabHeader on the other tabs.
-                    modifier = Modifier.align(Alignment.Top),
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Persistent "no internet" badge (Figma "Offline Mode",
-                    // node 332:424) - appears once the first-drop OfflineDialog
-                    // is dismissed and connectivity is still down.
-                    OfflineHeaderIndicator(
-                        isOnline = isOnline,
-                        iconSize = 28.dp,
-                        modifier = Modifier.padding(end = 12.dp),
-                    )
-                    // Account avatar doubles as the Profile shortcut (was a
-                    // settings gear). Same 40dp circle as TabHeader on the
-                    // other tabs so the header reads identically everywhere.
-                    AsyncImage(
-                        model = SessionManager.photoUrl.ifBlank { null },
-                        contentDescription = stringResource(R.string.home_settings_cd),
-                        contentScale = ContentScale.Crop,
-                        placeholder = painterResource(R.drawable.img_mock_avatar),
-                        error = painterResource(R.drawable.img_mock_avatar),
-                        fallback = painterResource(R.drawable.img_mock_avatar),
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .clickable(onClick = onSettingsClick),
-                    )
-                }
-            }
+            // Shared header: brand, bell (notification history) and account
+            // avatar (opens Profile); offline indicator replaces the avatar.
+            TabHeader(onAvatarClick = onSettingsClick, isOnline = isOnline)
 
             Text(
                 text = stringResource(R.string.brand_tagline),
