@@ -1,6 +1,5 @@
 package com.waypoint.app.core.common
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +12,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,7 +25,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import coil.compose.AsyncImage
 import com.waypoint.app.R
+import com.waypoint.app.core.db.SessionManager
+import com.waypoint.app.features.notifications.ui.NotificationHistoryModal
 import com.waypoint.app.core.theme.WaypointCard
 import com.waypoint.app.core.theme.WaypointTerracotta
 import com.waypoint.app.core.theme.WaypointTextPrimary
@@ -40,11 +47,17 @@ import com.waypoint.app.core.theme.WaypointTextPrimary
  */
 @Composable
 fun TabHeader(
-    onBellClick: () -> Unit = {},
+    /** Null (the default) opens the shared notification-history modal. */
+    onBellClick: (() -> Unit)? = null,
     showAvatar: Boolean = true,
     isOnline: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
+    var showHistory by remember { mutableStateOf(false) }
+    if (showHistory) {
+        Dialog(onDismissRequest = { showHistory = false }) { NotificationHistoryModal() }
+    }
+
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -55,15 +68,21 @@ fun TabHeader(
             color = WaypointTerracotta,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
+            // Top-aligned so the brand sits at the same y as on Home, whose
+            // header has no 40dp avatar pushing the row's centre line down.
+            modifier = Modifier.align(Alignment.Top),
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
-            BellWithBadge(onClick = onBellClick)
+            BellWithBadge(onClick = onBellClick ?: { showHistory = true })
             if (showAvatar) {
                 if (isOnline) {
-                    Image(
-                        painter = painterResource(R.drawable.img_mock_avatar),
+                    AsyncImage(
+                        model = SessionManager.photoUrl.ifBlank { null },
                         contentDescription = stringResource(R.string.tab_header_avatar_cd),
                         contentScale = ContentScale.Crop,
+                        placeholder = painterResource(R.drawable.img_mock_avatar),
+                        error = painterResource(R.drawable.img_mock_avatar),
+                        fallback = painterResource(R.drawable.img_mock_avatar),
                         modifier = Modifier
                             .padding(start = 14.dp)
                             .size(40.dp)
@@ -84,7 +103,6 @@ fun TabHeader(
 @Composable
 fun BellWithBadge(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(modifier = modifier) {
-        // TODO: not wired to a notifications feed/screen yet
         Icon(
             painter = painterResource(R.drawable.ic_bell),
             contentDescription = stringResource(R.string.tab_header_bell_cd),
