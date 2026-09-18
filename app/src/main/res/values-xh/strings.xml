@@ -173,4 +173,7 @@
     <!-- Push notifications (Firebase Cloud Messaging) -->
     <string name="notification_channel_name">Uhlaziyo lohambo</string>
     <string name="notification_channel_description">Izikhumbuzo nezilumkiso malunga neendlela zakho</string>
+    <string name="notification_welcome_title">Wamkelekile kwakhona!</string>
+    <string name="notification_welcome_title_named">Wamkelekile kwakhona, %1$s!</string>
+    <string name="notification_welcome_body">Iindlela zakho zilungile nanini na xa ulungile.</string>
 </resources>

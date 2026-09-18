@@ -174,4 +174,7 @@
     <!-- Push notifications (Firebase Cloud Messaging) -->
     <string name="notification_channel_name">Izibuyekezo zohambo</string>
     <string name="notification_channel_description">Izikhumbuzi nezexwayiso ngezinhambo zakho</string>
+    <string name="notification_welcome_title">Siyakwamukela futhi!</string>
+    <string name="notification_welcome_title_named">Siyakwamukela futhi, %1$s!</string>
+    <string name="notification_welcome_body">Izinhambo zakho zilungile noma nini lapho usulungile.</string>
 </resources>
