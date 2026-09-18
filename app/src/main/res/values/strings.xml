@@ -219,6 +219,10 @@
          built against the wrong node, 83:2). -->
     <string name="profile_stat_planned_label">Planned this year</string>
     <string name="profile_stat_created_label">Created on Waypoint</string>
+    <plurals name="profile_stat_trips">
+        <item quantity="one">%d trip</item>
+        <item quantity="other">%d trips</item>
+    </plurals>
     <string name="profile_preferences_header">Preferences</string>
     <string name="profile_notifications_title">Notifications</string>
     <string name="profile_notifications_subtitle">Flight, weather, and trip alerts</string>
