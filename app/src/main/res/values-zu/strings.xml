@@ -4,7 +4,166 @@
     whenever AppCompatDelegate.setApplicationLocales(zu) is active -
     stringResource() calls resolve here first, falling back to the default
     values/strings.xml for any key not overridden below.
+
+    First-pass translation, not verified by a fluent isiZulu speaker - needs
+    native-speaker review before shipping.
+
+    Intentionally NOT overridden here (fall back to values/strings.xml):
+    app_name, login_brand_name/register_brand_name ("Waypoint" - a brand
+    name), every *_glyph string (single-character symbols: arrows, ✎, ✕, ↺,
+    "G", "W" - not language-specific text), and the calendar_wd_*/
+    new_trip_wd_* single-letter weekday abbreviations - several isiZulu
+    weekday names share the same first letter (uLwesibili/uLwesithathu/
+    uLwesine/uLwesihlanu all start with "L"), so a single-letter scheme
+    doesn't work and needs a native speaker to pick a real abbreviation
+    convention (e.g. two letters) rather than a guess.
 -->
 <resources>
+    <string name="main_go_to_login">Iya ekungeneni</string>
+    <string name="main_go_to_trip_calendar">Iya kukhalenda lohambo</string>
+    <string name="main_go_to_view_itinerary">Iya ekubukeni uhlelo lohambo</string>
+    <string name="main_go_to_edit_itinerary">Iya ekuhleleni uhlelo lohambo</string>
+    <string name="main_go_to_all_trips">Iya kuzo zonke izinhambo</string>
+    <string name="main_go_to_settings">Iya ezilungiselelweni</string>
+    <string name="main_go_to_nearby_places">Iya ezindaweni eziseduze</string>
+    <string name="main_go_to_home">Iya ekhaya</string>
+
+    <string name="login_tagline">Hlela indlela. Gcina indaba.</string>
     <string name="login_welcome_back">Siyakwamukela futhi</string>
+    <string name="login_subtitle">Ngena ukuze uqhubeke uhlela izinhambo zakho.</string>
+    <string name="login_google_cta">Qhubeka ngeGoogle</string>
+    <string name="login_disclaimer">Ngokuqhubeka, uyavuma Imigomo Yesevisi kaWaypoint kanye Nenqubomgomo Yobumfihlo.</string>
+    <string name="login_deco_text">Uhambo ngalunye, lugcinwe kahle.</string>
+    <string name="login_footer_prompt">Umusha kuWaypoint?</string>
+    <string name="login_footer_cta">Dala i-akhawunti</string>
+
+    <string name="itinerary_back_cd">Emuva</string>
+    <string name="itinerary_title">Uhlelo Lohambo</string>
+    <string name="itinerary_header_flights">Izindiza</string>
+    <string name="itinerary_header_lodging">Indawo yokulala</string>
+    <string name="itinerary_header_car">Ukuqashisa imoto</string>
+    <string name="itinerary_header_food">Amarestaurant namakhefi</string>
+    <string name="itinerary_header_attractions">Izindawo zokuvakasha</string>
+    <string name="itinerary_header_entertainment">Ukuzijabulisa</string>
+    <string name="itinerary_view_pdf">Buka i-PDF</string>
+    <string name="itinerary_empty_entertainment">Akukho okokuzijabulisa okwengeziwe kulezi zinsuku</string>
+
+    <string name="calendar_back_cd">Emuva</string>
+    <string name="calendar_view_itinerary">Buka uhlelo lohambo</string>
+    <string name="calendar_edit_itinerary">Hlela uhlelo lohambo</string>
+
+    <string name="home_settings_cd">Izilungiselelo</string>
+    <string name="home_upcoming_trip_label">UHAMBO OLUZAYO</string>
+    <string name="home_view_all_trips">Buka zonke izinhambo</string>
+    <string name="home_new_trip">+ Uhambo olusha</string>
+    <string name="home_nearby_places_title">Izindawo eziseduze</string>
+    <string name="home_nearby_source">nge-LocationIQ</string>
+    <string name="home_map_cta">Buka zonke izindawo eziseduze emephini</string>
+    <string name="home_nav_home">Ikhaya</string>
+    <string name="home_nav_trips">Izinhambo</string>
+    <string name="home_nav_explore">Hlola</string>
+    <string name="home_nav_profile">Iphrofayela</string>
+
+    <string name="register_tagline">Hlela indlela. Gcina indaba.</string>
+    <string name="register_deco_text">Uhambo ngalunye, lugcinwe kahle.</string>
+    <string name="register_heading">Dala i-akhawunti yakho</string>
+    <string name="register_subtitle">Bhalisa ukuze uqale ukuhlela izinhambo zakho.</string>
+    <string name="register_google_cta">Bhalisa ngeGoogle</string>
+    <string name="register_disclaimer">Ngokuqhubeka, uyavuma Imigomo Yesevisi kaWaypoint kanye Nenqubomgomo Yobumfihlo.</string>
+    <string name="register_footer_prompt">Usunayo i-akhawunti?</string>
+    <string name="register_footer_cta">Ngena</string>
+
+    <string name="welcome_pin_cd">Uphawu lwendawo</string>
+    <string name="welcome_heading">Siyakwamukela</string>
+    <string name="welcome_subtitle">Ngena noma udale i-akhawunti ukuze uqale ukuhlela izinhambo zakho.</string>
+    <string name="welcome_destinations_heading">Izindawo ezithandwayo</string>
+    <string name="welcome_google_cta">Qhubeka ngeGoogle</string>
+    <string name="welcome_disclaimer">Ngokuqhubeka, uyavuma Imigomo Yethu Yesevisi kanye Nenqubomgomo Yobumfihlo.</string>
+
+    <string name="edit_itinerary_back_cd">Emuva</string>
+    <string name="edit_itinerary_title">Hlela uhlelo lohambo</string>
+    <string name="edit_itinerary_header_flights">Izindiza</string>
+    <string name="edit_itinerary_header_lodging">Indawo yokulala</string>
+    <string name="edit_itinerary_header_car">Ukuqashisa imoto</string>
+    <string name="edit_itinerary_header_food">Amarestaurant namakhefi</string>
+    <string name="edit_itinerary_header_attractions">Izindawo zokuvakasha</string>
+    <string name="edit_itinerary_header_entertainment">Ukuzijabulisa</string>
+    <string name="edit_itinerary_upload_chip">+ Layisha</string>
+    <string name="edit_itinerary_add_chip">+ Engeza</string>
+    <string name="edit_itinerary_replace_flight_doc_cd">Shintsha idokhumenti yendiza</string>
+    <string name="edit_itinerary_remove_flight_cd">Susa indiza</string>
+    <string name="edit_itinerary_replace_lodging_doc_cd">Shintsha idokhumenti yendawo yokulala</string>
+    <string name="edit_itinerary_remove_lodging_cd">Susa indawo yokulala</string>
+    <string name="edit_itinerary_replace_car_doc_cd">Shintsha idokhumenti yokuqashisa imoto</string>
+    <string name="edit_itinerary_remove_car_cd">Susa ukuqashisa imoto</string>
+    <string name="edit_itinerary_edit_place_cd">Hlela indawo</string>
+    <string name="edit_itinerary_remove_place_cd">Susa indawo</string>
+    <string name="edit_itinerary_add_entertainment_placeholder">+ Engeza okokuzijabulisa kulezi zinsuku</string>
+
+    <string name="all_trips_back_cd">Emuva</string>
+    <string name="all_trips_title">Zonke izinhambo</string>
+    <string name="all_trips_search_hint">Sesha izinhambo ngegama noma usuku</string>
+    <string name="all_trips_filter_all">Konke</string>
+    <string name="all_trips_filter_upcoming">Oluzayo</string>
+    <string name="all_trips_filter_ongoing">Oluqhubekayo</string>
+    <string name="all_trips_filter_past">Odlule</string>
+
+    <string name="new_trip_close_cd">Vala</string>
+    <string name="new_trip_title">Uhambo olusha</string>
+    <string name="new_trip_name_label">Igama lohambo</string>
+    <string name="new_trip_name_hint">isb. Uhambo LwaseKapa</string>
+    <string name="new_trip_dates_label">Khetha izinsuku zohambo</string>
+    <string name="new_trip_dates_subtitle">Kungakhethwa kuphela namuhla nezinsuku ezizayo</string>
+    <string name="new_trip_save_button">Londoloza uhambo</string>
+    <string name="new_trip_footer_hint">Uzothola isikrini sokuhlela uhlelo lohambo ngokulandelayo — uhambo lwakho luzoba negama nezinsuku kuphela uze wengeze izindiza, indawo zokulala, nezindawo.</string>
+
+    <string name="explore_helper">Faka idolobha — isb. Cape Town, London</string>
+    <string name="explore_filter_all">Konke</string>
+    <string name="explore_filter_restaurants">Amarestaurant</string>
+    <string name="explore_filter_cafes">Amakhefi</string>
+    <string name="explore_filter_attractions">Izindawo zokuvakasha</string>
+    <string name="explore_filter_entertainment">Ukuzijabulisa</string>
+    <string name="explore_filter_hotels">Amahhotela</string>
+    <string name="explore_attribution">nge-LocationIQ</string>
+
+    <string name="tab_header_avatar_cd">Isithombe sephrofayela</string>
+    <string name="tab_header_bell_cd">Izaziso</string>
+    <string name="tab_header_offline_cd">Ayikho i-inthanethi</string>
+
+    <string name="profile_stat_planned_label">Kuhleliwe kulo nyaka</string>
+    <string name="profile_stat_created_label">Kwenziwe kuWaypoint</string>
+    <string name="profile_preferences_header">Okuncanyelwayo</string>
+    <string name="profile_notifications_title">Izaziso</string>
+    <string name="profile_notifications_subtitle">Izexwayiso zendiza, isimo sezulu, nohambo</string>
+    <string name="profile_language_title">Ulimi</string>
+    <string name="profile_language_subtitle">Ulimi lokubonisa lohlelo lokusebenza</string>
+    <string name="profile_biometric_title">Ukungena nge-biometric</string>
+    <string name="profile_biometric_subtitle">Ukungena nge-Face ID noma izigxivizo zeminwe</string>
+    <string name="profile_currency_title">Imali</string>
+    <string name="profile_currency_subtitle">Imali ezenzakalelayo yokuguqula</string>
+    <string name="profile_logout">Phuma</string>
+
+    <string name="language_modal_title">Shintsha ulimi</string>
+
+    <string name="offline_dialog_title">Ayikho i-inthanethi</string>
+    <string name="offline_dialog_body">Sitholé ukuthi ukuxhumana kwakho ne-inthanethi kuwile. Ezinye izici zingase zingatholakali kuze kubuye.</string>
+    <string name="offline_dialog_okay">Kulungile</string>
+    <string name="offline_bubble_body">Usengaphandle kwe-inthanethi. Cindezela inkinobho engezansi ukuze uzame ukuxhuma kabusha kunethiwekhi.</string>
+
+    <string name="notifications_title">Izaziso</string>
+    <string name="notifications_mark_all_read">Phawula konke njengokufundiwe</string>
+    <string name="notifications_empty_title">Usulandele konke</string>
+    <string name="notifications_empty_subtitle">Izaziso ezintsha zizovela lapha</string>
+    <string name="notifications_empty_check_cd">Konke kulandelwe</string>
+
+    <string name="place_detail_back_cd">Emuva</string>
+    <string name="place_detail_about_header">Mayelana</string>
+    <string name="place_detail_wikipedia_attribution">nge-Wikipedia</string>
+    <string name="place_detail_location_header">Indawo</string>
+    <string name="place_detail_open_in_maps">Vula kumephu →</string>
+    <string name="place_detail_add_to_itinerary">+ Engeza kuhlelo lohambo</string>
+
+    <string name="modal_save_button">Londoloza</string>
+
+    <string name="currency_modal_title">Ukushintsha imali</string>
 </resources>
