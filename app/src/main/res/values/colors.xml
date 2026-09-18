@@ -4,6 +4,7 @@
     <color name="white">#FFFFFFFF</color>
 
     <!-- Waypoint brand palette (login screen, Figma node 64:2) -->
+    <color name="waypoint_splash_bg">#0F172A</color>
     <color name="waypoint_cream">#F2E9D3</color>
     <color name="waypoint_terracotta">#C1673D</color>
     <color name="waypoint_text_primary">#473021</color>

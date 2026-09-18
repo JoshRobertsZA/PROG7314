@@ -175,5 +175,6 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation(libs.androidx.biometric)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.coil.compose)
 }

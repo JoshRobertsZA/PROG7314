@@ -5,6 +5,7 @@ package com.waypoint.app.core.navigation
  *
  *   Main -> TripCalendar, ViewItinerary, EditItinerary, AllTrips,
  *           Settings, Explore, Home (all temporary scratch nav)
+ *   Splash -> Home if a session is already restored, otherwise Welcome
  *   Welcome -> Home (Google/GitHub SSO handles both sign-in and sign-up -
  *           there's no separate Login/Register flow)
  *   Home -> renders MainNavShell, which owns its own nested NavHost for
@@ -16,6 +17,7 @@ package com.waypoint.app.core.navigation
  */
 object Routes {
     const val Main = "main"
+    const val Splash = "splash"
     const val Welcome = "welcome"
     const val Home = "home"
     const val NewTrip = "new_trip"

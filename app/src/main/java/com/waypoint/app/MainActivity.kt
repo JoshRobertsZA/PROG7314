@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -62,6 +63,7 @@ import com.waypoint.app.features.newtrip.ui.NewTripScreen
 import com.waypoint.app.features.notifications.ui.NotificationsScreen
 import com.waypoint.app.features.placedetail.ui.PlaceDetailScreen
 import com.waypoint.app.features.settings.ui.SettingsScreen
+import com.waypoint.app.features.splash.ui.SplashScreen
 import com.waypoint.app.features.tripcalendar.ui.TripCalendarScreen
 import com.waypoint.app.features.viewitinerary.ui.ViewItineraryScreen
 import com.waypoint.app.features.welcome.WelcomeScreen
@@ -83,6 +85,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -140,14 +143,31 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         }
     }
 
-    // Skip straight past onboarding if Firebase already has a session
-    // from a previous launch (e.g. app was killed and reopened).
+    // The splash screen's entrance animation and the Firebase session
+    // restore race each other - only leave the splash route once BOTH are
+    // done, so it never flashes Welcome before jumping to Home for an
+    // already-signed-in user.
+    var sessionRestored by remember { mutableStateOf(false) }
+    var splashAnimationDone by remember { mutableStateOf(false) }
+    var hasLeftSplash by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         authViewModel.restoreSessionIfSignedIn()
-        if (AuthRepository.isSignedIn) {
-            armBiometricLockIfNeeded()
-            navController.navigate(Routes.Home) {
-                popUpTo(Routes.Welcome) { inclusive = true }
+        sessionRestored = true
+    }
+
+    LaunchedEffect(sessionRestored, splashAnimationDone) {
+        if (sessionRestored && splashAnimationDone && !hasLeftSplash) {
+            hasLeftSplash = true
+            if (AuthRepository.isSignedIn) {
+                armBiometricLockIfNeeded()
+                navController.navigate(Routes.Home) {
+                    popUpTo(Routes.Splash) { inclusive = true }
+                }
+            } else {
+                navController.navigate(Routes.Welcome) {
+                    popUpTo(Routes.Splash) { inclusive = true }
+                }
             }
         }
     }
@@ -168,8 +188,11 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
 
     NavHost(
         navController = navController,
-        startDestination = Routes.Welcome,
+        startDestination = Routes.Splash,
     ) {
+        composable(Routes.Splash) {
+            SplashScreen(onFinished = { splashAnimationDone = true })
+        }
         composable(Routes.Main) {
             MainScreen(
                 onGoToWelcomeClick = { navController.navigate(Routes.Welcome) },
