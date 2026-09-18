@@ -60,6 +60,14 @@
     <string name="view_itinerary_no_places">No places added</string>
     <string name="view_itinerary_open_pdf_cd">Open PDF</string>
     <string name="calendar_edit_itinerary">Edit itinerary</string>
+    <string name="calendar_edit_dates">Edit dates</string>
+    <string name="calendar_delete_trip">Delete trip</string>
+    <string name="calendar_delete_confirm_title">Delete this trip?</string>
+    <string name="calendar_delete_confirm_body">%1$s and its itinerary will be removed. This can\'t be undone.</string>
+    <string name="calendar_edit_dates_title">Change trip dates</string>
+    <string name="calendar_edit_dates_pick_start">Tap the new start date</string>
+    <string name="calendar_edit_dates_pick_end">Now tap the end date, then save</string>
+    <string name="common_cancel">Cancel</string>
 
     <!-- Home screen (Figma node 47:30, "03 Waypoint — Home").
          Reuses login_brand_name / login_tagline for the header, since the

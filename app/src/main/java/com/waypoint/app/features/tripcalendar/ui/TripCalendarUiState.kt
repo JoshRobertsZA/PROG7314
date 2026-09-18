@@ -25,6 +25,13 @@ data class TripCalendarUiState(
     // Edit name dialog
     val showNameDialog: Boolean = false,
     val nameInput: String = "",
+    // Delete / edit-dates modals
+    val showDeleteConfirm: Boolean = false,
+    val showEditDates: Boolean = false,
+    val editStart: LocalDate? = null,
+    val editEnd: LocalDate? = null,
+    val editMonth: YearMonth = YearMonth.now(),
+    val deleted: Boolean = false,
     // Destination search
     val showDestSearch: Boolean = false,
     val isGeocodingDest: Boolean = false,

@@ -42,6 +42,14 @@
     <string name="calendar_back_cd">Emva</string>
     <string name="calendar_view_itinerary">Jonga icwecwe lohambo</string>
     <string name="calendar_edit_itinerary">Hlela icwecwe lohambo</string>
+    <string name="calendar_edit_dates">Hlela imihla</string>
+    <string name="calendar_delete_trip">Cima uhambo</string>
+    <string name="calendar_delete_confirm_title">Cima olu hambo?</string>
+    <string name="calendar_delete_confirm_body">%1$s kunye nohlelo lwayo iya kususwa. Oku akunakubuyiselwa.</string>
+    <string name="calendar_edit_dates_title">Tshintsha imihla yohambo</string>
+    <string name="calendar_edit_dates_pick_start">Cofa umhla omtsha wokuqala</string>
+    <string name="calendar_edit_dates_pick_end">Ngoku cofa umhla wokuphela, uze ugcine</string>
+    <string name="common_cancel">Rhoxisa</string>
 
     <string name="home_settings_cd">Iisethingi</string>
     <string name="home_upcoming_trip_label">UHAMBO OLUZAYO</string>

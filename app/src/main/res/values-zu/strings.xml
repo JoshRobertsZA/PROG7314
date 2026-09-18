@@ -43,6 +43,14 @@
     <string name="calendar_back_cd">Emuva</string>
     <string name="calendar_view_itinerary">Buka uhlelo lohambo</string>
     <string name="calendar_edit_itinerary">Hlela uhlelo lohambo</string>
+    <string name="calendar_edit_dates">Hlela izinsuku</string>
+    <string name="calendar_delete_trip">Susa uhambo</string>
+    <string name="calendar_delete_confirm_title">Susa lolu hambo?</string>
+    <string name="calendar_delete_confirm_body">%1$s kanye nohlelo lwalo kuzosuswa. Lokhu akunakuhlehliswa.</string>
+    <string name="calendar_edit_dates_title">Shintsha izinsuku zohambo</string>
+    <string name="calendar_edit_dates_pick_start">Thepha usuku olusha lokuqala</string>
+    <string name="calendar_edit_dates_pick_end">Manje thepha usuku lokuphela, bese ulondoloza</string>
+    <string name="common_cancel">Khansela</string>
 
     <string name="home_settings_cd">Izilungiselelo</string>
     <string name="home_upcoming_trip_label">UHAMBO OLUZAYO</string>

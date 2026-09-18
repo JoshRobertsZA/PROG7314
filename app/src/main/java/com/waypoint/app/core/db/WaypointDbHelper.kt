@@ -21,6 +21,14 @@ import android.database.sqlite.SQLiteOpenHelper
 class WaypointDbHelper private constructor(context: Context) :
     SQLiteOpenHelper(context.applicationContext, DB_NAME, null, DB_VERSION) {
 
+    // The itinerary tables declare ON DELETE CASCADE, but SQLite ignores
+    // FK constraints unless enabled per connection - without this, deleting
+    // a trip would strand its days/flights/lodging/places rows.
+    override fun onConfigure(db: SQLiteDatabase) {
+        super.onConfigure(db)
+        db.setForeignKeyConstraintsEnabled(true)
+    }
+
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(CREATE_ACCOUNTS)
         db.execSQL(CREATE_TRIPS)

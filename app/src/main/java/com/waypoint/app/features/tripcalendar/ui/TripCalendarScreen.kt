@@ -57,6 +57,13 @@ import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
 import com.waypoint.app.core.theme.White
 import com.waypoint.app.features.home.ui.CitySearchDialog
+import com.waypoint.app.features.newtrip.ui.CalendarGrid
+import com.waypoint.app.features.newtrip.ui.NewTripUiState
+import androidx.compose.ui.window.Dialog
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.waypoint.app.core.theme.RadiusDeco
+import com.waypoint.app.core.theme.WaypointCard
+import com.waypoint.app.core.theme.WaypointLogoutBorder
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -103,6 +110,75 @@ fun TripCalendarScreen(
     // Re-read on every return to this screen so counts reflect documents
     // added or removed in Edit Itinerary (the ViewModel survives that push).
     LaunchedEffect(Unit) { viewModel.loadTrip() }
+
+    // Leave the screen once the trip is gone.
+    LaunchedEffect(uiState.deleted) { if (uiState.deleted) onBackClick() }
+
+    if (uiState.showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { viewModel.onDeleteDismiss() },
+            title = { Text(stringResource(R.string.calendar_delete_confirm_title)) },
+            text  = { Text(stringResource(R.string.calendar_delete_confirm_body, uiState.tripName)) },
+            confirmButton = {
+                Text(
+                    text = stringResource(R.string.calendar_delete_trip),
+                    color = WaypointTerracotta, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { viewModel.onDeleteConfirm() }.padding(8.dp),
+                )
+            },
+            dismissButton = {
+                Text(
+                    text = stringResource(R.string.common_cancel),
+                    color = WaypointTextMuted,
+                    modifier = Modifier.clickable { viewModel.onDeleteDismiss() }.padding(8.dp),
+                )
+            },
+            containerColor = WaypointCard,
+        )
+    }
+
+    if (uiState.showEditDates) {
+        Dialog(onDismissRequest = { viewModel.onEditDatesDismiss() }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(WaypointCard, RoundedCornerShape(RadiusDeco))
+                    .padding(horizontal = 18.dp, vertical = 20.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.calendar_edit_dates_title),
+                    color = WaypointTextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = stringResource(
+                        if (uiState.editStart == null) R.string.calendar_edit_dates_pick_start
+                        else R.string.calendar_edit_dates_pick_end
+                    ),
+                    color = WaypointTextMuted, fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
+                )
+                // CalendarGrid already greys out and ignores days before today,
+                // which is the "start can't be in the past" rule.
+                CalendarGrid(
+                    uiState = NewTripUiState(
+                        displayMonth = uiState.editMonth,
+                        startDate = uiState.editStart,
+                        endDate = uiState.editEnd,
+                    ),
+                    onDayTapped = viewModel::onEditDayTapped,
+                    onPrevMonth = viewModel::onEditPrevMonth,
+                    onNextMonth = viewModel::onEditNextMonth,
+                    onHeaderTap = {},
+                )
+                AppButtonFilled(
+                    text = stringResource(R.string.modal_save_button),
+                    onClick = { viewModel.onEditDatesSave() },
+                    enabled = uiState.editStart != null,
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                )
+            }
+        }
+    }
 
     LaunchedEffect(navTarget) {
         when (val t = navTarget) {
@@ -379,6 +455,23 @@ fun TripCalendarScreen(
             AppButtonFilled(
                 text = stringResource(R.string.calendar_edit_itinerary),
                 onClick = { viewModel.onEditItineraryClick() },
+                modifier = Modifier.weight(1f).padding(start = 12.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 14.dp),
+            )
+        }
+
+        // Trip management: change dates / delete (confirmed via dialog above)
+        Row(modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 4.dp)) {
+            AppButtonOutline(
+                text = stringResource(R.string.calendar_edit_dates),
+                onClick = { viewModel.onEditDatesClick() },
+                modifier = Modifier.weight(1f),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 14.dp),
+            )
+            AppButtonOutline(
+                text = stringResource(R.string.calendar_delete_trip),
+                onClick = { viewModel.onDeleteClick() },
+                borderColor = WaypointLogoutBorder,
                 modifier = Modifier.weight(1f).padding(start = 12.dp),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 14.dp),
             )

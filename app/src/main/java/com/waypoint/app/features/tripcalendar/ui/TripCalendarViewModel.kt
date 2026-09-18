@@ -173,6 +173,53 @@ class TripCalendarViewModel(
         }
     }
 
+    // ── Delete trip ───────────────────────────────────────────────────────────
+
+    fun onDeleteClick()   { _uiState.update { it.copy(showDeleteConfirm = true) } }
+    fun onDeleteDismiss() { _uiState.update { it.copy(showDeleteConfirm = false) } }
+
+    fun onDeleteConfirm() {
+        viewModelScope.launch {
+            repo.deleteTrip(tripId, SessionManager.accountId)
+            _uiState.update { it.copy(showDeleteConfirm = false, deleted = true) }
+        }
+    }
+
+    // ── Edit dates ────────────────────────────────────────────────────────────
+
+    fun onEditDatesClick() {
+        _uiState.update {
+            it.copy(showEditDates = true, editStart = null, editEnd = null,
+                    editMonth = it.startDate?.let { d -> YearMonth.from(d) } ?: YearMonth.now())
+        }
+    }
+    fun onEditDatesDismiss() { _uiState.update { it.copy(showEditDates = false) } }
+    fun onEditPrevMonth()    { _uiState.update { it.copy(editMonth = it.editMonth.minusMonths(1)) } }
+    fun onEditNextMonth()    { _uiState.update { it.copy(editMonth = it.editMonth.plusMonths(1)) } }
+
+    /** First tap = start, second = end (swapped if earlier), third starts over. */
+    fun onEditDayTapped(date: LocalDate) {
+        _uiState.update { s ->
+            when {
+                s.editStart == null || s.editEnd != null -> s.copy(editStart = date, editEnd = null)
+                date < s.editStart                       -> s.copy(editStart = date, editEnd = s.editStart)
+                else                                     -> s.copy(editEnd = date)
+            }
+        }
+    }
+
+    fun onEditDatesSave() {
+        val s = _uiState.value
+        val start = s.editStart ?: return
+        val end   = s.editEnd ?: start
+        viewModelScope.launch {
+            repo.updateTripDates(tripId, start.toString(), end.toString())
+            itineraryRepo.removeDaysOutside(tripId, start, end)
+            _uiState.update { it.copy(showEditDates = false) }
+            loadTrip()
+        }
+    }
+
     /** Called by the screen after it has acted on [navTarget] to clear the event. */
     fun onNavConsumed() { _navTarget.value = null }
 

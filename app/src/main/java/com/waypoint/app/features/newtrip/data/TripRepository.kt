@@ -149,6 +149,16 @@ class TripRepository(context: Context) {
         )
     }
 
+    /** Change a trip's date range (both "yyyy-MM-dd"). */
+    suspend fun updateTripDates(id: String, startDate: String, endDate: String) = withContext(Dispatchers.IO) {
+        val cv = ContentValues().apply {
+            put(COL_TRIP_START,   startDate)
+            put(COL_TRIP_END,     endDate)
+            put(COL_TRIP_UPDATED, System.currentTimeMillis())
+        }
+        db.writableDatabase.update(TABLE_TRIPS, cv, "$COL_TRIP_ID = ?", arrayOf(id))
+    }
+
     /**
      * Returns a single trip by its UUID, or null if not found.
      * Used by PlacePickerViewModel to resolve the trip's destination coords.

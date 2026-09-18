@@ -82,6 +82,19 @@ class ItineraryRepository(context: Context) {
     /**
      * Returns the saved selected days for [tripId], sorted ascending.
      */
+    /**
+     * After a trip's dates change, drop selected days that no longer fall
+     * inside the range. Flights/places on those days go with them (CASCADE).
+     */
+    suspend fun removeDaysOutside(tripId: String, start: LocalDate, end: LocalDate) =
+        withContext(Dispatchers.IO) {
+            db.writableDatabase.delete(
+                WaypointDbHelper.TABLE_ITIN_DAYS,
+                "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ? AND (${WaypointDbHelper.COL_IDAY_DATE} < ? OR ${WaypointDbHelper.COL_IDAY_DATE} > ?)",
+                arrayOf(tripId, start.toString(), end.toString()),
+            )
+        }
+
     suspend fun getSelectedDays(tripId: String): List<LocalDate> =
         withContext(Dispatchers.IO) {
             val read = db.readableDatabase
