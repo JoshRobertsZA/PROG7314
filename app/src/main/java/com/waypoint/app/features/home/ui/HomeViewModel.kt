@@ -9,6 +9,7 @@ import com.waypoint.app.core.secrets.RemoteSecrets
 import com.waypoint.app.features.explore.data.LocationIQRepository
 import com.waypoint.app.features.home.data.CurrencyRepository
 import com.waypoint.app.features.home.data.WeatherRepository
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,43 +63,54 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun selectCity(city: String) {
         prefs.edit().putString(KEY_CITY, city).apply()
         _uiState.update { it.copy(selectedCity = city) }
-        loadWeather(city)
+        viewModelScope.launch { loadWeather(city) }
     }
 
     fun selectFromCurrency(code: String) {
         prefs.edit().putString(KEY_CURRENCY, code).apply()
         _uiState.update { it.copy(selectedFromCurrency = code) }
-        loadCurrency(code)
+        viewModelScope.launch { loadCurrency(code) }
     }
 
-    fun refreshWeather()  = loadWeather(_uiState.value.selectedCity)
-    fun refreshCurrency() = loadCurrency(_uiState.value.selectedFromCurrency)
+    fun refreshWeather()  = viewModelScope.launch { loadWeather(_uiState.value.selectedCity) }
+    fun refreshCurrency() = viewModelScope.launch { loadCurrency(_uiState.value.selectedFromCurrency) }
+
+    /**
+     * Pull-to-refresh entry point (HomeScreen's PullToRefreshBox). Re-fetches
+     * weather, currency, and (if a GPS fix already exists) nearby places
+     * concurrently, and suspends until all three finish so the caller can
+     * drive a refresh spinner off it. A successful fetch here is also the de
+     * facto "are we back online" check - no separate connectivity probe is
+     * needed since rememberIsOnline() already reflects real connectivity live.
+     */
+    suspend fun refresh() = coroutineScope {
+        val s = _uiState.value
+        launch { loadWeather(s.selectedCity) }
+        launch { loadCurrency(s.selectedFromCurrency) }
+        s.location?.let { loc -> launch { loadNearbyPlaces(loc.lat, loc.lng) } }
+    }
 
     // ── Private helpers ────────────────────────────────────────────────────────
 
-    private fun loadWeather(city: String) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(weather = WeatherState.Loading) }
-            val result = WeatherRepository.getWeather(city)
-            _uiState.update {
-                it.copy(
-                    weather = if (result != null) WeatherState.Success(result)
-                              else WeatherState.Error,
-                )
-            }
+    private suspend fun loadWeather(city: String) {
+        _uiState.update { it.copy(weather = WeatherState.Loading) }
+        val result = WeatherRepository.getWeather(city)
+        _uiState.update {
+            it.copy(
+                weather = if (result != null) WeatherState.Success(result)
+                          else WeatherState.Error,
+            )
         }
     }
 
-    private fun loadCurrency(fromCode: String) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(currency = CurrencyState.Loading) }
-            val result = CurrencyRepository.getRate(fromCode)
-            _uiState.update {
-                it.copy(
-                    currency = if (result != null) CurrencyState.Success(result)
-                               else CurrencyState.Error,
-                )
-            }
+    private suspend fun loadCurrency(fromCode: String) {
+        _uiState.update { it.copy(currency = CurrencyState.Loading) }
+        val result = CurrencyRepository.getRate(fromCode)
+        _uiState.update {
+            it.copy(
+                currency = if (result != null) CurrencyState.Success(result)
+                           else CurrencyState.Error,
+            )
         }
     }
 
@@ -116,17 +128,15 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun loadNearbyPlaces(lat: Double, lon: Double) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(nearbyPlaces = NearbyState.Loading) }
-            val result = LocationIQRepository.getPlacesByCoords(lat, lon)
-            _uiState.update {
-                it.copy(
-                    nearbyPlaces = if (result != null && result.places.isNotEmpty())
-                        NearbyState.Success(result.places.take(3))
-                    else NearbyState.Error,
-                )
-            }
+    private suspend fun loadNearbyPlaces(lat: Double, lon: Double) {
+        _uiState.update { it.copy(nearbyPlaces = NearbyState.Loading) }
+        val result = LocationIQRepository.getPlacesByCoords(lat, lon)
+        _uiState.update {
+            it.copy(
+                nearbyPlaces = if (result != null && result.places.isNotEmpty())
+                    NearbyState.Success(result.places.take(3))
+                else NearbyState.Error,
+            )
         }
     }
 }
