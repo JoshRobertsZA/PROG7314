@@ -51,7 +51,7 @@ fun TabHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = stringResource(R.string.login_brand_name),
+            text = stringResource(R.string.brand_name),
             color = WaypointTerracotta,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,

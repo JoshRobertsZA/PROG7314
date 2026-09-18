@@ -3,9 +3,10 @@ package com.waypoint.app.core.navigation
 /**
  * Route constants for the top-level flat NavHost hosted in MainActivity:
  *
- *   Main -> Login, TripCalendar, ViewItinerary, EditItinerary, AllTrips,
+ *   Main -> TripCalendar, ViewItinerary, EditItinerary, AllTrips,
  *           Settings, Explore, Home (all temporary scratch nav)
- *   Login -> Register, Home
+ *   Welcome -> Home (Google/GitHub SSO handles both sign-in and sign-up -
+ *           there's no separate Login/Register flow)
  *   Home -> renders MainNavShell, which owns its own nested NavHost for
  *           the Home/Trips/Explore/Profile tabs (see MainNavShell.kt) -
  *           NewTrip is pushed on the top-level controller from inside it,
@@ -16,8 +17,6 @@ package com.waypoint.app.core.navigation
 object Routes {
     const val Main = "main"
     const val Welcome = "welcome"
-    const val Login = "login"
-    const val Register = "register"
     const val Home = "home"
     const val NewTrip = "new_trip"
     const val TripCalendar = "trip_calendar/{tripId}"
