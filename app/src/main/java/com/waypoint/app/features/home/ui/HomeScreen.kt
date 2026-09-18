@@ -188,50 +188,73 @@ fun HomeScreen(
                 modifier = Modifier.padding(top = 22.dp),
             )
 
-            // Upcoming trip card (mock content until trips feature is built)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 22.dp)
-                    .background(WaypointTerracotta, RoundedCornerShape(RadiusHero))
-                    .padding(18.dp),
-            ) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            text = stringResource(R.string.home_upcoming_trip_label),
-                            color = WaypointTripLabel,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Box(
-                            modifier = Modifier
-                                .background(WaypointCard, RoundedCornerShape(20.dp))
-                                .padding(horizontal = 10.dp, vertical = 4.dp),
+            // Upcoming / ongoing trip card — live from DB via HomeViewModel
+            val featuredTrip = state.upcomingTrip
+            if (featuredTrip != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 22.dp)
+                        .background(WaypointTerracotta, RoundedCornerShape(RadiusHero))
+                        .padding(18.dp),
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             Text(
-                                text = "In 8 days",
-                                color = WaypointTripBadgeText,
-                                fontSize = 10.sp,
+                                text = stringResource(
+                                    if (featuredTrip.status == com.waypoint.app.features.alltrips.ui.TripStatus.ONGOING)
+                                        R.string.home_ongoing_trip_label
+                                    else
+                                        R.string.home_upcoming_trip_label
+                                ),
+                                color = WaypointTripLabel,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                             )
+                            Box(
+                                modifier = Modifier
+                                    .background(WaypointCard, RoundedCornerShape(20.dp))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                            ) {
+                                Text(
+                                    text = featuredTrip.badgeText,
+                                    color = WaypointTripBadgeText,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
                         }
+                        Text(
+                            text = featuredTrip.name,
+                            color = White,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(top = 10.dp),
+                        )
+                        Text(
+                            text = "${featuredTrip.destination} · ${featuredTrip.dates}",
+                            color = WaypointDecoText,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
                     }
+                }
+            } else {
+                // No trips yet — placeholder card
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 22.dp)
+                        .background(WaypointCard, RoundedCornerShape(RadiusHero))
+                        .padding(18.dp),
+                ) {
                     Text(
-                        text = "Cape Town Getaway",
-                        color = White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 10.dp),
-                    )
-                    Text(
-                        text = "Cape Town, South Africa · Aug 2 – Aug 9",
-                        color = WaypointDecoText,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(top = 4.dp),
+                        text = "No upcoming trips — tap New Trip to get started!",
+                        color = WaypointTextMuted,
+                        fontSize = 13.sp,
                     )
                 }
             }

@@ -9,6 +9,11 @@ import com.waypoint.app.core.secrets.RemoteSecrets
 import com.waypoint.app.features.explore.data.LocationIQRepository
 import com.waypoint.app.features.home.data.CurrencyRepository
 import com.waypoint.app.features.home.data.WeatherRepository
+import com.waypoint.app.features.alltrips.ui.TripStatus
+import com.waypoint.app.features.alltrips.ui.toRow
+import com.waypoint.app.features.newtrip.data.TripRepository
+import com.waypoint.app.core.db.SessionManager
+import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,6 +58,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             val s = _uiState.value
             loadWeather(s.selectedCity)
             loadCurrency(s.selectedFromCurrency)
+            loadFeaturedTrip()
         }
         startLocationUpdates()
     }
@@ -127,6 +133,21 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     else NearbyState.Error,
                 )
             }
+        }
+    }
+
+    private fun loadFeaturedTrip() {
+        viewModelScope.launch {
+            val today     = LocalDate.now()
+            val accountId = SessionManager.accountId
+            val tripRepo  = TripRepository(getApplication())
+            val entities  = tripRepo.getTripsForAccount(accountId)
+            val rows      = entities.mapIndexed { i, e -> e.toRow(i, today) }
+            // Prefer an ongoing trip; fall back to the soonest upcoming one
+            val featured  = rows.firstOrNull { it.status == TripStatus.ONGOING }
+                ?: rows.filter { it.status == TripStatus.UPCOMING }
+                       .minByOrNull { it.dates }
+            _uiState.update { it.copy(upcomingTrip = featured) }
         }
     }
 }

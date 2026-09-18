@@ -4,6 +4,7 @@ import com.waypoint.app.core.cache.CurrencyCache
 import com.waypoint.app.core.cache.DeviceLocation
 import com.waypoint.app.core.cache.ExplorePlace
 import com.waypoint.app.core.cache.WeatherCache
+import com.waypoint.app.features.alltrips.ui.TripRow
 
 /**
  * Top-level state for the Home screen.
@@ -20,6 +21,7 @@ data class HomeUiState(
     val selectedCity: String = "Cape Town",
     val selectedFromCurrency: String = "USD",
     val nearbyPlaces: NearbyState = NearbyState.Idle,
+    val upcomingTrip: TripRow? = null,
 )
 
 sealed class WeatherState {
