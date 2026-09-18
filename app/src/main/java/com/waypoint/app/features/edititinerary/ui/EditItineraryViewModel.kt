@@ -224,4 +224,14 @@ class EditItineraryViewModel(
             _uiState.update { it.copy(placesForActiveDay = places) }
         }
     }
+
+    // ── Refresh (called when the screen re-enters composition after add-place flow) ──
+
+    fun refreshPlacesForActiveDay() {
+        val dayId = activeDayId ?: return
+        viewModelScope.launch {
+            val places = loadPlacesFor(dayId)
+            _uiState.update { it.copy(placesForActiveDay = places) }
+        }
+    }
 }

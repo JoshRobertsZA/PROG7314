@@ -78,6 +78,10 @@ fun EditItineraryScreen(
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsState()
 
+    // Reload places whenever the screen re-enters composition
+    // (e.g. returning from the add-place flow after a PlaceDetailPicker back-press).
+    LaunchedEffect(Unit) { viewModel.refreshPlacesForActiveDay() }
+
     // PDF picker launcher
     val pdfLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
