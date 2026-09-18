@@ -9,6 +9,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.waypoint.app.core.db.AccountEntity
 import com.waypoint.app.core.db.SessionManager
+import com.waypoint.app.core.secrets.RemoteSecrets
 import com.waypoint.app.features.newtrip.data.TripRepository
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +54,12 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
+                // FIREBASE_WEB_CLIENT_ID may come from the shared remote key
+                // cache rather than a local override (see apikey.properties.example),
+                // which is fetched async on app start - make sure that fetch
+                // has actually resolved before requesting a credential, so a
+                // fast tap right after launch doesn't race an empty client id.
+                RemoteSecrets.ensureLoaded()
                 val idToken = fetchGoogleIdToken(context)
                 val user = AuthRepository.signInWithGoogleIdToken(idToken)
                 applySignedInUser(user)
