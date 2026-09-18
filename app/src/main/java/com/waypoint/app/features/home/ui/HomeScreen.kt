@@ -94,6 +94,7 @@ fun HomeScreen(
     onNewTripClick: () -> Unit,
     onViewAllTripsClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onTripClick: (tripId: String) -> Unit = {},
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = viewModel(),
 ) {
@@ -215,6 +216,8 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .padding(top = 22.dp)
                         .background(WaypointTerracotta, RoundedCornerShape(RadiusHero))
+                        // Same destination as tapping this trip in All Trips.
+                        .clickable { onTripClick(featuredTrip.id) }
                         .padding(18.dp),
                 ) {
                     Column {
