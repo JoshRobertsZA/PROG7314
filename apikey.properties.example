@@ -2,11 +2,15 @@
 # real values. apikey.properties is gitignored — never commit it.
 #
 # Where each key comes from:
-#   OPENWEATHER_API_KEY  -> https://openweathermap.org/api
-#   EXCHANGERATE_API_KEY -> https://www.exchangerate-api.com/
-#   LOCATIONIQ_API_KEY   -> https://locationiq.com/
-#   AIRLABS_API_KEY      -> https://airlabs.co/
-#   COUNTERAPI_API_KEY   -> https://counterapi.dev/ (v2 requires a key)
+#   OPENWEATHER_API_KEY     -> https://openweathermap.org/api
+#   EXCHANGERATE_API_KEY    -> https://www.exchangerate-api.com/
+#   LOCATIONIQ_API_KEY      -> https://locationiq.com/
+#   AIRLABS_API_KEY         -> https://airlabs.co/
+#   COUNTERAPI_API_KEY      -> https://counterapi.dev/ (v2 requires a key)
+#   FIREBASE_WEB_CLIENT_ID  -> Firebase console -> Authentication -> Sign-in
+#                              method -> Google -> Web SDK configuration
+#                              ("Web client ID"). Also needs app/google-services.json
+#                              in place - see README for full Firebase setup steps.
 
 OPENWEATHER_API_KEY=your_key_here
 EXCHANGERATE_API_KEY=your_key_here
@@ -15,3 +19,4 @@ AIRLABS_API_KEY=your_key_here
 COUNTERAPI_API_KEY=your_key_here
 COUNTERAPI_WORKSPACE=
 COUNTERAPI_PLACES_SLUG=
+FIREBASE_WEB_CLIENT_ID=your_web_client_id_here
