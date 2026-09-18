@@ -25,7 +25,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,6 +71,7 @@ private val accentCycle = listOf(
     WaypointPlaceAccent4,
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreen(
     exploreViewModel: ExploreViewModel,
@@ -120,9 +123,15 @@ fun ExploreScreen(
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(start = 22.dp, top = 28.dp, end = 22.dp),
     ) {
-        Column(
+        PullToRefreshBox(
+            isRefreshing = state.placesState is PlacesState.Loading,
+            onRefresh = { exploreViewModel.retry() },
             modifier = Modifier
                 .weight(1f)
+                .fillMaxWidth(),
+        ) {
+        Column(
+            modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
         ) {
@@ -265,6 +274,7 @@ fun ExploreScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+        }
         }
     }
 }
