@@ -8,7 +8,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,6 +21,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -26,6 +36,10 @@ import androidx.navigation.navArgument
 import androidx.navigation.compose.rememberNavController
 import com.waypoint.app.core.auth.AuthRepository
 import com.waypoint.app.core.auth.AuthViewModel
+import com.waypoint.app.core.auth.BiometricAuthenticator
+import com.waypoint.app.core.auth.BiometricAvailability
+import com.waypoint.app.core.auth.BiometricLockOverlay
+import com.waypoint.app.core.auth.BiometricLockPreferences
 import com.waypoint.app.core.common.OfflineDialog
 import com.waypoint.app.core.connectivity.rememberIsOnline
 import com.waypoint.app.core.navigation.MainNavShell
@@ -35,6 +49,7 @@ import com.waypoint.app.core.notifications.PushTokenManager
 import com.waypoint.app.core.notifications.WelcomeNotifier
 import com.waypoint.app.core.secrets.RemoteSecrets
 import com.waypoint.app.core.theme.WaypointTheme
+import com.waypoint.app.R
 import com.waypoint.app.features.alltrips.ui.AllTripsScreen
 import com.waypoint.app.features.edititinerary.ui.EditItineraryScreen
 import com.waypoint.app.features.edititinerary.ui.EditItineraryViewModel
@@ -103,21 +118,52 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         if (isOnline) offlineDialogDismissed = false
     }
 
-    // Shared across Welcome/Login/Register - all three drive the same
-    // Firebase Google Sign-In flow, see AuthViewModel.
+    // Shared across Welcome and Register/Login-turned-SSO-only-flow - both
+    // drive the same Firebase Google/GitHub Sign-In, see AuthViewModel.
     val authViewModel: AuthViewModel = viewModel()
     val authUiState by authViewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val activity = context as FragmentActivity
+
+    // The biometric app-unlock gate (Settings' "Biometric login" toggle).
+    // Only relevant once actually signed in - there's nothing to protect
+    // before that - and only armed if the device can currently do
+    // biometric auth at all, so a change in enrollment doesn't lock
+    // someone out of an app they can no longer unlock.
+    var biometricLockActive by remember { mutableStateOf(false) }
+
+    fun armBiometricLockIfNeeded() {
+        if (BiometricLockPreferences.isEnabled(context) &&
+            BiometricAuthenticator.availability(context) == BiometricAvailability.AVAILABLE
+        ) {
+            biometricLockActive = true
+        }
+    }
 
     // Skip straight past onboarding if Firebase already has a session
     // from a previous launch (e.g. app was killed and reopened).
     LaunchedEffect(Unit) {
         authViewModel.restoreSessionIfSignedIn()
         if (AuthRepository.isSignedIn) {
+            armBiometricLockIfNeeded()
             navController.navigate(Routes.Home) {
                 popUpTo(Routes.Welcome) { inclusive = true }
             }
         }
+    }
+
+    // Re-lock every time the app is backgrounded (ON_STOP - not ON_PAUSE,
+    // which also fires for transient things like a permission dialog or
+    // pulling down the notification shade, which would be too aggressive).
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP && AuthRepository.isSignedIn) {
+                armBiometricLockIfNeeded()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     NavHost(
@@ -295,4 +341,25 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         OfflineDialog(onDismissRequest = { offlineDialogDismissed = true })
     }
 
+    AnimatedVisibility(
+        visible = biometricLockActive,
+        enter = fadeIn(animationSpec = tween(250)),
+        exit = fadeOut(animationSpec = tween(250)),
+    ) {
+        val promptTitle = stringResource(R.string.biometric_lock_prompt_title)
+        val promptSubtitle = stringResource(R.string.biometric_lock_prompt_subtitle)
+        val cancelText = stringResource(R.string.biometric_lock_cancel)
+        BiometricLockOverlay(
+            onUnlockClick = {
+                BiometricAuthenticator.authenticate(
+                    activity = activity,
+                    title = promptTitle,
+                    subtitle = promptSubtitle,
+                    negativeButtonText = cancelText,
+                    onSuccess = { biometricLockActive = false },
+                    onError = { _, _ -> /* stay locked - user can retry via the button */ },
+                )
+            },
+        )
+    }
 }
