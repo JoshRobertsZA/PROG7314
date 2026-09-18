@@ -169,4 +169,8 @@
     <string name="modal_save_button">Gcina</string>
 
     <string name="currency_modal_title">Utshintsho lwemali</string>
+
+    <!-- Push notifications (Firebase Cloud Messaging) -->
+    <string name="notification_channel_name">Uhlaziyo lohambo</string>
+    <string name="notification_channel_description">Izikhumbuzo nezilumkiso malunga neendlela zakho</string>
 </resources>

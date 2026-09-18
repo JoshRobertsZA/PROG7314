@@ -170,4 +170,8 @@
     <string name="modal_save_button">Londoloza</string>
 
     <string name="currency_modal_title">Ukushintsha imali</string>
+
+    <!-- Push notifications (Firebase Cloud Messaging) -->
+    <string name="notification_channel_name">Izibuyekezo zohambo</string>
+    <string name="notification_channel_description">Izikhumbuzi nezexwayiso ngezinhambo zakho</string>
 </resources>
