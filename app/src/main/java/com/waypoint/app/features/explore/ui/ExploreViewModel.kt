@@ -25,6 +25,24 @@ import kotlinx.coroutines.tasks.await
 private const val TAG = "ExploreVM"
 
 /**
+ * Filters a places cache down to one [ExploreFilter]. Pulled out of
+ * [ExploreViewModel] as a top-level function (rather than a private method)
+ * so unit tests can call the real filtering logic directly instead of
+ * needing an AndroidViewModel instance - see ExplorePlaceFilterTest.
+ */
+internal fun applyExploreFilter(cache: PlacesCache, filter: ExploreFilter): List<ExplorePlace> {
+    return when (filter) {
+        ExploreFilter.ALL         -> cache.places
+        ExploreFilter.RESTAURANTS -> cache.places.filter { it.type == "restaurant" }
+        ExploreFilter.CAFES       -> cache.places.filter { it.type == "cafe" }
+        ExploreFilter.HOTELS      -> cache.places.filter { it.type == "hotel" }
+        ExploreFilter.PARKS       -> cache.places.filter { it.type == "park" }
+        ExploreFilter.PUBS        -> cache.places.filter { it.type == "pub" }
+        ExploreFilter.CINEMAS     -> cache.places.filter { it.type == "cinema" }
+    }
+}
+
+/**
  * ViewModel for the Explore screen.
  *
  * Uses the device's current GPS location to fetch nearby places via
@@ -61,7 +79,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     state.copy(
                         locationLabel = city,
                         placesState   = PlacesState.Success(result),
-                        visiblePlaces = applyFilter(result, state.activeFilter),
+                        visiblePlaces = applyExploreFilter(result, state.activeFilter),
                     )
                 } else {
                     state.copy(placesState = PlacesState.Error)
@@ -76,7 +94,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         _uiState.update {
             it.copy(
                 activeFilter  = filter,
-                visiblePlaces = applyFilter(cache, filter),
+                visiblePlaces = applyExploreFilter(cache, filter),
             )
         }
     }
@@ -141,7 +159,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 if (result != null) {
                     state.copy(
                         placesState   = PlacesState.Success(result),
-                        visiblePlaces = applyFilter(result, state.activeFilter),
+                        visiblePlaces = applyExploreFilter(result, state.activeFilter),
                     )
                 } else {
                     state.copy(placesState = PlacesState.Error)
@@ -150,18 +168,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         } catch (e: Exception) {
             Log.w(TAG, "GPS/places fetch failed: ${e.message}")
             _uiState.update { it.copy(placesState = PlacesState.Error) }
-        }
-    }
-
-    private fun applyFilter(cache: PlacesCache, filter: ExploreFilter): List<ExplorePlace> {
-        return when (filter) {
-            ExploreFilter.ALL         -> cache.places
-            ExploreFilter.RESTAURANTS -> cache.places.filter { it.type == "restaurant" }
-            ExploreFilter.CAFES       -> cache.places.filter { it.type == "cafe" }
-            ExploreFilter.HOTELS      -> cache.places.filter { it.type == "hotel" }
-            ExploreFilter.PARKS       -> cache.places.filter { it.type == "park" }
-            ExploreFilter.PUBS        -> cache.places.filter { it.type == "pub" }
-            ExploreFilter.CINEMAS     -> cache.places.filter { it.type == "cinema" }
         }
     }
 }
