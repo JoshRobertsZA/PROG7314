@@ -15,6 +15,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import com.example.prog7314.features.edititinerary.data.ItineraryRepository
 
 class TripCalendarViewModel(
     app: Application,
@@ -23,9 +24,18 @@ class TripCalendarViewModel(
 
     private val tripId: String = checkNotNull(savedStateHandle["tripId"])
     private val repo = TripRepository(app)
+    private val itineraryRepo = ItineraryRepository(app)
 
     private val _uiState = MutableStateFlow(TripCalendarUiState())
     val uiState: StateFlow<TripCalendarUiState> = _uiState
+
+    sealed interface ItineraryNavTarget {
+        data class EditItinerary(val tripId: String) : ItineraryNavTarget
+        data class ViewItinerary(val tripId: String) : ItineraryNavTarget
+    }
+
+    private val _navTarget = MutableStateFlow<ItineraryNavTarget?>(null)
+    val navTarget: StateFlow<ItineraryNavTarget?> = _navTarget
 
     private val shortFmt = DateTimeFormatter.ofPattern("MMM d")
     private val longFmt  = DateTimeFormatter.ofPattern("MMM d, yyyy")
@@ -119,6 +129,31 @@ class TripCalendarViewModel(
             it.copy(selectedDays = if (date in current) current - date else current + date)
         }
     }
+
+    // ── Itinerary navigation ──────────────────────────────────────────────────
+
+    /** Persists the current day selection, then signals navigation to Edit Itinerary. */
+    fun onEditItineraryClick() {
+        val id   = _uiState.value.tripId
+        val days = _uiState.value.selectedDays
+        viewModelScope.launch {
+            itineraryRepo.replaceSelectedDays(id, days)
+            _navTarget.value = ItineraryNavTarget.EditItinerary(id)
+        }
+    }
+
+    /** Persists the current day selection, then signals navigation to View Itinerary. */
+    fun onViewItineraryClick() {
+        val id   = _uiState.value.tripId
+        val days = _uiState.value.selectedDays
+        viewModelScope.launch {
+            itineraryRepo.replaceSelectedDays(id, days)
+            _navTarget.value = ItineraryNavTarget.ViewItinerary(id)
+        }
+    }
+
+    /** Called by the screen after it has acted on [navTarget] to clear the event. */
+    fun onNavConsumed() { _navTarget.value = null }
 
     fun onDestinationSelected(name: String) {
         _uiState.update { it.copy(showDestSearch = false, destination = name, isGeocodingDest = true) }

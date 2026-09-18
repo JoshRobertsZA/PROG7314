@@ -23,6 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -82,12 +83,27 @@ private fun buildCalendarGrid(
 @Composable
 fun TripCalendarScreen(
     onBackClick: () -> Unit,
-    onEditItineraryClick: () -> Unit = {},
-    onViewItineraryClick: () -> Unit = {},
+    onEditItineraryClick: (tripId: String) -> Unit = {},
+    onViewItineraryClick: (tripId: String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: TripCalendarViewModel = viewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val navTarget by viewModel.navTarget.collectAsState()
+
+    LaunchedEffect(navTarget) {
+        when (val t = navTarget) {
+            is TripCalendarViewModel.ItineraryNavTarget.EditItinerary -> {
+                onEditItineraryClick(t.tripId)
+                viewModel.onNavConsumed()
+            }
+            is TripCalendarViewModel.ItineraryNavTarget.ViewItinerary -> {
+                onViewItineraryClick(t.tripId)
+                viewModel.onNavConsumed()
+            }
+            null -> Unit
+        }
+    }
 
     // Destination search overlay
     if (uiState.showDestSearch) {
@@ -316,13 +332,13 @@ fun TripCalendarScreen(
         Row(modifier = Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 4.dp)) {
             AppButtonOutline(
                 text = stringResource(R.string.calendar_view_itinerary),
-                onClick = onViewItineraryClick,
+                onClick = { viewModel.onViewItineraryClick() },
                 modifier = Modifier.weight(1f),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 14.dp),
             )
             AppButtonFilled(
                 text = stringResource(R.string.calendar_edit_itinerary),
-                onClick = onEditItineraryClick,
+                onClick = { viewModel.onEditItineraryClick() },
                 modifier = Modifier.weight(1f).padding(start = 12.dp),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 14.dp),
             )
