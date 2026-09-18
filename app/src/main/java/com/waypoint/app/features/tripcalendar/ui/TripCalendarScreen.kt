@@ -20,8 +20,15 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.remember
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -90,6 +97,8 @@ fun TripCalendarScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val navTarget by viewModel.navTarget.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(navTarget) {
         when (val t = navTarget) {
@@ -104,6 +113,29 @@ fun TripCalendarScreen(
             null -> Unit
         }
     }
+
+    LaunchedEffect(uiState.showNoDaysError) {
+        if (uiState.showNoDaysError) {
+            scope.launch {
+                snackbarHostState.showSnackbar("Select at least one day to continue")
+            }
+            viewModel.onNoDaysErrorShown()
+        }
+    }
+
+    Scaffold(
+        containerColor = WaypointCream,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = WaypointTextPrimary,
+                    contentColor = WaypointCream,
+                )
+            }
+        },
+    ) { _ ->
 
     // Destination search overlay
     if (uiState.showDestSearch) {
@@ -344,7 +376,9 @@ fun TripCalendarScreen(
             )
         }
     }
-}
+    } // end Scaffold
+
+} // end TripCalendarScreen
 
 @Composable
 private fun OverviewCard(

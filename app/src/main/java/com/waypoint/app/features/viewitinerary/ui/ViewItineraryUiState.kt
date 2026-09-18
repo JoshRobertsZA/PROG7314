@@ -30,6 +30,9 @@ data class ViewPlaceItem(
     val name: String,
     val category: String,
     val note: String?,
+    val lat: Double? = null,
+    val lng: Double? = null,
+    val photoUrl: String? = null,
 )
 
 data class ViewItineraryUiState(
@@ -40,4 +43,5 @@ data class ViewItineraryUiState(
     val lodging: ViewLodgingItem? = null,
     val carRental: ViewCarRentalItem? = null,
     val placesForActiveDay: Map<String, List<ViewPlaceItem>> = emptyMap(),
+    val selectedPlace: ViewPlaceItem? = null,
 )

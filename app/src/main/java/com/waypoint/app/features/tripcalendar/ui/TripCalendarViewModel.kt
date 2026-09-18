@@ -132,28 +132,39 @@ class TripCalendarViewModel(
 
     // ── Itinerary navigation ──────────────────────────────────────────────────
 
-    /** Persists the current day selection, then signals navigation to Edit Itinerary. */
+    /** Persists the current day selection, then signals navigation to Edit Itinerary.
+     *  Shows an error snackbar and does nothing if no days are selected. */
     fun onEditItineraryClick() {
-        val id   = _uiState.value.tripId
-        val days = _uiState.value.selectedDays
+        val state = _uiState.value
+        if (state.selectedDays.isEmpty()) {
+            _uiState.update { it.copy(showNoDaysError = true) }
+            return
+        }
         viewModelScope.launch {
-            itineraryRepo.replaceSelectedDays(id, days)
-            _navTarget.value = ItineraryNavTarget.EditItinerary(id)
+            itineraryRepo.replaceSelectedDays(state.tripId, state.selectedDays)
+            _navTarget.value = ItineraryNavTarget.EditItinerary(state.tripId)
         }
     }
 
-    /** Persists the current day selection, then signals navigation to View Itinerary. */
+    /** Persists the current day selection, then signals navigation to View Itinerary.
+     *  Shows an error snackbar and does nothing if no days are selected. */
     fun onViewItineraryClick() {
-        val id   = _uiState.value.tripId
-        val days = _uiState.value.selectedDays
+        val state = _uiState.value
+        if (state.selectedDays.isEmpty()) {
+            _uiState.update { it.copy(showNoDaysError = true) }
+            return
+        }
         viewModelScope.launch {
-            itineraryRepo.replaceSelectedDays(id, days)
-            _navTarget.value = ItineraryNavTarget.ViewItinerary(id)
+            itineraryRepo.replaceSelectedDays(state.tripId, state.selectedDays)
+            _navTarget.value = ItineraryNavTarget.ViewItinerary(state.tripId)
         }
     }
 
     /** Called by the screen after it has acted on [navTarget] to clear the event. */
     fun onNavConsumed() { _navTarget.value = null }
+
+    /** Called by the screen after the "no days selected" snackbar has been shown. */
+    fun onNoDaysErrorShown() { _uiState.update { it.copy(showNoDaysError = false) } }
 
     fun onDestinationSelected(name: String) {
         _uiState.update { it.copy(showDestSearch = false, destination = name, isGeocodingDest = true) }

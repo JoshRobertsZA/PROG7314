@@ -17,12 +17,16 @@ class EditItineraryViewModel(
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
 
-    private val tripId: String = checkNotNull(savedStateHandle["tripId"])
+    val tripId: String = checkNotNull(savedStateHandle["tripId"])
 
     private val repo = ItineraryRepository(application)
 
     private val _uiState = MutableStateFlow(EditItineraryUiState())
     val uiState: StateFlow<EditItineraryUiState> = _uiState.asStateFlow()
+
+    /** The Room ID of the currently displayed day, or null when days haven't loaded yet. */
+    val activeDayId: String?
+        get() = _uiState.value.days.getOrNull(_uiState.value.activeDayIndex)?.dayId
 
     init {
         loadAll()
@@ -73,7 +77,7 @@ class EditItineraryViewModel(
         }
 
     private suspend fun loadPlacesFor(dayId: String): Map<String, List<PlaceItem>> {
-        val itinCategories = listOf("HOTELS", "PARKS", "PUBS", "CINEMAS")
+        val itinCategories = listOf("RESTAURANTS", "HOTELS", "PARKS", "PUBS", "CINEMAS")
         val all = repo.getPlacesForDay(dayId).map { p ->
             PlaceItem(
                 id       = p.id,
@@ -217,6 +221,16 @@ class EditItineraryViewModel(
         viewModelScope.launch {
             repo.deletePlace(placeId)
             val places = loadPlacesFor(activeDayId)
+            _uiState.update { it.copy(placesForActiveDay = places) }
+        }
+    }
+
+    // ── Refresh (called when the screen re-enters composition after add-place flow) ──
+
+    fun refreshPlacesForActiveDay() {
+        val dayId = activeDayId ?: return
+        viewModelScope.launch {
+            val places = loadPlacesFor(dayId)
             _uiState.update { it.copy(placesForActiveDay = places) }
         }
     }

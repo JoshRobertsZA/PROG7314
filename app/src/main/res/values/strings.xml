@@ -78,6 +78,7 @@
          real/dynamic values set from code once the backend is wired up. -->
     <string name="home_settings_cd">Settings</string>
     <string name="home_upcoming_trip_label">UPCOMING TRIP</string>
+    <string name="home_ongoing_trip_label">ONGOING TRIP</string>
     <string name="home_view_all_trips">View all trips</string>
     <string name="home_new_trip">+ New trip</string>
     <string name="home_nearby_places_title">Nearby places</string>
