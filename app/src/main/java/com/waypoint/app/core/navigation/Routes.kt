@@ -31,4 +31,8 @@ object Routes {
     const val Settings = "settings"
     const val Notifications = "notifications"
     const val PlaceDetail = "place_detail"
+    const val PlacePicker = "place_picker/{tripId}/{dayId}/{category}"
+    fun placePicker(tripId: String, dayId: String, category: String) = "place_picker/$tripId/$dayId/$category"
+    const val PlaceDetailPicker = "place_detail_picker/{tripId}/{dayId}/{category}/{placeId}"
+    fun placeDetailPicker(tripId: String, dayId: String, category: String, placeId: String) = "place_detail_picker/$tripId/$dayId/$category/$placeId"
 }

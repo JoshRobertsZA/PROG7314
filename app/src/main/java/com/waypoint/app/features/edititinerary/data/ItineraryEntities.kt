@@ -56,5 +56,6 @@ data class PlaceEntity(
     val lat: Double?,
     val lng: Double?,
     val note: String?,
+    val photoUrl: String? = null,
     val createdAtMs: Long,
 )

@@ -22,7 +22,7 @@ class ViewItineraryViewModel(
     private val _uiState = MutableStateFlow(ViewItineraryUiState())
     val uiState: StateFlow<ViewItineraryUiState> = _uiState.asStateFlow()
 
-    private val itinCategories = listOf("HOTELS", "PARKS", "PUBS", "CINEMAS")
+    private val itinCategories = listOf("RESTAURANTS", "HOTELS", "PARKS", "PUBS", "CINEMAS")
 
     init { loadAll() }
 
@@ -75,6 +75,14 @@ class ViewItineraryViewModel(
         }
     }
 
+    fun onPlaceSelected(place: ViewPlaceItem) {
+        _uiState.update { it.copy(selectedPlace = place) }
+    }
+
+    fun onPlaceDismissed() {
+        _uiState.update { it.copy(selectedPlace = null) }
+    }
+
     private suspend fun loadFlightsFor(dayId: String): List<ViewFlightItem> =
         repo.getFlightsForDays(listOf(dayId)).map { f ->
             ViewFlightItem(id = f.id, flightNumber = f.flightNumber, pdfUri = f.pdfUri)
@@ -82,7 +90,7 @@ class ViewItineraryViewModel(
 
     private suspend fun loadPlacesFor(dayId: String): Map<String, List<ViewPlaceItem>> {
         val all = repo.getPlacesForDay(dayId).map { p ->
-            ViewPlaceItem(id = p.id, name = p.name, category = p.category, note = p.note)
+            ViewPlaceItem(id = p.id, name = p.name, category = p.category, note = p.note, lat = p.lat, lng = p.lng, photoUrl = p.photoUrl)
         }
         return itinCategories.associateWith { cat -> all.filter { it.category == cat } }
     }

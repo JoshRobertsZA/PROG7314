@@ -30,14 +30,41 @@ class ItineraryRepository(context: Context) {
         val write = db.writableDatabase
         write.beginTransaction()
         try {
-            // Clear existing days for this trip
-            write.delete(
-                WaypointDbHelper.TABLE_ITIN_DAYS,
-                "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ?",
-                arrayOf(tripId),
-            )
-            // Insert each selected day
-            for (date in days) {
+            // Load the existing date → id mapping so we can preserve IDs for
+            // dates that are still selected. This keeps place/flight rows valid.
+            val existing: Map<LocalDate, String> = run {
+                val cursor = db.readableDatabase.query(
+                    WaypointDbHelper.TABLE_ITIN_DAYS,
+                    arrayOf(WaypointDbHelper.COL_IDAY_ID, WaypointDbHelper.COL_IDAY_DATE),
+                    "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ?",
+                    arrayOf(tripId),
+                    null, null, null,
+                )
+                val map = mutableMapOf<LocalDate, String>()
+                cursor.use { c ->
+                    while (c.moveToNext()) {
+                        runCatching {
+                            map[LocalDate.parse(c.getString(1))] = c.getString(0)
+                        }
+                    }
+                }
+                map
+            }
+
+            // Delete rows for dates no longer in the selection.
+            val datesToRemove = existing.keys - days
+            for (date in datesToRemove) {
+                val id = existing[date] ?: continue
+                write.delete(
+                    WaypointDbHelper.TABLE_ITIN_DAYS,
+                    "${WaypointDbHelper.COL_IDAY_ID} = ?",
+                    arrayOf(id),
+                )
+            }
+
+            // Insert rows only for dates that are genuinely new.
+            val datesToAdd = days - existing.keys
+            for (date in datesToAdd) {
                 val cv = ContentValues().apply {
                     put(WaypointDbHelper.COL_IDAY_ID,      UUID.randomUUID().toString())
                     put(WaypointDbHelper.COL_IDAY_TRIP_ID, tripId)
@@ -45,6 +72,7 @@ class ItineraryRepository(context: Context) {
                 }
                 write.insert(WaypointDbHelper.TABLE_ITIN_DAYS, null, cv)
             }
+
             write.setTransactionSuccessful()
         } finally {
             write.endTransaction()
@@ -343,6 +371,7 @@ class ItineraryRepository(context: Context) {
         lat: Double? = null,
         lng: Double? = null,
         note: String? = null,
+        photoUrl: String? = null,
     ): String = withContext(Dispatchers.IO) {
         val id = UUID.randomUUID().toString()
         val cv = ContentValues().apply {
@@ -353,6 +382,7 @@ class ItineraryRepository(context: Context) {
             if (lat != null) put(WaypointDbHelper.COL_IPLACE_LAT, lat)
             if (lng != null) put(WaypointDbHelper.COL_IPLACE_LNG, lng)
             if (note != null) put(WaypointDbHelper.COL_IPLACE_NOTE, note)
+            if (photoUrl != null) put(WaypointDbHelper.COL_IPLACE_PHOTO_URL, photoUrl)
             put(WaypointDbHelper.COL_IPLACE_CREATED, System.currentTimeMillis())
         }
         db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_PLACES, null, cv)
@@ -376,8 +406,9 @@ class ItineraryRepository(context: Context) {
             val result = mutableListOf<PlaceEntity>()
             cursor.use {
                 while (it.moveToNext()) {
-                    val latIdx = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_LAT)
-                    val lngIdx = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_LNG)
+                    val latIdx   = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_LAT)
+                    val lngIdx   = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_LNG)
+                    val photoIdx = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_PHOTO_URL)
                     result.add(
                         PlaceEntity(
                             id          = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_ID)),
@@ -387,6 +418,7 @@ class ItineraryRepository(context: Context) {
                             lat         = if (latIdx >= 0 && !it.isNull(latIdx)) it.getDouble(latIdx) else null,
                             lng         = if (lngIdx >= 0 && !it.isNull(lngIdx)) it.getDouble(lngIdx) else null,
                             note        = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_NOTE)),
+                            photoUrl    = if (photoIdx >= 0 && !it.isNull(photoIdx)) it.getString(photoIdx) else null,
                             createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_CREATED)),
                         )
                     )

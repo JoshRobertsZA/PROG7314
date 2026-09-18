@@ -25,6 +25,7 @@ data class TripCalendarUiState(
     val isGeocodingDest: Boolean = false,
     // Day selection
     val selectedDays: Set<LocalDate> = emptySet(),
+    val showNoDaysError: Boolean = false,
 ) {
     /** "3 days selected · Jul 3 - Jul 5", or blank when nothing is selected. */
     val selectionLabel: String

@@ -11,12 +11,16 @@
 #                              method -> Google -> Web SDK configuration
 #                              ("Web client ID"). Also needs app/google-services.json
 #                              in place - see README for full Firebase setup steps.
+#
+# Leave a key blank to fall back to the shared team key cache instead -
+# see RemoteSecrets.kt. Only fill one in if you want to override it with
+# your own personal quota (a non-blank value here always wins).
 
-OPENWEATHER_API_KEY=your_key_here
-EXCHANGERATE_API_KEY=your_key_here
-LOCATIONIQ_API_KEY=your_key_here
-AIRLABS_API_KEY=your_key_here
-COUNTERAPI_API_KEY=your_key_here
+OPENWEATHER_API_KEY=
+EXCHANGERATE_API_KEY=
+LOCATIONIQ_API_KEY=
+AIRLABS_API_KEY=
+COUNTERAPI_API_KEY=
 COUNTERAPI_WORKSPACE=
 COUNTERAPI_PLACES_SLUG=
-FIREBASE_WEB_CLIENT_ID=your_web_client_id_here
+FIREBASE_WEB_CLIENT_ID=

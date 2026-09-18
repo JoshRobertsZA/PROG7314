@@ -144,6 +144,32 @@ class TripRepository(context: Context) {
     }
 
     /**
+     * Returns a single trip by its UUID, or null if not found.
+     * Used by PlacePickerViewModel to resolve the trip's destination coords.
+     */
+    suspend fun getTripById(id: String): TripEntity? = withContext(Dispatchers.IO) {
+        val cursor = db.readableDatabase.rawQuery(
+            "SELECT * FROM $TABLE_TRIPS WHERE $COL_TRIP_ID = ? LIMIT 1",
+            arrayOf(id),
+        )
+        cursor.use {
+            if (!it.moveToFirst()) return@withContext null
+            TripEntity(
+                id          = it.getString(it.getColumnIndexOrThrow(COL_TRIP_ID)),
+                accountId   = it.getString(it.getColumnIndexOrThrow(COL_TRIP_ACCOUNT_ID)),
+                name        = it.getString(it.getColumnIndexOrThrow(COL_TRIP_NAME)),
+                startDate   = it.getString(it.getColumnIndexOrThrow(COL_TRIP_START)),
+                endDate     = it.getString(it.getColumnIndexOrThrow(COL_TRIP_END)),
+                destination = it.getString(it.getColumnIndexOrThrow(COL_TRIP_DESTINATION)),
+                destLat     = it.getColumnIndex(COL_TRIP_DEST_LAT).let { idx -> if (idx >= 0 && !it.isNull(idx)) it.getDouble(idx) else null },
+                destLng     = it.getColumnIndex(COL_TRIP_DEST_LNG).let { idx -> if (idx >= 0 && !it.isNull(idx)) it.getDouble(idx) else null },
+                createdAtMs = it.getLong(it.getColumnIndexOrThrow(COL_TRIP_CREATED)),
+                updatedAtMs = it.getLong(it.getColumnIndexOrThrow(COL_TRIP_UPDATED)),
+            )
+        }
+    }
+
+    /**
      * Delete a single trip by id (only if it belongs to [accountId]).
      */
     suspend fun deleteTrip(id: String, accountId: String) = withContext(Dispatchers.IO) {
