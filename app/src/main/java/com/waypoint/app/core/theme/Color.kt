@@ -41,18 +41,34 @@ val WaypointTripLabel = Color(0xD9FFEBDE)
 // Shared bottom nav active-tab pill (Figma node 270:37, terracotta at 12% alpha)
 val WaypointNavActivePill = Color(0x1FC1673D)
 
-// Welcome screen (Figma node 363:20)
+// Welcome screen (Figma node 363:20). Four time-of-day gradient stops -
+// "Animation 1-4" in Figma - that WelcomeScreen cross-fades between in a
+// continuous loop rather than picking just one statically.
 val WelcomeGradientTop = Color(0xFFFFD9A0)
 val WelcomeGradientUpperMid = Color(0xFFFFB199)
 val WelcomeGradientMid = Color(0xFFE8848C)
 val WelcomeGradientLowerMid = Color(0xFF7C6B96)
 val WelcomeGradientBottom = Color(0xFF4B3B62)
-val WelcomePinCircleBg = Color(0x26FFFFFF)
+
+val WelcomeGradientDayTop = Color(0xFF8ED2FF)
+val WelcomeGradientDayUpperMid = Color(0xFF79B8E8)
+val WelcomeGradientDayMid = Color(0xFFC98FC0)
+val WelcomeGradientDayLowerMid = Color(0xFF7C6B96)
+val WelcomeGradientDayBottom = Color(0xFF4B3B62)
+
+val WelcomeGradientDuskTop = Color(0xFFFF9A56)
+val WelcomeGradientDuskUpperMid = Color(0xFFE8637C)
+val WelcomeGradientDuskMid = Color(0xFF8C5B96)
+val WelcomeGradientDuskLowerMid = Color(0xFF6B5589)
+val WelcomeGradientDuskBottom = Color(0xFF4B3B62)
+
+val WelcomeGradientNightTop = Color(0xFF2B2F5E)
+val WelcomeGradientNightUpperMid = Color(0xFF34366B)
+val WelcomeGradientNightMid = Color(0xFF3D3568)
+val WelcomeGradientNightLowerMid = Color(0xFF453460)
+val WelcomeGradientNightBottom = Color(0xFF4B3B62)
+
 val WelcomeCardScrim = Color(0xBF000000)
-val WelcomeCardAccent1 = Color(0xFFC97FA8)
-val WelcomeCardAccent2 = Color(0xFF6B2F52)
-val WelcomeCardAccent3 = Color(0xFF6BC9C9)
-val WelcomeCardAccent4 = Color(0xFF2F6B6B)
 
 // Language modal
 val WaypointRadioBorderUnselected = Color(0xFFE6DCC4)
