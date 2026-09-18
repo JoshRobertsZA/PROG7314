@@ -195,4 +195,7 @@
     <string name="reminder_weather_body">%1$s kanye no-%2$d°C lapho uya khona. Hlela kusasa ngokufanele.</string>
     <string name="view_itinerary_flight_no_time">Isikhathi sokuhamba asisethiwe</string>
     <string name="view_itinerary_no_pdf_viewer">Ayikho i-app yokuvula ama-PDF</string>
+    <string name="edit_itinerary_lodging_doc">Idokhumenti yendawo yokulala</string>
+    <string name="edit_itinerary_car_doc">Idokhumenti yokuqasha imoto</string>
+    <string name="edit_itinerary_remove_doc_cd">Susa idokhumenti</string>
 </resources>

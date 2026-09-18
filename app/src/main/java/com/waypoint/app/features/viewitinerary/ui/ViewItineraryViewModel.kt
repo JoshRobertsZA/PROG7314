@@ -33,12 +33,8 @@ class ViewItineraryViewModel(
             val dayEntities = repo.getSelectedDaysWithIds(tripId)
             val days        = dayEntities.map { e -> ViewDayItem(dayId = e.id, date = e.date) }
 
-            val lodging = repo.getLodgingForTrip(tripId)?.let { l ->
-                ViewLodgingItem(fromDate = l.fromDate, toDate = l.toDate, pdfUri = l.pdfUri)
-            }
-            val car = repo.getCarRentalForTrip(tripId)?.let { c ->
-                ViewCarRentalItem(fromDate = c.fromDate, toDate = c.toDate, pdfUri = c.pdfUri)
-            }
+            val lodgings = repo.getLodgingsForTrip(tripId).map { l -> ViewLodgingItem(l.fromDate, l.toDate, l.pdfUri, l.docName) }
+            val cars     = repo.getCarRentalsForTrip(tripId).map { c -> ViewCarRentalItem(c.fromDate, c.toDate, c.pdfUri, c.docName) }
 
             val activeIndex = 0
             val flights     = if (days.isNotEmpty()) loadFlightsFor(days[activeIndex].dayId) else emptyList()
@@ -50,8 +46,8 @@ class ViewItineraryViewModel(
                     days                = days,
                     activeDayIndex      = activeIndex,
                     flightsForActiveDay = flights,
-                    lodging             = lodging,
-                    carRental           = car,
+                    lodgings            = lodgings,
+                    carRentals          = cars,
                     placesForActiveDay  = places,
                 )
             }
@@ -85,7 +81,7 @@ class ViewItineraryViewModel(
 
     private suspend fun loadFlightsFor(dayId: String): List<ViewFlightItem> =
         repo.getFlightsForDays(listOf(dayId)).map { f ->
-            ViewFlightItem(id = f.id, flightNumber = f.flightNumber, pdfUri = f.pdfUri, departureTime = f.departureTime)
+            ViewFlightItem(id = f.id, flightNumber = f.flightNumber, pdfUri = f.pdfUri, departureTime = f.departureTime, docName = f.docName)
         }
 
     private suspend fun loadPlacesFor(dayId: String): Map<String, List<ViewPlaceItem>> {

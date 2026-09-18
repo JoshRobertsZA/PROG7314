@@ -134,6 +134,9 @@
     <string name="edit_itinerary_remove_car_cd">Remove car rental</string>
     <string name="edit_itinerary_edit_place_cd">Edit place</string>
     <string name="edit_itinerary_flight_number_hint">Flight number (e.g. SA 123)</string>
+    <string name="edit_itinerary_lodging_doc">Lodging document</string>
+    <string name="edit_itinerary_car_doc">Car rental document</string>
+    <string name="edit_itinerary_remove_doc_cd">Remove document</string>
     <string name="edit_itinerary_no_pdf_uploaded">No PDF uploaded yet</string>
     <string name="edit_itinerary_day_label_cd">Day card</string>
 

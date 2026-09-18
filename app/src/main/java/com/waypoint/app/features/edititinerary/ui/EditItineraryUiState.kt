@@ -37,28 +37,25 @@ data class FlightItem(
     val pdfUri: String,
     /** "HH:mm" local, or null while unset. Drives early-vs-same-day flight reminders. */
     val departureTime: String? = null,
+    val docName: String? = null,
 )
 
-/**
- * The single lodging document for the whole selection.
- * Null while no PDF has been uploaded.
- */
+/** One lodging document; only listed on days inside its range. */
 data class LodgingItem(
     val id: String,
     val fromDate: LocalDate,
     val toDate: LocalDate,
     val pdfUri: String,
+    val docName: String? = null,
 )
 
-/**
- * The single car-rental document for the whole selection.
- * Null while no PDF has been uploaded.
- */
+/** One car-rental document; only listed on days inside its range. */
 data class CarRentalItem(
     val id: String,
     val fromDate: LocalDate,
     val toDate: LocalDate,
     val pdfUri: String,
+    val docName: String? = null,
 )
 
 
@@ -84,8 +81,9 @@ data class EditItineraryUiState(
      * Flights from other days are loaded lazily when the user scrolls to them.
      */
     val flightsForActiveDay: List<FlightItem> = emptyList(),
-    val lodging: LodgingItem? = null,
-    val carRental: CarRentalItem? = null,
+    /** All documents on the trip; filter with [lodgingForActiveDay] / [carRentalsForActiveDay]. */
+    val lodgings: List<LodgingItem> = emptyList(),
+    val carRentals: List<CarRentalItem> = emptyList(),
     /**
      * Non-null while the system PDF picker should be showing.
      * Cleared after the picker result arrives (success or cancel).
@@ -96,4 +94,10 @@ data class EditItineraryUiState(
      * (HOTELS, PARKS, PUBS, CINEMAS).
      */
     val placesForActiveDay: Map<String, List<PlaceItem>> = emptyMap(),
-)
+) {
+    private val activeDate: LocalDate? get() = days.getOrNull(activeDayIndex)?.date
+    val lodgingForActiveDay: List<LodgingItem>
+        get() = activeDate?.let { d -> lodgings.filter { !d.isBefore(it.fromDate) && !d.isAfter(it.toDate) } }.orEmpty()
+    val carRentalsForActiveDay: List<CarRentalItem>
+        get() = activeDate?.let { d -> carRentals.filter { !d.isBefore(it.fromDate) && !d.isAfter(it.toDate) } }.orEmpty()
+}

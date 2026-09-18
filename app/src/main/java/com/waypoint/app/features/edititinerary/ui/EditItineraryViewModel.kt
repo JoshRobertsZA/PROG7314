@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.waypoint.app.core.common.DocumentNames
 import com.waypoint.app.features.edititinerary.data.ItineraryRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,12 +41,8 @@ class EditItineraryViewModel(
 
             val dayEntities = repo.getSelectedDaysWithIds(tripId)
             val days        = dayEntities.map { e -> DayItem(dayId = e.id, date = e.date) }
-            val lodging     = repo.getLodgingForTrip(tripId)?.let { l ->
-                LodgingItem(id = l.id, fromDate = l.fromDate, toDate = l.toDate, pdfUri = l.pdfUri)
-            }
-            val car         = repo.getCarRentalForTrip(tripId)?.let { c ->
-                CarRentalItem(id = c.id, fromDate = c.fromDate, toDate = c.toDate, pdfUri = c.pdfUri)
-            }
+            val lodgings    = loadLodgings()
+            val cars        = loadCarRentals()
 
             val activeIndex = 0
             val flights     = if (days.isNotEmpty()) loadFlightsFor(days[activeIndex].dayId) else emptyList()
@@ -58,13 +55,19 @@ class EditItineraryViewModel(
                     days                = days,
                     activeDayIndex      = activeIndex,
                     flightsForActiveDay = flights,
-                    lodging             = lodging,
-                    carRental           = car,
+                    lodgings            = lodgings,
+                    carRentals          = cars,
                     placesForActiveDay  = places,
                 )
             }
         }
     }
+
+    private suspend fun loadLodgings(): List<LodgingItem> =
+        repo.getLodgingsForTrip(tripId).map { l -> LodgingItem(l.id, l.fromDate, l.toDate, l.pdfUri, l.docName) }
+
+    private suspend fun loadCarRentals(): List<CarRentalItem> =
+        repo.getCarRentalsForTrip(tripId).map { c -> CarRentalItem(c.id, c.fromDate, c.toDate, c.pdfUri, c.docName) }
 
     private suspend fun loadFlightsFor(dayId: String): List<FlightItem> =
         repo.getFlightsForDays(listOf(dayId)).map { f ->
@@ -74,6 +77,7 @@ class EditItineraryViewModel(
                 flightNumber = f.flightNumber.orEmpty(),
                 pdfUri       = f.pdfUri,
                 departureTime = f.departureTime,
+                docName      = f.docName,
             )
         }
 
@@ -133,7 +137,7 @@ class EditItineraryViewModel(
             .getOrNull(_uiState.value.activeDayIndex)
             ?.dayId ?: return
         viewModelScope.launch {
-            repo.insertFlight(dayId = activeDayId, pdfUri = pdfUri)
+            repo.insertFlight(dayId = activeDayId, pdfUri = pdfUri, docName = DocumentNames.displayName(getApplication(), pdfUri))
             val flights = loadFlightsFor(activeDayId)
             _uiState.update {
                 it.copy(
@@ -149,12 +153,10 @@ class EditItineraryViewModel(
         if (days.isEmpty()) return
         val from = days.first().date
         val to   = days.last().date
+        // Covers the currently selected days only; other days keep their own docs.
         viewModelScope.launch {
-            repo.upsertLodging(tripId = tripId, fromDate = from, toDate = to, pdfUri = pdfUri)
-            val lodging = repo.getLodgingForTrip(tripId)?.let { l ->
-                LodgingItem(id = l.id, fromDate = l.fromDate, toDate = l.toDate, pdfUri = l.pdfUri)
-            }
-            _uiState.update { it.copy(pendingUploadType = null, lodging = lodging) }
+            repo.insertLodging(tripId, from, to, pdfUri, DocumentNames.displayName(getApplication(), pdfUri))
+            _uiState.update { it.copy(pendingUploadType = null, lodgings = loadLodgings()) }
         }
     }
 
@@ -164,11 +166,8 @@ class EditItineraryViewModel(
         val from = days.first().date
         val to   = days.last().date
         viewModelScope.launch {
-            repo.upsertCarRental(tripId = tripId, fromDate = from, toDate = to, pdfUri = pdfUri)
-            val car = repo.getCarRentalForTrip(tripId)?.let { c ->
-                CarRentalItem(id = c.id, fromDate = c.fromDate, toDate = c.toDate, pdfUri = c.pdfUri)
-            }
-            _uiState.update { it.copy(pendingUploadType = null, carRental = car) }
+            repo.insertCarRental(tripId, from, to, pdfUri, DocumentNames.displayName(getApplication(), pdfUri))
+            _uiState.update { it.copy(pendingUploadType = null, carRentals = loadCarRentals()) }
         }
     }
 
@@ -185,17 +184,17 @@ class EditItineraryViewModel(
         }
     }
 
-    fun onDeleteLodging() {
+    fun onDeleteLodging(lodgingId: String) {
         viewModelScope.launch {
-            repo.deleteLodging(tripId)
-            _uiState.update { it.copy(lodging = null) }
+            repo.deleteLodging(lodgingId)
+            _uiState.update { it.copy(lodgings = loadLodgings()) }
         }
     }
 
-    fun onDeleteCarRental() {
+    fun onDeleteCarRental(carRentalId: String) {
         viewModelScope.launch {
-            repo.deleteCarRental(tripId)
-            _uiState.update { it.copy(carRental = null) }
+            repo.deleteCarRental(carRentalId)
+            _uiState.update { it.copy(carRentals = loadCarRentals()) }
         }
     }
 

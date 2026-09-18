@@ -166,30 +166,34 @@ fun ViewItineraryScreen(
 
         // Lodging
         ViewSectionHeader(title = stringResource(R.string.edit_itinerary_header_lodging), topPadding = 20.dp)
-        val lodging = state.lodging
-        if (lodging == null) {
+        val lodgings = state.lodgingForActiveDay
+        if (lodgings.isEmpty()) {
             ViewEmptyPlaceholder(label = stringResource(R.string.view_itinerary_no_lodging))
         } else {
-            ViewDocCard(
-                accentColor = WaypointPlaceAccent2,
-                title       = "Lodging document",
-                subtitle    = "${lodging.fromDate} – ${lodging.toDate}",
-                pdfUri      = lodging.pdfUri,
-            )
+            lodgings.forEach { lodging ->
+                ViewDocCard(
+                    accentColor = WaypointPlaceAccent2,
+                    title       = lodging.docName ?: stringResource(R.string.edit_itinerary_lodging_doc),
+                    subtitle    = "${lodging.fromDate} – ${lodging.toDate}",
+                    pdfUri      = lodging.pdfUri,
+                )
+            }
         }
 
         // Car rental
         ViewSectionHeader(title = stringResource(R.string.edit_itinerary_header_car), topPadding = 20.dp)
-        val car = state.carRental
-        if (car == null) {
+        val cars = state.carRentalsForActiveDay
+        if (cars.isEmpty()) {
             ViewEmptyPlaceholder(label = stringResource(R.string.view_itinerary_no_car))
         } else {
-            ViewDocCard(
-                accentColor = WaypointPlaceAccent3,
-                title       = "Car rental document",
-                subtitle    = "${car.fromDate} – ${car.toDate}",
-                pdfUri      = car.pdfUri,
-            )
+            cars.forEach { car ->
+                ViewDocCard(
+                    accentColor = WaypointPlaceAccent3,
+                    title       = car.docName ?: stringResource(R.string.edit_itinerary_car_doc),
+                    subtitle    = "${car.fromDate} – ${car.toDate}",
+                    pdfUri      = car.pdfUri,
+                )
+            }
         }
 
         // Places by category
@@ -290,7 +294,7 @@ private fun ViewFlightCard(flight: ViewFlightItem) {
                     modifier = Modifier.padding(top = 3.dp),
                 )
                 Text(
-                    text     = pdfLabel(flight.pdfUri),
+                    text     = flight.docName ?: pdfLabel(flight.pdfUri),
                     color    = WaypointTripBadgeText,
                     fontSize = 9.sp,
                     modifier = Modifier.padding(top = 3.dp).alpha(0.8f),
@@ -324,12 +328,6 @@ private fun ViewDocCard(
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
                 Text(title, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 Text(subtitle, color = WaypointTextMuted, fontSize = 11.sp, modifier = Modifier.padding(top = 3.dp))
-                Text(
-                    text     = pdfLabel(pdfUri),
-                    color    = WaypointTripBadgeText,
-                    fontSize = 9.sp,
-                    modifier = Modifier.padding(top = 3.dp).alpha(0.8f),
-                )
             }
         }
     }

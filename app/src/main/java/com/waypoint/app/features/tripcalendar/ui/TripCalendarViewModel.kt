@@ -60,12 +60,12 @@ class TripCalendarViewModel(
                 "$n ${if (n == 1L) "day" else "days"}"
             } else ""
 
-            // Overview counts: flights across every selected day, and one
-            // per uploaded lodging / car-rental document.
+            // Overview counts: flights across every selected day, and every
+            // uploaded lodging / car-rental document.
             val dayIds   = itineraryRepo.getSelectedDaysWithIds(trip.id).map { d -> d.id }
             val flights  = itineraryRepo.getFlightsForDays(dayIds).size
-            val stays    = if (itineraryRepo.getLodgingForTrip(trip.id) != null) 1 else 0
-            val rentals  = if (itineraryRepo.getCarRentalForTrip(trip.id) != null) 1 else 0
+            val stays    = itineraryRepo.getLodgingsForTrip(trip.id).size
+            val rentals  = itineraryRepo.getCarRentalsForTrip(trip.id).size
 
             _uiState.update {
                 it.copy(

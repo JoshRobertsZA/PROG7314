@@ -194,4 +194,7 @@
     <string name="reminder_weather_body">%1$s kunye ne-%2$d°C apho uya khona. Cwangcisa ngomso ngokufanelekileyo.</string>
     <string name="view_itinerary_flight_no_time">Ixesha lokuhamba alisetwanga</string>
     <string name="view_itinerary_no_pdf_viewer">Akukho app yokuvula ii-PDF</string>
+    <string name="edit_itinerary_lodging_doc">Uxwebhu lwendawo yokuhlala</string>
+    <string name="edit_itinerary_car_doc">Uxwebhu lokuqasha imoto</string>
+    <string name="edit_itinerary_remove_doc_cd">Susa uxwebhu</string>
 </resources>

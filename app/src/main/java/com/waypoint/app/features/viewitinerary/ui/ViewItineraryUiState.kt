@@ -13,18 +13,21 @@ data class ViewFlightItem(
     val pdfUri: String,
     /** "HH:mm" local, null if never set or resolved. */
     val departureTime: String? = null,
+    val docName: String? = null,
 )
 
 data class ViewLodgingItem(
     val fromDate: LocalDate,
     val toDate: LocalDate,
     val pdfUri: String,
+    val docName: String? = null,
 )
 
 data class ViewCarRentalItem(
     val fromDate: LocalDate,
     val toDate: LocalDate,
     val pdfUri: String,
+    val docName: String? = null,
 )
 
 data class ViewPlaceItem(
@@ -42,8 +45,15 @@ data class ViewItineraryUiState(
     val days: List<ViewDayItem> = emptyList(),
     val activeDayIndex: Int = 0,
     val flightsForActiveDay: List<ViewFlightItem> = emptyList(),
-    val lodging: ViewLodgingItem? = null,
-    val carRental: ViewCarRentalItem? = null,
+    val lodgings: List<ViewLodgingItem> = emptyList(),
+    val carRentals: List<ViewCarRentalItem> = emptyList(),
     val placesForActiveDay: Map<String, List<ViewPlaceItem>> = emptyMap(),
     val selectedPlace: ViewPlaceItem? = null,
-)
+) {
+    private val activeDate: LocalDate? get() = days.getOrNull(activeDayIndex)?.date
+    val lodgingForActiveDay: List<ViewLodgingItem>
+        get() = activeDate?.let { d -> lodgings.filter { !d.isBefore(it.fromDate) && !d.isAfter(it.toDate) } }.orEmpty()
+    val carRentalsForActiveDay: List<ViewCarRentalItem>
+        get() = activeDate?.let { d -> carRentals.filter { !d.isBefore(it.fromDate) && !d.isAfter(it.toDate) } }.orEmpty()
+}
+
