@@ -59,6 +59,13 @@ class TripCalendarViewModel(
                 "$n ${if (n == 1L) "day" else "days"}"
             } else ""
 
+            // Overview counts: flights across every selected day, and one
+            // per uploaded lodging / car-rental document.
+            val dayIds   = itineraryRepo.getSelectedDaysWithIds(trip.id).map { d -> d.id }
+            val flights  = itineraryRepo.getFlightsForDays(dayIds).size
+            val stays    = if (itineraryRepo.getLodgingForTrip(trip.id) != null) 1 else 0
+            val rentals  = if (itineraryRepo.getCarRentalForTrip(trip.id) != null) 1 else 0
+
             _uiState.update {
                 it.copy(
                     isLoading      = false,
@@ -68,6 +75,9 @@ class TripCalendarViewModel(
                     destLat        = trip.destLat,
                     destLng        = trip.destLng,
                     nightCount     = nights,
+                    flightCount    = flights,
+                    stayCount      = stays,
+                    rentalCount    = rentals,
                     startDate      = start,
                     endDate        = end,
                     displayMonth   = start?.let { d -> YearMonth.from(d) } ?: YearMonth.now(),

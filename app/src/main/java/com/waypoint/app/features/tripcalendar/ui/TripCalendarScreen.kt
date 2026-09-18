@@ -100,6 +100,10 @@ fun TripCalendarScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    // Re-read on every return to this screen so counts reflect documents
+    // added or removed in Edit Itinerary (the ViewModel survives that push).
+    LaunchedEffect(Unit) { viewModel.loadTrip() }
+
     LaunchedEffect(navTarget) {
         when (val t = navTarget) {
             is TripCalendarViewModel.ItineraryNavTarget.EditItinerary -> {
@@ -265,11 +269,15 @@ fun TripCalendarScreen(
             )
         }
 
-        // Row 2: Flight, Stay, Rental placeholders
+        // Row 2: Flight, Stay, Rental counts from the itinerary
         Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
-            listOf("Flight", "Stay", "Rental").forEachIndexed { i, label ->
+            listOf(
+                "Flight" to uiState.flightCount,
+                "Stay"   to uiState.stayCount,
+                "Rental" to uiState.rentalCount,
+            ).forEachIndexed { i, (label, count) ->
                 OverviewCard(
-                    value = "0",
+                    value = "$count",
                     label = label,
                     modifier = Modifier
                         .weight(1f)

@@ -12,6 +12,10 @@ data class TripCalendarUiState(
     val destLat: Double? = null,
     val destLng: Double? = null,
     val nightCount: Int = 0,
+    // Overview counts, derived from itinerary rows for this trip
+    val flightCount: Int = 0,
+    val stayCount: Int = 0,
+    val rentalCount: Int = 0,
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
     val displayMonth: YearMonth = YearMonth.now(),
