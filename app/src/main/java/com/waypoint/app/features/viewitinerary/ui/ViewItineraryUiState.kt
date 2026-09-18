@@ -43,4 +43,5 @@ data class ViewItineraryUiState(
     val lodging: ViewLodgingItem? = null,
     val carRental: ViewCarRentalItem? = null,
     val placesForActiveDay: Map<String, List<ViewPlaceItem>> = emptyMap(),
+    val selectedPlace: ViewPlaceItem? = null,
 )

@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImagePainter
 import androidx.compose.ui.layout.ContentScale
 import com.waypoint.app.R
@@ -83,16 +85,21 @@ fun PlaceDetailPickerScreen(
             val emoji = state.placeEmoji.ifEmpty { "📍" }
             if (!thumb.isNullOrBlank()) {
                 // Show Wikipedia thumbnail; fall back to emoji on load failure
+                val ctx = LocalContext.current
                 SubcomposeAsyncImage(
-                    model              = thumb,
+                    model              = ImageRequest.Builder(ctx).data(thumb).crossfade(true).build(),
                     contentDescription = state.placeName,
                     contentScale       = ContentScale.Crop,
                     modifier           = Modifier.fillMaxSize(),
                     loading = {
-                        Text(text = emoji, fontSize = 72.sp)
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(text = emoji, fontSize = 72.sp)
+                        }
                     },
                     error = {
-                        Text(text = emoji, fontSize = 72.sp)
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(text = emoji, fontSize = 72.sp)
+                        }
                     },
                 )
             } else {

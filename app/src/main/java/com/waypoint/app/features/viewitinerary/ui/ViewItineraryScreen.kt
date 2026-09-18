@@ -4,6 +4,13 @@ import android.content.Intent
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.style.TextOverflow
+import com.waypoint.app.core.theme.RadiusHero
+import com.waypoint.app.core.theme.WaypointDecoText
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -60,6 +67,12 @@ import com.waypoint.app.core.theme.WaypointTerracotta
 import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
 import com.waypoint.app.core.theme.WaypointTripBadgeText
+import com.waypoint.app.features.placepicker.data.WikipediaPlaceRepository
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @Composable
 fun ViewItineraryScreen(
@@ -69,6 +82,15 @@ fun ViewItineraryScreen(
     viewModel: ViewItineraryViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    // Detail overlay — shown when a place card is tapped
+    state.selectedPlace?.let { place ->
+        ViewPlaceDetailOverlay(
+            place      = place,
+            onBack     = viewModel::onPlaceDismissed,
+        )
+        return
+    }
 
     if (state.isLoading) {
         Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -178,7 +200,7 @@ fun ViewItineraryScreen(
             if (items.isEmpty()) {
                 ViewEmptyPlaceholder(label = stringResource(R.string.view_itinerary_no_places))
             } else {
-                items.forEach { place -> ViewPlaceCard(place = place) }
+                items.forEach { place -> ViewPlaceCard(place = place, onTap = { viewModel.onPlaceSelected(place) }) }
             }
         }
     }
@@ -293,36 +315,34 @@ private fun ViewDocCard(
 // ── Place card (read-only, tappable → Google Maps) ───────────────────────────
 
 @Composable
-private fun ViewPlaceCard(place: ViewPlaceItem) {
-    val context = LocalContext.current
-    val hasCoords = place.lat != null && place.lng != null
+private fun ViewPlaceCard(place: ViewPlaceItem, onTap: () -> Unit) {
     RowSurface(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp)
-            .then(
-                if (hasCoords) Modifier.clickable {
-                    val uri = Uri.parse(
-                        "https://www.google.com/maps/dir/?api=1" +
-                        "&destination=${place.lat},${place.lng}" +
-                        "&destination_place_id=${Uri.encode(place.name)}"
-                    )
-                    context.startActivity(Intent(Intent.ACTION_VIEW, uri))
-                } else Modifier,
-            ),
+            .clickable { onTap() },
     ) {
         Row(
             modifier          = Modifier.padding(start = 10.dp, top = 10.dp, end = 12.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (!place.photoUrl.isNullOrBlank()) {
-                AsyncImage(
-                    model              = place.photoUrl,
+                val ctx = LocalContext.current
+                SubcomposeAsyncImage(
+                    model              = ImageRequest.Builder(ctx).data(place.photoUrl).crossfade(true).build(),
                     contentDescription = place.name,
                     contentScale       = ContentScale.Crop,
                     modifier           = Modifier
                         .size(44.dp)
-                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(RadiusThumbnail)),
+                        .clip(RoundedCornerShape(RadiusThumbnail)),
+                    error = {
+                        ThumbnailBlock(
+                            accentColor  = WaypointPlaceAccent1,
+                            label        = categoryEmoji(place.category),
+                            size         = 44.dp,
+                            cornerRadius = RadiusThumbnail,
+                        )
+                    },
                 )
             } else {
                 ThumbnailBlock(
@@ -337,12 +357,180 @@ private fun ViewPlaceCard(place: ViewPlaceItem) {
                 if (!place.note.isNullOrBlank()) {
                     Text(place.note, color = WaypointTextMuted, fontSize = 11.sp, modifier = Modifier.padding(top = 3.dp))
                 }
-                if (hasCoords) {
+                Text(
+                    text     = "Tap for details",
+                    color    = WaypointTerracotta,
+                    fontSize = 10.sp,
+                    modifier = Modifier.padding(top = 3.dp),
+                )
+            }
+        }
+    }
+}
+
+// ── Place detail overlay ──────────────────────────────────────────────────────
+
+@Composable
+private fun ViewPlaceDetailOverlay(
+    place: ViewPlaceItem,
+    onBack: () -> Unit,
+) {
+    val context   = LocalContext.current
+    val hasCoords = place.lat != null && place.lng != null
+    val emoji     = categoryEmoji(place.category)
+
+    // Live Wikipedia fetch for description + fallback thumbnail
+    var wiki by remember { mutableStateOf<WikipediaPlaceRepository.WikipediaSummary?>(null) }
+    var wikiLoading by remember { mutableStateOf(true) }
+    LaunchedEffect(place.id) {
+        wiki = WikipediaPlaceRepository.getSummary(place.name)
+        wikiLoading = false
+    }
+
+    // Prefer stored photo URL, then live wiki thumbnail
+    val photoUrl = place.photoUrl?.takeIf { it.isNotBlank() }
+        ?: if (!wikiLoading) wiki?.thumbnailUrl?.takeIf { it.isNotBlank() } else null
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(WaypointCream)
+            .windowInsetsPadding(WindowInsets.systemBars),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 96.dp),
+        ) {
+
+            // ── Hero ──────────────────────────────────────────────────────────
+            Box(
+                modifier         = Modifier
+                    .fillMaxWidth()
+                    .height(280.dp)
+                    .background(WaypointPlaceAccent2),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (!photoUrl.isNullOrBlank()) {
+                    val heroCtx = LocalContext.current
+                    SubcomposeAsyncImage(
+                        model              = ImageRequest.Builder(heroCtx).data(photoUrl).crossfade(true).build(),
+                        contentDescription = place.name,
+                        contentScale       = ContentScale.Crop,
+                        modifier           = Modifier.fillMaxSize(),
+                        loading = {
+                            Box(Modifier.fillMaxSize(), Alignment.Center) {
+                                Text(text = emoji, fontSize = 88.sp)
+                            }
+                        },
+                        error = {
+                            Box(Modifier.fillMaxSize(), Alignment.Center) {
+                                Text(text = emoji, fontSize = 88.sp)
+                            }
+                        },
+                    )
+                } else {
+                    Text(text = emoji, fontSize = 88.sp)
+                }
+
+                // Back button
+                CircleIconButton(
+                    onClick  = onBack,
+                    modifier = Modifier.align(Alignment.TopStart).padding(16.dp),
+                ) {
+                    Text(text = "←", color = WaypointTerracotta, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            // ── Body ─────────────────────────────────────────────────────────
+            Column(modifier = Modifier.padding(horizontal = 22.dp, vertical = 20.dp)) {
+
+                // Category chip
+                Box(
+                    modifier = Modifier
+                        .background(WaypointCard, RoundedCornerShape(20.dp))
+                        .padding(horizontal = 12.dp, vertical = 5.dp),
+                ) {
                     Text(
-                        text     = "Tap to open in Maps",
-                        color    = WaypointTerracotta,
-                        fontSize = 10.sp,
-                        modifier = Modifier.padding(top = 3.dp),
+                        text       = "$emoji  ${place.category.lowercase().replaceFirstChar { it.uppercaseChar() }}",
+                        color      = WaypointTextMuted,
+                        fontSize   = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+
+                // Place name
+                Text(
+                    text       = place.name,
+                    color      = WaypointTextPrimary,
+                    fontSize   = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier   = Modifier.padding(top = 12.dp),
+                )
+
+                // User note
+                if (!place.note.isNullOrBlank()) {
+                    Text(
+                        text     = place.note,
+                        color    = WaypointTextMuted,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(top = 6.dp),
+                    )
+                }
+
+                // Wikipedia description
+                val description = wiki?.extract?.takeIf { it.isNotBlank() }
+                if (description != null) {
+                    Text(
+                        text       = description,
+                        color      = WaypointTextPrimary,
+                        fontSize   = 14.sp,
+                        lineHeight = 21.sp,
+                        maxLines   = 8,
+                        overflow   = TextOverflow.Ellipsis,
+                        modifier   = Modifier.padding(top = 16.dp),
+                    )
+                } else if (!wikiLoading) {
+                    Text(
+                        text     = "No description available.",
+                        color    = WaypointTextMuted,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(top = 16.dp),
+                    )
+                }
+            }
+        }
+
+        // ── Open in Maps pinned to bottom ──────────────────────────────────
+        if (hasCoords) {
+            Box(
+                modifier         = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .background(WaypointCream)
+                    .padding(horizontal = 22.dp, vertical = 16.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(WaypointTerracotta, RoundedCornerShape(RadiusButton))
+                        .clickable {
+                            val uri = Uri.parse(
+                                "https://www.google.com/maps/dir/?api=1" +
+                                "&destination=${place.lat},${place.lng}" +
+                                "&destination_place_id=${Uri.encode(place.name)}"
+                            )
+                            context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                        }
+                        .padding(vertical = 16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text       = "Open in Maps",
+                        color      = androidx.compose.ui.graphics.Color.White,
+                        fontSize   = 15.sp,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }

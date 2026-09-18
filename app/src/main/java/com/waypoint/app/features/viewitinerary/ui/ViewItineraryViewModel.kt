@@ -75,6 +75,14 @@ class ViewItineraryViewModel(
         }
     }
 
+    fun onPlaceSelected(place: ViewPlaceItem) {
+        _uiState.update { it.copy(selectedPlace = place) }
+    }
+
+    fun onPlaceDismissed() {
+        _uiState.update { it.copy(selectedPlace = null) }
+    }
+
     private suspend fun loadFlightsFor(dayId: String): List<ViewFlightItem> =
         repo.getFlightsForDays(listOf(dayId)).map { f ->
             ViewFlightItem(id = f.id, flightNumber = f.flightNumber, pdfUri = f.pdfUri)
