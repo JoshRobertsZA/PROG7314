@@ -17,13 +17,13 @@ if (apikeyPropertiesFile.exists()) {
 fun apiKey(name: String): String = apikeyProperties.getProperty(name, "")
 
 android {
-    namespace = "com.example.prog7314"
+    namespace = "com.waypoint.app"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.example.prog7314"
+        applicationId = "com.waypoint.app"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
