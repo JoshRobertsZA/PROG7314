@@ -70,7 +70,7 @@ fun AllTripsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 22.dp, top = 28.dp, end = 22.dp, bottom = 80.dp)
+                .padding(start = 22.dp, top = 28.dp, end = 22.dp, bottom = 96.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
             // TopBar
@@ -203,7 +203,7 @@ fun AllTripsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(start = 22.dp, end = 22.dp, bottom = 32.dp),
+                .padding(start = 22.dp, end = 22.dp, bottom = 16.dp),
         )
     }
 }
