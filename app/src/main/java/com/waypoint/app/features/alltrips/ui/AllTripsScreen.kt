@@ -19,7 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,6 +50,7 @@ import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
 import com.waypoint.app.core.theme.White
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllTripsScreen(
     onBackClick: () -> Unit,
@@ -67,6 +70,11 @@ fun AllTripsScreen(
             .background(WaypointCream)
             .windowInsetsPadding(WindowInsets.statusBars),
     ) {
+        PullToRefreshBox(
+            isRefreshing = uiState.isLoading,
+            onRefresh = { viewModel.loadTrips() },
+            modifier = Modifier.fillMaxSize(),
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -194,6 +202,7 @@ fun AllTripsScreen(
                 }
             }
 
+        }
         }
 
         // Sticky button, always visible at the bottom
