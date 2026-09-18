@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -39,6 +38,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import com.waypoint.app.core.db.SessionManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -169,7 +173,7 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
         ) {
-            // Header: brand name + settings
+            // Header: brand name + avatar (opens Profile)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -190,12 +194,19 @@ fun HomeScreen(
                         iconSize = 28.dp,
                         modifier = Modifier.padding(end = 12.dp),
                     )
-                    Icon(
-                        painter = painterResource(R.drawable.ic_settings),
+                    // Account avatar doubles as the Profile shortcut (was a
+                    // settings gear). Same 40dp circle as TabHeader on the
+                    // other tabs so the header reads identically everywhere.
+                    AsyncImage(
+                        model = SessionManager.photoUrl.ifBlank { null },
                         contentDescription = stringResource(R.string.home_settings_cd),
-                        tint = WaypointTextPrimary,
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(R.drawable.img_mock_avatar),
+                        error = painterResource(R.drawable.img_mock_avatar),
+                        fallback = painterResource(R.drawable.img_mock_avatar),
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(40.dp)
+                            .clip(CircleShape)
                             .clickable(onClick = onSettingsClick),
                     )
                 }
