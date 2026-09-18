@@ -170,9 +170,9 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             NewTripScreen(
                 onCloseClick = { navController.popBackStack() },
                 onSaveSuccess = {
-                    navController.navigate(Routes.AllTrips) {
-                        popUpTo(Routes.NewTrip) { inclusive = true }
-                    }
+                    // Pop back to the existing MainNavShell entry so the bottom nav is visible.
+                    // Navigating to Routes.AllTrips would land on the standalone screen (no nav bar).
+                    navController.popBackStack(route = Routes.Home, inclusive = false)
                 },
             )
         }
