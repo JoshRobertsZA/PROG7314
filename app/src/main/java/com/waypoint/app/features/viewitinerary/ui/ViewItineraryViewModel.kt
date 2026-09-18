@@ -82,7 +82,7 @@ class ViewItineraryViewModel(
 
     private suspend fun loadPlacesFor(dayId: String): Map<String, List<ViewPlaceItem>> {
         val all = repo.getPlacesForDay(dayId).map { p ->
-            ViewPlaceItem(id = p.id, name = p.name, category = p.category, note = p.note)
+            ViewPlaceItem(id = p.id, name = p.name, category = p.category, note = p.note, lat = p.lat, lng = p.lng)
         }
         return itinCategories.associateWith { cat -> all.filter { it.category == cat } }
     }

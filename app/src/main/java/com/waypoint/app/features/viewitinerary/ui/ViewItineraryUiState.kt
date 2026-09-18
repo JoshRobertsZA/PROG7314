@@ -30,6 +30,8 @@ data class ViewPlaceItem(
     val name: String,
     val category: String,
     val note: String?,
+    val lat: Double? = null,
+    val lng: Double? = null,
 )
 
 data class ViewItineraryUiState(

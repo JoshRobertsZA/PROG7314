@@ -1,5 +1,6 @@
 package com.waypoint.app.features.viewitinerary.ui
 
+import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,6 +28,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -285,24 +287,64 @@ private fun ViewDocCard(
     }
 }
 
-// ── Place card (read-only) ────────────────────────────────────────────────────
+// ── Place card (read-only, tappable → Google Maps) ───────────────────────────
 
 @Composable
 private fun ViewPlaceCard(place: ViewPlaceItem) {
-    RowSurface(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+    val context = LocalContext.current
+    val hasCoords = place.lat != null && place.lng != null
+    RowSurface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+            .then(
+                if (hasCoords) Modifier.clickable {
+                    val uri = Uri.parse(
+                        "https://www.google.com/maps/dir/?api=1" +
+                        "&destination=${place.lat},${place.lng}" +
+                        "&destination_place_id=${Uri.encode(place.name)}"
+                    )
+                    context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                } else Modifier,
+            ),
+    ) {
         Row(
             modifier          = Modifier.padding(start = 10.dp, top = 10.dp, end = 12.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ThumbnailBlock(accentColor = WaypointPlaceAccent1, size = 44.dp, cornerRadius = RadiusThumbnail)
+            ThumbnailBlock(
+                accentColor = WaypointPlaceAccent1,
+                label       = categoryEmoji(place.category),
+                size        = 44.dp,
+                cornerRadius = RadiusThumbnail,
+            )
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
                 Text(place.name, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 if (!place.note.isNullOrBlank()) {
                     Text(place.note, color = WaypointTextMuted, fontSize = 11.sp, modifier = Modifier.padding(top = 3.dp))
                 }
+                if (hasCoords) {
+                    Text(
+                        text     = "Tap to open in Maps",
+                        color    = WaypointTerracotta,
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(top = 3.dp),
+                    )
+                }
             }
         }
     }
+}
+
+// ── Category emoji ────────────────────────────────────────────────────────────
+
+private fun categoryEmoji(category: String): String = when (category) {
+    "RESTAURANTS" -> "🍽️"
+    "PARKS"       -> "🌳"
+    "PUBS"        -> "🍺"
+    "CINEMAS"     -> "🎬"
+    "HOTELS"      -> "🏨"
+    else          -> "📍"
 }
 
 // ── Section header (label only, no chip) ─────────────────────────────────────
