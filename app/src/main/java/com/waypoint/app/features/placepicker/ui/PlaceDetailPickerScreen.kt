@@ -2,6 +2,7 @@ package com.waypoint.app.features.placepicker.ui
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,11 +37,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.SubcomposeAsyncImage
-import coil.request.ImageRequest
-import androidx.compose.ui.platform.LocalContext
-import coil.compose.AsyncImagePainter
-import androidx.compose.ui.layout.ContentScale
 import com.waypoint.app.R
 import com.waypoint.app.core.common.CircleIconButton
 import com.waypoint.app.core.common.ThumbnailBlock
@@ -73,7 +71,7 @@ fun PlaceDetailPickerScreen(
 
     Box(modifier = modifier.fillMaxSize().background(WaypointCream)) {
 
-        // ── Hero: Wikipedia thumbnail if available, else emoji placeholder ──
+        // ── Hero ─────────────────────────────────────────────────────────────
         Box(
             modifier         = Modifier
                 .fillMaxWidth()
@@ -81,34 +79,21 @@ fun PlaceDetailPickerScreen(
                 .background(WaypointPlaceAccent2),
             contentAlignment = Alignment.Center,
         ) {
-            val thumb = if (!state.isLoadingWiki) state.wikiSummary?.thumbnailUrl else null
-            val emoji = state.placeEmoji.ifEmpty { "📍" }
-            if (!thumb.isNullOrBlank()) {
-                // Show Wikipedia thumbnail; fall back to emoji on load failure
-                val ctx = LocalContext.current
-                SubcomposeAsyncImage(
-                    model              = ImageRequest.Builder(ctx).data(thumb).crossfade(true).build(),
+            val bitmap = if (!state.isLoadingWiki) state.photoBitmap else null
+            val emoji  = state.placeEmoji.ifEmpty { "📍" }
+            if (bitmap != null) {
+                Image(
+                    bitmap             = bitmap.asImageBitmap(),
                     contentDescription = state.placeName,
                     contentScale       = ContentScale.Crop,
                     modifier           = Modifier.fillMaxSize(),
-                    loading = {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = emoji, fontSize = 72.sp)
-                        }
-                    },
-                    error = {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = emoji, fontSize = 72.sp)
-                        }
-                    },
                 )
             } else {
-                // No thumbnail (or still loading wiki) — show category emoji
                 Text(text = emoji, fontSize = 72.sp)
             }
         }
 
-        // ── Scrollable body ──────────────────────────────────────────────────
+        // ── Scrollable body ───────────────────────────────────────────────────
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -117,7 +102,6 @@ fun PlaceDetailPickerScreen(
                 .background(WaypointCream, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
                 .padding(start = 22.dp, top = 24.dp, end = 22.dp, bottom = 28.dp),
         ) {
-            // Place name + subtitle
             Text(
                 text       = state.placeName.ifBlank { "…" },
                 color      = WaypointTextPrimary,
@@ -139,7 +123,6 @@ fun PlaceDetailPickerScreen(
                 )
             }
 
-            // Weather info card
             Spacer(Modifier.height(20.dp))
             if (state.isLoadingWeather) {
                 CircularProgressIndicator(
@@ -157,7 +140,6 @@ fun PlaceDetailPickerScreen(
                 }
             }
 
-            // Wikipedia About section
             Spacer(Modifier.height(22.dp))
             Row(
                 modifier          = Modifier.fillMaxWidth(),
@@ -171,8 +153,8 @@ fun PlaceDetailPickerScreen(
                     modifier   = Modifier.weight(1f),
                 )
                 Text(
-                    text  = stringResource(R.string.place_detail_wikipedia_attribution),
-                    color = WaypointTextMuted,
+                    text     = stringResource(R.string.place_detail_wikipedia_attribution),
+                    color    = WaypointTextMuted,
                     fontSize = 10.sp,
                 )
             }
@@ -195,7 +177,6 @@ fun PlaceDetailPickerScreen(
                 )
             }
 
-            // Location / Open in Maps
             Spacer(Modifier.height(22.dp))
             Text(
                 text       = stringResource(R.string.place_detail_location_header),
@@ -236,7 +217,6 @@ fun PlaceDetailPickerScreen(
                 }
             }
 
-            // Add to itinerary
             Spacer(Modifier.height(22.dp))
             Box(
                 modifier = Modifier
@@ -264,7 +244,7 @@ fun PlaceDetailPickerScreen(
             }
         }
 
-        // ── Back button overlaid on hero ─────────────────────────────────────
+        // ── Back button overlaid on hero ──────────────────────────────────────
         CircleIconButton(
             onClick     = onBackClick,
             fillColor   = White.copy(alpha = 0.9f),

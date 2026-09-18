@@ -85,8 +85,11 @@ class PlaceDetailPickerViewModel(
             WeatherRepository.getWeatherByCoords(place.lat, place.lon)
         }
 
+        val wiki = wikiDeferred.await()
+        val bitmap = wiki?.thumbnailUrl?.let { WikipediaPlaceRepository.downloadBitmap(it) }
         _uiState.update { it.copy(
-            wikiSummary       = wikiDeferred.await(),
+            wikiSummary       = wiki,
+            photoBitmap       = bitmap,
             isLoadingWiki     = false,
             weather           = weatherDeferred.await(),
             isLoadingWeather  = false,

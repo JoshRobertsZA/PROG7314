@@ -4,6 +4,9 @@ import android.content.Intent
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -379,17 +382,19 @@ private fun ViewPlaceDetailOverlay(
     val hasCoords = place.lat != null && place.lng != null
     val emoji     = categoryEmoji(place.category)
 
-    // Live Wikipedia fetch for description + fallback thumbnail
+    // Live Wikipedia fetch for description + bitmap
     var wiki by remember { mutableStateOf<WikipediaPlaceRepository.WikipediaSummary?>(null) }
     var wikiLoading by remember { mutableStateOf(true) }
+    var photoBitmap by remember { mutableStateOf<Bitmap?>(null) }
     LaunchedEffect(place.id) {
         wiki = WikipediaPlaceRepository.getSummary(place.name)
+        val urlToLoad = place.photoUrl?.takeIf { it.isNotBlank() }
+            ?: wiki?.thumbnailUrl?.takeIf { it.isNotBlank() }
+        if (urlToLoad != null) {
+            photoBitmap = WikipediaPlaceRepository.downloadBitmap(urlToLoad)
+        }
         wikiLoading = false
     }
-
-    // Prefer stored photo URL, then live wiki thumbnail
-    val photoUrl = place.photoUrl?.takeIf { it.isNotBlank() }
-        ?: if (!wikiLoading) wiki?.thumbnailUrl?.takeIf { it.isNotBlank() } else null
 
     Box(
         modifier = Modifier
@@ -412,23 +417,12 @@ private fun ViewPlaceDetailOverlay(
                     .background(WaypointPlaceAccent2),
                 contentAlignment = Alignment.Center,
             ) {
-                if (!photoUrl.isNullOrBlank()) {
-                    val heroCtx = LocalContext.current
-                    SubcomposeAsyncImage(
-                        model              = ImageRequest.Builder(heroCtx).data(photoUrl).crossfade(true).build(),
+                if (photoBitmap != null) {
+                    Image(
+                        bitmap             = photoBitmap!!.asImageBitmap(),
                         contentDescription = place.name,
                         contentScale       = ContentScale.Crop,
                         modifier           = Modifier.fillMaxSize(),
-                        loading = {
-                            Box(Modifier.fillMaxSize(), Alignment.Center) {
-                                Text(text = emoji, fontSize = 88.sp)
-                            }
-                        },
-                        error = {
-                            Box(Modifier.fillMaxSize(), Alignment.Center) {
-                                Text(text = emoji, fontSize = 88.sp)
-                            }
-                        },
                     )
                 } else {
                     Text(text = emoji, fontSize = 88.sp)

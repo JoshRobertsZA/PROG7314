@@ -1,6 +1,7 @@
 package com.waypoint.app.features.placepicker.ui
 
 import com.waypoint.app.core.cache.WeatherCache
+import android.graphics.Bitmap
 import com.waypoint.app.features.placepicker.data.WikipediaPlaceRepository.WikipediaSummary
 
 data class PlaceDetailPickerUiState(
@@ -16,6 +17,7 @@ data class PlaceDetailPickerUiState(
     val weather      : WeatherCache?      = null,
     val wikiSummary  : WikipediaSummary?  = null,
     val isLoadingWiki: Boolean            = true,
+    val photoBitmap  : Bitmap?            = null,
     val isLoadingWeather: Boolean         = true,
 
     // Action state

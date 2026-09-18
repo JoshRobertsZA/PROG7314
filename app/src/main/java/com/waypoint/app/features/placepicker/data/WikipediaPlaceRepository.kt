@@ -1,5 +1,7 @@
 package com.waypoint.app.features.placepicker.data
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.waypoint.app.core.network.HttpClient
 import kotlinx.coroutines.Dispatchers
@@ -96,4 +98,26 @@ object WikipediaPlaceRepository {
             null
         }
     }
+    /** Downloads a Wikipedia thumbnail as a Bitmap using the shared OkHttpClient. */
+    suspend fun downloadBitmap(url: String): Bitmap? = withContext(Dispatchers.IO) {
+        if (url.isBlank()) return@withContext null
+        try {
+            val req = Request.Builder()
+                .url(url)
+                .header("User-Agent", "WaypointApp/1.0 (Android; prog7314@iie.ac.za)")
+                .get().build()
+            HttpClient.instance.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) {
+                    Log.w(TAG, "Bitmap download HTTP \${resp.code} for \$url")
+                    return@withContext null
+                }
+                val bytes = resp.body?.bytes() ?: return@withContext null
+                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Bitmap download failed: \${e.message}")
+            null
+        }
+    }
+
 }
