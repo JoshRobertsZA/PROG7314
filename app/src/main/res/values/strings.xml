@@ -224,6 +224,15 @@
     <string name="profile_chevron_glyph" translatable="false">›</string>
     <string name="profile_logout">Log out</string>
 
+    <!-- Biometric app-unlock overlay, shown when Settings' "Biometric
+         login" is enabled and the app resumes from the background. -->
+    <string name="biometric_lock_title">Unlock Waypoint</string>
+    <string name="biometric_lock_subtitle">Confirm it\'s you to continue</string>
+    <string name="biometric_lock_prompt_title">Unlock Waypoint</string>
+    <string name="biometric_lock_prompt_subtitle">Use your face or fingerprint to continue</string>
+    <string name="biometric_lock_unlock_button">Unlock</string>
+    <string name="biometric_lock_cancel">Cancel</string>
+
     <!-- Language modal (Figma node 394:62, "Settings — Change language").
          Option labels come from AppLanguage.displayName, not string
          resources - language names are shown in their own native form

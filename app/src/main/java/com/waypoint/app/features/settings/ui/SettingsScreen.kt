@@ -41,8 +41,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.os.LocaleListCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.waypoint.app.R
+import com.waypoint.app.core.auth.BiometricAuthenticator
+import com.waypoint.app.core.auth.BiometricAvailability
+import com.waypoint.app.core.auth.BiometricLockPreferences
 import com.waypoint.app.core.common.TabHeader
 import com.waypoint.app.core.db.SessionManager
 import com.waypoint.app.core.notifications.NotificationPreferences
@@ -182,13 +186,49 @@ fun SettingsScreen(
                 ChevronValue(value = selectedLanguage.displayName)
             }
 
-            var biometricEnabled by remember { mutableStateOf(true) }
+            // Checked once - device biometric enrollment doesn't change
+            // while this screen is open, and re-checking on every
+            // recomposition would be wasteful.
+            val biometricAvailability = remember { BiometricAuthenticator.availability(context) }
+            var biometricEnabled by remember { mutableStateOf(BiometricLockPreferences.isEnabled(context)) }
+            val biometricSubtitle = when (biometricAvailability) {
+                BiometricAvailability.AVAILABLE -> stringResource(R.string.profile_biometric_subtitle)
+                BiometricAvailability.NONE_ENROLLED -> stringResource(R.string.profile_biometric_unavailable_none_enrolled)
+                else -> stringResource(R.string.profile_biometric_unavailable_no_hardware)
+            }
+            val enableTitle = stringResource(R.string.profile_biometric_enable_title)
+            val enableSubtitle = stringResource(R.string.profile_biometric_enable_subtitle)
+            val cancelText = stringResource(R.string.biometric_lock_cancel)
             PreferenceRow(
                 title = stringResource(R.string.profile_biometric_title),
-                subtitle = stringResource(R.string.profile_biometric_subtitle),
+                subtitle = biometricSubtitle,
                 modifier = Modifier.padding(top = 12.dp),
             ) {
-                PreferenceToggle(checked = biometricEnabled, onCheckedChange = { biometricEnabled = it })
+                PreferenceToggle(
+                    checked = biometricEnabled,
+                    enabled = biometricAvailability == BiometricAvailability.AVAILABLE,
+                    onCheckedChange = { turningOn ->
+                        if (!turningOn) {
+                            biometricEnabled = false
+                            BiometricLockPreferences.setEnabled(context, false)
+                            return@PreferenceToggle
+                        }
+                        // Confirm biometric actually works before persisting
+                        // enabled=true - otherwise a stale/broken sensor
+                        // could lock the user out of their own app.
+                        BiometricAuthenticator.authenticate(
+                            activity = context as FragmentActivity,
+                            title = enableTitle,
+                            subtitle = enableSubtitle,
+                            negativeButtonText = cancelText,
+                            onSuccess = {
+                                biometricEnabled = true
+                                BiometricLockPreferences.setEnabled(context, true)
+                            },
+                            onError = { _, _ -> /* leave the toggle off */ },
+                        )
+                    },
+                )
             }
 
             Box(
@@ -271,12 +311,24 @@ private fun PreferenceRow(
 }
 
 @Composable
-private fun PreferenceToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
+private fun PreferenceToggle(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
     Box(
         modifier = modifier
             .size(width = 40.dp, height = 24.dp)
-            .clickable { onCheckedChange(!checked) }
-            .background(if (checked) WaypointTerracotta else WaypointBorderSoft, RoundedCornerShape(12.dp)),
+            .clickable(enabled = enabled) { onCheckedChange(!checked) }
+            .background(
+                when {
+                    !enabled -> WaypointBorderSoft.copy(alpha = 0.5f)
+                    checked -> WaypointTerracotta
+                    else -> WaypointBorderSoft
+                },
+                RoundedCornerShape(12.dp),
+            ),
     ) {
         Box(
             modifier = Modifier
