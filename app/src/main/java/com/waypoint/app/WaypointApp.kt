@@ -2,6 +2,7 @@ package com.waypoint.app
 
 import android.app.Application
 import com.waypoint.app.core.notifications.NotificationChannels
+import com.waypoint.app.core.notifications.TripReminderScheduler
 
 /**
  * Process-wide setup that must exist before any Activity or Service runs.
@@ -16,5 +17,6 @@ class WaypointApp : Application() {
     override fun onCreate() {
         super.onCreate()
         NotificationChannels.ensureCreated(this)
+        TripReminderScheduler.ensureScheduled(this)
     }
 }

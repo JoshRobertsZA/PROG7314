@@ -290,4 +290,29 @@
     <string name="notification_welcome_title">Welcome back!</string>
     <string name="notification_welcome_title_named">Welcome back, %1$s!</string>
     <string name="notification_welcome_body">Your trips are ready whenever you are.</string>
+    <!-- Flight departure time (Edit Itinerary) -->
+    <string name="edit_itinerary_flight_set_time">Set departure time</string>
+    <string name="edit_itinerary_flight_departs">Departs %1$s</string>
+
+    <!-- Scheduled trip reminders (TripReminderWorker) -->
+    <string name="reminder_countdown_title">%1$d days to go!</string>
+    <string name="reminder_countdown_body">%1$s to %2$s is coming up. Time to check your itinerary.</string>
+    <string name="reminder_no_plan_title">%1$s is in 5 days</string>
+    <string name="reminder_no_plan_body">You haven\'t planned anything for %1$s yet. Open Waypoint to add your itinerary.</string>
+    <string name="reminder_start_title">%1$s starts today!</string>
+    <string name="reminder_start_body">Have a great time in %1$s. Your itinerary is ready in the app.</string>
+    <string name="reminder_digest_title">Day %1$d of %2$s</string>
+    <string name="reminder_digest_places">Today: %1$s.</string>
+    <string name="reminder_digest_lodging">Check-in at your accommodation today.</string>
+    <string name="reminder_digest_car">Pick up your rental car today.</string>
+    <string name="reminder_digest_empty">Nothing planned for day %1$d in %2$s yet. Open the app to add something.</string>
+    <string name="reminder_flight_title">Flight reminder</string>
+    <string name="reminder_flight_unnamed">Your flight</string>
+    <string name="reminder_flight_today_body">%1$s departs today at %2$s. Check in and have your documents ready.</string>
+    <string name="reminder_flight_today_body_no_time">%1$s departs today. Check the time on your booking.</string>
+    <string name="reminder_flight_tomorrow_body">Early start: %1$s departs tomorrow at %2$s. Pack tonight.</string>
+    <string name="reminder_ended_title">How was %1$s?</string>
+    <string name="reminder_ended_body">Welcome home. Thanks for planning with Waypoint.</string>
+    <string name="reminder_weather_title">Weather in %1$s</string>
+    <string name="reminder_weather_body">%1$s and %2$d°C at your destination. Plan tomorrow accordingly.</string>
 </resources>

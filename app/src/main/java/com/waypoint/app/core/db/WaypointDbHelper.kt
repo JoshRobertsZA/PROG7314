@@ -15,6 +15,7 @@ import android.database.sqlite.SQLiteOpenHelper
  *         itinerary_lodging, itinerary_car_rental, itinerary_places
  *   4 — added photo_url column to itinerary_places
  *   5 — added notifications table (per-account push history)
+ *   6 — added departure_time to itinerary_flights; reminder_log table
  */
 class WaypointDbHelper private constructor(context: Context) :
     SQLiteOpenHelper(context.applicationContext, DB_NAME, null, DB_VERSION) {
@@ -35,6 +36,7 @@ class WaypointDbHelper private constructor(context: Context) :
         db.execSQL(CREATE_ITINERARY_PLACES_DAY_IDX)
         db.execSQL(CREATE_NOTIFICATIONS)
         db.execSQL(CREATE_NOTIFICATIONS_ACCOUNT_IDX)
+        db.execSQL(CREATE_REMINDER_LOG)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -65,11 +67,16 @@ class WaypointDbHelper private constructor(context: Context) :
             db.execSQL(CREATE_NOTIFICATIONS)
             db.execSQL(CREATE_NOTIFICATIONS_ACCOUNT_IDX)
         }
+        if (oldVersion < 6) {
+            // v6: flight departure time + reminder de-dupe log.
+            db.execSQL("ALTER TABLE $TABLE_ITIN_FLIGHTS ADD COLUMN $COL_IFLIGHT_DEPARTURE TEXT")
+            db.execSQL(CREATE_REMINDER_LOG)
+        }
     }
 
     companion object {
         private const val DB_NAME    = "waypoint.db"
-        private const val DB_VERSION = 5
+        private const val DB_VERSION = 6
 
         // ── accounts ─────────────────────────────────────────────────────────
         const val TABLE_ACCOUNTS       = "accounts"
@@ -105,6 +112,7 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_IFLIGHT_FLIGHT_NUMBER = "flight_number"  // nullable
         const val COL_IFLIGHT_PDF_URI       = "pdf_uri"
         const val COL_IFLIGHT_CREATED       = "created_at_ms"
+        const val COL_IFLIGHT_DEPARTURE     = "departure_time" // nullable, "HH:mm" local
 
         // ── itinerary_lodging ─────────────────────────────────────────────────
         const val TABLE_ITIN_LODGING   = "itinerary_lodging"
@@ -144,6 +152,11 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_NOTIF_TITLE      = "title"
         const val COL_NOTIF_BODY       = "body"
         const val COL_NOTIF_CREATED    = "created_at_ms"
+
+        // ── reminder_log (which scheduled reminders already fired) ───────────
+        const val TABLE_REMINDER_LOG   = "reminder_log"
+        const val COL_RLOG_KEY         = "key"
+        const val COL_RLOG_SENT        = "sent_at_ms"
 
         // ── CREATE statements ─────────────────────────────────────────────────
 
@@ -196,6 +209,7 @@ class WaypointDbHelper private constructor(context: Context) :
                 $COL_IFLIGHT_FLIGHT_NUMBER TEXT,
                 $COL_IFLIGHT_PDF_URI       TEXT NOT NULL,
                 $COL_IFLIGHT_CREATED       INTEGER NOT NULL,
+                $COL_IFLIGHT_DEPARTURE     TEXT,
                 FOREIGN KEY ($COL_IFLIGHT_DAY_ID) REFERENCES $TABLE_ITIN_DAYS($COL_IDAY_ID)
                     ON DELETE CASCADE
             )
@@ -267,6 +281,13 @@ class WaypointDbHelper private constructor(context: Context) :
 
         private const val CREATE_NOTIFICATIONS_ACCOUNT_IDX =
             "CREATE INDEX idx_notifications_account ON $TABLE_NOTIFICATIONS($COL_NOTIF_ACCOUNT_ID)"
+
+        private val CREATE_REMINDER_LOG = """
+            CREATE TABLE $TABLE_REMINDER_LOG (
+                $COL_RLOG_KEY  TEXT PRIMARY KEY,
+                $COL_RLOG_SENT INTEGER NOT NULL
+            )
+        """.trimIndent()
 
         @Volatile private var instance: WaypointDbHelper? = null
 

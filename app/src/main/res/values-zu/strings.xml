@@ -176,4 +176,29 @@
     <string name="notification_welcome_title">Siyakwamukela futhi!</string>
     <string name="notification_welcome_title_named">Siyakwamukela futhi, %1$s!</string>
     <string name="notification_welcome_body">Izinhambo zakho zilungile noma nini lapho usulungile.</string>
+    <!-- Flight departure time (Edit Itinerary) -->
+    <string name="edit_itinerary_flight_set_time">Setha isikhathi sokuhamba</string>
+    <string name="edit_itinerary_flight_departs">Iyahamba %1$s</string>
+
+    <!-- Scheduled trip reminders (TripReminderWorker) -->
+    <string name="reminder_countdown_title">Kusele izinsuku ezingu-%1$d!</string>
+    <string name="reminder_countdown_body">%1$s eya e-%2$s iyeza. Isikhathi sokubheka uhlelo lwakho.</string>
+    <string name="reminder_no_plan_title">%1$s ezinsukwini ezi-5</string>
+    <string name="reminder_no_plan_body">Awukahleli lutho lwe-%1$s. Vula uWaypoint ukwengeza uhlelo lwakho.</string>
+    <string name="reminder_start_title">%1$s iqala namuhla!</string>
+    <string name="reminder_start_body">Jabulela e-%1$s. Uhlelo lwakho lulungile ku-app.</string>
+    <string name="reminder_digest_title">Usuku %1$d lwe-%2$s</string>
+    <string name="reminder_digest_places">Namuhla: %1$s.</string>
+    <string name="reminder_digest_lodging">Ngena endaweni yakho yokuhlala namuhla.</string>
+    <string name="reminder_digest_car">Thatha imoto yakho eqashiwe namuhla.</string>
+    <string name="reminder_digest_empty">Akukho lutho oluhleliwe losuku %1$d e-%2$s. Vula i-app ukwengeza okuthile.</string>
+    <string name="reminder_flight_title">Isikhumbuzi sendiza</string>
+    <string name="reminder_flight_unnamed">Indiza yakho</string>
+    <string name="reminder_flight_today_body">%1$s iyahamba namuhla ngo-%2$s. Bhalisa futhi ulungise amadokhumenti akho.</string>
+    <string name="reminder_flight_today_body_no_time">%1$s iyahamba namuhla. Bheka isikhathi ekubhukeni kwakho.</string>
+    <string name="reminder_flight_tomorrow_body">Ukuqala kusenesikhathi: %1$s iyahamba kusasa ngo-%2$s. Pakisha namuhla ebusuku.</string>
+    <string name="reminder_ended_title">Bekunjani e-%1$s?</string>
+    <string name="reminder_ended_body">Siyakwamukela ekhaya. Siyabonga ngokuhlela noWaypoint.</string>
+    <string name="reminder_weather_title">Isimo sezulu e-%1$s</string>
+    <string name="reminder_weather_body">%1$s kanye no-%2$d°C lapho uya khona. Hlela kusasa ngokufanele.</string>
 </resources>
