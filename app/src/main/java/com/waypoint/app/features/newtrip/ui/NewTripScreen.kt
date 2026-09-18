@@ -178,7 +178,7 @@ fun NewTripScreen(
 
             // Destination field
             Text(
-                text = "Destination",
+                text = stringResource(R.string.new_trip_destination_label),
                 color = WaypointTextMuted,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
@@ -285,7 +285,7 @@ private fun TripSummaryBar(
             val start = uiState.startDate.format(SUMMARY_FMT)
             val end   = uiState.endDate.format(SUMMARY_FMT)
             val days  = uiState.selectedDayCount
-            "$start – $end · $days ${if (days == 1) "day" else "days"}"
+            "$start – $end · " + androidx.compose.ui.res.pluralStringResource(R.plurals.day_count, days, days)
         }
     }
 

@@ -73,7 +73,7 @@ fun CurrencyExchangeModal(
             Surface(shape = RoundedCornerShape(16.dp), tonalElevation = 4.dp) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Select currency",
+                        text = stringResource(R.string.currency_modal_select),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = WaypointTextPrimary,

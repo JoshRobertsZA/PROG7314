@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.waypoint.app.core.theme.RadiusButton
 import com.waypoint.app.core.theme.WaypointCard
@@ -48,7 +50,9 @@ fun AppButtonFilled(
             .padding(contentPadding),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = text, color = textColor, fontWeight = FontWeight.Bold)
+        // Labels vary a lot in length across en/xh/zu; wrap to two lines
+        // rather than clipping a fixed-height button.
+        Text(text = text, color = textColor, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -80,6 +84,8 @@ fun AppButtonOutline(
             .padding(contentPadding),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = text, color = textColor, fontWeight = FontWeight.Bold)
+        // Labels vary a lot in length across en/xh/zu; wrap to two lines
+        // rather than clipping a fixed-height button.
+        Text(text = text, color = textColor, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }

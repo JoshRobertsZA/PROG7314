@@ -39,6 +39,8 @@ import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
 import com.waypoint.app.core.theme.White
 import java.time.Month
+import androidx.compose.ui.res.stringResource
+import com.waypoint.app.R
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
@@ -170,7 +172,7 @@ fun YearMonthPicker(
 
             // Dismiss hint
             Text(
-                text = "Tap a month to jump to it",
+                text = stringResource(R.string.year_picker_hint),
                 color = WaypointTextMuted,
                 fontSize = 10.sp,
                 textAlign = TextAlign.Center,

@@ -20,6 +20,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.waypoint.app.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,7 +73,7 @@ fun CitySearchDialog(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Select a city",
+                    text = stringResource(R.string.city_search_title),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = WaypointTextPrimary,
@@ -80,7 +82,7 @@ fun CitySearchDialog(
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    placeholder = { Text("Type a city name...") },
+                    placeholder = { Text(stringResource(R.string.city_search_hint)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -93,7 +95,7 @@ fun CitySearchDialog(
                     )
                 } else if (searchAttempted && suggestions.isEmpty()) {
                     Text(
-                        text = "No results found",
+                        text = stringResource(R.string.city_search_no_results),
                         color = WaypointTextMuted,
                         fontSize = 13.sp,
                         modifier = Modifier.padding(top = 8.dp),

@@ -152,7 +152,7 @@ fun AllTripsScreen(
                 if (displayed.isEmpty()) {
                     Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
                         Text(
-                            text = "No trips yet. Tap the button below to plan one!",
+                            text = stringResource(R.string.all_trips_empty),
                             color = WaypointTextMuted,
                             fontSize = 13.sp,
                         )
@@ -199,7 +199,7 @@ fun AllTripsScreen(
                                                 modifier = Modifier.weight(1f),
                                             )
                                             StatusBadge(
-                                                text = trip.badgeText,
+                                                text = tripBadgeLabel(trip.badge),
                                                 fillColor = trip.badgeColor,
                                                 textColor = trip.badgeTextColor,
                                                 cornerRadius = 20.dp,

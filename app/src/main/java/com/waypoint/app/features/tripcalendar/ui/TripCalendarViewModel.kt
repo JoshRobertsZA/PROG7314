@@ -55,10 +55,7 @@ class TripCalendarViewModel(
                 ChronoUnit.DAYS.between(start, end).toInt() else 0
             val rangeLabel = if (start != null && end != null)
                 "${start.format(shortFmt)} - ${end.format(longFmt)}" else ""
-            val dayCount = if (start != null && end != null) {
-                val n = ChronoUnit.DAYS.between(start, end) + 1
-                "$n ${if (n == 1L) "day" else "days"}"
-            } else ""
+            val dayCount = if (start != null && end != null) (ChronoUnit.DAYS.between(start, end) + 1).toInt() else 0
 
             // Overview counts: flights across every selected day, and every
             // uploaded lodging / car-rental document.
@@ -84,7 +81,7 @@ class TripCalendarViewModel(
                     endDate        = end,
                     displayMonth   = start?.let { d -> YearMonth.from(d) } ?: YearMonth.now(),
                     dateRangeLabel = rangeLabel,
-                    dayCountLabel  = dayCount,
+                    dayCount       = dayCount,
                 )
             }
         }

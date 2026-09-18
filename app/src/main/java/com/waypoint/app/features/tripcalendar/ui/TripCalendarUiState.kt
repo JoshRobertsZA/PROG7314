@@ -21,7 +21,7 @@ data class TripCalendarUiState(
     val endDate: LocalDate? = null,
     val displayMonth: YearMonth = YearMonth.now(),
     val dateRangeLabel: String = "",
-    val dayCountLabel: String = "",
+    val dayCount: Int = 0,
     // Edit name dialog
     val showNameDialog: Boolean = false,
     val nameInput: String = "",

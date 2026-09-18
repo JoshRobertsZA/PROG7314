@@ -242,7 +242,7 @@ fun HomeScreen(
                                     .padding(horizontal = 10.dp, vertical = 4.dp),
                             ) {
                                 Text(
-                                    text = featuredTrip.badgeText,
+                                    text = com.waypoint.app.features.alltrips.ui.tripBadgeLabel(featuredTrip.badge),
                                     color = WaypointTripBadgeText,
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
@@ -274,7 +274,7 @@ fun HomeScreen(
                         .padding(18.dp),
                 ) {
                     Text(
-                        text = "No upcoming trips — tap New Trip to get started!",
+                        text = stringResource(R.string.home_no_trips),
                         color = WaypointTextMuted,
                         fontSize = 13.sp,
                     )
@@ -285,16 +285,13 @@ fun HomeScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
                     .padding(top = 22.dp),
             ) {
                 AppButtonOutline(
                     text = stringResource(R.string.home_view_all_trips),
                     onClick = onViewAllTripsClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    modifier = Modifier.weight(1f),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 12.dp),
                 )
                 AppButtonFilled(
                     text = stringResource(R.string.home_new_trip),
@@ -303,7 +300,7 @@ fun HomeScreen(
                         .weight(1f)
                         .fillMaxHeight()
                         .padding(start = 12.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 12.dp),
                 )
             }
 
@@ -352,7 +349,7 @@ fun HomeScreen(
                         }
                         is WeatherState.Error -> {
                             Text(
-                                text = "Weather unavailable",
+                                text = stringResource(R.string.home_weather_unavailable),
                                 color = WaypointTextMuted,
                                 fontSize = 12.sp,
                             )
@@ -365,7 +362,7 @@ fun HomeScreen(
                         }
                         else -> {
                             Text(
-                                text = "Tap to set city",
+                                text = stringResource(R.string.home_tap_set_city),
                                 color = WaypointTextMuted,
                                 fontSize = 12.sp,
                             )
@@ -390,7 +387,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(16.dp),
                             )
                             Text(
-                                text = "Fetching rate...",
+                                text = stringResource(R.string.home_fetching_rate),
                                 color = WaypointTextMuted,
                                 fontSize = 10.sp,
                                 modifier = Modifier.padding(top = 2.dp),
@@ -404,7 +401,7 @@ fun HomeScreen(
                                 fontWeight = FontWeight.Bold,
                             )
                             Text(
-                                text = "Live rate",
+                                text = stringResource(R.string.home_live_rate),
                                 color = WaypointTextMuted,
                                 fontSize = 10.sp,
                                 modifier = Modifier.padding(top = 2.dp),
@@ -412,12 +409,12 @@ fun HomeScreen(
                         }
                         is CurrencyState.Error -> {
                             Text(
-                                text = "Rate unavailable",
+                                text = stringResource(R.string.home_rate_unavailable),
                                 color = WaypointTextMuted,
                                 fontSize = 12.sp,
                             )
                             Text(
-                                text = "Tap to retry",
+                                text = stringResource(R.string.home_tap_retry),
                                 color = WaypointTextMuted,
                                 fontSize = 10.sp,
                                 modifier = Modifier.padding(top = 2.dp),
@@ -511,7 +508,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(18.dp),
                             )
                             Text(
-                                text = "Finding places near you...",
+                                text = stringResource(R.string.home_finding_places),
                                 color = WaypointTextMuted,
                                 fontSize = 12.sp,
                                 modifier = Modifier.padding(start = 10.dp),
@@ -520,7 +517,7 @@ fun HomeScreen(
                     }
                     is NearbyState.Error -> {
                         Text(
-                            text = "Could not load nearby places. Check your connection.",
+                            text = stringResource(R.string.home_places_error),
                             color = WaypointTextMuted,
                             fontSize = 12.sp,
                             modifier = Modifier
@@ -530,7 +527,7 @@ fun HomeScreen(
                     }
                     else -> {
                         Text(
-                            text = "Allow location access to see places near you.",
+                            text = stringResource(R.string.home_places_permission),
                             color = WaypointTextMuted,
                             fontSize = 12.sp,
                             modifier = Modifier

@@ -379,7 +379,7 @@ private fun ViewPlaceCard(place: ViewPlaceItem, onTap: () -> Unit) {
                     Text(place.note, color = WaypointTextMuted, fontSize = 11.sp, modifier = Modifier.padding(top = 3.dp))
                 }
                 Text(
-                    text     = "Tap for details",
+                    text     = stringResource(R.string.view_itinerary_tap_details),
                     color    = WaypointTerracotta,
                     fontSize = 10.sp,
                     modifier = Modifier.padding(top = 3.dp),
@@ -505,7 +505,7 @@ private fun ViewPlaceDetailOverlay(
                     )
                 } else if (!wikiLoading) {
                     Text(
-                        text     = "No description available.",
+                        text     = stringResource(R.string.view_itinerary_no_description),
                         color    = WaypointTextMuted,
                         fontSize = 13.sp,
                         modifier = Modifier.padding(top = 16.dp),
@@ -539,7 +539,7 @@ private fun ViewPlaceDetailOverlay(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text       = "Open in Maps",
+                        text       = stringResource(R.string.view_itinerary_open_maps),
                         color      = androidx.compose.ui.graphics.Color.White,
                         fontSize   = 15.sp,
                         fontWeight = FontWeight.Bold,

@@ -35,6 +35,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -229,7 +230,7 @@ fun TripCalendarScreen(
     if (uiState.showNameDialog) {
         AlertDialog(
             onDismissRequest = viewModel::onDismissNameDialog,
-            title = { Text("Rename trip", color = WaypointTextPrimary, fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.calendar_rename_trip), color = WaypointTextPrimary, fontWeight = FontWeight.Bold) },
             text = {
                 BasicTextField(
                     value = uiState.nameInput,
@@ -244,12 +245,12 @@ fun TripCalendarScreen(
             },
             confirmButton = {
                 TextButton(onClick = viewModel::onConfirmNameEdit) {
-                    Text("Save", color = WaypointTerracotta, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.modal_save_button), color = WaypointTerracotta, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = viewModel::onDismissNameDialog) {
-                    Text("Cancel", color = WaypointTextMuted)
+                    Text(stringResource(R.string.common_cancel), color = WaypointTextMuted)
                 }
             },
             containerColor = WaypointCream,
@@ -308,7 +309,7 @@ fun TripCalendarScreen(
         // Date range subtitle
         if (uiState.dateRangeLabel.isNotBlank()) {
             Text(
-                text = "${uiState.dateRangeLabel} · ${uiState.dayCountLabel}",
+                text = "${uiState.dateRangeLabel} · ${pluralStringResource(R.plurals.day_count, uiState.dayCount, uiState.dayCount)}",
                 color = WaypointTextMuted,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center,
@@ -318,7 +319,7 @@ fun TripCalendarScreen(
 
         // Trip overview section
         Text(
-            text = "Trip overview",
+            text = stringResource(R.string.calendar_overview),
             color = WaypointTextPrimary,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
@@ -329,13 +330,13 @@ fun TripCalendarScreen(
         Row(modifier = Modifier.fillMaxWidth()) {
             OverviewCard(
                 value = "${uiState.nightCount}",
-                label = "Duration",
-                suffix = if (uiState.nightCount == 1) "night" else "nights",
+                label = stringResource(R.string.calendar_duration),
+                suffix = pluralStringResource(R.plurals.night_count_suffix, uiState.nightCount),
                 modifier = Modifier.weight(1f),
             )
             OverviewCard(
-                value = uiState.destination ?: "Add destination",
-                label = "Destination",
+                value = uiState.destination ?: stringResource(R.string.calendar_add_destination),
+                label = stringResource(R.string.calendar_destination),
                 isPlaceholder = uiState.destination == null,
                 isLoading = uiState.isGeocodingDest,
                 modifier = Modifier
@@ -348,9 +349,9 @@ fun TripCalendarScreen(
         // Row 2: Flight, Stay, Rental counts from the itinerary
         Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
             listOf(
-                "Flight" to uiState.flightCount,
-                "Stay"   to uiState.stayCount,
-                "Rental" to uiState.rentalCount,
+                stringResource(R.string.calendar_flight) to uiState.flightCount,
+                stringResource(R.string.calendar_stay)   to uiState.stayCount,
+                stringResource(R.string.calendar_rental) to uiState.rentalCount,
             ).forEachIndexed { i, (label, count) ->
                 OverviewCard(
                     value = "$count",

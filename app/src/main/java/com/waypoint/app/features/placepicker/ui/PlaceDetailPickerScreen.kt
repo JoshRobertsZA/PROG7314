@@ -134,7 +134,7 @@ fun PlaceDetailPickerScreen(
                 if (w != null) {
                     InfoCard(
                         value    = "${"%.0f".format(w.tempC)}°C · ${w.description}",
-                        label    = "At this location",
+                        label    = stringResource(R.string.place_at_location),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -160,7 +160,7 @@ fun PlaceDetailPickerScreen(
             }
             if (state.isLoadingWiki) {
                 Text(
-                    text     = "Loading…",
+                    text     = stringResource(R.string.common_loading),
                     color    = WaypointTextMuted,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 8.dp),
