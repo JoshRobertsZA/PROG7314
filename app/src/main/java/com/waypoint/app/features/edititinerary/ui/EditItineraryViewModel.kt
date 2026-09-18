@@ -77,7 +77,7 @@ class EditItineraryViewModel(
         }
 
     private suspend fun loadPlacesFor(dayId: String): Map<String, List<PlaceItem>> {
-        val itinCategories = listOf("HOTELS", "PARKS", "PUBS", "CINEMAS")
+        val itinCategories = listOf("RESTAURANTS", "HOTELS", "PARKS", "PUBS", "CINEMAS")
         val all = repo.getPlacesForDay(dayId).map { p ->
             PlaceItem(
                 id       = p.id,

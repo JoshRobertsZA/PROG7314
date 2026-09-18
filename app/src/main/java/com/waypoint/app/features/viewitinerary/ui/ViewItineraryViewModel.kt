@@ -22,7 +22,7 @@ class ViewItineraryViewModel(
     private val _uiState = MutableStateFlow(ViewItineraryUiState())
     val uiState: StateFlow<ViewItineraryUiState> = _uiState.asStateFlow()
 
-    private val itinCategories = listOf("HOTELS", "PARKS", "PUBS", "CINEMAS")
+    private val itinCategories = listOf("RESTAURANTS", "HOTELS", "PARKS", "PUBS", "CINEMAS")
 
     init { loadAll() }
 
