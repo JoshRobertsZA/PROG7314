@@ -106,6 +106,7 @@ class PlaceDetailPickerViewModel(
                 category  = category,
                 lat       = state.lat,
                 lng       = state.lon,
+                photoUrl  = state.wikiSummary?.thumbnailUrl,
             )
             _uiState.update { it.copy(isAdding = false, isAdded = true) }
         }

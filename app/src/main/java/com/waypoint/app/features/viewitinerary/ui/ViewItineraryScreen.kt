@@ -1,6 +1,9 @@
 package com.waypoint.app.features.viewitinerary.ui
 
 import android.content.Intent
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -312,12 +315,23 @@ private fun ViewPlaceCard(place: ViewPlaceItem) {
             modifier          = Modifier.padding(start = 10.dp, top = 10.dp, end = 12.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ThumbnailBlock(
-                accentColor = WaypointPlaceAccent1,
-                label       = categoryEmoji(place.category),
-                size        = 44.dp,
-                cornerRadius = RadiusThumbnail,
-            )
+            if (!place.photoUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model              = place.photoUrl,
+                    contentDescription = place.name,
+                    contentScale       = ContentScale.Crop,
+                    modifier           = Modifier
+                        .size(44.dp)
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(RadiusThumbnail)),
+                )
+            } else {
+                ThumbnailBlock(
+                    accentColor  = WaypointPlaceAccent1,
+                    label        = categoryEmoji(place.category),
+                    size         = 44.dp,
+                    cornerRadius = RadiusThumbnail,
+                )
+            }
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
                 Text(place.name, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 if (!place.note.isNullOrBlank()) {

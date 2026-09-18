@@ -13,6 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper
  *   2 — added dest_lat / dest_lng columns to trips
  *   3 — added itinerary tables: itinerary_days, itinerary_flights,
  *         itinerary_lodging, itinerary_car_rental, itinerary_places
+ *   4 — added photo_url column to itinerary_places
  */
 class WaypointDbHelper private constructor(context: Context) :
     SQLiteOpenHelper(context.applicationContext, DB_NAME, null, DB_VERSION) {
@@ -39,6 +40,10 @@ class WaypointDbHelper private constructor(context: Context) :
             db.execSQL("ALTER TABLE $TABLE_TRIPS ADD COLUMN $COL_TRIP_DEST_LAT REAL")
             db.execSQL("ALTER TABLE $TABLE_TRIPS ADD COLUMN $COL_TRIP_DEST_LNG REAL")
         }
+        if (oldVersion < 4) {
+            // v4: photo_url column on itinerary_places.
+            db.execSQL("ALTER TABLE $TABLE_ITIN_PLACES ADD COLUMN $COL_IPLACE_PHOTO_URL TEXT")
+        }
         if (oldVersion < 3) {
             // v3: itinerary tables.
             db.execSQL(CREATE_ITINERARY_DAYS)
@@ -56,7 +61,7 @@ class WaypointDbHelper private constructor(context: Context) :
 
     companion object {
         private const val DB_NAME    = "waypoint.db"
-        private const val DB_VERSION = 3
+        private const val DB_VERSION = 4
 
         // ── accounts ─────────────────────────────────────────────────────────
         const val TABLE_ACCOUNTS       = "accounts"
@@ -122,6 +127,7 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_IPLACE_LNG          = "place_lng"   // nullable
         const val COL_IPLACE_NOTE         = "note"        // nullable
         const val COL_IPLACE_CREATED      = "created_at_ms"
+        const val COL_IPLACE_PHOTO_URL    = "photo_url"  // nullable
 
         // ── CREATE statements ─────────────────────────────────────────────────
 
@@ -223,6 +229,7 @@ class WaypointDbHelper private constructor(context: Context) :
                 $COL_IPLACE_LAT      REAL,
                 $COL_IPLACE_LNG      REAL,
                 $COL_IPLACE_NOTE     TEXT,
+                $COL_IPLACE_PHOTO_URL TEXT,
                 $COL_IPLACE_CREATED  INTEGER NOT NULL,
                 FOREIGN KEY ($COL_IPLACE_DAY_ID) REFERENCES $TABLE_ITIN_DAYS($COL_IDAY_ID)
                     ON DELETE CASCADE

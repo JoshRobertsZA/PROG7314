@@ -34,6 +34,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 import com.waypoint.app.R
 import com.waypoint.app.core.common.CircleIconButton
 import com.waypoint.app.core.common.ThumbnailBlock
@@ -68,7 +70,7 @@ fun PlaceDetailPickerScreen(
 
     Box(modifier = modifier.fillMaxSize().background(WaypointCream)) {
 
-        // ── Hero emoji block ─────────────────────────────────────────────────
+        // ── Hero: Wikipedia thumbnail if available, else emoji placeholder ──
         Box(
             modifier         = Modifier
                 .fillMaxWidth()
@@ -76,7 +78,15 @@ fun PlaceDetailPickerScreen(
                 .background(WaypointPlaceAccent2),
             contentAlignment = Alignment.Center,
         ) {
-            if (state.placeEmoji.isNotEmpty()) {
+            val thumb = state.wikiSummary?.thumbnailUrl
+            if (!thumb.isNullOrBlank()) {
+                AsyncImage(
+                    model             = thumb,
+                    contentDescription = state.placeName,
+                    contentScale      = ContentScale.Crop,
+                    modifier          = Modifier.fillMaxSize(),
+                )
+            } else if (state.placeEmoji.isNotEmpty()) {
                 Text(text = state.placeEmoji, fontSize = 72.sp)
             }
         }

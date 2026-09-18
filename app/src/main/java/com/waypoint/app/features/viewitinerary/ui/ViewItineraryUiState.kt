@@ -32,6 +32,7 @@ data class ViewPlaceItem(
     val note: String?,
     val lat: Double? = null,
     val lng: Double? = null,
+    val photoUrl: String? = null,
 )
 
 data class ViewItineraryUiState(

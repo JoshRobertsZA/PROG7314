@@ -371,6 +371,7 @@ class ItineraryRepository(context: Context) {
         lat: Double? = null,
         lng: Double? = null,
         note: String? = null,
+        photoUrl: String? = null,
     ): String = withContext(Dispatchers.IO) {
         val id = UUID.randomUUID().toString()
         val cv = ContentValues().apply {
@@ -381,6 +382,7 @@ class ItineraryRepository(context: Context) {
             if (lat != null) put(WaypointDbHelper.COL_IPLACE_LAT, lat)
             if (lng != null) put(WaypointDbHelper.COL_IPLACE_LNG, lng)
             if (note != null) put(WaypointDbHelper.COL_IPLACE_NOTE, note)
+            if (photoUrl != null) put(WaypointDbHelper.COL_IPLACE_PHOTO_URL, photoUrl)
             put(WaypointDbHelper.COL_IPLACE_CREATED, System.currentTimeMillis())
         }
         db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_PLACES, null, cv)
@@ -404,8 +406,9 @@ class ItineraryRepository(context: Context) {
             val result = mutableListOf<PlaceEntity>()
             cursor.use {
                 while (it.moveToNext()) {
-                    val latIdx = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_LAT)
-                    val lngIdx = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_LNG)
+                    val latIdx   = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_LAT)
+                    val lngIdx   = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_LNG)
+                    val photoIdx = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_PHOTO_URL)
                     result.add(
                         PlaceEntity(
                             id          = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_ID)),
@@ -415,6 +418,7 @@ class ItineraryRepository(context: Context) {
                             lat         = if (latIdx >= 0 && !it.isNull(latIdx)) it.getDouble(latIdx) else null,
                             lng         = if (lngIdx >= 0 && !it.isNull(lngIdx)) it.getDouble(lngIdx) else null,
                             note        = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_NOTE)),
+                            photoUrl    = if (photoIdx >= 0 && !it.isNull(photoIdx)) it.getString(photoIdx) else null,
                             createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_CREATED)),
                         )
                     )
