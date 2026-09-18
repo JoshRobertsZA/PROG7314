@@ -132,6 +132,10 @@
 
     <string name="profile_stat_planned_label">Kuhleliwe kulo nyaka</string>
     <string name="profile_stat_created_label">Kwenziwe kuWaypoint</string>
+    <plurals name="profile_stat_trips">
+        <item quantity="one">%d uhambo</item>
+        <item quantity="other">%d izinhambo</item>
+    </plurals>
     <string name="profile_preferences_header">Okuncanyelwayo</string>
     <string name="profile_notifications_title">Izaziso</string>
     <string name="profile_notifications_subtitle">Izexwayiso zendiza, isimo sezulu, nohambo</string>
