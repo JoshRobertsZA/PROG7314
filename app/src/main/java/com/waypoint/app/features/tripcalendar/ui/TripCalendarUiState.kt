@@ -11,15 +11,27 @@ data class TripCalendarUiState(
     val destination: String? = null,
     val destLat: Double? = null,
     val destLng: Double? = null,
+    val destPhotoUrl: String? = null,
     val nightCount: Int = 0,
+    // Overview counts, derived from itinerary rows for this trip
+    val flightCount: Int = 0,
+    val stayCount: Int = 0,
+    val rentalCount: Int = 0,
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
     val displayMonth: YearMonth = YearMonth.now(),
     val dateRangeLabel: String = "",
-    val dayCountLabel: String = "",
+    val dayCount: Int = 0,
     // Edit name dialog
     val showNameDialog: Boolean = false,
     val nameInput: String = "",
+    // Delete / edit-dates modals
+    val showDeleteConfirm: Boolean = false,
+    val showEditDates: Boolean = false,
+    val editStart: LocalDate? = null,
+    val editEnd: LocalDate? = null,
+    val editMonth: YearMonth = YearMonth.now(),
+    val deleted: Boolean = false,
     // Destination search
     val showDestSearch: Boolean = false,
     val isGeocodingDest: Boolean = false,

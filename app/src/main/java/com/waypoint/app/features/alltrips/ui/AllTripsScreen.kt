@@ -40,6 +40,13 @@ import com.waypoint.app.core.common.CardSurface
 import com.waypoint.app.core.common.CircleIconButton
 import com.waypoint.app.core.common.StatusBadge
 import com.waypoint.app.core.common.ThumbnailBlock
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import coil.compose.AsyncImage
 import com.waypoint.app.core.theme.RadiusButton
 import com.waypoint.app.core.theme.RadiusCard
 import com.waypoint.app.core.theme.WaypointBorderSoft
@@ -148,7 +155,7 @@ fun AllTripsScreen(
                 if (displayed.isEmpty()) {
                     Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
                         Text(
-                            text = "No trips yet. Tap the button below to plan one!",
+                            text = stringResource(R.string.all_trips_empty),
                             color = WaypointTextMuted,
                             fontSize = 13.sp,
                         )
@@ -167,12 +174,34 @@ fun AllTripsScreen(
                                     modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 14.dp, bottom = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    ThumbnailBlock(
-                                        accentColor = trip.thumbColor,
-                                        size = 56.dp,
-                                        cornerRadius = RadiusButton,
-                                        modifier = Modifier.alpha(trip.thumbAlpha),
-                                    )
+                                    if (trip.photoUrl != null) {
+                                        // Fall back to the colour block if the image fails.
+                                        var failed by remember(trip.photoUrl) { mutableStateOf(false) }
+                                        if (failed) {
+                                            ThumbnailBlock(
+                                                accentColor = trip.thumbColor,
+                                                size = 56.dp,
+                                                cornerRadius = RadiusButton,
+                                                modifier = Modifier.alpha(trip.thumbAlpha),
+                                            )
+                                        } else AsyncImage(
+                                            model = trip.photoUrl,
+                                            contentDescription = trip.destination,
+                                            contentScale = ContentScale.Crop,
+                                            onError = { failed = true },
+                                            modifier = Modifier
+                                                .size(56.dp)
+                                                .clip(RoundedCornerShape(RadiusButton))
+                                                .alpha(trip.thumbAlpha),
+                                        )
+                                    } else {
+                                        ThumbnailBlock(
+                                            accentColor = trip.thumbColor,
+                                            size = 56.dp,
+                                            cornerRadius = RadiusButton,
+                                            modifier = Modifier.alpha(trip.thumbAlpha),
+                                        )
+                                    }
                                     Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             Text(
@@ -183,7 +212,7 @@ fun AllTripsScreen(
                                                 modifier = Modifier.weight(1f),
                                             )
                                             StatusBadge(
-                                                text = trip.badgeText,
+                                                text = tripBadgeLabel(trip.badge),
                                                 fillColor = trip.badgeColor,
                                                 textColor = trip.badgeTextColor,
                                                 cornerRadius = 20.dp,

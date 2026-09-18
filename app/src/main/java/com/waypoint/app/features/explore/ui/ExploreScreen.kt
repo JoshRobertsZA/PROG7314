@@ -233,7 +233,7 @@ fun ExploreScreen(
                 is PlacesState.Success -> {
                     if (state.visiblePlaces.isEmpty()) {
                         Text(
-                            text = "No places found for this filter.",
+                            text = stringResource(R.string.explore_no_places),
                             color = WaypointTextMuted,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(vertical = 16.dp),
@@ -251,7 +251,7 @@ fun ExploreScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = "Could not load places. Check your connection and try again.",
+                            text = stringResource(R.string.explore_load_error),
                             color = WaypointTextMuted,
                             fontSize = 12.sp,
                         )
@@ -263,7 +263,7 @@ fun ExploreScreen(
                                 .padding(horizontal = 20.dp, vertical = 10.dp),
                         ) {
                             Text(
-                                text = "Try Again",
+                                text = stringResource(R.string.common_try_again),
                                 color = White,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,

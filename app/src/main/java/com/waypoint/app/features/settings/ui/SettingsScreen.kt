@@ -51,7 +51,6 @@ import com.waypoint.app.core.common.TabHeader
 import com.waypoint.app.core.db.SessionManager
 import com.waypoint.app.core.notifications.NotificationPreferences
 import com.waypoint.app.core.locale.AppLanguage
-import com.waypoint.app.features.notifications.ui.NotificationHistoryModal
 import com.waypoint.app.core.theme.RadiusButton
 import com.waypoint.app.core.theme.RadiusRow
 import com.waypoint.app.core.theme.WaypointBorderSoft
@@ -89,7 +88,6 @@ fun SettingsScreen(
 
     var selectedLanguage by remember { mutableStateOf(AppLanguage.current()) }
     var showLanguageModal by remember { mutableStateOf(false) }
-    var showNotificationHistory by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -106,7 +104,7 @@ fun SettingsScreen(
         ) {
             // Header: brand name + bell (no avatar here - the big avatar
             // below is this screen's own subject).
-            TabHeader(showAvatar = false, onBellClick = { showNotificationHistory = true })
+            TabHeader(showAvatar = false)
 
             // Avatar + name + email, centered.
             AsyncImage(
@@ -250,12 +248,6 @@ fun SettingsScreen(
                     fontWeight = FontWeight.SemiBold,
                 )
             }
-        }
-    }
-
-    if (showNotificationHistory) {
-        Dialog(onDismissRequest = { showNotificationHistory = false }) {
-            NotificationHistoryModal()
         }
     }
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.waypoint.app.core.db.SessionManager
 import com.waypoint.app.features.explore.data.LocationIQRepository
+import com.waypoint.app.features.home.data.WikipediaCitySearch
 import com.waypoint.app.features.newtrip.data.TripRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -138,11 +139,13 @@ class NewTripViewModel(application: Application) : AndroidViewModel(application)
         _uiState.update { it.copy(showDestSearch = false, destinationName = name, isGeocodingDest = true) }
         viewModelScope.launch {
             val coords = LocationIQRepository.geocodeCity(name)
+            val photo  = WikipediaCitySearch.thumbnailUrl(name)
             _uiState.update {
                 it.copy(
                     isGeocodingDest = false,
                     destLat = coords?.first,
                     destLng = coords?.second,
+                    destPhotoUrl = photo,
                 )
             }
         }
@@ -164,6 +167,7 @@ class NewTripViewModel(application: Application) : AndroidViewModel(application)
                 destination = state.destinationName.ifBlank { null },
                 destLat     = state.destLat,
                 destLng     = state.destLng,
+                destPhotoUrl = state.destPhotoUrl,
             )
             _uiState.update { it.copy(isSaving = false) }
             _tripSaved.emit(id)

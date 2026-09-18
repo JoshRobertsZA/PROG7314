@@ -16,6 +16,30 @@ object WikipediaCitySearch {
 
     private const val TAG = "WikipediaCitySearch"
 
+    /**
+     * Wikipedia REST summary -> lead image thumbnail URL for [title], or null
+     * if the page has none or the call fails. Stored on the trip so All
+     * Trips can show a destination picture offline.
+     */
+    suspend fun thumbnailUrl(title: String): String? = withContext(Dispatchers.IO) {
+        if (title.isBlank()) return@withContext null
+        val encoded = URLEncoder.encode(title.trim().replace(' ', '_'), "UTF-8")
+        val url = "https://en.wikipedia.org/api/rest_v1/page/summary/$encoded"
+        try {
+            val request = Request.Builder()
+                .url(url)
+                .header("User-Agent", "WaypointApp/1.0 (Android; prog7314@iie.ac.za)")
+                .get()
+                .build()
+            val body = HttpClient.instance.newCall(request).execute().use { it.body?.string() }
+            if (body.isNullOrBlank()) return@withContext null
+            org.json.JSONObject(body).optJSONObject("thumbnail")?.optString("source")?.takeIf { it.isNotBlank() }
+        } catch (e: Exception) {
+            Log.w(TAG, "Thumbnail lookup failed for '$title'", e)
+            null
+        }
+    }
+
     suspend fun search(query: String): List<String> = withContext(Dispatchers.IO) {
         if (query.isBlank()) return@withContext emptyList()
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")

@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.waypoint.app.core.db.SessionManager
 import com.waypoint.app.features.explore.data.LocationIQRepository
+import com.waypoint.app.features.home.data.WikipediaCitySearch
 import com.waypoint.app.features.newtrip.data.TripRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,10 +55,14 @@ class TripCalendarViewModel(
                 ChronoUnit.DAYS.between(start, end).toInt() else 0
             val rangeLabel = if (start != null && end != null)
                 "${start.format(shortFmt)} - ${end.format(longFmt)}" else ""
-            val dayCount = if (start != null && end != null) {
-                val n = ChronoUnit.DAYS.between(start, end) + 1
-                "$n ${if (n == 1L) "day" else "days"}"
-            } else ""
+            val dayCount = if (start != null && end != null) (ChronoUnit.DAYS.between(start, end) + 1).toInt() else 0
+
+            // Overview counts: flights across every selected day, and every
+            // uploaded lodging / car-rental document.
+            val dayIds   = itineraryRepo.getSelectedDaysWithIds(trip.id).map { d -> d.id }
+            val flights  = itineraryRepo.getFlightsForDays(dayIds).size
+            val stays    = itineraryRepo.getLodgingsForTrip(trip.id).size
+            val rentals  = itineraryRepo.getCarRentalsForTrip(trip.id).size
 
             _uiState.update {
                 it.copy(
@@ -67,12 +72,16 @@ class TripCalendarViewModel(
                     destination    = trip.destination,
                     destLat        = trip.destLat,
                     destLng        = trip.destLng,
+                    destPhotoUrl   = trip.destPhotoUrl,
                     nightCount     = nights,
+                    flightCount    = flights,
+                    stayCount      = stays,
+                    rentalCount    = rentals,
                     startDate      = start,
                     endDate        = end,
                     displayMonth   = start?.let { d -> YearMonth.from(d) } ?: YearMonth.now(),
                     dateRangeLabel = rangeLabel,
-                    dayCountLabel  = dayCount,
+                    dayCount       = dayCount,
                 )
             }
         }
@@ -108,6 +117,7 @@ class TripCalendarViewModel(
                 destination = state.destination,
                 destLat     = state.destLat,
                 destLng     = state.destLng,
+                destPhotoUrl = state.destPhotoUrl,
             )
         }
     }
@@ -160,6 +170,53 @@ class TripCalendarViewModel(
         }
     }
 
+    // ── Delete trip ───────────────────────────────────────────────────────────
+
+    fun onDeleteClick()   { _uiState.update { it.copy(showDeleteConfirm = true) } }
+    fun onDeleteDismiss() { _uiState.update { it.copy(showDeleteConfirm = false) } }
+
+    fun onDeleteConfirm() {
+        viewModelScope.launch {
+            repo.deleteTrip(tripId, SessionManager.accountId)
+            _uiState.update { it.copy(showDeleteConfirm = false, deleted = true) }
+        }
+    }
+
+    // ── Edit dates ────────────────────────────────────────────────────────────
+
+    fun onEditDatesClick() {
+        _uiState.update {
+            it.copy(showEditDates = true, editStart = null, editEnd = null,
+                    editMonth = it.startDate?.let { d -> YearMonth.from(d) } ?: YearMonth.now())
+        }
+    }
+    fun onEditDatesDismiss() { _uiState.update { it.copy(showEditDates = false) } }
+    fun onEditPrevMonth()    { _uiState.update { it.copy(editMonth = it.editMonth.minusMonths(1)) } }
+    fun onEditNextMonth()    { _uiState.update { it.copy(editMonth = it.editMonth.plusMonths(1)) } }
+
+    /** First tap = start, second = end (swapped if earlier), third starts over. */
+    fun onEditDayTapped(date: LocalDate) {
+        _uiState.update { s ->
+            when {
+                s.editStart == null || s.editEnd != null -> s.copy(editStart = date, editEnd = null)
+                date < s.editStart                       -> s.copy(editStart = date, editEnd = s.editStart)
+                else                                     -> s.copy(editEnd = date)
+            }
+        }
+    }
+
+    fun onEditDatesSave() {
+        val s = _uiState.value
+        val start = s.editStart ?: return
+        val end   = s.editEnd ?: start
+        viewModelScope.launch {
+            repo.updateTripDates(tripId, start.toString(), end.toString())
+            itineraryRepo.removeDaysOutside(tripId, start, end)
+            _uiState.update { it.copy(showEditDates = false) }
+            loadTrip()
+        }
+    }
+
     /** Called by the screen after it has acted on [navTarget] to clear the event. */
     fun onNavConsumed() { _navTarget.value = null }
 
@@ -170,12 +227,14 @@ class TripCalendarViewModel(
         _uiState.update { it.copy(showDestSearch = false, destination = name, isGeocodingDest = true) }
         viewModelScope.launch {
             val coords = LocationIQRepository.geocodeCity(name)
+            val photo  = WikipediaCitySearch.thumbnailUrl(name)
             val state  = _uiState.value
             _uiState.update {
                 it.copy(
                     isGeocodingDest = false,
                     destLat         = coords?.first,
                     destLng         = coords?.second,
+                    destPhotoUrl    = photo,
                 )
             }
             repo.updateTripDetails(
@@ -184,6 +243,7 @@ class TripCalendarViewModel(
                 destination = name,
                 destLat     = coords?.first,
                 destLng     = coords?.second,
+                destPhotoUrl = photo,
             )
         }
     }

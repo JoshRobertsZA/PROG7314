@@ -16,9 +16,19 @@ import android.database.sqlite.SQLiteOpenHelper
  *   4 — added photo_url column to itinerary_places
  *   5 — added notifications table (per-account push history)
  *   6 — added departure_time to itinerary_flights; reminder_log table
+ *   7 — added dest_photo_url to trips
+ *   8 — added doc_name to itinerary_flights / lodging / car_rental
  */
 class WaypointDbHelper private constructor(context: Context) :
     SQLiteOpenHelper(context.applicationContext, DB_NAME, null, DB_VERSION) {
+
+    // The itinerary tables declare ON DELETE CASCADE, but SQLite ignores
+    // FK constraints unless enabled per connection - without this, deleting
+    // a trip would strand its days/flights/lodging/places rows.
+    override fun onConfigure(db: SQLiteDatabase) {
+        super.onConfigure(db)
+        db.setForeignKeyConstraintsEnabled(true)
+    }
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(CREATE_ACCOUNTS)
@@ -72,11 +82,21 @@ class WaypointDbHelper private constructor(context: Context) :
             db.execSQL("ALTER TABLE $TABLE_ITIN_FLIGHTS ADD COLUMN $COL_IFLIGHT_DEPARTURE TEXT")
             db.execSQL(CREATE_REMINDER_LOG)
         }
+        if (oldVersion < 7) {
+            // v7: destination thumbnail on trips.
+            db.execSQL("ALTER TABLE $TABLE_TRIPS ADD COLUMN $COL_TRIP_DEST_PHOTO TEXT")
+        }
+        if (oldVersion < 8) {
+            // v8: human-readable document names on uploaded PDFs.
+            db.execSQL("ALTER TABLE $TABLE_ITIN_FLIGHTS ADD COLUMN $COL_IFLIGHT_DOC_NAME TEXT")
+            db.execSQL("ALTER TABLE $TABLE_ITIN_LODGING ADD COLUMN $COL_ILODGE_DOC_NAME TEXT")
+            db.execSQL("ALTER TABLE $TABLE_ITIN_CAR ADD COLUMN $COL_ICAR_DOC_NAME TEXT")
+        }
     }
 
     companion object {
         private const val DB_NAME    = "waypoint.db"
-        private const val DB_VERSION = 6
+        private const val DB_VERSION = 8
 
         // ── accounts ─────────────────────────────────────────────────────────
         const val TABLE_ACCOUNTS       = "accounts"
@@ -98,6 +118,7 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_TRIP_UPDATED     = "updated_at_ms"
         const val COL_TRIP_DEST_LAT    = "dest_lat"
         const val COL_TRIP_DEST_LNG    = "dest_lng"
+        const val COL_TRIP_DEST_PHOTO  = "dest_photo_url" // nullable, Wikipedia thumbnail
 
         // ── itinerary_days ────────────────────────────────────────────────────
         const val TABLE_ITIN_DAYS      = "itinerary_days"
@@ -113,6 +134,7 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_IFLIGHT_PDF_URI       = "pdf_uri"
         const val COL_IFLIGHT_CREATED       = "created_at_ms"
         const val COL_IFLIGHT_DEPARTURE     = "departure_time" // nullable, "HH:mm" local
+        const val COL_IFLIGHT_DOC_NAME      = "doc_name"       // nullable, display name of the PDF
 
         // ── itinerary_lodging ─────────────────────────────────────────────────
         const val TABLE_ITIN_LODGING   = "itinerary_lodging"
@@ -122,6 +144,7 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_ILODGE_TO_DATE   = "to_date"      // yyyy-MM-dd
         const val COL_ILODGE_PDF_URI   = "pdf_uri"
         const val COL_ILODGE_CREATED   = "created_at_ms"
+        const val COL_ILODGE_DOC_NAME  = "doc_name"     // nullable
 
         // ── itinerary_car_rental ──────────────────────────────────────────────
         const val TABLE_ITIN_CAR       = "itinerary_car_rental"
@@ -131,6 +154,7 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_ICAR_TO_DATE     = "to_date"      // yyyy-MM-dd
         const val COL_ICAR_PDF_URI     = "pdf_uri"
         const val COL_ICAR_CREATED     = "created_at_ms"
+        const val COL_ICAR_DOC_NAME    = "doc_name"     // nullable
 
         // ── itinerary_places ──────────────────────────────────────────────────
         // place_category maps to ExploreFilter values: HOTELS, PARKS, PUBS, CINEMAS
@@ -180,6 +204,7 @@ class WaypointDbHelper private constructor(context: Context) :
                 $COL_TRIP_DESTINATION TEXT,
                 $COL_TRIP_DEST_LAT    REAL,
                 $COL_TRIP_DEST_LNG    REAL,
+                $COL_TRIP_DEST_PHOTO  TEXT,
                 $COL_TRIP_CREATED     INTEGER NOT NULL,
                 $COL_TRIP_UPDATED     INTEGER NOT NULL,
                 FOREIGN KEY ($COL_TRIP_ACCOUNT_ID) REFERENCES $TABLE_ACCOUNTS($COL_ACC_ID)
@@ -210,6 +235,7 @@ class WaypointDbHelper private constructor(context: Context) :
                 $COL_IFLIGHT_PDF_URI       TEXT NOT NULL,
                 $COL_IFLIGHT_CREATED       INTEGER NOT NULL,
                 $COL_IFLIGHT_DEPARTURE     TEXT,
+                $COL_IFLIGHT_DOC_NAME      TEXT,
                 FOREIGN KEY ($COL_IFLIGHT_DAY_ID) REFERENCES $TABLE_ITIN_DAYS($COL_IDAY_ID)
                     ON DELETE CASCADE
             )
@@ -226,6 +252,7 @@ class WaypointDbHelper private constructor(context: Context) :
                 $COL_ILODGE_TO_DATE   TEXT NOT NULL,
                 $COL_ILODGE_PDF_URI   TEXT NOT NULL,
                 $COL_ILODGE_CREATED   INTEGER NOT NULL,
+                $COL_ILODGE_DOC_NAME  TEXT,
                 FOREIGN KEY ($COL_ILODGE_TRIP_ID) REFERENCES $TABLE_TRIPS($COL_TRIP_ID)
                     ON DELETE CASCADE
             )
@@ -242,6 +269,7 @@ class WaypointDbHelper private constructor(context: Context) :
                 $COL_ICAR_TO_DATE   TEXT NOT NULL,
                 $COL_ICAR_PDF_URI   TEXT NOT NULL,
                 $COL_ICAR_CREATED   INTEGER NOT NULL,
+                $COL_ICAR_DOC_NAME  TEXT,
                 FOREIGN KEY ($COL_ICAR_TRIP_ID) REFERENCES $TABLE_TRIPS($COL_TRIP_ID)
                     ON DELETE CASCADE
             )

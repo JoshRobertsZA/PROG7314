@@ -106,10 +106,8 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
                     val places = itinerary.getPlacesForDay(day.id).map { it.name }
                     if (places.isNotEmpty()) parts += ctx.getString(R.string.reminder_digest_places, places.joinToString(", "))
                 }
-                itinerary.getLodgingForTrip(trip.id)?.takeIf { it.fromDate == today }
-                    ?.let { parts += ctx.getString(R.string.reminder_digest_lodging) }
-                itinerary.getCarRentalForTrip(trip.id)?.takeIf { it.fromDate == today }
-                    ?.let { parts += ctx.getString(R.string.reminder_digest_car) }
+                if (itinerary.getLodgingsForTrip(trip.id).any { it.fromDate == today }) parts += ctx.getString(R.string.reminder_digest_lodging)
+                if (itinerary.getCarRentalsForTrip(trip.id).any { it.fromDate == today }) parts += ctx.getString(R.string.reminder_digest_car)
 
                 val body = if (parts.isEmpty()) ctx.getString(R.string.reminder_digest_empty, dayNumber, place)
                            else parts.joinToString(" ")

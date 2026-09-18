@@ -18,6 +18,7 @@ data class TripEntity(
     val destination: String?,  // nullable; display name of the destination city
     val destLat: Double?,       // nullable; latitude of destination
     val destLng: Double?,       // nullable; longitude of destination
+    val destPhotoUrl: String? = null, // nullable; Wikipedia thumbnail for the destination
     val createdAtMs: Long,
     val updatedAtMs: Long,
 )

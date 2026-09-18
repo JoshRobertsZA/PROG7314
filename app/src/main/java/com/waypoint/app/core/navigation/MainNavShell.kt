@@ -81,6 +81,7 @@ fun MainNavShell(
                     onSettingsClick = {
                         tabNavController.navigate(NavTab.PROFILE.route) { launchSingleTop = true }
                     },
+                    onTripClick = onTripClick,
                 )
             }
             composable(NavTab.TRIPS.route) {

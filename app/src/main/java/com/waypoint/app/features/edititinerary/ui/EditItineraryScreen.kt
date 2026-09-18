@@ -208,18 +208,19 @@ fun EditItineraryScreen(
             topPadding  = 20.dp,
         )
 
-        val lodging = state.lodging
-        if (lodging == null) {
+        val lodgings = state.lodgingForActiveDay
+        if (lodgings.isEmpty()) {
             EmptyDocPlaceholder()
         } else {
-            DocCard(
-                accentColor    = WaypointPlaceAccent2,
-                title          = "Lodging document",
-                subtitle       = "${lodging.fromDate} – ${lodging.toDate}",
-                pdfUri         = lodging.pdfUri,
-                onReplaceClick = viewModel::onUploadLodgingClick,
-                onDeleteClick  = viewModel::onDeleteLodging,
-            )
+            lodgings.forEach { lodging ->
+                DocCard(
+                    accentColor   = WaypointPlaceAccent2,
+                    title         = lodging.docName ?: stringResource(R.string.edit_itinerary_lodging_doc),
+                    subtitle      = "${lodging.fromDate} – ${lodging.toDate}",
+                    pdfUri        = lodging.pdfUri,
+                    onDeleteClick = { viewModel.onDeleteLodging(lodging.id) },
+                )
+            }
         }
 
         // ── Car rental ────────────────────────────────────────────────────────
@@ -230,18 +231,19 @@ fun EditItineraryScreen(
             topPadding  = 20.dp,
         )
 
-        val car = state.carRental
-        if (car == null) {
+        val cars = state.carRentalsForActiveDay
+        if (cars.isEmpty()) {
             EmptyDocPlaceholder()
         } else {
-            DocCard(
-                accentColor    = WaypointPlaceAccent3,
-                title          = "Car rental document",
-                subtitle       = "${car.fromDate} – ${car.toDate}",
-                pdfUri         = car.pdfUri,
-                onReplaceClick = viewModel::onUploadCarRentalClick,
-                onDeleteClick  = viewModel::onDeleteCarRental,
-            )
+            cars.forEach { car ->
+                DocCard(
+                    accentColor   = WaypointPlaceAccent3,
+                    title         = car.docName ?: stringResource(R.string.edit_itinerary_car_doc),
+                    subtitle      = "${car.fromDate} – ${car.toDate}",
+                    pdfUri        = car.pdfUri,
+                    onDeleteClick = { viewModel.onDeleteCarRental(car.id) },
+                )
+            }
         }
 
         // ── Food ─────────────────────────────────────────────────────────────
@@ -408,7 +410,7 @@ private fun FlightCard(
                     },
                 )
                 Text(
-                    text     = pdfFileName(flight.pdfUri),
+                    text     = flight.docName ?: pdfFileName(flight.pdfUri),
                     color    = WaypointTripBadgeText,
                     fontSize = 9.sp,
                     modifier = Modifier.padding(top = 3.dp).alpha(0.8f),
@@ -449,7 +451,6 @@ private fun DocCard(
     title: String,
     subtitle: String,
     pdfUri: String,
-    onReplaceClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
     RowSurface(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
@@ -461,28 +462,13 @@ private fun DocCard(
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
                 Text(title, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 Text(subtitle, color = WaypointTextMuted, fontSize = 11.sp, modifier = Modifier.padding(top = 3.dp))
-                Text(
-                    text     = pdfFileName(pdfUri),
-                    color    = WaypointTripBadgeText,
-                    fontSize = 9.sp,
-                    modifier = Modifier.padding(top = 3.dp).alpha(0.8f),
-                )
             }
-            Row {
-                IconActionButton(
-                    glyph              = stringResource(R.string.edit_itinerary_undo_glyph),
-                    contentDescription = "Replace document",
-                    color              = WaypointTerracotta,
-                    onClick            = onReplaceClick,
-                )
-                IconActionButton(
-                    glyph              = stringResource(R.string.edit_itinerary_close_glyph),
-                    contentDescription = "Remove document",
-                    color              = WaypointTextMuted,
-                    onClick            = onDeleteClick,
-                    modifier           = Modifier.padding(start = 6.dp),
-                )
-            }
+            IconActionButton(
+                glyph              = stringResource(R.string.edit_itinerary_close_glyph),
+                contentDescription = stringResource(R.string.edit_itinerary_remove_doc_cd),
+                color              = WaypointTextMuted,
+                onClick            = onDeleteClick,
+            )
         }
     }
 }

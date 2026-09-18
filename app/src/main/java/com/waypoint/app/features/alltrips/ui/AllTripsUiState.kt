@@ -18,18 +18,35 @@ enum class TripFilter { ALL, UPCOMING, ONGOING, PAST }
 
 enum class TripStatus { ONGOING, UPCOMING, COMPLETED }
 
+/** Badge content, resolved to a localized string by [tripBadgeLabel]. */
+sealed class TripBadge {
+    object Tomorrow : TripBadge()
+    data class InDays(val days: Long) : TripBadge()
+    object Ongoing : TripBadge()
+    object Completed : TripBadge()
+}
+
+@androidx.compose.runtime.Composable
+fun tripBadgeLabel(badge: TripBadge): String = when (badge) {
+    TripBadge.Tomorrow      -> androidx.compose.ui.res.stringResource(com.waypoint.app.R.string.trip_badge_tomorrow)
+    is TripBadge.InDays     -> androidx.compose.ui.res.stringResource(com.waypoint.app.R.string.trip_badge_in_days, badge.days)
+    TripBadge.Ongoing       -> androidx.compose.ui.res.stringResource(com.waypoint.app.R.string.trip_badge_ongoing)
+    TripBadge.Completed     -> androidx.compose.ui.res.stringResource(com.waypoint.app.R.string.trip_badge_completed)
+}
+
 data class TripRow(
     val id: String,
     val name: String,
     val destination: String,
     val dates: String,
     val status: TripStatus,
-    val badgeText: String,
+    val badge: TripBadge,
     val badgeColor: Color,
     val badgeTextColor: Color,
     val titleColor: Color,
     val thumbColor: Color,
     val thumbAlpha: Float,
+    val photoUrl: String? = null,
 )
 
 data class AllTripsUiState(
@@ -79,10 +96,10 @@ fun TripEntity.toRow(index: Int, today: LocalDate = LocalDate.now()): TripRow {
     val badge = when (status) {
         TripStatus.UPCOMING  -> {
             val days = start?.let { today.until(it, java.time.temporal.ChronoUnit.DAYS) } ?: 0L
-            if (days <= 1L) "Tomorrow" else "In $days days"
+            if (days <= 1L) TripBadge.Tomorrow else TripBadge.InDays(days)
         }
-        TripStatus.ONGOING   -> "Ongoing"
-        TripStatus.COMPLETED -> "Completed"
+        TripStatus.ONGOING   -> TripBadge.Ongoing
+        TripStatus.COMPLETED -> TripBadge.Completed
     }
 
     val dateStr = if (start != null && end != null) {
@@ -95,9 +112,10 @@ fun TripEntity.toRow(index: Int, today: LocalDate = LocalDate.now()): TripRow {
         id            = id,
         name          = name,
         destination   = destination ?: "",
+        photoUrl      = destPhotoUrl,
         dates         = dateStr,
         status        = status,
-        badgeText     = badge,
+        badge         = badge,
         badgeColor    = when (status) {
             TripStatus.UPCOMING  -> WaypointTerracotta
             TripStatus.ONGOING   -> WaypointTripRange

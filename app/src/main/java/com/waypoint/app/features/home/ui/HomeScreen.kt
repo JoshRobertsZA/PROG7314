@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -39,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -49,7 +47,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.waypoint.app.R
 import com.waypoint.app.core.common.AppButtonFilled
 import com.waypoint.app.core.common.AppButtonOutline
-import com.waypoint.app.core.common.OfflineHeaderIndicator
+import com.waypoint.app.core.common.TabHeader
 import com.waypoint.app.core.common.RowSurface
 import com.waypoint.app.core.common.ThumbnailBlock
 import com.waypoint.app.core.connectivity.rememberIsOnline
@@ -94,6 +92,7 @@ fun HomeScreen(
     onNewTripClick: () -> Unit,
     onViewAllTripsClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onTripClick: (tripId: String) -> Unit = {},
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = viewModel(),
 ) {
@@ -168,37 +167,9 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
         ) {
-            // Header: brand name + settings
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.brand_name),
-                    color = WaypointTerracotta,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Persistent "no internet" badge (Figma "Offline Mode",
-                    // node 332:424) - appears once the first-drop OfflineDialog
-                    // is dismissed and connectivity is still down.
-                    OfflineHeaderIndicator(
-                        isOnline = isOnline,
-                        iconSize = 28.dp,
-                        modifier = Modifier.padding(end = 12.dp),
-                    )
-                    Icon(
-                        painter = painterResource(R.drawable.ic_settings),
-                        contentDescription = stringResource(R.string.home_settings_cd),
-                        tint = WaypointTextPrimary,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clickable(onClick = onSettingsClick),
-                    )
-                }
-            }
+            // Shared header: brand, bell (notification history) and account
+            // avatar (opens Profile); offline indicator replaces the avatar.
+            TabHeader(onAvatarClick = onSettingsClick, isOnline = isOnline)
 
             Text(
                 text = stringResource(R.string.brand_tagline),
@@ -215,6 +186,8 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .padding(top = 22.dp)
                         .background(WaypointTerracotta, RoundedCornerShape(RadiusHero))
+                        // Same destination as tapping this trip in All Trips.
+                        .clickable { onTripClick(featuredTrip.id) }
                         .padding(18.dp),
                 ) {
                     Column {
@@ -239,7 +212,7 @@ fun HomeScreen(
                                     .padding(horizontal = 10.dp, vertical = 4.dp),
                             ) {
                                 Text(
-                                    text = featuredTrip.badgeText,
+                                    text = com.waypoint.app.features.alltrips.ui.tripBadgeLabel(featuredTrip.badge),
                                     color = WaypointTripBadgeText,
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
@@ -271,7 +244,7 @@ fun HomeScreen(
                         .padding(18.dp),
                 ) {
                     Text(
-                        text = "No upcoming trips — tap New Trip to get started!",
+                        text = stringResource(R.string.home_no_trips),
                         color = WaypointTextMuted,
                         fontSize = 13.sp,
                     )
@@ -282,16 +255,13 @@ fun HomeScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
                     .padding(top = 22.dp),
             ) {
                 AppButtonOutline(
                     text = stringResource(R.string.home_view_all_trips),
                     onClick = onViewAllTripsClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    modifier = Modifier.weight(1f),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 12.dp),
                 )
                 AppButtonFilled(
                     text = stringResource(R.string.home_new_trip),
@@ -300,7 +270,7 @@ fun HomeScreen(
                         .weight(1f)
                         .fillMaxHeight()
                         .padding(start = 12.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 12.dp),
                 )
             }
 
@@ -349,7 +319,7 @@ fun HomeScreen(
                         }
                         is WeatherState.Error -> {
                             Text(
-                                text = "Weather unavailable",
+                                text = stringResource(R.string.home_weather_unavailable),
                                 color = WaypointTextMuted,
                                 fontSize = 12.sp,
                             )
@@ -362,7 +332,7 @@ fun HomeScreen(
                         }
                         else -> {
                             Text(
-                                text = "Tap to set city",
+                                text = stringResource(R.string.home_tap_set_city),
                                 color = WaypointTextMuted,
                                 fontSize = 12.sp,
                             )
@@ -387,7 +357,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(16.dp),
                             )
                             Text(
-                                text = "Fetching rate...",
+                                text = stringResource(R.string.home_fetching_rate),
                                 color = WaypointTextMuted,
                                 fontSize = 10.sp,
                                 modifier = Modifier.padding(top = 2.dp),
@@ -401,7 +371,7 @@ fun HomeScreen(
                                 fontWeight = FontWeight.Bold,
                             )
                             Text(
-                                text = "Live rate",
+                                text = stringResource(R.string.home_live_rate),
                                 color = WaypointTextMuted,
                                 fontSize = 10.sp,
                                 modifier = Modifier.padding(top = 2.dp),
@@ -409,12 +379,12 @@ fun HomeScreen(
                         }
                         is CurrencyState.Error -> {
                             Text(
-                                text = "Rate unavailable",
+                                text = stringResource(R.string.home_rate_unavailable),
                                 color = WaypointTextMuted,
                                 fontSize = 12.sp,
                             )
                             Text(
-                                text = "Tap to retry",
+                                text = stringResource(R.string.home_tap_retry),
                                 color = WaypointTextMuted,
                                 fontSize = 10.sp,
                                 modifier = Modifier.padding(top = 2.dp),
@@ -508,7 +478,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(18.dp),
                             )
                             Text(
-                                text = "Finding places near you...",
+                                text = stringResource(R.string.home_finding_places),
                                 color = WaypointTextMuted,
                                 fontSize = 12.sp,
                                 modifier = Modifier.padding(start = 10.dp),
@@ -517,7 +487,7 @@ fun HomeScreen(
                     }
                     is NearbyState.Error -> {
                         Text(
-                            text = "Could not load nearby places. Check your connection.",
+                            text = stringResource(R.string.home_places_error),
                             color = WaypointTextMuted,
                             fontSize = 12.sp,
                             modifier = Modifier
@@ -527,7 +497,7 @@ fun HomeScreen(
                     }
                     else -> {
                         Text(
-                            text = "Allow location access to see places near you.",
+                            text = stringResource(R.string.home_places_permission),
                             color = WaypointTextMuted,
                             fontSize = 12.sp,
                             modifier = Modifier

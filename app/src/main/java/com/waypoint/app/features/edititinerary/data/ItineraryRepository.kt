@@ -82,6 +82,19 @@ class ItineraryRepository(context: Context) {
     /**
      * Returns the saved selected days for [tripId], sorted ascending.
      */
+    /**
+     * After a trip's dates change, drop selected days that no longer fall
+     * inside the range. Flights/places on those days go with them (CASCADE).
+     */
+    suspend fun removeDaysOutside(tripId: String, start: LocalDate, end: LocalDate) =
+        withContext(Dispatchers.IO) {
+            db.writableDatabase.delete(
+                WaypointDbHelper.TABLE_ITIN_DAYS,
+                "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ? AND (${WaypointDbHelper.COL_IDAY_DATE} < ? OR ${WaypointDbHelper.COL_IDAY_DATE} > ?)",
+                arrayOf(tripId, start.toString(), end.toString()),
+            )
+        }
+
     suspend fun getSelectedDays(tripId: String): List<LocalDate> =
         withContext(Dispatchers.IO) {
             val read = db.readableDatabase
@@ -141,13 +154,14 @@ class ItineraryRepository(context: Context) {
     /**
      * Inserts a new flight row for [dayId]. Returns the generated row id.
      */
-    suspend fun insertFlight(dayId: String, pdfUri: String): String =
+    suspend fun insertFlight(dayId: String, pdfUri: String, docName: String? = null): String =
         withContext(Dispatchers.IO) {
             val id = UUID.randomUUID().toString()
             val cv = ContentValues().apply {
                 put(WaypointDbHelper.COL_IFLIGHT_ID,      id)
                 put(WaypointDbHelper.COL_IFLIGHT_DAY_ID,  dayId)
                 put(WaypointDbHelper.COL_IFLIGHT_PDF_URI, pdfUri)
+                put(WaypointDbHelper.COL_IFLIGHT_DOC_NAME, docName)
                 put(WaypointDbHelper.COL_IFLIGHT_CREATED, System.currentTimeMillis())
             }
             db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_FLIGHTS, null, cv)
@@ -196,7 +210,8 @@ class ItineraryRepository(context: Context) {
                     "${WaypointDbHelper.COL_IFLIGHT_FLIGHT_NUMBER}, " +
                     "${WaypointDbHelper.COL_IFLIGHT_PDF_URI}, " +
                     "${WaypointDbHelper.COL_IFLIGHT_CREATED}, " +
-                    "${WaypointDbHelper.COL_IFLIGHT_DEPARTURE} " +
+                    "${WaypointDbHelper.COL_IFLIGHT_DEPARTURE}, " +
+                    "${WaypointDbHelper.COL_IFLIGHT_DOC_NAME} " +
                     "FROM ${WaypointDbHelper.TABLE_ITIN_FLIGHTS} " +
                     "WHERE ${WaypointDbHelper.COL_IFLIGHT_DAY_ID} IN ($placeholders) " +
                     "ORDER BY ${WaypointDbHelper.COL_IFLIGHT_CREATED} ASC",
@@ -213,6 +228,7 @@ class ItineraryRepository(context: Context) {
                             pdfUri       = it.getString(3),
                             createdAtMs  = it.getLong(4),
                             departureTime = if (it.isNull(5)) null else it.getString(5),
+                            docName      = if (it.isNull(6)) null else it.getString(6),
                         )
                     )
                 }
@@ -232,143 +248,121 @@ class ItineraryRepository(context: Context) {
 
     // ── Lodging ───────────────────────────────────────────────────────────────
 
-    /**
-     * Inserts (or replaces) the lodging record for [tripId].
-     * There is only ever one active lodging doc per trip, so existing rows
-     * are deleted before the new one is inserted.
-     */
-    suspend fun upsertLodging(
+    /** Adds a lodging document covering [fromDate]..[toDate]. Multiple per trip are allowed. */
+    suspend fun insertLodging(
         tripId: String,
         fromDate: LocalDate,
         toDate: LocalDate,
         pdfUri: String,
+        docName: String? = null,
     ): String = withContext(Dispatchers.IO) {
-        val write = db.writableDatabase
-        write.beginTransaction()
-        try {
-            write.delete(
-                WaypointDbHelper.TABLE_ITIN_LODGING,
-                "${WaypointDbHelper.COL_ILODGE_TRIP_ID} = ?",
-                arrayOf(tripId),
-            )
-            val id = UUID.randomUUID().toString()
-            val cv = ContentValues().apply {
-                put(WaypointDbHelper.COL_ILODGE_ID,        id)
-                put(WaypointDbHelper.COL_ILODGE_TRIP_ID,   tripId)
-                put(WaypointDbHelper.COL_ILODGE_FROM_DATE, fromDate.toString())
-                put(WaypointDbHelper.COL_ILODGE_TO_DATE,   toDate.toString())
-                put(WaypointDbHelper.COL_ILODGE_PDF_URI,   pdfUri)
-                put(WaypointDbHelper.COL_ILODGE_CREATED,   System.currentTimeMillis())
-            }
-            write.insert(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)
-            write.setTransactionSuccessful()
-            id
-        } finally {
-            write.endTransaction()
+        val id = UUID.randomUUID().toString()
+        val cv = ContentValues().apply {
+            put(WaypointDbHelper.COL_ILODGE_ID,        id)
+            put(WaypointDbHelper.COL_ILODGE_TRIP_ID,   tripId)
+            put(WaypointDbHelper.COL_ILODGE_FROM_DATE, fromDate.toString())
+            put(WaypointDbHelper.COL_ILODGE_TO_DATE,   toDate.toString())
+            put(WaypointDbHelper.COL_ILODGE_PDF_URI,   pdfUri)
+            put(WaypointDbHelper.COL_ILODGE_CREATED,   System.currentTimeMillis())
+            put(WaypointDbHelper.COL_ILODGE_DOC_NAME,  docName)
         }
+        db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)
+        id
     }
 
-    /** Returns the active lodging entry for [tripId], or null. */
-    suspend fun getLodgingForTrip(tripId: String): LodgingEntity? =
+    /** Every lodging document for [tripId], oldest first. */
+    suspend fun getLodgingsForTrip(tripId: String): List<LodgingEntity> =
         withContext(Dispatchers.IO) {
             val cursor = db.readableDatabase.query(
-                WaypointDbHelper.TABLE_ITIN_LODGING,
-                null,
-                "${WaypointDbHelper.COL_ILODGE_TRIP_ID} = ?",
-                arrayOf(tripId),
-                null, null,
-                "${WaypointDbHelper.COL_ILODGE_CREATED} DESC",
-                "1",
+                WaypointDbHelper.TABLE_ITIN_LODGING, null,
+                "${WaypointDbHelper.COL_ILODGE_TRIP_ID} = ?", arrayOf(tripId),
+                null, null, "${WaypointDbHelper.COL_ILODGE_CREATED} ASC",
             )
+            val out = mutableListOf<LodgingEntity>()
             cursor.use {
-                if (!it.moveToFirst()) return@withContext null
-                LodgingEntity(
-                    id          = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_ID)),
-                    tripId      = tripId,
-                    fromDate    = LocalDate.parse(it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_FROM_DATE))),
-                    toDate      = LocalDate.parse(it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_TO_DATE))),
-                    pdfUri      = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_PDF_URI)),
-                    createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_CREATED)),
-                )
+                while (it.moveToNext()) {
+                    val nameIdx = it.getColumnIndex(WaypointDbHelper.COL_ILODGE_DOC_NAME)
+                    out += LodgingEntity(
+                        id          = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_ID)),
+                        tripId      = tripId,
+                        fromDate    = LocalDate.parse(it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_FROM_DATE))),
+                        toDate      = LocalDate.parse(it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_TO_DATE))),
+                        pdfUri      = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_PDF_URI)),
+                        createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_CREATED)),
+                        docName     = if (nameIdx < 0 || it.isNull(nameIdx)) null else it.getString(nameIdx),
+                    )
+                }
             }
+            out
         }
 
-    /** Removes all lodging rows for [tripId]. */
-    suspend fun deleteLodging(tripId: String) =
+    /** Removes one lodging document by id. */
+    suspend fun deleteLodging(lodgingId: String) =
         withContext(Dispatchers.IO) {
             db.writableDatabase.delete(
                 WaypointDbHelper.TABLE_ITIN_LODGING,
-                "${WaypointDbHelper.COL_ILODGE_TRIP_ID} = ?",
-                arrayOf(tripId),
+                "${WaypointDbHelper.COL_ILODGE_ID} = ?",
+                arrayOf(lodgingId),
             )
         }
 
     // ── Car Rental ────────────────────────────────────────────────────────────
 
-    /** Same upsert semantics as [upsertLodging] but for the car-rental table. */
-    suspend fun upsertCarRental(
+    /** Adds a car-rental document covering [fromDate]..[toDate]. Multiple per trip are allowed. */
+    suspend fun insertCarRental(
         tripId: String,
         fromDate: LocalDate,
         toDate: LocalDate,
         pdfUri: String,
+        docName: String? = null,
     ): String = withContext(Dispatchers.IO) {
-        val write = db.writableDatabase
-        write.beginTransaction()
-        try {
-            write.delete(
-                WaypointDbHelper.TABLE_ITIN_CAR,
-                "${WaypointDbHelper.COL_ICAR_TRIP_ID} = ?",
-                arrayOf(tripId),
-            )
-            val id = UUID.randomUUID().toString()
-            val cv = ContentValues().apply {
-                put(WaypointDbHelper.COL_ICAR_ID,        id)
-                put(WaypointDbHelper.COL_ICAR_TRIP_ID,   tripId)
-                put(WaypointDbHelper.COL_ICAR_FROM_DATE, fromDate.toString())
-                put(WaypointDbHelper.COL_ICAR_TO_DATE,   toDate.toString())
-                put(WaypointDbHelper.COL_ICAR_PDF_URI,   pdfUri)
-                put(WaypointDbHelper.COL_ICAR_CREATED,   System.currentTimeMillis())
-            }
-            write.insert(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)
-            write.setTransactionSuccessful()
-            id
-        } finally {
-            write.endTransaction()
+        val id = UUID.randomUUID().toString()
+        val cv = ContentValues().apply {
+            put(WaypointDbHelper.COL_ICAR_ID,        id)
+            put(WaypointDbHelper.COL_ICAR_TRIP_ID,   tripId)
+            put(WaypointDbHelper.COL_ICAR_FROM_DATE, fromDate.toString())
+            put(WaypointDbHelper.COL_ICAR_TO_DATE,   toDate.toString())
+            put(WaypointDbHelper.COL_ICAR_PDF_URI,   pdfUri)
+            put(WaypointDbHelper.COL_ICAR_CREATED,   System.currentTimeMillis())
+            put(WaypointDbHelper.COL_ICAR_DOC_NAME,  docName)
         }
+        db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)
+        id
     }
 
-    /** Returns the active car-rental entry for [tripId], or null. */
-    suspend fun getCarRentalForTrip(tripId: String): CarRentalEntity? =
+    /** Every car-rental document for [tripId], oldest first. */
+    suspend fun getCarRentalsForTrip(tripId: String): List<CarRentalEntity> =
         withContext(Dispatchers.IO) {
             val cursor = db.readableDatabase.query(
-                WaypointDbHelper.TABLE_ITIN_CAR,
-                null,
-                "${WaypointDbHelper.COL_ICAR_TRIP_ID} = ?",
-                arrayOf(tripId),
-                null, null,
-                "${WaypointDbHelper.COL_ICAR_CREATED} DESC",
-                "1",
+                WaypointDbHelper.TABLE_ITIN_CAR, null,
+                "${WaypointDbHelper.COL_ICAR_TRIP_ID} = ?", arrayOf(tripId),
+                null, null, "${WaypointDbHelper.COL_ICAR_CREATED} ASC",
             )
+            val out = mutableListOf<CarRentalEntity>()
             cursor.use {
-                if (!it.moveToFirst()) return@withContext null
-                CarRentalEntity(
-                    id          = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_ID)),
-                    tripId      = tripId,
-                    fromDate    = LocalDate.parse(it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_FROM_DATE))),
-                    toDate      = LocalDate.parse(it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_TO_DATE))),
-                    pdfUri      = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_PDF_URI)),
-                    createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_CREATED)),
-                )
+                while (it.moveToNext()) {
+                    val nameIdx = it.getColumnIndex(WaypointDbHelper.COL_ICAR_DOC_NAME)
+                    out += CarRentalEntity(
+                        id          = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_ID)),
+                        tripId      = tripId,
+                        fromDate    = LocalDate.parse(it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_FROM_DATE))),
+                        toDate      = LocalDate.parse(it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_TO_DATE))),
+                        pdfUri      = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_PDF_URI)),
+                        createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_CREATED)),
+                        docName     = if (nameIdx < 0 || it.isNull(nameIdx)) null else it.getString(nameIdx),
+                    )
+                }
             }
+            out
         }
 
-    /** Removes all car-rental rows for [tripId]. */
-    suspend fun deleteCarRental(tripId: String) =
+    /** Removes one car-rental document by id. */
+    suspend fun deleteCarRental(carRentalId: String) =
         withContext(Dispatchers.IO) {
             db.writableDatabase.delete(
                 WaypointDbHelper.TABLE_ITIN_CAR,
-                "${WaypointDbHelper.COL_ICAR_TRIP_ID} = ?",
-                arrayOf(tripId),
+                "${WaypointDbHelper.COL_ICAR_ID} = ?",
+                arrayOf(carRentalId),
             )
         }
 
