@@ -6,7 +6,7 @@ sealed interface PickerLoadState {
     data object Loading : PickerLoadState
     data class  Success(val places: List<ExplorePlace>) : PickerLoadState
     data object Empty   : PickerLoadState
-    data object Error   : PickerLoadState
+    data class  Error(val message: String) : PickerLoadState
 }
 
 data class PlacePickerUiState(

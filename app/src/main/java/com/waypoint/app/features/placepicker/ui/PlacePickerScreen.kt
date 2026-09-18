@@ -102,7 +102,7 @@ fun PlacePickerScreen(
                     }
                 }
 
-                PickerLoadState.Error -> {
+                is PickerLoadState.Error -> {
                     Box(
                         modifier         = Modifier
                             .fillMaxWidth()
@@ -110,7 +110,7 @@ fun PlacePickerScreen(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            text     = "This trip has no destination set. Edit your trip to add one.",
+                            text     = s.message,
                             color    = WaypointTextMuted,
                             fontSize = 13.sp,
                         )

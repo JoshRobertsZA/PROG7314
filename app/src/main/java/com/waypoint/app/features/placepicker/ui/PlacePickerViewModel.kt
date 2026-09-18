@@ -40,23 +40,25 @@ class PlacePickerViewModel(
         _uiState.update { it.copy(loadState = PickerLoadState.Loading) }
 
         val trip = tripRepo.getTripById(tripId)
+        if (trip == null || (trip.destLat == null && trip.destLng == null && trip.destination.isNullOrBlank())) {
+            Log.w(TAG, "Trip $tripId has no destination — cannot load places")
+            _uiState.update { it.copy(loadState = PickerLoadState.Error("This trip has no destination set. Edit your trip to add one.")) }
+            return
+        }
+
         val cache = when {
-            trip?.destLat != null && trip.destLng != null -> {
+            trip.destLat != null && trip.destLng != null -> {
                 Log.d(TAG, "Loading places by coords for trip $tripId")
                 LocationIQRepository.getPlacesByCoords(trip.destLat, trip.destLng)
             }
-            trip?.destination != null -> {
-                Log.d(TAG, "Loading places by city name '${trip.destination}' for trip $tripId")
-                LocationIQRepository.getPlaces(trip.destination)
-            }
             else -> {
-                Log.w(TAG, "Trip $tripId has no destination — cannot load places")
-                null
+                Log.d(TAG, "Loading places by city name '${trip.destination}' for trip $tripId")
+                LocationIQRepository.getPlaces(trip.destination!!)
             }
         }
 
         if (cache == null) {
-            _uiState.update { it.copy(loadState = PickerLoadState.Error) }
+            _uiState.update { it.copy(loadState = PickerLoadState.Error("Could not load places. Check your connection and try again.")) }
             return
         }
 
