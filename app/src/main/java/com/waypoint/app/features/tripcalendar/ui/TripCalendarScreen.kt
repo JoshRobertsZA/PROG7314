@@ -61,9 +61,7 @@ import com.waypoint.app.features.home.ui.CitySearchDialog
 import com.waypoint.app.features.newtrip.ui.CalendarGrid
 import com.waypoint.app.features.newtrip.ui.NewTripUiState
 import androidx.compose.ui.window.Dialog
-import androidx.compose.foundation.shape.RoundedCornerShape
 import com.waypoint.app.core.theme.RadiusDeco
-import com.waypoint.app.core.theme.WaypointCard
 import com.waypoint.app.core.theme.WaypointLogoutBorder
 import java.time.LocalDate
 import java.time.YearMonth

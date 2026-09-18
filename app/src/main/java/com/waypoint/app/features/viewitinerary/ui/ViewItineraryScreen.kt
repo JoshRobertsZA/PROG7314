@@ -75,7 +75,6 @@ import com.waypoint.app.features.placepicker.data.WikipediaPlaceRepository
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
 @Composable
