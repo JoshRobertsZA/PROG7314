@@ -92,7 +92,7 @@ fun NotificationsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                EmptyState()
+                NotificationsEmptyState()
             }
         } else {
             Column(
@@ -128,7 +128,7 @@ private val mockNotifications = listOf(
 )
 
 @Composable
-private fun NotificationRow(item: NotificationItem, modifier: Modifier = Modifier) {
+internal fun NotificationRow(item: NotificationItem, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -161,7 +161,7 @@ private fun NotificationRow(item: NotificationItem, modifier: Modifier = Modifie
 }
 
 @Composable
-private fun EmptyState(modifier: Modifier = Modifier) {
+internal fun NotificationsEmptyState(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,

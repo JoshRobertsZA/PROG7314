@@ -170,6 +170,19 @@ class ItineraryRepository(context: Context) {
             )
         }
 
+    /** Sets (or clears with null) the local departure time "HH:mm" for a flight. */
+    suspend fun updateFlightDepartureTime(flightId: String, time: String?) =
+        withContext(Dispatchers.IO) {
+            val cv = ContentValues().apply {
+                if (time == null) putNull(WaypointDbHelper.COL_IFLIGHT_DEPARTURE)
+                else put(WaypointDbHelper.COL_IFLIGHT_DEPARTURE, time)
+            }
+            db.writableDatabase.update(
+                WaypointDbHelper.TABLE_ITIN_FLIGHTS, cv,
+                "${WaypointDbHelper.COL_IFLIGHT_ID} = ?", arrayOf(flightId),
+            )
+        }
+
     /**
      * Returns all flights for the given list of day IDs.
      */
@@ -182,7 +195,8 @@ class ItineraryRepository(context: Context) {
                     "${WaypointDbHelper.COL_IFLIGHT_DAY_ID}, " +
                     "${WaypointDbHelper.COL_IFLIGHT_FLIGHT_NUMBER}, " +
                     "${WaypointDbHelper.COL_IFLIGHT_PDF_URI}, " +
-                    "${WaypointDbHelper.COL_IFLIGHT_CREATED} " +
+                    "${WaypointDbHelper.COL_IFLIGHT_CREATED}, " +
+                    "${WaypointDbHelper.COL_IFLIGHT_DEPARTURE} " +
                     "FROM ${WaypointDbHelper.TABLE_ITIN_FLIGHTS} " +
                     "WHERE ${WaypointDbHelper.COL_IFLIGHT_DAY_ID} IN ($placeholders) " +
                     "ORDER BY ${WaypointDbHelper.COL_IFLIGHT_CREATED} ASC",
@@ -198,6 +212,7 @@ class ItineraryRepository(context: Context) {
                             flightNumber = it.getString(2),
                             pdfUri       = it.getString(3),
                             createdAtMs  = it.getLong(4),
+                            departureTime = if (it.isNull(5)) null else it.getString(5),
                         )
                     )
                 }

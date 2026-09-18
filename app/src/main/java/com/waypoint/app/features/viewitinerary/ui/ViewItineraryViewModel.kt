@@ -85,7 +85,7 @@ class ViewItineraryViewModel(
 
     private suspend fun loadFlightsFor(dayId: String): List<ViewFlightItem> =
         repo.getFlightsForDays(listOf(dayId)).map { f ->
-            ViewFlightItem(id = f.id, flightNumber = f.flightNumber, pdfUri = f.pdfUri)
+            ViewFlightItem(id = f.id, flightNumber = f.flightNumber, pdfUri = f.pdfUri, departureTime = f.departureTime)
         }
 
     private suspend fun loadPlacesFor(dayId: String): Map<String, List<ViewPlaceItem>> {

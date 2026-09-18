@@ -35,6 +35,8 @@ data class FlightItem(
     val dayId: String,
     val flightNumber: String,
     val pdfUri: String,
+    /** "HH:mm" local, or null while unset. Drives early-vs-same-day flight reminders. */
+    val departureTime: String? = null,
 )
 
 /**

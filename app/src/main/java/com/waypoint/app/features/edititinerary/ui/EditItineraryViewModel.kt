@@ -73,6 +73,7 @@ class EditItineraryViewModel(
                 dayId        = f.dayId,
                 flightNumber = f.flightNumber.orEmpty(),
                 pdfUri       = f.pdfUri,
+                departureTime = f.departureTime,
             )
         }
 
@@ -210,6 +211,17 @@ class EditItineraryViewModel(
             )
         }
         viewModelScope.launch { repo.updateFlightNumber(flightId, number) }
+    }
+
+    fun onFlightDepartureTimeChanged(flightId: String, time: String?) {
+        _uiState.update { state ->
+            state.copy(
+                flightsForActiveDay = state.flightsForActiveDay.map { f ->
+                    if (f.id == flightId) f.copy(departureTime = time) else f
+                }
+            )
+        }
+        viewModelScope.launch { repo.updateFlightDepartureTime(flightId, time) }
     }
 
     // ── Places ────────────────────────────────────────────────────────────────

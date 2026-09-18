@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import android.app.TimePickerDialog
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -194,6 +195,7 @@ fun EditItineraryScreen(
                     onReplaceClick = viewModel::onUploadFlightClick,
                     onDeleteClick  = { viewModel.onDeleteFlight(flight.id) },
                     onNumberChanged = { num -> viewModel.onFlightNumberChanged(flight.id, num) },
+                    onTimeChanged  = { time -> viewModel.onFlightDepartureTimeChanged(flight.id, time) },
                 )
             }
         }
@@ -365,7 +367,16 @@ private fun FlightCard(
     onReplaceClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onNumberChanged: (String) -> Unit,
+    onTimeChanged: (String) -> Unit,
 ) {
+    val context = LocalContext.current
+    // Departure time drives the reminder: before 09:00 -> 7 pm the night
+    // before; otherwise (or unset) -> 7 am on the day. Left blank, the
+    // reminder worker will try AirLabs using the flight number.
+    val openTimePicker = {
+        val (h, m) = flight.departureTime?.split(":")?.map { it.toInt() } ?: listOf(9, 0)
+        TimePickerDialog(context, { _, hour, minute -> onTimeChanged("%02d:%02d".format(hour, minute)) }, h, m, true).show()
+    }
     RowSurface(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Row(
             modifier          = Modifier.padding(start = 10.dp, top = 10.dp, end = 12.dp, bottom = 10.dp),
@@ -401,6 +412,14 @@ private fun FlightCard(
                     color    = WaypointTripBadgeText,
                     fontSize = 9.sp,
                     modifier = Modifier.padding(top = 3.dp).alpha(0.8f),
+                )
+                Text(
+                    text     = flight.departureTime?.let { stringResource(R.string.edit_itinerary_flight_departs, it) }
+                               ?: stringResource(R.string.edit_itinerary_flight_set_time),
+                    color    = WaypointTerracotta,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(top = 3.dp).clickable(onClick = openTimePicker),
                 )
             }
             Row {
