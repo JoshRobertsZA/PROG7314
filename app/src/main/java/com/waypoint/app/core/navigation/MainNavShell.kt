@@ -41,6 +41,7 @@ import com.waypoint.app.features.settings.ui.SettingsScreen
 fun MainNavShell(
     onNewTripClick: () -> Unit,
     onTripClick: (tripId: String) -> Unit,
+    onLogoutClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tabNavController = rememberNavController()
@@ -90,7 +91,7 @@ fun MainNavShell(
                 )
             }
             composable(NavTab.EXPLORE.route) { ExploreScreen(exploreViewModel = exploreViewModel) }
-            composable(NavTab.PROFILE.route) { SettingsScreen() }
+            composable(NavTab.PROFILE.route) { SettingsScreen(onLogoutClick = onLogoutClick) }
         }
     }
 }

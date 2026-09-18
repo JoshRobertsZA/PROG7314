@@ -92,14 +92,14 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         authViewModel.restoreSessionIfSignedIn()
         if (AuthRepository.isSignedIn) {
             navController.navigate(Routes.Home) {
-                popUpTo(Routes.Login) { inclusive = true }
+                popUpTo(Routes.Welcome) { inclusive = true }
             }
         }
     }
 
     NavHost(
         navController = navController,
-        startDestination = Routes.Login,
+        startDestination = Routes.Welcome,
     ) {
         composable(Routes.Main) {
             MainScreen(
@@ -161,6 +161,12 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             MainNavShell(
                 onNewTripClick = { navController.navigate(Routes.NewTrip) },
                 onTripClick    = { tripId -> navController.navigate(Routes.tripCalendar(tripId)) },
+                onLogoutClick = {
+                    authViewModel.signOut()
+                    navController.navigate(Routes.Welcome) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
             )
         }
         composable(Routes.NewTrip) {
