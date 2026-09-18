@@ -24,14 +24,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
@@ -67,6 +70,7 @@ import com.waypoint.app.core.theme.WaypointTripBadgeText
 import com.waypoint.app.core.theme.WaypointTripLabel
 import com.waypoint.app.core.theme.White
 import com.waypoint.app.features.currencyexchange.ui.CurrencyExchangeModal
+import kotlinx.coroutines.launch
 
 /**
  * Home screen. Wired up to [HomeViewModel] for live weather + currency data.
@@ -84,6 +88,7 @@ fun placeTypeEmoji(type: String): String = when (type) {
     else         -> "📍"
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNewTripClick: () -> Unit,
@@ -95,9 +100,11 @@ fun HomeScreen(
     val state by homeViewModel.uiState.collectAsState()
     val isOnline by rememberIsOnline()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     var showCitySearch by remember { mutableStateOf(false) }
     var showCurrencyModal by remember { mutableStateOf(false) }
+    var isRefreshing by remember { mutableStateOf(false) }
 
     // Request location permission on first composition
     val locationPermissionLauncher = rememberLauncherForActivityResult(
@@ -143,9 +150,21 @@ fun HomeScreen(
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(start = 22.dp, top = 28.dp, end = 22.dp),
     ) {
-        Column(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                coroutineScope.launch {
+                    isRefreshing = true
+                    homeViewModel.refresh()
+                    isRefreshing = false
+                }
+            },
             modifier = Modifier
                 .weight(1f)
+                .fillMaxWidth(),
+        ) {
+        Column(
+            modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
         ) {
@@ -496,6 +515,7 @@ fun HomeScreen(
                 }
             }
 
+        }
         }
     }
 }
