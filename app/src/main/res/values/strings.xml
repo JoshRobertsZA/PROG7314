@@ -63,6 +63,8 @@
     <string name="view_itinerary_back_glyph">&#8592;</string>
     <string name="view_itinerary_back_cd">Back</string>
     <string name="view_itinerary_no_flights">No flights uploaded</string>
+    <string name="view_itinerary_flight_no_time">Departure time not set</string>
+    <string name="view_itinerary_no_pdf_viewer">No app found to open PDFs</string>
     <string name="view_itinerary_no_lodging">No lodging document</string>
     <string name="view_itinerary_no_car">No car rental document</string>
     <string name="view_itinerary_no_places">No places added</string>

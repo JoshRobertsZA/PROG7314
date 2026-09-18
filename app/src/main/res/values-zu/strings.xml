@@ -201,4 +201,6 @@
     <string name="reminder_ended_body">Siyakwamukela ekhaya. Siyabonga ngokuhlela noWaypoint.</string>
     <string name="reminder_weather_title">Isimo sezulu e-%1$s</string>
     <string name="reminder_weather_body">%1$s kanye no-%2$d°C lapho uya khona. Hlela kusasa ngokufanele.</string>
+    <string name="view_itinerary_flight_no_time">Isikhathi sokuhamba asisethiwe</string>
+    <string name="view_itinerary_no_pdf_viewer">Ayikho i-app yokuvula ama-PDF</string>
 </resources>

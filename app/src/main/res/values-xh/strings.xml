@@ -200,4 +200,6 @@
     <string name="reminder_ended_body">Wamkelekile ekhaya. Enkosi ngokucwangcisa noWaypoint.</string>
     <string name="reminder_weather_title">Imozulu e-%1$s</string>
     <string name="reminder_weather_body">%1$s kunye ne-%2$d°C apho uya khona. Cwangcisa ngomso ngokufanelekileyo.</string>
+    <string name="view_itinerary_flight_no_time">Ixesha lokuhamba alisetwanga</string>
+    <string name="view_itinerary_no_pdf_viewer">Akukho app yokuvula ii-PDF</string>
 </resources>
