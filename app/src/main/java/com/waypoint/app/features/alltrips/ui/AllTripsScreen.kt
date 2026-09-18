@@ -61,142 +61,149 @@ fun AllTripsScreen(
     // Reload every time this screen enters composition (e.g. returning after saving a new trip)
     LaunchedEffect(Unit) { viewModel.loadTrips() }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(WaypointCream)
-            .windowInsetsPadding(WindowInsets.systemBars)
-            .padding(start = 22.dp, top = 28.dp, end = 22.dp, bottom = 32.dp)
-            .verticalScroll(rememberScrollState()),
+            .windowInsetsPadding(WindowInsets.systemBars),
     ) {
-        // TopBar
-        Box(modifier = Modifier.fillMaxWidth()) {
-            CircleIconButton(onClick = onBackClick, modifier = Modifier.align(Alignment.CenterStart)) {
-                Text(
-                    text = stringResource(R.string.all_trips_back_glyph),
-                    color = WaypointTerracotta,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-            Text(
-                text = stringResource(R.string.all_trips_title),
-                color = WaypointTextPrimary,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Center),
-            )
-        }
-
-        // SearchBox
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-                .background(WaypointCard, RoundedCornerShape(RadiusButton))
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+                .fillMaxSize()
+                .padding(start = 22.dp, top = 28.dp, end = 22.dp, bottom = 80.dp)
+                .verticalScroll(rememberScrollState()),
         ) {
-            if (uiState.searchQuery.isEmpty()) {
-                Text(stringResource(R.string.all_trips_search_hint), color = WaypointTextMuted, fontSize = 12.sp)
-            }
-            BasicTextField(
-                value = uiState.searchQuery,
-                onValueChange = { viewModel.onSearchQueryChanged(it) },
-                textStyle = androidx.compose.ui.text.TextStyle(color = WaypointTextPrimary, fontSize = 12.sp),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-
-        // Filter chips
-        Row(modifier = Modifier.padding(top = 16.dp)) {
-            val filterLabels = listOf(
-                TripFilter.ALL      to stringResource(R.string.all_trips_filter_all),
-                TripFilter.UPCOMING to stringResource(R.string.all_trips_filter_upcoming),
-                TripFilter.ONGOING  to stringResource(R.string.all_trips_filter_ongoing),
-                TripFilter.PAST     to stringResource(R.string.all_trips_filter_past),
-            )
-            filterLabels.forEachIndexed { index, (filter, label) ->
-                FilterChip(
-                    label    = label,
-                    selected = uiState.filter == filter,
-                    onClick  = { viewModel.onFilterSelected(filter) },
-                    modifier = Modifier.padding(start = if (index == 0) 0.dp else 8.dp),
-                )
-            }
-        }
-
-        // Trip list
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = WaypointTerracotta)
-            }
-        } else {
-            val displayed = uiState.displayed
-            if (displayed.isEmpty()) {
-                Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
+            // TopBar
+            Box(modifier = Modifier.fillMaxWidth()) {
+                CircleIconButton(onClick = onBackClick, modifier = Modifier.align(Alignment.CenterStart)) {
                     Text(
-                        text = "No trips yet. Tap the button below to plan one!",
-                        color = WaypointTextMuted,
-                        fontSize = 13.sp,
+                        text = stringResource(R.string.all_trips_back_glyph),
+                        color = WaypointTerracotta,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
+                Text(
+                    text = stringResource(R.string.all_trips_title),
+                    color = WaypointTextPrimary,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            }
+
+            // SearchBox
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+                    .background(WaypointCard, RoundedCornerShape(RadiusButton))
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+            ) {
+                if (uiState.searchQuery.isEmpty()) {
+                    Text(stringResource(R.string.all_trips_search_hint), color = WaypointTextMuted, fontSize = 12.sp)
+                }
+                BasicTextField(
+                    value = uiState.searchQuery,
+                    onValueChange = { viewModel.onSearchQueryChanged(it) },
+                    textStyle = androidx.compose.ui.text.TextStyle(color = WaypointTextPrimary, fontSize = 12.sp),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            // Filter chips
+            Row(modifier = Modifier.padding(top = 16.dp)) {
+                val filterLabels = listOf(
+                    TripFilter.ALL      to stringResource(R.string.all_trips_filter_all),
+                    TripFilter.UPCOMING to stringResource(R.string.all_trips_filter_upcoming),
+                    TripFilter.ONGOING  to stringResource(R.string.all_trips_filter_ongoing),
+                    TripFilter.PAST     to stringResource(R.string.all_trips_filter_past),
+                )
+                filterLabels.forEachIndexed { index, (filter, label) ->
+                    FilterChip(
+                        label    = label,
+                        selected = uiState.filter == filter,
+                        onClick  = { viewModel.onFilterSelected(filter) },
+                        modifier = Modifier.padding(start = if (index == 0) 0.dp else 8.dp),
+                    )
+                }
+            }
+
+            // Trip list
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = WaypointTerracotta)
+                }
             } else {
-                Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp)) {
-                    displayed.forEachIndexed { index, trip ->
-                        CardSurface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = if (index == 0) 0.dp else 12.dp)
-                                .clickable { onTripClick(trip.id) },
-                            cornerRadius = RadiusCard,
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 14.dp, bottom = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
+                val displayed = uiState.displayed
+                if (displayed.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "No trips yet. Tap the button below to plan one!",
+                            color = WaypointTextMuted,
+                            fontSize = 13.sp,
+                        )
+                    }
+                } else {
+                    Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp)) {
+                        displayed.forEachIndexed { index, trip ->
+                            CardSurface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = if (index == 0) 0.dp else 12.dp)
+                                    .clickable { onTripClick(trip.id) },
+                                cornerRadius = RadiusCard,
                             ) {
-                                ThumbnailBlock(
-                                    accentColor = trip.thumbColor,
-                                    size = 56.dp,
-                                    cornerRadius = RadiusButton,
-                                    modifier = Modifier.alpha(trip.thumbAlpha),
-                                )
-                                Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            text = trip.name,
-                                            color = trip.titleColor,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                        StatusBadge(
-                                            text = trip.badgeText,
-                                            fillColor = trip.badgeColor,
-                                            textColor = trip.badgeTextColor,
-                                            cornerRadius = 20.dp,
-                                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 9.dp, vertical = 4.dp),
-                                        )
+                                Row(
+                                    modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 14.dp, bottom = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    ThumbnailBlock(
+                                        accentColor = trip.thumbColor,
+                                        size = 56.dp,
+                                        cornerRadius = RadiusButton,
+                                        modifier = Modifier.alpha(trip.thumbAlpha),
+                                    )
+                                    Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = trip.name,
+                                                color = trip.titleColor,
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.weight(1f),
+                                            )
+                                            StatusBadge(
+                                                text = trip.badgeText,
+                                                fillColor = trip.badgeColor,
+                                                textColor = trip.badgeTextColor,
+                                                cornerRadius = 20.dp,
+                                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 9.dp, vertical = 4.dp),
+                                            )
+                                        }
+                                        if (trip.destination.isNotBlank()) {
+                                            Text(trip.destination, color = WaypointTextMuted, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
+                                        }
+                                        Text(trip.dates, color = WaypointTextMuted, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
                                     }
-                                    if (trip.destination.isNotBlank()) {
-                                        Text(trip.destination, color = WaypointTextMuted, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
-                                    }
-                                    Text(trip.dates, color = WaypointTextMuted, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
                                 }
                             }
                         }
                     }
                 }
             }
+
         }
 
-        // New trip button
+        // Sticky button, always visible at the bottom
         AppButtonFilled(
-            text     = stringResource(R.string.home_new_trip),
-            onClick  = onNewTripClick,
+            text    = stringResource(R.string.home_new_trip),
+            onClick = onNewTripClick,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp),
+                .align(Alignment.BottomCenter)
+                .padding(start = 22.dp, end = 22.dp, bottom = 32.dp),
         )
     }
 }
