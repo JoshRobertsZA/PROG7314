@@ -1,7 +1,7 @@
 package com.waypoint.app.features.settings.ui
 
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.Image
+import coil.compose.AsyncImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -90,10 +90,13 @@ fun SettingsScreen(modifier: Modifier = Modifier, onLogoutClick: () -> Unit = {}
             TabHeader(showAvatar = false)
 
             // Avatar + name + email, centered.
-            Image(
-                painter = painterResource(R.drawable.img_mock_avatar),
+            AsyncImage(
+                model = SessionManager.photoUrl.ifBlank { null },
                 contentDescription = stringResource(R.string.tab_header_avatar_cd),
                 contentScale = ContentScale.Crop,
+                placeholder = painterResource(R.drawable.img_mock_avatar),
+                error = painterResource(R.drawable.img_mock_avatar),
+                fallback = painterResource(R.drawable.img_mock_avatar),
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .size(72.dp)
