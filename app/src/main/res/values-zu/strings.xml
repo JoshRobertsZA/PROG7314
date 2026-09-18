@@ -154,6 +154,7 @@
 
     <string name="notifications_title">Izaziso</string>
     <string name="notifications_mark_all_read">Phawula konke njengokufundiwe</string>
+    <string name="notifications_clear_all">Sula konke</string>
     <string name="notifications_empty_title">Usulandele konke</string>
     <string name="notifications_empty_subtitle">Izaziso ezintsha zizovela lapha</string>
     <string name="notifications_empty_check_cd">Konke kulandelwe</string>

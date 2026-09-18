@@ -14,6 +14,7 @@ import android.database.sqlite.SQLiteOpenHelper
  *   3 — added itinerary tables: itinerary_days, itinerary_flights,
  *         itinerary_lodging, itinerary_car_rental, itinerary_places
  *   4 — added photo_url column to itinerary_places
+ *   5 — added notifications table (per-account push history)
  */
 class WaypointDbHelper private constructor(context: Context) :
     SQLiteOpenHelper(context.applicationContext, DB_NAME, null, DB_VERSION) {
@@ -32,6 +33,8 @@ class WaypointDbHelper private constructor(context: Context) :
         db.execSQL(CREATE_ITINERARY_CAR_TRIP_IDX)
         db.execSQL(CREATE_ITINERARY_PLACES)
         db.execSQL(CREATE_ITINERARY_PLACES_DAY_IDX)
+        db.execSQL(CREATE_NOTIFICATIONS)
+        db.execSQL(CREATE_NOTIFICATIONS_ACCOUNT_IDX)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -57,11 +60,16 @@ class WaypointDbHelper private constructor(context: Context) :
             db.execSQL(CREATE_ITINERARY_PLACES)
             db.execSQL(CREATE_ITINERARY_PLACES_DAY_IDX)
         }
+        if (oldVersion < 5) {
+            // v5: notification history.
+            db.execSQL(CREATE_NOTIFICATIONS)
+            db.execSQL(CREATE_NOTIFICATIONS_ACCOUNT_IDX)
+        }
     }
 
     companion object {
         private const val DB_NAME    = "waypoint.db"
-        private const val DB_VERSION = 4
+        private const val DB_VERSION = 5
 
         // ── accounts ─────────────────────────────────────────────────────────
         const val TABLE_ACCOUNTS       = "accounts"
@@ -128,6 +136,14 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_IPLACE_NOTE         = "note"        // nullable
         const val COL_IPLACE_CREATED      = "created_at_ms"
         const val COL_IPLACE_PHOTO_URL    = "photo_url"  // nullable
+
+        // ── notifications ─────────────────────────────────────────────────────
+        const val TABLE_NOTIFICATIONS  = "notifications"
+        const val COL_NOTIF_ID         = "id"
+        const val COL_NOTIF_ACCOUNT_ID = "account_id"
+        const val COL_NOTIF_TITLE      = "title"
+        const val COL_NOTIF_BODY       = "body"
+        const val COL_NOTIF_CREATED    = "created_at_ms"
 
         // ── CREATE statements ─────────────────────────────────────────────────
 
@@ -238,6 +254,19 @@ class WaypointDbHelper private constructor(context: Context) :
 
         private const val CREATE_ITINERARY_PLACES_DAY_IDX =
             "CREATE INDEX idx_itin_places_day ON $TABLE_ITIN_PLACES($COL_IPLACE_DAY_ID)"
+
+        private val CREATE_NOTIFICATIONS = """
+            CREATE TABLE $TABLE_NOTIFICATIONS (
+                $COL_NOTIF_ID         TEXT PRIMARY KEY,
+                $COL_NOTIF_ACCOUNT_ID TEXT NOT NULL,
+                $COL_NOTIF_TITLE      TEXT NOT NULL,
+                $COL_NOTIF_BODY       TEXT NOT NULL,
+                $COL_NOTIF_CREATED    INTEGER NOT NULL
+            )
+        """.trimIndent()
+
+        private const val CREATE_NOTIFICATIONS_ACCOUNT_IDX =
+            "CREATE INDEX idx_notifications_account ON $TABLE_NOTIFICATIONS($COL_NOTIF_ACCOUNT_ID)"
 
         @Volatile private var instance: WaypointDbHelper? = null
 

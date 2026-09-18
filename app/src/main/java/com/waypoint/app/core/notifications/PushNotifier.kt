@@ -11,6 +11,11 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.waypoint.app.MainActivity
 import com.waypoint.app.R
+import com.waypoint.app.core.db.SessionManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 /**
  * Builds and posts a local notification. Used by WaypointMessagingService for
@@ -21,6 +26,10 @@ import com.waypoint.app.R
  * the launch Intent so a later checkpoint can deep-link to a specific trip.
  */
 object PushNotifier {
+
+    // show() is called from non-suspend contexts (the FCM service), so the
+    // history write gets its own process-lifetime IO scope.
+    private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun show(context: Context, title: String, body: String, extras: Map<String, String> = emptyMap()) {
         if (!NotificationPreferences.isEnabled(context)) return   // user switched them off in Profile
@@ -49,6 +58,12 @@ object PushNotifier {
 
         // Unique id per notification so consecutive pushes stack instead of replacing.
         NotificationManagerCompat.from(context).notify(System.currentTimeMillis().toInt(), notification)
+
+        // Only notifications that were actually posted end up in the history.
+        if (SessionManager.isSignedIn) {
+            val accountId = SessionManager.accountId
+            ioScope.launch { NotificationRepository(context).record(accountId, title, body) }
+        }
     }
 
     /** POST_NOTIFICATIONS only exists from API 33; earlier versions are implicitly granted. */

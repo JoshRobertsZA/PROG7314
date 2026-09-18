@@ -252,6 +252,7 @@
     <string name="notifications_back_glyph">←</string>
     <string name="notifications_title">Notifications</string>
     <string name="notifications_mark_all_read">Mark all read</string>
+    <string name="notifications_clear_all">Clear all</string>
     <string name="notifications_empty_title">You\'re all caught up</string>
     <string name="notifications_empty_subtitle">New notifications will appear here</string>
     <string name="notifications_empty_check_cd">All caught up</string>

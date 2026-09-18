@@ -153,6 +153,7 @@
 
     <string name="notifications_title">Izaziso</string>
     <string name="notifications_mark_all_read">Phawula konke njengokufundiweyo</string>
+    <string name="notifications_clear_all">Cima zonke</string>
     <string name="notifications_empty_title">Ulandelele konke</string>
     <string name="notifications_empty_subtitle">Izaziso ezitsha ziya kuvela apha</string>
     <string name="notifications_empty_check_cd">Konke kulandelwe</string>
