@@ -210,8 +210,21 @@
     <string name="profile_language_subtitle">App display language</string>
     <string name="profile_biometric_title">Biometric login</string>
     <string name="profile_biometric_subtitle">Face ID or fingerprint sign-in</string>
+    <string name="profile_biometric_unavailable_no_hardware">Not supported on this device</string>
+    <string name="profile_biometric_unavailable_none_enrolled">No biometrics set up on this device</string>
+    <string name="profile_biometric_enable_title">Enable biometric login</string>
+    <string name="profile_biometric_enable_subtitle">Confirm it\'s you to turn this on</string>
     <string name="profile_chevron_glyph">›</string>
     <string name="profile_logout">Log out</string>
+
+    <!-- Biometric app-unlock overlay, shown when Settings' "Biometric
+         login" is enabled and the app resumes from the background. -->
+    <string name="biometric_lock_title">Unlock Waypoint</string>
+    <string name="biometric_lock_subtitle">Confirm it\'s you to continue</string>
+    <string name="biometric_lock_prompt_title">Unlock Waypoint</string>
+    <string name="biometric_lock_prompt_subtitle">Use your face or fingerprint to continue</string>
+    <string name="biometric_lock_unlock_button">Unlock</string>
+    <string name="biometric_lock_cancel">Cancel</string>
 
     <!-- Language modal (Figma node 394:62, "Settings — Change language").
          Option labels come from AppLanguage.displayName, not string
