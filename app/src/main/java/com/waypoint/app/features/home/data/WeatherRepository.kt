@@ -6,6 +6,7 @@ import com.waypoint.app.core.cache.GitHubCacheRepository
 import com.waypoint.app.core.cache.WeatherCache
 import com.waypoint.app.core.network.HttpClient
 import com.waypoint.app.core.secrets.RemoteSecrets
+import java.util.Calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -47,6 +48,78 @@ object WeatherRepository {
         if (cached != null) Log.d(TAG, "Returning stale cache for $city after API failure")
         return cached
     }
+
+    /**
+     * Fetches weather for a lat/lon coordinate pair using a calendar-day TTL.
+     * The cache key is a coord slug so it never collides with city-name entries.
+     * Used by the place detail picker, which should not refresh weather more
+     * than once per UTC calendar day regardless of how many times the user opens
+     * the screen.
+     */
+    suspend fun getWeatherByCoords(lat: Double, lon: Double): WeatherCache? {
+        val slug = coordSlug(lat, lon)
+        val path = GitHubCacheRepository.weatherPath(slug)
+
+        val cached = readFromCache(path)
+        if (cached != null && !isDailyStale(cached.fetchedAtMs)) {
+            Log.d(TAG, "Cache hit (daily): $slug")
+            return cached
+        }
+
+        val fresh = fetchFromApiByCoords(lat, lon)
+        if (fresh != null) {
+            writeToCache(path, fresh.copy(city = slug))
+            return fresh
+        }
+
+        if (cached != null) Log.d(TAG, "Returning stale coord cache for $slug after API failure")
+        return cached
+    }
+
+    /** Coord slug matching LocationIQ's convention, e.g. "n33d92_018d42". */
+    private fun coordSlug(lat: Double, lon: Double) =
+        "%.2f_%.2f".format(lat, lon).replace('-', 'n').replace('.', 'd')
+
+    /** Returns true once the UTC calendar day has rolled over since [fetchedAtMs]. */
+    private fun isDailyStale(fetchedAtMs: Long): Boolean {
+        val now     = Calendar.getInstance()
+        val fetched = Calendar.getInstance().apply { timeInMillis = fetchedAtMs }
+        return now.get(Calendar.YEAR)        != fetched.get(Calendar.YEAR) ||
+               now.get(Calendar.DAY_OF_YEAR) != fetched.get(Calendar.DAY_OF_YEAR)
+    }
+
+    private suspend fun fetchFromApiByCoords(lat: Double, lon: Double): WeatherCache? =
+        withContext(Dispatchers.IO) {
+            val key = RemoteSecrets.get("OPENWEATHER_API_KEY", BuildConfig.OPENWEATHER_API_KEY)
+            if (key.isBlank()) { Log.w(TAG, "No OpenWeatherMap key"); return@withContext null }
+            try {
+                val url = "https://api.openweathermap.org/data/2.5/weather" +
+                          "?lat=$lat&lon=$lon&units=metric&appid=$key"
+                val req = Request.Builder()
+                    .url(url)
+                    .header("Accept", "application/json")
+                    .get().build()
+                val resp = HttpClient.instance.newCall(req).execute()
+                if (!resp.isSuccessful) {
+                    Log.w(TAG, "OpenWeatherMap coords HTTP \${resp.code}")
+                    return@withContext null
+                }
+                val body = JSONObject(resp.body?.string() ?: return@withContext null)
+                WeatherCache(
+                    city        = coordSlug(lat, lon),
+                    displayName = body.getString("name"),
+                    tempC       = body.getJSONObject("main").getDouble("temp"),
+                    description = body.getJSONArray("weather")
+                                      .getJSONObject(0)
+                                      .getString("description")
+                                      .replaceFirstChar { it.uppercase() },
+                    fetchedAtMs = System.currentTimeMillis(),
+                )
+            } catch (e: Exception) {
+                Log.w(TAG, "API fetch error (coords): \${e.message}")
+                null
+            }
+        }
 
     private suspend fun readFromCache(path: String): WeatherCache? {
         val json = GitHubCacheRepository.readJson(path) ?: return null
