@@ -324,7 +324,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 // continues the statement started above: `onGoToViewItineraryClick = { navController.navigate(Routes.…`
                 onGoToViewItineraryClick = { navController.navigate(Routes.viewItinerary("__scratch__")) },
                 // continues the statement started above: `onGoToEditItineraryClick = { navController.navigate(Routes.…`
-                onGoToEditItineraryClick = { navController.navigate(Routes.editItinerary("__scratch__", "")) },
+                onGoToEditItineraryClick = { navController.navigate(Routes.editItinerary("__scratch__")) },
                 // continues the statement started above: `onGoToAllTripsClick = { navController.navigate(Routes.AllTr…`
                 onGoToAllTripsClick = { navController.navigate(Routes.AllTrips) },
                 // continues the statement started above: `onGoToSettingsClick = { navController.navigate(Routes.Setti…`
@@ -428,7 +428,10 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             // continues the statement started above: `route = Routes.TripCalendar,`
             route = Routes.TripCalendar,
             // continues the statement started above: `arguments = listOf(navArgument("tripId") { type = NavType.S…`
-            arguments = listOf(navArgument("tripId") { type = NavType.StringType }, navArgument("selectedDates") { type = NavType.StringType }),
+            arguments = listOf(
+                navArgument("tripId") { type = NavType.StringType },
+                navArgument("selectedDates") { type = NavType.StringType; defaultValue = "" },
+            ),
         // ends the argument list started above and opens the block that follows
         ) {
             // calls `TripCalendarScreen` with an argument list that continues on the following lines
@@ -462,7 +465,10 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             // continues the statement started above: `route = Routes.EditItinerary,`
             route = Routes.EditItinerary,
             // continues the statement started above: `arguments = listOf(navArgument("tripId") { type = NavType.S…`
-            arguments = listOf(navArgument("tripId") { type = NavType.StringType }, navArgument("selectedDates") { type = NavType.StringType }),
+            arguments = listOf(
+                navArgument("tripId") { type = NavType.StringType },
+                navArgument("selectedDates") { type = NavType.StringType; defaultValue = "" },
+            ),
         // continues the statement started above: `) { backStackEntry ->`
         ) { backStackEntry ->
             // continues the statement started above: `val tripId = backStackEntry.arguments?.getString("tripId") …`
@@ -494,7 +500,10 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             // continues the statement started above: `route = Routes.ViewItinerary,`
             route = Routes.ViewItinerary,
             // continues the statement started above: `arguments = listOf(navArgument("tripId") { type = NavType.S…`
-            arguments = listOf(navArgument("tripId") { type = NavType.StringType }, navArgument("selectedDates") { type = NavType.StringType }),
+            arguments = listOf(
+                navArgument("tripId") { type = NavType.StringType },
+                navArgument("selectedDates") { type = NavType.StringType; defaultValue = "" },
+            ),
         // ends the argument list started above and opens the block that follows
         ) {
             // calls `ViewItineraryScreen` with an argument list that continues on the following lines

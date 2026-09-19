@@ -113,6 +113,8 @@ import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
 // imports `com.waypoint.app.core.theme.White` for use in this file
 import com.waypoint.app.core.theme.White
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
 
 // annotation `@OptIn` with arguments `(ExperimentalMaterial3Api::class)` applied to the declaration that follows
 @OptIn(ExperimentalMaterial3Api::class)
@@ -175,20 +177,19 @@ fun AllTripsScreen(
             // calls `Box` with arguments `(modifier = Modifier.fillMaxWidth())` and opens a trailing lambda / block
             Box(modifier = Modifier.fillMaxWidth()) {
                 // calls `CircleIconButton` with arguments `(onClick = onBackClick, modifier = Modifier.a…)` and opens a trailing lambda / block
-                CircleIconButton(onClick = onBackClick, modifier = Modifier.align(Alignment.CenterStart)) {
-                    // calls `Text` with an argument list that continues on the following lines
-                    Text(
-                        // continues the statement started above: `text = stringResource(R.string.all_trips_back_glyph),`
-                        text = stringResource(R.string.all_trips_back_glyph),
-                        // continues the statement started above: `color = WaypointTerracotta,`
-                        color = WaypointTerracotta,
-                        // continues the statement started above: `fontSize = 15.sp,`
-                        fontSize = 15.sp,
-                        // continues the statement started above: `fontWeight = FontWeight.Bold,`
-                        fontWeight = FontWeight.Bold,
-                    // closes the multi-line argument list started above
+                CircleIconButton(
+                    onClick = onBackClick,
+                    modifier = Modifier.align(Alignment.CenterStart),
+                    size = 40.dp,
+                    fillColor = WaypointTerracotta,
+                    borderColor = null,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_back_arrow),
+                        contentDescription = null,
+                        tint = WaypointCard,
+                        modifier = Modifier.size(18.dp),
                     )
-                // closes the lambda passed to `CircleIconButton`
                 }
                 // calls `Text` with an argument list that continues on the following lines
                 Text(

@@ -139,6 +139,8 @@ import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
 // imports `com.waypoint.app.core.theme.WaypointTripBadgeText` for use in this file
 import com.waypoint.app.core.theme.WaypointTripBadgeText
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
 
 // annotation `@Composable` applied to the declaration that follows
 @Composable
@@ -251,25 +253,18 @@ fun EditItineraryScreen(
         Box(modifier = Modifier.fillMaxWidth()) {
             // calls `CircleIconButton` with an argument list that continues on the following lines
             CircleIconButton(
-                // continues the statement started above: `onClick = onBackClick,`
                 onClick = onBackClick,
-                // continues the statement started above: `modifier = Modifier.align(Alignment.CenterStart),`
                 modifier = Modifier.align(Alignment.CenterStart),
-            // ends the argument list started above and opens the block that follows
+                size = 40.dp,
+                fillColor = WaypointTerracotta,
+                borderColor = null,
             ) {
-                // calls `Text` with an argument list that continues on the following lines
-                Text(
-                    // continues the statement started above: `text = stringResource(R.string.edit_itinerary_back_glyph),`
-                    text = stringResource(R.string.edit_itinerary_back_glyph),
-                    // continues the statement started above: `color = WaypointTerracotta,`
-                    color = WaypointTerracotta,
-                    // continues the statement started above: `fontSize = 15.sp,`
-                    fontSize = 15.sp,
-                    // continues the statement started above: `fontWeight = FontWeight.Bold,`
-                    fontWeight = FontWeight.Bold,
-                // closes the multi-line argument list started above
+                Icon(
+                    painter = painterResource(R.drawable.ic_back_arrow),
+                    contentDescription = null,
+                    tint = WaypointCard,
+                    modifier = Modifier.size(18.dp),
                 )
-            // closes the block
             }
             // calls `Column` with an argument list that continues on the following lines
             Column(
