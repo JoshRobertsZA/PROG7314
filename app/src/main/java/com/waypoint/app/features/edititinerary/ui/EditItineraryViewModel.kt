@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.update
 // imports `kotlinx.coroutines.launch` for use in this file
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 // imports `java.time.LocalDate` for use in this file
 import java.time.LocalDate
@@ -168,6 +167,8 @@ class EditItineraryViewModel(
                 category = p.category,
                 // continues the statement started above: `note = p.note,`
                 note     = p.note,
+                // continues the statement started above: `photoUrl = p.photoUrl,`
+                photoUrl = p.photoUrl,
             // closes the multi-line argument list started above
             )
         // closes the block

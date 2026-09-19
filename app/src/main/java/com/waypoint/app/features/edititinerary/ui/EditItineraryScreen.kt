@@ -948,16 +948,24 @@ private fun PlaceCard(
             verticalAlignment = Alignment.CenterVertically,
         // ends the argument list started above and opens the block that follows
         ) {
-            // calls `ThumbnailBlock` with an argument list that continues on the following lines
-            ThumbnailBlock(
-                // continues the statement started above: `accentColor = WaypointPlaceAccent1,`
-                accentColor  = WaypointPlaceAccent1,
-                // continues the statement started above: `size = 44.dp,`
-                size         = 44.dp,
-                // continues the statement started above: `cornerRadius = RadiusThumbnail,`
-                cornerRadius = RadiusThumbnail,
-            // closes the multi-line argument list started above
-            )
+            // show place photo if available, otherwise fall back to accent block
+            val placePhotoUrl = place.photoUrl
+            if (placePhotoUrl != null) {
+                SubcomposeAsyncImage(
+                    model              = ImageRequest.Builder(LocalContext.current).data(placePhotoUrl).crossfade(true).build(),
+                    contentDescription = place.name,
+                    contentScale       = ContentScale.Crop,
+                    modifier           = Modifier.size(44.dp).clip(RoundedCornerShape(RadiusThumbnail)),
+                    loading = { ThumbnailBlock(accentColor = WaypointPlaceAccent1, size = 44.dp, cornerRadius = RadiusThumbnail) },
+                    error   = { ThumbnailBlock(accentColor = WaypointPlaceAccent1, size = 44.dp, cornerRadius = RadiusThumbnail) },
+                )
+            } else {
+                ThumbnailBlock(
+                    accentColor  = WaypointPlaceAccent1,
+                    size         = 44.dp,
+                    cornerRadius = RadiusThumbnail,
+                )
+            }
             // calls `Column` with arguments `(modifier = Modifier.weight(1f).padding(start…)` and opens a trailing lambda / block
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
                 // calls `Text` with an argument list that continues on the following lines

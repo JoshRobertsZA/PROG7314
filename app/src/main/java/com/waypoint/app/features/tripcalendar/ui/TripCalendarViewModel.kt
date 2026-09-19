@@ -106,7 +106,9 @@ class TripCalendarViewModel(
             val dayCount = if (start != null && end != null) (ChronoUnit.DAYS.between(start, end) + 1).toInt() else 0
 
             // declares read-only property `dayIds`, initialised with the result of calling `itineraryRepo.getSelectedDaysWithIds(…)`
-            val dayIds   = itineraryRepo.getSelectedDaysWithIds(trip.id).map { d -> d.id }
+            val storedDays = itineraryRepo.getSelectedDaysWithIds(trip.id)
+            val dayIds   = storedDays.map { d -> d.id }
+            val selectedDayDates = storedDays.map { d -> d.date }.toSet()
             // declares read-only property `flights`, initialised with the result of calling `itineraryRepo.getFlightsForDays(…)`
             val flights  = itineraryRepo.getFlightsForDays(dayIds).size
             // declares read-only property `stays`, initialised with the result of calling `itineraryRepo.getLodgingsForTrip(…)`
@@ -150,6 +152,8 @@ class TripCalendarViewModel(
                     dateRangeLabel = rangeLabel,
                     // continues the statement started above: `dayCount = dayCount,`
                     dayCount       = dayCount,
+                    // continues the statement started above: `selectedDays = selectedDayDates,`
+                    selectedDays   = selectedDayDates,
                 // closes the multi-line argument list started above
                 )
             // closes the block
