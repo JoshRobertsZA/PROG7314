@@ -1,103 +1,134 @@
+// declares that this file belongs to the package `com.waypoint.app.features.edititinerary.ui`
 package com.waypoint.app.features.edititinerary.ui
 
+// imports `java.time.LocalDate` for use in this file
 import java.time.LocalDate
 
-/** Which PDF upload the user triggered - used to fire the system picker. */
+// declares enum class `ItineraryUploadType` and opens its body
 enum class ItineraryUploadType {
+    // expression: `FLIGHT,`
     FLIGHT,
+    // continues the statement started above: `LODGING,`
     LODGING,
+    // continues the statement started above: `CAR_RENTAL,`
     CAR_RENTAL,
+// closes the class `ItineraryUploadType`
 }
 
-/**
- * One card in the horizontal day-scroller.
- * [dayId] is the DB primary key; [date] drives the label.
- */
+// expression: `data class DayItem(`
 data class DayItem(
+    // continues the statement started above: `val dayId: String,`
     val dayId: String,
+    // continues the statement started above: `val date: LocalDate,`
     val date: LocalDate,
+// ends the argument list started above and opens the block that follows
 ) {
+    // declares read-only property `label` of type `String`
     val label: String
+        // custom getter: returns `"${date.dayOfMonth} ${`
         get() = "${date.dayOfMonth} ${
             date.month.name
                 .lowercase()
                 .replaceFirstChar { it.uppercaseChar() }
                 .take(3)
         }"
+// closes the block
 }
 
-/**
- * A flight PDF card shown under the active day.
- * [flightNumber] starts empty and can be typed by the user.
- */
+// expression: `data class FlightItem(`
 data class FlightItem(
+    // continues the statement started above: `val id: String,`
     val id: String,
+    // continues the statement started above: `val dayId: String,`
     val dayId: String,
+    // continues the statement started above: `val flightNumber: String,`
     val flightNumber: String,
+    // continues the statement started above: `val pdfUri: String,`
     val pdfUri: String,
-    /** "HH:mm" local, or null while unset. Drives early-vs-same-day flight reminders. */
+    // continues the statement started above: `val departureTime: String? = null,`
     val departureTime: String? = null,
+    // continues the statement started above: `val docName: String? = null,`
     val docName: String? = null,
+// closes the multi-line argument list started above
 )
 
-/** One lodging document; only listed on days inside its range. */
+// expression: `data class LodgingItem(`
 data class LodgingItem(
+    // continues the statement started above: `val id: String,`
     val id: String,
+    // continues the statement started above: `val fromDate: LocalDate,`
     val fromDate: LocalDate,
+    // continues the statement started above: `val toDate: LocalDate,`
     val toDate: LocalDate,
+    // continues the statement started above: `val pdfUri: String,`
     val pdfUri: String,
+    // continues the statement started above: `val docName: String? = null,`
     val docName: String? = null,
+// closes the multi-line argument list started above
 )
 
-/** One car-rental document; only listed on days inside its range. */
+// expression: `data class CarRentalItem(`
 data class CarRentalItem(
+    // continues the statement started above: `val id: String,`
     val id: String,
+    // continues the statement started above: `val fromDate: LocalDate,`
     val fromDate: LocalDate,
+    // continues the statement started above: `val toDate: LocalDate,`
     val toDate: LocalDate,
+    // continues the statement started above: `val pdfUri: String,`
     val pdfUri: String,
+    // continues the statement started above: `val docName: String? = null,`
     val docName: String? = null,
+// closes the multi-line argument list started above
 )
 
 
-/**
- * A place (hotel, park, pub, cinema) saved for a specific itinerary day.
- */
+// expression: `data class PlaceItem(`
 data class PlaceItem(
+    // continues the statement started above: `val id: String,`
     val id: String,
+    // continues the statement started above: `val dayId: String,`
     val dayId: String,
+    // continues the statement started above: `val name: String,`
     val name: String,
-    /** One of: HOTELS, PARKS, PUBS, CINEMAS */
+    // continues the statement started above: `val category: String,`
     val category: String,
+    // continues the statement started above: `val note: String?,`
     val note: String?,
+    // continues the statement started above: `val photoUrl: String? = null,`
+    val photoUrl: String? = null,
+// closes the multi-line argument list started above
 )
 
+// expression: `data class EditItineraryUiState(`
 data class EditItineraryUiState(
+    // continues the statement started above: `val isLoading: Boolean = true,`
     val isLoading: Boolean = true,
+    // continues the statement started above: `val days: List<DayItem> = emptyList(),`
     val days: List<DayItem> = emptyList(),
-    /** Index into [days] for the currently selected/active clock card. */
+    // continues the statement started above: `val activeDayIndex: Int = 0,`
     val activeDayIndex: Int = 0,
-    /**
-     * Flights that belong to the active day.
-     * Flights from other days are loaded lazily when the user scrolls to them.
-     */
+    // continues the statement started above: `val flightsForActiveDay: List<FlightItem> = emptyList(),`
     val flightsForActiveDay: List<FlightItem> = emptyList(),
-    /** All documents on the trip; filter with [lodgingForActiveDay] / [carRentalsForActiveDay]. */
+    // continues the statement started above: `val lodgings: List<LodgingItem> = emptyList(),`
     val lodgings: List<LodgingItem> = emptyList(),
+    // continues the statement started above: `val carRentals: List<CarRentalItem> = emptyList(),`
     val carRentals: List<CarRentalItem> = emptyList(),
-    /**
-     * Non-null while the system PDF picker should be showing.
-     * Cleared after the picker result arrives (success or cancel).
-     */
+    // continues the statement started above: `val pendingUploadType: ItineraryUploadType? = null,`
     val pendingUploadType: ItineraryUploadType? = null,
-    /**
-     * Places for the active day, grouped by category key
-     * (HOTELS, PARKS, PUBS, CINEMAS).
-     */
+    // continues the statement started above: `val placesForActiveDay: Map<String, List<PlaceItem>> = empt…`
     val placesForActiveDay: Map<String, List<PlaceItem>> = emptyMap(),
+// ends the argument list started above and opens the block that follows
 ) {
+    // expression: `private val activeDate: LocalDate? get() = days.getOrNull(active…`
     private val activeDate: LocalDate? get() = days.getOrNull(activeDayIndex)?.date
+    // declares read-only property `lodgingForActiveDay` of type `List<LodgingItem>`
     val lodgingForActiveDay: List<LodgingItem>
+        // custom getter: returns `activeDate?.let { d -> lodgings.filter { !d.isBefore(it.fromDate) && …`
         get() = activeDate?.let { d -> lodgings.filter { !d.isBefore(it.fromDate) && !d.isAfter(it.toDate) } }.orEmpty()
+    // declares read-only property `carRentalsForActiveDay` of type `List<CarRentalItem>`
     val carRentalsForActiveDay: List<CarRentalItem>
+        // custom getter: returns `activeDate?.let { d -> carRentals.filter { !d.isBefore(it.fromDate) &…`
         get() = activeDate?.let { d -> carRentals.filter { !d.isBefore(it.fromDate) && !d.isAfter(it.toDate) } }.orEmpty()
+// closes the block
 }

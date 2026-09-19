@@ -1,14 +1,13 @@
+// declares that this file belongs to the package `com.waypoint.app.features.settings.ui`
 package com.waypoint.app.features.settings.ui
 
-/**
- * State for the Profile tab's stat cards. Both counts are scoped to the
- * signed-in account ([com.waypoint.app.core.db.SessionManager.accountId])
- * so two Google accounts on the same device never see each other's trips.
- */
+// expression: `data class SettingsUiState(`
 data class SettingsUiState(
+    // continues the statement started above: `val isLoading: Boolean = true,`
     val isLoading: Boolean = true,
-    /** Trips whose start date falls in the current calendar year. */
+    // continues the statement started above: `val plannedThisYear: Int = 0,`
     val plannedThisYear: Int = 0,
-    /** Every trip this account has ever created - past, present and future. */
+    // continues the statement started above: `val totalTrips: Int = 0,`
     val totalTrips: Int = 0,
+// closes the multi-line argument list started above
 )

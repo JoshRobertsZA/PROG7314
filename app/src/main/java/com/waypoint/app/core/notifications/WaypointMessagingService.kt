@@ -1,44 +1,44 @@
+// declares that this file belongs to the package `com.waypoint.app.core.notifications`
 package com.waypoint.app.core.notifications
 
+// imports `android.util.Log` for use in this file
 import android.util.Log
+// imports `com.google.firebase.messaging.FirebaseMessagingService` for use in this file
 import com.google.firebase.messaging.FirebaseMessagingService
+// imports `com.google.firebase.messaging.RemoteMessage` for use in this file
 import com.google.firebase.messaging.RemoteMessage
 
-/**
- * Entry point for Firebase Cloud Messaging.
- *
- * FCM delivers two kinds of payload:
- *  - "notification" messages: when the app is in the background the SDK
- *    posts these itself using the manifest default icon/channel and this
- *    method is NOT called. In the foreground it IS called, so we post it
- *    ourselves here or the user would never see it.
- *  - "data" messages: always routed here, foreground or background.
- *
- * To cover both, we read title/body from the notification block first and
- * fall back to the data map, so a console test message and a server-sent
- * data message render identically.
- */
+// declares class `WaypointMessagingService`, inheriting from `FirebaseMessagingService()` and opens its body
 class WaypointMessagingService : FirebaseMessagingService() {
 
+    // declares override function `onMessageReceived` taking 1 parameter (`message`) and opens its body
     override fun onMessageReceived(message: RemoteMessage) {
+        // declares read-only property `title`, initialised to `message.notification?.title ?: message.data[…`
         val title = message.notification?.title ?: message.data["title"] ?: getString(com.waypoint.app.R.string.app_name)
+        // declares read-only property `body`, initialised to `message.notification?.body ?: message.data["…`
         val body  = message.notification?.body  ?: message.data["body"]  ?: return
 
+        // calls `d` on `Log` with arguments `(TAG, "Push received: title=$title data=${mes…)`
         Log.d(TAG, "Push received: title=$title data=${message.data}")
+        // calls `show` on `PushNotifier` with arguments `(applicationContext, title, body, message.data)`
         PushNotifier.show(applicationContext, title, body, message.data)
+    // closes the function `onMessageReceived`
     }
 
-    /**
-     * Fired on first install and whenever FCM rotates the token. Logged so
-     * the token can be pasted into the Firebase Console for test sends;
-     * a later checkpoint will persist it against the signed-in account.
-     */
+    // declares override function `onNewToken` taking 1 parameter (`token`) and opens its body
     override fun onNewToken(token: String) {
+        // calls `i` on `Log` with arguments `(TAG, "FCM token refreshed: $token")`
         Log.i(TAG, "FCM token refreshed: $token")
+        // calls `onTokenRefreshed` on `PushTokenManager` with arguments `(token)`
         PushTokenManager.onTokenRefreshed(token)
+    // closes the function `onNewToken`
     }
 
+    // declares the companion object holding members shared by all instances of the enclosing class
     private companion object {
+        // declares const read-only property `TAG`, initialised to the string literal "WaypointFCM"
         const val TAG = "WaypointFCM"
+    // closes the companion object
     }
+// closes the class `WaypointMessagingService`
 }
