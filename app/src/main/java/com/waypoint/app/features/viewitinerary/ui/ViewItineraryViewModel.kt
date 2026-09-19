@@ -21,6 +21,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 // imports `kotlinx.coroutines.launch` for use in this file
 import kotlinx.coroutines.launch
+// imports `com.waypoint.app.core.network.AirLabsRepository` for use in this file
+import com.waypoint.app.core.network.AirLabsRepository
+// imports `android.util.Log` for use in this file
+import android.util.Log
 
 // expression: `class ViewItineraryViewModel(`
 class ViewItineraryViewModel(
@@ -35,6 +39,14 @@ class ViewItineraryViewModel(
     private val tripId: String = checkNotNull(savedStateHandle["tripId"])
     // declares private read-only property `repo`, initialised with the result of calling `ItineraryRepository(…)`
     private val repo = ItineraryRepository(application)
+
+    // companion object holding a log tag for this ViewModel
+    companion object { private const val TAG = "ViewItineraryVM" }
+
+    // in-memory cache: flight IATA -> (fetchedAtMillis, result); cleared when ViewModel is cleared
+    private val flightStatusCache = HashMap<String, Pair<Long, AirLabsRepository.FlightStatusResult>>()
+    // cache TTL: 10 minutes
+    private val CACHE_TTL_MS = 10 * 60 * 1_000L
 
     // declares private read-only property `_uiState`, initialised with the result of calling `MutableStateFlow(…)`
     private val _uiState = MutableStateFlow(ViewItineraryUiState())
@@ -143,6 +155,34 @@ class ViewItineraryViewModel(
         // expression: `_uiState.update { it.copy(selectedPlace = null) }`
         _uiState.update { it.copy(selectedPlace = null) }
     // closes the function `onPlaceDismissed`
+    }
+
+    // declares function `onFlightStatusTap` that triggers a live status fetch for the given flight number
+    fun onFlightStatusTap(flightNumber: String) {
+        viewModelScope.launch {
+            val iata = flightNumber.replace(" ", "").uppercase()
+            // check in-memory cache first
+            val cached = flightStatusCache[iata]
+            if (cached != null && (System.currentTimeMillis() - cached.first) < CACHE_TTL_MS) {
+                Log.d(TAG, "Flight status cache hit for $iata")
+                _uiState.update { it.copy(flightStatus = FlightStatusState.Success(cached.second)) }
+                return@launch
+            }
+            // show spinner while fetching
+            _uiState.update { it.copy(flightStatus = FlightStatusState.Loading) }
+            val result = AirLabsRepository.fetchFlightStatus(iata)
+            if (result != null) {
+                flightStatusCache[iata] = Pair(System.currentTimeMillis(), result)
+                _uiState.update { it.copy(flightStatus = FlightStatusState.Success(result)) }
+            } else {
+                _uiState.update { it.copy(flightStatus = FlightStatusState.Error("Could not fetch status for $iata")) }
+            }
+        }
+    }
+
+    // declares function `onFlightStatusDismissed` that hides the modal
+    fun onFlightStatusDismissed() {
+        _uiState.update { it.copy(flightStatus = FlightStatusState.Idle) }
     }
 
     // declares private suspend function `loadFlightsFor` taking 1 parameter (`dayId`), returning `List<ViewFlightItem>`; its body is the expression ``

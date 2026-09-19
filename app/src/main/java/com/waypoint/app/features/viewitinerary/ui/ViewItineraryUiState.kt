@@ -73,6 +73,18 @@ data class ViewPlaceItem(
 // closes the multi-line argument list started above
 )
 
+// sealed class representing the loading/success/idle states for the flight status modal
+sealed class FlightStatusState {
+    // idle: modal is not visible
+    object Idle : FlightStatusState()
+    // loading: fetch is in progress, shows spinner
+    object Loading : FlightStatusState()
+    // success: fetch returned data, shows modal
+    data class Success(val result: com.waypoint.app.core.network.AirLabsRepository.FlightStatusResult) : FlightStatusState()
+    // error: fetch failed, shows error text
+    data class Error(val message: String) : FlightStatusState()
+}
+
 // expression: `data class ViewItineraryUiState(`
 data class ViewItineraryUiState(
     // continues the statement started above: `val isLoading: Boolean = true,`
@@ -91,6 +103,8 @@ data class ViewItineraryUiState(
     val placesForActiveDay: Map<String, List<ViewPlaceItem>> = emptyMap(),
     // continues the statement started above: `val selectedPlace: ViewPlaceItem? = null,`
     val selectedPlace: ViewPlaceItem? = null,
+    // continues the statement started above: `val flightStatus: FlightStatusState = FlightStatusState.Idle,`
+    val flightStatus: FlightStatusState = FlightStatusState.Idle,
 // ends the argument list started above and opens the block that follows
 ) {
     // expression: `private val activeDate: LocalDate? get() = days.getOrNull(active…`

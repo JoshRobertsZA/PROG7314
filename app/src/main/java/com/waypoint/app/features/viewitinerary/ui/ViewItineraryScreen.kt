@@ -153,6 +153,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 // imports `androidx.compose.runtime.setValue` for use in this file
 import androidx.compose.runtime.setValue
+// imports `androidx.compose.material3.AlertDialog` for use in this file
+import androidx.compose.material3.AlertDialog
+// imports `androidx.compose.material3.TextButton` for use in this file
+import androidx.compose.material3.TextButton
+// imports `androidx.compose.material3.Divider` for use in this file
+import androidx.compose.material3.HorizontalDivider
 
 // annotation `@Composable` applied to the declaration that follows
 @Composable
@@ -184,6 +190,15 @@ fun ViewItineraryScreen(
         // returns from the current function with no value
         return
     // closes the block
+    }
+
+    // show the flight status modal when the state is Loading, Success or Error
+    val flightStatus = state.flightStatus
+    if (flightStatus !is FlightStatusState.Idle) {
+        FlightStatusModal(
+            status    = flightStatus,
+            onDismiss = viewModel::onFlightStatusDismissed,
+        )
     }
 
     // `if` statement: the block below runs when `state.isLoading` is true
@@ -304,8 +319,14 @@ fun ViewItineraryScreen(
         } else {
             // expression: `state.flightsForActiveDay.forEach { f ->`
             state.flightsForActiveDay.forEach { f ->
-                // continues the statement started above: `ViewFlightCard(flight = f)`
-                ViewFlightCard(flight = f)
+                // continues the statement started above: `ViewFlightCard(flight = f, onStatusClick = …)`
+                ViewFlightCard(
+                    flight        = f,
+                    onStatusClick = {
+                        val fn = f.flightNumber?.takeIf { it.isNotBlank() }
+                        if (fn != null) viewModel.onFlightStatusTap(fn)
+                    },
+                )
             // closes the block
             }
         // closes the else branch
@@ -507,8 +528,8 @@ private fun ViewDayScroller(
 
 // annotation `@Composable` applied to the declaration that follows
 @Composable
-// declares private function `ViewFlightCard` taking 1 parameter (`flight`) and opens its body
-private fun ViewFlightCard(flight: ViewFlightItem) {
+// declares private function `ViewFlightCard` taking 2 parameters (`flight`, `onStatusClick`) and opens its body
+private fun ViewFlightCard(flight: ViewFlightItem, onStatusClick: () -> Unit) {
     // declares read-only property `context`, initialised to `LocalContext.current`
     val context = LocalContext.current
     // calls `RowSurface` with an argument list that continues on the following lines
@@ -537,8 +558,14 @@ private fun ViewFlightCard(flight: ViewFlightItem) {
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
                 // declares read-only property `label`, initialised to `flight.flightNumber?.takeIf { it.isNotBlank(…`
                 val label = flight.flightNumber?.takeIf { it.isNotBlank() } ?: stringResource(R.string.reminder_flight_unnamed)
-                // calls `Text` with arguments `(label, color = WaypointTextPrimary, fontSize…)`
-                Text(label, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                // calls `Text` with arguments `(label, color = WaypointTextPrimary, fontSize…)` and a clickable modifier so tapping the number opens live status
+                Text(
+                    text       = label,
+                    color      = WaypointTerracotta,
+                    fontSize   = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier   = Modifier.clickable(enabled = flight.flightNumber?.isNotBlank() == true) { onStatusClick() },
+                )
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
                     // continues the statement started above: `text = flight.departureTime?.let { stringResource(R.string.…`
@@ -1024,6 +1051,103 @@ private fun ViewPlaceDetailOverlay(
     // closes the block
     }
 // closes the block
+}
+
+
+// annotation `@Composable` applied to the declaration that follows
+@Composable
+// declares private function `FlightStatusModal` showing live AirLabs status in an AlertDialog
+private fun FlightStatusModal(
+    // continues the statement started above: `status: FlightStatusState,`
+    status: FlightStatusState,
+    // continues the statement started above: `onDismiss: () -> Unit,`
+    onDismiss: () -> Unit,
+) {
+    // builds the dialog title text from the current state
+    val title = when (status) {
+        is FlightStatusState.Loading -> "Fetching flight status…"
+        is FlightStatusState.Success -> status.result.flightIata
+        is FlightStatusState.Error   -> "Error"
+        else                         -> ""
+    }
+    AlertDialog(
+        onDismissRequest   = onDismiss,
+        containerColor     = WaypointCard,
+        title              = { Text(title, color = WaypointTextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp) },
+        text               = {
+            when (status) {
+                is FlightStatusState.Loading -> {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = WaypointTerracotta, modifier = Modifier.size(36.dp))
+                    }
+                }
+                is FlightStatusState.Error -> {
+                    Text(status.message, color = WaypointTextMuted, fontSize = 13.sp)
+                }
+                is FlightStatusState.Success -> {
+                    val r = status.result
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        // status badge
+                        val (badgeColor, badgeLabel) = when (r.status.lowercase()) {
+                            "active"    -> Pair(WaypointTerracotta,     "In Flight")
+                            "landed"    -> Pair(WaypointPlaceAccent1,   "Landed")
+                            "scheduled" -> Pair(WaypointPlaceAccent2,   "Scheduled")
+                            "cancelled" -> Pair(WaypointTextMuted,      "Cancelled")
+                            else        -> Pair(WaypointTextMuted,      r.status.replaceFirstChar { it.uppercaseChar() })
+                        }
+                        Box(
+                            modifier         = Modifier
+                                .background(badgeColor.copy(alpha = 0.15f), androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
+                                .padding(horizontal = 12.dp, vertical = 4.dp),
+                        ) {
+                            Text(badgeLabel, color = badgeColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        HorizontalDivider(color = WaypointTextMuted.copy(alpha = 0.15f))
+                        Spacer(Modifier.height(12.dp))
+                        // departure row
+                        if (r.depIata.isNotBlank()) {
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Departure", color = WaypointTextMuted, fontSize = 11.sp)
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text(r.depIata, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                    if (r.depTime.isNotBlank()) Text(r.depTime, color = WaypointTextMuted, fontSize = 11.sp)
+                                    if (r.depTerminal.isNotBlank()) Text("Terminal ${r.depTerminal}", color = WaypointTextMuted, fontSize = 10.sp)
+                                    if (r.depGate.isNotBlank())     Text("Gate ${r.depGate}", color = WaypointTextMuted, fontSize = 10.sp)
+                                }
+                            }
+                            Spacer(Modifier.height(8.dp))
+                        }
+                        // arrival row
+                        if (r.arrIata.isNotBlank()) {
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Arrival", color = WaypointTextMuted, fontSize = 11.sp)
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text(r.arrIata, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                    if (r.arrTime.isNotBlank()) Text(r.arrTime, color = WaypointTextMuted, fontSize = 11.sp)
+                                }
+                            }
+                            Spacer(Modifier.height(8.dp))
+                        }
+                        // delay and duration
+                        if (r.depDelayedMin > 0) {
+                            Text("Delayed ${r.depDelayedMin} min", color = WaypointTerracotta, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Spacer(Modifier.height(4.dp))
+                        }
+                        if (r.durationMin > 0) {
+                            Text("Duration: ${r.durationMin / 60}h ${r.durationMin % 60}m", color = WaypointTextMuted, fontSize = 11.sp)
+                        }
+                    }
+                }
+                else -> {}
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close", color = WaypointTerracotta, fontWeight = FontWeight.Bold)
+            }
+        },
+    )
 }
 
 

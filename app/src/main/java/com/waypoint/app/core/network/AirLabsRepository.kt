@@ -66,5 +66,56 @@ object AirLabsRepository {
         }
     // closes the block
     }
+    // data class holding the fields we display in the flight status modal
+    data class FlightStatusResult(
+        val flightIata: String,
+        val status: String,
+        val depIata: String,
+        val arrIata: String,
+        val depTime: String,
+        val arrTime: String,
+        val depTerminal: String,
+        val depGate: String,
+        val depDelayedMin: Int,
+        val durationMin: Int,
+    )
+
+    // fetches full flight status from AirLabs schedules endpoint; only called on explicit user tap
+    suspend fun fetchFlightStatus(flightNumber: String): FlightStatusResult? = withContext(Dispatchers.IO) {
+        val key = RemoteSecrets.get("AIRLABS_API_KEY", BuildConfig.AIRLABS_API_KEY)
+        if (key.isBlank()) { Log.w(TAG, "No AirLabs key"); return@withContext null }
+
+        val iata = flightNumber.replace(" ", "").uppercase()
+        if (iata.isBlank()) return@withContext null
+
+        try {
+            val url = "https://airlabs.co/api/v9/schedules?flight_iata=$iata&api_key=$key"
+            val req = Request.Builder().url(url).header("Accept", "application/json").get().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            if (!resp.isSuccessful) { Log.w(TAG, "AirLabs HTTP ${'$'}{resp.code} for $iata"); return@withContext null }
+
+            val body = JSONObject(resp.body?.string() ?: return@withContext null)
+            val list = body.optJSONArray("response") ?: return@withContext null
+            if (list.length() == 0) return@withContext null
+
+            val flight = list.getJSONObject(0)
+            FlightStatusResult(
+                flightIata   = flight.optString("flight_iata", iata),
+                status       = flight.optString("status", "unknown"),
+                depIata      = flight.optString("dep_iata", ""),
+                arrIata      = flight.optString("arr_iata", ""),
+                depTime      = flight.optString("dep_time", "").substringAfter(' ', ""),
+                arrTime      = flight.optString("arr_time", "").substringAfter(' ', ""),
+                depTerminal  = flight.optString("dep_terminal", ""),
+                depGate      = flight.optString("dep_gate", ""),
+                depDelayedMin = flight.optInt("dep_delayed", 0),
+                durationMin  = flight.optInt("duration", 0),
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "AirLabs fetchFlightStatus failed for $iata: ${'$'}{e.message}")
+            null
+        }
+    }
+
 // closes the object `AirLabsRepository`
 }
