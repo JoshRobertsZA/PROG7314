@@ -108,6 +108,9 @@ import com.waypoint.app.core.common.RowSurface
 // imports `com.waypoint.app.core.common.StatusBadge` for use in this file
 import com.waypoint.app.core.common.StatusBadge
 // imports `com.waypoint.app.core.common.ThumbnailBlock` for use in this file
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.layout.ContentScale
 import com.waypoint.app.core.common.ThumbnailBlock
 // imports `com.waypoint.app.core.theme.RadiusButton` for use in this file
 import com.waypoint.app.core.theme.RadiusButton
@@ -714,16 +717,20 @@ private fun FlightCard(
             verticalAlignment = Alignment.CenterVertically,
         // ends the argument list started above and opens the block that follows
         ) {
-            // calls `ThumbnailBlock` with an argument list that continues on the following lines
-            ThumbnailBlock(
-                // continues the statement started above: `accentColor = WaypointPlaceAccent4,`
-                accentColor   = WaypointPlaceAccent4,
-                // continues the statement started above: `size = 44.dp,`
-                size          = 44.dp,
-                // continues the statement started above: `cornerRadius = RadiusThumbnail,`
-                cornerRadius  = RadiusThumbnail,
-            // closes the multi-line argument list started above
-            )
+            // shows airline logo if a carrier code can be derived, falling back to the accent block
+            val logoUrl = airlineLogoUrl(flight.flightNumber)
+            if (logoUrl != null) {
+                SubcomposeAsyncImage(
+                    model              = ImageRequest.Builder(LocalContext.current).data(logoUrl).crossfade(true).build(),
+                    contentDescription = flight.flightNumber,
+                    contentScale       = ContentScale.Fit,
+                    modifier           = Modifier.size(44.dp).clip(RoundedCornerShape(RadiusThumbnail)).background(Color.White),
+                    loading = { ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail) },
+                    error   = { ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail) },
+                )
+            } else {
+                ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail)
+            }
             // calls `Column` with arguments `(modifier = Modifier.weight(1f).padding(start…)` and opens a trailing lambda / block
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
                 // calls `BasicTextField` with an argument list that continues on the following lines
@@ -1097,6 +1104,12 @@ private fun IconActionButton(
 // closes the block
 }
 
+
+// derives a carrier logo URL from the flight number prefix, or null if the code can't be determined
+private fun airlineLogoUrl(flightNumber: String): String? {
+    val code = flightNumber.replace(" ", "").uppercase().take(2).takeIf { it.length == 2 } ?: return null
+    return "https://pics.avs.io/100/100/$code.png"
+}
 
 // declares private function `pdfFileName` taking 1 parameter (`uri`), returning `String` and opens its body
 private fun pdfFileName(uri: String): String {
