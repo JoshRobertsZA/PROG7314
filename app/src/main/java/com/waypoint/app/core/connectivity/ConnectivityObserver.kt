@@ -21,6 +21,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 // imports `androidx.compose.ui.platform.LocalContext` for use in this file
 import androidx.compose.ui.platform.LocalContext
+// imports `androidx.compose.runtime.LaunchedEffect` for use in this file
+import androidx.compose.runtime.LaunchedEffect
+// imports `kotlinx.coroutines.delay` for use in this file
+import kotlinx.coroutines.delay
 
 // annotation `@Composable` applied to the declaration that follows
 @Composable
@@ -69,6 +73,14 @@ fun rememberIsOnline(): State<Boolean> {
         // expression: `onDispose { connectivityManager.unregisterNetworkCallback(callba…`
         onDispose { connectivityManager.unregisterNetworkCallback(callback) }
     // closes the lambda passed to `DisposableEffect`
+    }
+
+    // poll every 5 seconds as a fallback in case NetworkCallback misses an event
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(5_000L)
+            isOnline.value = connectivityManager.isCurrentlyOnline()
+        }
     }
 
     // returns `isOnline` from the current function

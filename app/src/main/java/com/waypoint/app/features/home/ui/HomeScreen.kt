@@ -308,8 +308,8 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState()),
         // ends the argument list started above and opens the block that follows
         ) {
-            // calls `TabHeader` with arguments `(onAvatarClick = onSettingsClick, isOnline = …)`
-            TabHeader(onAvatarClick = onSettingsClick, isOnline = isOnline)
+            // calls `TabHeader` with arguments `(onAvatarClick = onSettingsClick)`
+            TabHeader(onAvatarClick = onSettingsClick)
 
             // calls `Text` with an argument list that continues on the following lines
             Text(

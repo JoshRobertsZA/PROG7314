@@ -73,6 +73,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 // imports `androidx.lifecycle.viewmodel.compose.viewModel` for use in this file
 import androidx.lifecycle.viewmodel.compose.viewModel
+// imports `com.waypoint.app.core.connectivity.rememberIsOnline` for use in this file
+import com.waypoint.app.core.connectivity.rememberIsOnline
 // imports `com.waypoint.app.features.notifications.ui.NotificationHistoryViewModel` for use in this file
 import com.waypoint.app.features.notifications.ui.NotificationHistoryViewModel
 
@@ -86,8 +88,6 @@ fun TabHeader(
     showAvatar: Boolean = true,
     // continues the statement started above: `onAvatarClick: () -> Unit = {},`
     onAvatarClick: () -> Unit = {},
-    // continues the statement started above: `isOnline: Boolean = true,`
-    isOnline: Boolean = true,
     // continues the statement started above: `modifier: Modifier = Modifier,`
     modifier: Modifier = Modifier,
 // ends the argument list started above and opens the block that follows
@@ -99,6 +99,8 @@ fun TabHeader(
     val notifState by notifVm.uiState.collectAsState()
     // load notifications on first composition
     LaunchedEffect(Unit) { notifVm.load() }
+    // observe connectivity so the offline indicator updates on all screens
+    val isOnline by rememberIsOnline()
     // `if` statement: the block below runs when `showHistory` is true
     if (showHistory) {
         // calls `Dialog` with arguments `(onDismissRequest = { showHistory = false })`
