@@ -552,8 +552,23 @@ private fun ViewFlightCard(flight: ViewFlightItem, onStatusClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         // ends the argument list started above and opens the block that follows
         ) {
-            // calls `ThumbnailBlock` with arguments `(accentColor = WaypointPlaceAccent4, size = 4…)`
-            ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail)
+            // shows the airline logo if a carrier code can be derived from the flight number, falling back to the accent block
+            val logoUrl = airlineLogoUrl(flight.flightNumber)
+            if (logoUrl != null) {
+                SubcomposeAsyncImage(
+                    model              = ImageRequest.Builder(context).data(logoUrl).crossfade(true).build(),
+                    contentDescription = flight.flightNumber,
+                    contentScale       = ContentScale.Fit,
+                    modifier           = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(RadiusThumbnail))
+                        .background(androidx.compose.ui.graphics.Color.White),
+                    loading = { ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail) },
+                    error   = { ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail) },
+                )
+            } else {
+                ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail)
+            }
             // calls `Column` with arguments `(modifier = Modifier.weight(1f).padding(start…)` and opens a trailing lambda / block
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
                 // declares read-only property `label`, initialised to `flight.flightNumber?.takeIf { it.isNotBlank(…`
@@ -1148,6 +1163,14 @@ private fun FlightStatusModal(
             }
         },
     )
+}
+
+
+// declares private function `airlineLogoUrl` that derives a carrier logo URL from the flight number, or null if the code can't be determined
+private fun airlineLogoUrl(flightNumber: String?): String? {
+    // strip spaces, uppercase, take the first two characters (IATA carrier codes are always two characters)
+    val code = flightNumber?.replace(" ", "")?.uppercase()?.take(2)?.takeIf { it.length == 2 } ?: return null
+    return "https://pics.avs.io/100/100/$code.png"
 }
 
 
