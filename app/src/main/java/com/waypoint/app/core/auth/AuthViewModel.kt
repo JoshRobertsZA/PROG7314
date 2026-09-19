@@ -43,6 +43,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 // imports `kotlinx.coroutines.launch` for use in this file
 import kotlinx.coroutines.launch
+// imports `kotlinx.coroutines.tasks.await` for use in this file
+import kotlinx.coroutines.tasks.await
 
 // declares enum class `AuthProvider` and opens its body
 enum class AuthProvider {
@@ -221,6 +223,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 )
             // closes the multi-line argument list started above
             )
+        // closes the lambda passed to `launch`
+        }
+        // calls `launch` on `viewModelScope` with arguments `(Dispatchers.IO)` and opens a trailing lambda / block
+        viewModelScope.launch(Dispatchers.IO) {
+            // declares read-only property `token`, initialised to `runCatching { user.getIdToken(false).await()…`
+            val token = runCatching { user.getIdToken(false).await()?.token }.getOrNull()
+            // `if` statement: executes `tripRepository.pullAndMergeTrips(token, user…` when `token != null` is true
+            if (token != null) tripRepository.pullAndMergeTrips(token, user.uid)
         // closes the lambda passed to `launch`
         }
     // closes the function `applySignedInUser`

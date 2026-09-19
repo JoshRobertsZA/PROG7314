@@ -53,6 +53,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 // imports `java.util.UUID` for use in this file
 import java.util.UUID
+// imports `com.waypoint.app.core.network.WaypointApiRepository` for use in this file
+import com.waypoint.app.core.network.WaypointApiRepository
 
 // declares class `TripRepository` with a primary constructor taking 1 parameter (`context`) and opens its body
 class TripRepository(context: Context) {
@@ -325,5 +327,82 @@ class TripRepository(context: Context) {
         )
     // closes the block
     }
+
+    // declares suspend function `syncTripCreate` taking 2 parameters (`idToken`, `tripId`); its body is the expression `withContext(Dispatchers.IO) {`
+    suspend fun syncTripCreate(idToken: String, tripId: String) = withContext(Dispatchers.IO) {
+        // declares read-only property `trip`, initialised with the result of calling `getTripById(…)`
+        val trip = getTripById(tripId) ?: return@withContext
+        // calls `createTrip` on `WaypointApiRepository` with arguments `(idToken, trip)`
+        WaypointApiRepository.createTrip(idToken, trip)
+    // closes the block
+    }
+
+    // declares suspend function `syncTripUpdate` taking 2 parameters (`idToken`, `tripId`); its body is the expression `withContext(Dispatchers.IO) {`
+    suspend fun syncTripUpdate(idToken: String, tripId: String) = withContext(Dispatchers.IO) {
+        // declares read-only property `trip`, initialised with the result of calling `getTripById(…)`
+        val trip = getTripById(tripId) ?: return@withContext
+        // calls `updateTrip` on `WaypointApiRepository` with arguments `(idToken, trip)`
+        WaypointApiRepository.updateTrip(idToken, trip)
+    // closes the block
+    }
+
+    // declares suspend function `syncTripDelete` taking 2 parameters (`idToken`, `tripId`); its body is the expression `withContext(Dispatchers.IO) {`
+    suspend fun syncTripDelete(idToken: String, tripId: String) = withContext(Dispatchers.IO) {
+        // calls `deleteTrip` on `WaypointApiRepository` with arguments `(idToken, tripId)`
+        WaypointApiRepository.deleteTrip(idToken, tripId)
+    // closes the block
+    }
+
+    // declares suspend function `pullAndMergeTrips` taking 2 parameters (`idToken`, `accountId`); its body is the expression `withContext(Dispatchers.IO) {`
+    suspend fun pullAndMergeTrips(idToken: String, accountId: String) = withContext(Dispatchers.IO) {
+        // declares read-only property `cloudTrips`, initialised with the result of calling `WaypointApiRepository.getTrips(…)`
+        val cloudTrips = WaypointApiRepository.getTrips(idToken) ?: return@withContext
+        // declares read-only property `wdb`, initialised to `db.writableDatabase`
+        val wdb = db.writableDatabase
+        // `for` loop: iterates over `cloudTrips`, binding each element to `t`
+        for (t in cloudTrips) {
+            // `if` statement: executes `continue` when `t.accountId != accountId` is true
+            if (t.accountId != accountId) continue
+            // declares read-only property `cv`, initialised with the result of calling `ContentValues(…)` and opens a lambda / block
+            val cv = ContentValues().apply {
+                // calls `put` with arguments `(COL_TRIP_ID, t.id)`
+                put(COL_TRIP_ID,          t.id)
+                // calls `put` with arguments `(COL_TRIP_ACCOUNT_ID, t.accountId)`
+                put(COL_TRIP_ACCOUNT_ID,  t.accountId)
+                // calls `put` with arguments `(COL_TRIP_NAME, t.name)`
+                put(COL_TRIP_NAME,        t.name)
+                // calls `put` with arguments `(COL_TRIP_START, t.startDate)`
+                put(COL_TRIP_START,       t.startDate)
+                // calls `put` with arguments `(COL_TRIP_END, t.endDate)`
+                put(COL_TRIP_END,         t.endDate)
+                // calls `put` with arguments `(COL_TRIP_DESTINATION, t.destination)`
+                put(COL_TRIP_DESTINATION, t.destination)
+                // `if` statement: executes `put(COL_TRIP_DEST_LAT, t.destLat)` when `t.destLat != null` is true
+                if (t.destLat      != null) put(COL_TRIP_DEST_LAT,  t.destLat)
+                // `if` statement: executes `put(COL_TRIP_DEST_LNG, t.destLng)` when `t.destLng != null` is true
+                if (t.destLng      != null) put(COL_TRIP_DEST_LNG,  t.destLng)
+                // calls `put` with arguments `(COL_TRIP_DEST_PHOTO, t.destPhotoUrl)`
+                put(COL_TRIP_DEST_PHOTO,  t.destPhotoUrl)
+                // declares read-only property `now`, initialised with the result of calling `System.currentTimeMillis(…)`
+                val now = System.currentTimeMillis()
+                // calls `put` with arguments `(COL_TRIP_CREATED, now)`
+                put(COL_TRIP_CREATED, now)
+                // calls `put` with arguments `(COL_TRIP_UPDATED, now)`
+                put(COL_TRIP_UPDATED, now)
+            // closes the lambda assigned to `cv`
+            }
+            // calls `insertWithOnConflict` on `wdb` with an argument list that continues on the following lines
+            wdb.insertWithOnConflict(
+                // continues the statement started above: `TABLE_TRIPS, null, cv,`
+                TABLE_TRIPS, null, cv,
+                // continues the statement started above: `android.database.sqlite.SQLiteDatabase.CONFLICT_IGNORE,`
+                android.database.sqlite.SQLiteDatabase.CONFLICT_IGNORE,
+            // closes the multi-line argument list started above
+            )
+        // closes the for loop
+        }
+    // closes the block
+    }
+
 // closes the class `TripRepository`
 }

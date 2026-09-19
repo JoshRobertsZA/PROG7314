@@ -35,6 +35,10 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 // imports `java.time.YearMonth` for use in this file
 import java.time.YearMonth
+// imports `com.google.firebase.auth.FirebaseAuth` for use in this file
+import com.google.firebase.auth.FirebaseAuth
+// imports `kotlinx.coroutines.tasks.await` for use in this file
+import kotlinx.coroutines.tasks.await
 
 // declares class `NewTripViewModel` with a primary constructor taking 1 parameter (`application`), inheriting from `AndroidViewModel(application)` and opens its body
 class NewTripViewModel(application: Application) : AndroidViewModel(application) {
@@ -242,6 +246,14 @@ class NewTripViewModel(application: Application) : AndroidViewModel(application)
             _uiState.update { it.copy(isSaving = false) }
             // calls `emit` on `_tripSaved` with arguments `(id)`
             _tripSaved.emit(id)
+            // declares read-only property `token`, initialised to `runCatching` and opens a lambda / block
+            val token = runCatching {
+                // calls `getInstance` on `FirebaseAuth` with arguments `()`, then chains `.currentUser`, `.?.getIdToken(false)`, `.?.await()`, `.?.token`
+                FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token
+            // statement: `}.getOrNull()`
+            }.getOrNull()
+            // `if` statement: executes `repository.syncTripCreate(token, id)` when `token != null` is true
+            if (token != null) repository.syncTripCreate(token, id)
         // closes the block
         }
     // closes the function `saveTrip`
