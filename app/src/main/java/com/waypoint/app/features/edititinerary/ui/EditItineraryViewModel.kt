@@ -9,6 +9,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 // imports `androidx.lifecycle.viewModelScope` for use in this file
 import androidx.lifecycle.viewModelScope
+// imports `com.waypoint.app.core.network.AirLabsRepository` for use in this file
+import com.waypoint.app.core.network.AirLabsRepository
 // imports `com.waypoint.app.core.common.DocumentNames` for use in this file
 import com.waypoint.app.core.common.DocumentNames
 // imports `com.waypoint.app.features.edititinerary.data.ItineraryRepository` for use in this file
@@ -135,7 +137,7 @@ class EditItineraryViewModel(
                 // continues the statement started above: `pdfUri = f.pdfUri,`
                 pdfUri       = f.pdfUri,
                 // continues the statement started above: `departureTime = f.departureTime,`
-                departureTime = f.departureTime,
+                departureTime = f.departureTime?.takeIf { it != AirLabsRepository.AIRLABS_MISS },
                 // continues the statement started above: `docName = f.docName,`
                 docName      = f.docName,
             // closes the multi-line argument list started above

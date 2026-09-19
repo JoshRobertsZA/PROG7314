@@ -21,6 +21,8 @@ object AirLabsRepository {
 
     // declares private const read-only property `TAG`, initialised to the string literal "AirLabsRepo"
     private const val TAG = "AirLabsRepo"
+    // sentinel written to `departureTime` when AirLabs returns no match — prevents future calls for this flight
+    const val AIRLABS_MISS = "AIRLABS_MISS"
 
     // declares suspend function `lookupDepartureTime` taking 1 parameter (`flightNumber`), returning `String?`; its body is the expression `withContext(Dispatchers.IO) {`
     suspend fun lookupDepartureTime(flightNumber: String): String? = withContext(Dispatchers.IO) {

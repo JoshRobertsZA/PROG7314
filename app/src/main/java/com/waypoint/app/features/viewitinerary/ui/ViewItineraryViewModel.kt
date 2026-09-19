@@ -175,7 +175,10 @@ class ViewItineraryViewModel(
                 flightStatusCache[iata] = Pair(System.currentTimeMillis(), result)
                 _uiState.update { it.copy(flightStatus = FlightStatusState.Success(result)) }
             } else {
-                _uiState.update { it.copy(flightStatus = FlightStatusState.Error("Could not fetch status for $iata")) }
+                // cache the miss for 2 minutes so rapid re-taps on an unknown flight don't burn quota
+                val missResult = AirLabsRepository.FlightStatusResult(iata, "not_found", "", "", "", "", "", "", 0, 0)
+                flightStatusCache[iata] = Pair(System.currentTimeMillis() - CACHE_TTL_MS + 2 * 60 * 1_000L, missResult)
+                _uiState.update { it.copy(flightStatus = FlightStatusState.Error("No flight found for $iata")) }
             }
         }
     }
@@ -190,7 +193,7 @@ class ViewItineraryViewModel(
         // continues the statement started above: `repo.getFlightsForDays(listOf(dayId)).map { f ->`
         repo.getFlightsForDays(listOf(dayId)).map { f ->
             // continues the statement started above: `ViewFlightItem(id = f.id, flightNumber = f.flightNumber, pd…`
-            ViewFlightItem(id = f.id, flightNumber = f.flightNumber, pdfUri = f.pdfUri, departureTime = f.departureTime, docName = f.docName)
+            ViewFlightItem(id = f.id, flightNumber = f.flightNumber, pdfUri = f.pdfUri, departureTime = f.departureTime?.takeIf { it != AirLabsRepository.AIRLABS_MISS }, docName = f.docName)
         // closes the block
         }
 
