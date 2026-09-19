@@ -41,6 +41,9 @@ class EditItineraryViewModel(
 
     // declares read-only property `tripId` of type `String`, initialised with the result of calling `checkNotNull(…)`
     val tripId: String = checkNotNull(savedStateHandle["tripId"])
+    // pipe-separated ISO dates from TripCalendar selection, e.g. "2024-12-23|2024-12-28"
+    private val selectedDates: Set<String> = (savedStateHandle.get<String>("selectedDates") ?: "")
+        .split("|").filter { it.isNotBlank() }.toSet()
 
     // declares private read-only property `repo`, initialised with the result of calling `ItineraryRepository(…)`
     private val repo = ItineraryRepository(application)
@@ -72,8 +75,10 @@ class EditItineraryViewModel(
             // expression: `_uiState.update { it.copy(isLoading = true) }`
             _uiState.update { it.copy(isLoading = true) }
 
-            // declares read-only property `dayEntities`, initialised with the result of calling `repo.getSelectedDaysWithIds(…)`
-            val dayEntities = repo.getSelectedDaysWithIds(tripId)
+            // load all stored days then filter to only the ones selected on the calendar
+            val allDayEntities = repo.getSelectedDaysWithIds(tripId)
+            val dayEntities = if (selectedDates.isEmpty()) allDayEntities
+                              else allDayEntities.filter { it.date.toString() in selectedDates }
             // declares read-only property `days`, initialised to a lambda / arrow function
             val days        = dayEntities.map { e -> DayItem(dayId = e.id, date = e.date) }
             // declares read-only property `lodgings`, initialised with the result of calling `loadLodgings(…)`

@@ -19,10 +19,9 @@ object Routes {
     fun tripCalendar(tripId: String) = "trip_calendar/$tripId"
     // declares const read-only property `AllTrips`, initialised to the string literal "all_trips"
     const val AllTrips = "all_trips"
-    // declares const read-only property `EditItinerary`, initialised to the string literal "edit_itinerary/{tripId}"
-    const val EditItinerary = "edit_itinerary/{tripId}"
-    // declares function `editItinerary` taking 1 parameter (`tripId`); its body is the expression `"edit_itinerary/$tripId"`
-    fun editItinerary(tripId: String) = "edit_itinerary/$tripId"
+    // edit_itinerary/{tripId}/{selectedDates} — selectedDates is pipe-separated ISO dates, e.g. "2024-12-23|2024-12-28"
+    const val EditItinerary = "edit_itinerary/{tripId}/{selectedDates}"
+    fun editItinerary(tripId: String, selectedDates: String) = "edit_itinerary/$tripId/$selectedDates"
     // declares const read-only property `ViewItinerary`, initialised to the string literal "view_itinerary/{tripId}"
     const val ViewItinerary = "view_itinerary/{tripId}"
     // declares function `viewItinerary` taking 1 parameter (`tripId`); its body is the expression `"view_itinerary/$tripId"`

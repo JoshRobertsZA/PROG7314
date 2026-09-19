@@ -324,7 +324,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 // continues the statement started above: `onGoToViewItineraryClick = { navController.navigate(Routes.…`
                 onGoToViewItineraryClick = { navController.navigate(Routes.viewItinerary("__scratch__")) },
                 // continues the statement started above: `onGoToEditItineraryClick = { navController.navigate(Routes.…`
-                onGoToEditItineraryClick = { navController.navigate(Routes.editItinerary("__scratch__")) },
+                onGoToEditItineraryClick = { navController.navigate(Routes.editItinerary("__scratch__", "")) },
                 // continues the statement started above: `onGoToAllTripsClick = { navController.navigate(Routes.AllTr…`
                 onGoToAllTripsClick = { navController.navigate(Routes.AllTrips) },
                 // continues the statement started above: `onGoToSettingsClick = { navController.navigate(Routes.Setti…`
@@ -428,7 +428,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             // continues the statement started above: `route = Routes.TripCalendar,`
             route = Routes.TripCalendar,
             // continues the statement started above: `arguments = listOf(navArgument("tripId") { type = NavType.S…`
-            arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
+            arguments = listOf(navArgument("tripId") { type = NavType.StringType }, navArgument("selectedDates") { type = NavType.StringType }),
         // ends the argument list started above and opens the block that follows
         ) {
             // calls `TripCalendarScreen` with an argument list that continues on the following lines
@@ -436,7 +436,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 // continues the statement started above: `onBackClick = { navController.popBackStack() },`
                 onBackClick = { navController.popBackStack() },
                 // continues the statement started above: `onEditItineraryClick = { tripId -> navController.navigate(R…`
-                onEditItineraryClick = { tripId -> navController.navigate(Routes.editItinerary(tripId)) },
+                onEditItineraryClick = { tripId, selectedDates -> navController.navigate(Routes.editItinerary(tripId, selectedDates)) },
                 // continues the statement started above: `onViewItineraryClick = { tripId -> navController.navigate(R…`
                 onViewItineraryClick = { tripId -> navController.navigate(Routes.viewItinerary(tripId)) },
             // closes the multi-line argument list started above
@@ -462,7 +462,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             // continues the statement started above: `route = Routes.EditItinerary,`
             route = Routes.EditItinerary,
             // continues the statement started above: `arguments = listOf(navArgument("tripId") { type = NavType.S…`
-            arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
+            arguments = listOf(navArgument("tripId") { type = NavType.StringType }, navArgument("selectedDates") { type = NavType.StringType }),
         // continues the statement started above: `) { backStackEntry ->`
         ) { backStackEntry ->
             // continues the statement started above: `val tripId = backStackEntry.arguments?.getString("tripId") …`
@@ -494,7 +494,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             // continues the statement started above: `route = Routes.ViewItinerary,`
             route = Routes.ViewItinerary,
             // continues the statement started above: `arguments = listOf(navArgument("tripId") { type = NavType.S…`
-            arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
+            arguments = listOf(navArgument("tripId") { type = NavType.StringType }, navArgument("selectedDates") { type = NavType.StringType }),
         // ends the argument list started above and opens the block that follows
         ) {
             // calls `ViewItineraryScreen` with an argument list that continues on the following lines

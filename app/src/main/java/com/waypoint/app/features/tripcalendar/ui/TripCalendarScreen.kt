@@ -190,8 +190,8 @@ private fun buildCalendarGrid(
 fun TripCalendarScreen(
     // continues the statement started above: `onBackClick: () -> Unit,`
     onBackClick: () -> Unit,
-    // continues the statement started above: `onEditItineraryClick: (tripId: String) -> Unit = {},`
-    onEditItineraryClick: (tripId: String) -> Unit = {},
+    // continues the statement started above: `onEditItineraryClick: (tripId: String, selectedDates: String) -> Unit = { _, _ -> },`
+    onEditItineraryClick: (tripId: String, selectedDates: String) -> Unit = { _, _ -> },
     // continues the statement started above: `onViewItineraryClick: (tripId: String) -> Unit = {},`
     onViewItineraryClick: (tripId: String) -> Unit = {},
     // continues the statement started above: `modifier: Modifier = Modifier,`
@@ -348,7 +348,7 @@ fun TripCalendarScreen(
             // `when` branch `is TripCalendarViewModel.ItineraryNavTa…`: opens a block
             is TripCalendarViewModel.ItineraryNavTarget.EditItinerary -> {
                 // calls `onEditItineraryClick` with arguments `(t.tripId)`
-                onEditItineraryClick(t.tripId)
+                onEditItineraryClick(t.tripId, t.selectedDates)
                 // calls `onNavConsumed` on `viewModel` with arguments `()`
                 viewModel.onNavConsumed()
             // closes the when branch

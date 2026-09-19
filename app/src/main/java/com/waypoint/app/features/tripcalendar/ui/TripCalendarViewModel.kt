@@ -60,7 +60,7 @@ class TripCalendarViewModel(
     // declares sealed interface `ItineraryNavTarget` and opens its body
     sealed interface ItineraryNavTarget {
         // declares data class `EditItinerary` with a primary constructor taking 1 parameter (`tripId`), inheriting from `ItineraryNavTarget`
-        data class EditItinerary(val tripId: String) : ItineraryNavTarget
+        data class EditItinerary(val tripId: String, val selectedDates: String) : ItineraryNavTarget
         // declares data class `ViewItinerary` with a primary constructor taking 1 parameter (`tripId`), inheriting from `ItineraryNavTarget`
         data class ViewItinerary(val tripId: String) : ItineraryNavTarget
     // closes the interface `ItineraryNavTarget`
@@ -267,8 +267,8 @@ class TripCalendarViewModel(
         viewModelScope.launch {
             // calls `replaceSelectedDays` on `itineraryRepo` with arguments `(state.tripId, state.selectedDays)`
             itineraryRepo.replaceSelectedDays(state.tripId, state.selectedDays)
-            // assigns `_navTarget.value` the value `ItineraryNavTarget.EditItinerary(state.tripId)`
-            _navTarget.value = ItineraryNavTarget.EditItinerary(state.tripId)
+            val selectedDates = state.selectedDays.joinToString("|") { it.toString() }
+            _navTarget.value = ItineraryNavTarget.EditItinerary(state.tripId, selectedDates)
         // closes the block
         }
     // closes the function `onEditItineraryClick`
