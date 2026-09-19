@@ -80,20 +80,6 @@ class ItineraryRepository(context: Context) {
             for (date in datesToRemove) {
                 // declares read-only property `id`, initialised to `existing[date] ?: continue`
                 val id = existing[date] ?: continue
-                // Safety: preserve any day that still has flight or place data so we never cascade-delete user content
-                val hasFlights = write.query(
-                    WaypointDbHelper.TABLE_ITIN_FLIGHTS,
-                    arrayOf("COUNT(*)"),
-                    "${WaypointDbHelper.COL_IFLIGHT_DAY_ID} = ?",
-                    arrayOf(id), null, null, null,
-                ).use { c -> c.moveToFirst() && c.getInt(0) > 0 }
-                val hasPlaces = write.query(
-                    WaypointDbHelper.TABLE_ITIN_PLACES,
-                    arrayOf("COUNT(*)"),
-                    "${WaypointDbHelper.COL_IPLACE_DAY_ID} = ?",
-                    arrayOf(id), null, null, null,
-                ).use { c -> c.moveToFirst() && c.getInt(0) > 0 }
-                if (hasFlights || hasPlaces) continue
                 // calls `delete` on `write` with an argument list that continues on the following lines
                 write.delete(
                     // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_DAYS,`
