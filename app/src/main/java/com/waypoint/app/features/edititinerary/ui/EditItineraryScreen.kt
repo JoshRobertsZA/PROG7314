@@ -77,6 +77,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 // imports `androidx.compose.ui.draw.alpha` for use in this file
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 // imports `androidx.compose.ui.graphics.Color` for use in this file
 import androidx.compose.ui.graphics.Color
 // imports `android.app.TimePickerDialog` for use in this file
