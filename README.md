@@ -1,6 +1,6 @@
 # Waypoint
 
-> A travel itinerary planner for Android — built with Kotlin, Jetpack Compose, and real-time API data.
+> A travel itinerary planner for Android built with Kotlin, Jetpack Compose, and real-time API data.
 
 [![Android CI](https://github.com/JoshRobertsZA/PROG7314/actions/workflows/android-ci.yml/badge.svg)](https://github.com/JoshRobertsZA/PROG7314/actions/workflows/android-ci.yml)
 
@@ -8,7 +8,7 @@
 
 ## About
 
-Waypoint lets travellers plan and manage trips from a single app. Users can build day-by-day itineraries, track live flight status, check local weather and currency rates, discover nearby places, and receive push notifications before departure. All data syncs to the cloud via Firestore and is also stored locally in a SQLite database so the app works offline.
+Waypoint lets travellers plan and manage trips from a single app. Users can build day-by-day itineraries, track live flight status, check local weather and currency rates, discover nearby places, and receive push notifications before departure. Trip data is synced to the cloud via a dedicated REST API backed by Firestore, and is also stored locally in a SQLite database so the app works offline.
 
 ---
 
@@ -21,10 +21,10 @@ Waypoint lets travellers plan and manage trips from a single app. Users can buil
 - **Live weather**: Displayed for any destination via OpenWeatherMap
 - **Currency converter**: Using real-time rates from ExchangeRate-API
 - **Wikipedia summaries**: Used for destinations and places
-- **Push notifications**: Used via Firebase Cloud Messaging with WorkManager scheduling
-- **Cloud sync**: Intergrated with Firestore; offline-first with local SQLite cache
+- **Push notifications**: Via Firebase Cloud Messaging with WorkManager scheduling
+- **Cloud sync**: Offline-first with local SQLite as source of truth; trips sync to cloud via REST API on every create, update, and delete, and are pulled back on login to restore data on new or wiped devices
 - **Multi-language support**: English (default), isiZulu, isiXhosa
-- **GitHub Actions CI**: Includes automated lint, unit tests, and APK build on every push
+- **GitHub Actions CI**: Automated lint, unit tests, and APK build on every push
 
 ---
 
@@ -36,7 +36,8 @@ Waypoint lets travellers plan and manage trips from a single app. Users can buil
 | UI | Jetpack Compose |
 | Pattern | MVVM (ViewModel + StateFlow) |
 | Local database | SQLite via `SQLiteOpenHelper` |
-| Cloud database | Firebase Firestore |
+| Cloud sync | Custom REST API (Node.js) hosted on Google Cloud Run |
+| Cloud database | Firebase Firestore (via REST API, not directly from app) |
 | Authentication | Firebase Auth (Google SSO) + BiometricPrompt |
 | Push notifications | Firebase Cloud Messaging + WorkManager |
 | HTTP client | OkHttp |
@@ -57,8 +58,22 @@ API keys are fetched at runtime from a private GitHub repository via `core/secre
 | [LocationIQ](https://locationiq.com/) | Reverse geocoding and nearby points-of-interest search |
 | [Wikipedia REST API](https://en.wikipedia.org/api/rest_v1/) | City and place summaries displayed on destination cards |
 | [GitHub Contents API](https://docs.github.com/en/rest/repos/contents) | Secure remote fetch of API keys at runtime |
-| [CounterAPI](https://counterapi.dev/) | Anonymous usage counter (app open events) |
+| [CounterAPI](https://counterapi.dev/) | Anonymous usage counter for place search events |
 | [Firebase Cloud Messaging](https://firebase.google.com/docs/cloud-messaging) | Push notifications for trip reminders |
+| [Waypoint REST API](https://prog7314-git-287180570190.africa-south1.run.app) | Custom Cloud Run API for trip CRUD and cloud sync |
+
+---
+
+## Cloud Sync Architecture
+
+The app follows an offline-first pattern:
+
+1. Every trip write (create, update, delete) hits SQLite immediately so the UI never waits on the network
+2. After the SQLite write succeeds, the app fires a background coroutine to sync the change to the Waypoint REST API
+3. On login, the app pulls all cloud trips and merges them into SQLite using `CONFLICT_IGNORE` so local data is never overwritten
+4. The REST API authenticates every request using the user's Firebase ID token
+
+This means the app works fully offline and data is restored automatically when signing in on a new or wiped device.
 
 ---
 
