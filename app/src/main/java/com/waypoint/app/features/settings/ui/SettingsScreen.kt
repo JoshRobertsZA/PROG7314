@@ -11,22 +11,18 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 // imports `androidx.compose.foundation.clickable` for use in this file
 import androidx.compose.foundation.clickable
-// imports `androidx.compose.foundation.layout.Box` for use in this file
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-// imports `androidx.compose.foundation.layout.Column` for use in this file
 import androidx.compose.foundation.layout.Column
-// imports `androidx.compose.foundation.layout.Row` for use in this file
 import androidx.compose.foundation.layout.Row
-// imports `androidx.compose.foundation.layout.WindowInsets` for use in this file
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-// imports `androidx.compose.foundation.layout.fillMaxSize` for use in this file
 import androidx.compose.foundation.layout.fillMaxSize
-// imports `androidx.compose.foundation.layout.fillMaxWidth` for use in this file
 import androidx.compose.foundation.layout.fillMaxWidth
-// imports `androidx.compose.foundation.layout.padding` for use in this file
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-// imports `androidx.compose.foundation.layout.size` for use in this file
 import androidx.compose.foundation.layout.size
+import com.waypoint.app.core.theme.White
 // imports `androidx.compose.foundation.layout.statusBars` for use in this file
 import androidx.compose.foundation.layout.statusBars
 // imports `androidx.compose.foundation.layout.windowInsetsPadding` for use in this file
@@ -81,6 +77,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 // imports `androidx.compose.ui.window.Dialog` for use in this file
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 // imports `androidx.core.os.LocaleListCompat` for use in this file
 import androidx.core.os.LocaleListCompat
 // imports `androidx.fragment.app.FragmentActivity` for use in this file
@@ -126,23 +123,19 @@ import com.waypoint.app.core.theme.WaypointTextPrimary
 @Composable
 // expression: `fun SettingsScreen(`
 fun SettingsScreen(
-    // continues the statement started above: `modifier: Modifier = Modifier,`
     modifier: Modifier = Modifier,
-    // continues the statement started above: `onLogoutClick: () -> Unit = {},`
     onLogoutClick: () -> Unit = {},
-    // continues the statement started above: `viewModel: SettingsViewModel = viewModel(),`
+    onNotificationsClick: () -> Unit = {},
     viewModel: SettingsViewModel = viewModel(),
-// ends the argument list started above and opens the block that follows
 ) {
     // declares read-only property `uiState`, delegated to `viewModel.uiState.collectAsState()`
     val uiState by viewModel.uiState.collectAsState()
     // calls `LaunchedEffect` with arguments `(Unit)`
     LaunchedEffect(Unit) { viewModel.loadTripCounts() }
 
-    // declares mutable property `selectedLanguage`, delegated to `remember { mutableStateOf(AppLanguage.c…`
     var selectedLanguage by remember { mutableStateOf(AppLanguage.current()) }
-    // declares mutable property `showLanguageModal`, delegated to `remember { mutableStateOf(false) }`
     var showLanguageModal by remember { mutableStateOf(false) }
+    var showLogoutModal by remember { mutableStateOf(false) }
 
     // calls `Column` with an argument list that continues on the following lines
     Column(
@@ -170,8 +163,7 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
         // ends the argument list started above and opens the block that follows
         ) {
-            // calls `TabHeader` with arguments `(showAvatar = false)`
-            TabHeader(showAvatar = false)
+            TabHeader(showAvatar = false, onBellClick = onNotificationsClick)
 
             // calls `AsyncImage` with an argument list that continues on the following lines
             AsyncImage(
@@ -405,11 +397,8 @@ fun SettingsScreen(
                     .padding(top = 16.dp, bottom = 16.dp)
                     // continues the statement started above: `.background(WaypointCard, RoundedCornerShape(RadiusRow))`
                     .background(WaypointCard, RoundedCornerShape(RadiusRow))
-                    // continues the statement started above: `.border(1.dp, WaypointLogoutBorder, RoundedCornerShape(Radi…`
                     .border(1.dp, WaypointLogoutBorder, RoundedCornerShape(RadiusRow))
-                    // continues the statement started above: `.clickable(onClick = onLogoutClick)`
-                    .clickable(onClick = onLogoutClick)
-                    // continues the statement started above: `.padding(vertical = 12.dp),`
+                    .clickable { showLogoutModal = true }
                     .padding(vertical = 12.dp),
                 // continues the statement started above: `contentAlignment = Alignment.Center,`
                 contentAlignment = Alignment.Center,
@@ -417,52 +406,153 @@ fun SettingsScreen(
             ) {
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
-                    // continues the statement started above: `text = stringResource(R.string.profile_logout),`
                     text = stringResource(R.string.profile_logout),
-                    // continues the statement started above: `color = WaypointTerracotta,`
                     color = WaypointTerracotta,
-                    // continues the statement started above: `fontSize = 13.sp,`
                     fontSize = 13.sp,
-                    // continues the statement started above: `fontWeight = FontWeight.SemiBold,`
                     fontWeight = FontWeight.SemiBold,
-                // closes the multi-line argument list started above
                 )
-            // closes the block
             }
-        // closes the block
         }
-    // closes the block
-    }
 
-    // `if` statement: the block below runs when `showLanguageModal` is true
-    if (showLanguageModal) {
-        // calls `Dialog` with arguments `(onDismissRequest = { showLanguageModal = fal…)` and opens a trailing lambda / block
-        Dialog(onDismissRequest = { showLanguageModal = false }) {
-            // calls `LanguageModal` with an argument list that continues on the following lines
-            LanguageModal(
-                // continues the statement started above: `selectedLanguage = selectedLanguage,`
-                selectedLanguage = selectedLanguage,
-                // continues the statement started above: `onLanguageSelected = { selectedLanguage = it },`
-                onLanguageSelected = { selectedLanguage = it },
-                // continues the statement started above: `onSaveClick = {`
-                onSaveClick = {
-                    // calls `setApplicationLocales` on `AppCompatDelegate` with an argument list that continues on the following lines
-                    AppCompatDelegate.setApplicationLocales(
-                        // continues the statement started above: `LocaleListCompat.forLanguageTags(selectedLanguage.localeTag…`
-                        LocaleListCompat.forLanguageTags(selectedLanguage.localeTag),
-                    // closes the multi-line argument list started above
+        if (showLanguageModal) {
+            Dialog(
+                onDismissRequest = { showLanguageModal = false },
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                ) {
+                    LanguageModal(
+                        selectedLanguage = selectedLanguage,
+                        onLanguageSelected = { selectedLanguage = it },
+                        onSaveClick = {
+                            AppCompatDelegate.setApplicationLocales(
+                                LocaleListCompat.forLanguageTags(selectedLanguage.localeTag),
+                            )
+                            showLanguageModal = false
+                        },
                     )
-                    // assigns `showLanguageModal` the value `false`
-                    showLanguageModal = false
-                // closes the block
-                },
-            // closes the multi-line argument list started above
-            )
-        // closes the lambda passed to `Dialog`
+                }
+            }
         }
-    // closes the if block
+
+        if (showLogoutModal) {
+            LogoutConfirmationModal(
+                onConfirmLogout = {
+                    showLogoutModal = false
+                    onLogoutClick()
+                },
+                onDismiss = { showLogoutModal = false },
+            )
+        }
     }
-// closes the block
+}
+
+@Composable
+private fun LogoutConfirmationModal(
+    onConfirmLogout: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+        ) {
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .background(WaypointCard, RoundedCornerShape(22.dp))
+                    .border(1.dp, WaypointBorderSoft, RoundedCornerShape(22.dp))
+                    .padding(22.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                // Exit / Logout Icon Badge
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(WaypointTerracotta.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("👋", fontSize = 28.sp)
+                }
+
+                // Title & Description
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        text = "Log out of Waypoint?",
+                        color = WaypointTextPrimary,
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+
+                    Text(
+                        text = "Are you sure you want to log out? You can sign back in anytime to access your trips and saved itineraries.",
+                        color = WaypointTextMuted,
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Action Buttons
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    // Confirm Logout Button
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(RadiusButton))
+                            .background(WaypointTerracotta)
+                            .clickable(onClick = onConfirmLogout),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.profile_logout),
+                            color = White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+
+                    // Cancel Button
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(RadiusButton))
+                            .background(WaypointCream)
+                            .border(1.dp, WaypointBorderSoft, RoundedCornerShape(RadiusButton))
+                            .clickable(onClick = onDismiss),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            color = WaypointTextPrimary,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 // annotation `@Composable` applied to the declaration that follows
