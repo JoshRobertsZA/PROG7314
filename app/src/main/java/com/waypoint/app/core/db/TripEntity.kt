@@ -1,24 +1,29 @@
+// declares that this file belongs to the package `com.waypoint.app.core.db`
 package com.waypoint.app.core.db
 
-/**
- * A single saved trip belonging to one Google account.
- *
- * [accountId] matches [AccountEntity.id] so trips are never shared between
- * two Google accounts on the same device.
- *
- * Dates are stored as ISO strings ("yyyy-MM-dd") so they sort correctly
- * with plain string comparisons and need no epoch conversion.
- */
+// expression: `data class TripEntity(`
 data class TripEntity(
-    val id: String,            // UUID, generated at insert time
-    val accountId: String,     // Google sub of the owning account
+    // continues the statement started above: `val id: String,`
+    val id: String,
+    // continues the statement started above: `val accountId: String,`
+    val accountId: String,
+    // continues the statement started above: `val name: String,`
     val name: String,
-    val startDate: String,     // "yyyy-MM-dd"
-    val endDate: String,       // "yyyy-MM-dd"
-    val destination: String?,  // nullable; display name of the destination city
-    val destLat: Double?,       // nullable; latitude of destination
-    val destLng: Double?,       // nullable; longitude of destination
-    val destPhotoUrl: String? = null, // nullable; Wikipedia thumbnail for the destination
+    // continues the statement started above: `val startDate: String,`
+    val startDate: String,
+    // continues the statement started above: `val endDate: String,`
+    val endDate: String,
+    // continues the statement started above: `val destination: String?,`
+    val destination: String?,
+    // continues the statement started above: `val destLat: Double?,`
+    val destLat: Double?,
+    // continues the statement started above: `val destLng: Double?,`
+    val destLng: Double?,
+    // continues the statement started above: `val destPhotoUrl: String? = null,`
+    val destPhotoUrl: String? = null,
+    // continues the statement started above: `val createdAtMs: Long,`
     val createdAtMs: Long,
+    // continues the statement started above: `val updatedAtMs: Long,`
     val updatedAtMs: Long,
+// closes the multi-line argument list started above
 )

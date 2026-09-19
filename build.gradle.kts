@@ -1,5 +1,8 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// opens a block after `plugins`
 plugins {
+    // calls `alias` with arguments `(libs.plugins.android.application)`
     alias(libs.plugins.android.application) apply false
+    // calls `alias` with arguments `(libs.plugins.google.services)`
     alias(libs.plugins.google.services) apply false
+// closes the block
 }

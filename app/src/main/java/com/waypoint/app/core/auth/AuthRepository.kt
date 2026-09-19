@@ -1,69 +1,72 @@
+// declares that this file belongs to the package `com.waypoint.app.core.auth`
 package com.waypoint.app.core.auth
 
+// imports `android.app.Activity` for use in this file
 import android.app.Activity
+// imports `com.google.firebase.auth.FirebaseAuth` for use in this file
 import com.google.firebase.auth.FirebaseAuth
+// imports `com.google.firebase.auth.FirebaseUser` for use in this file
 import com.google.firebase.auth.FirebaseUser
+// imports `com.google.firebase.auth.GoogleAuthProvider` for use in this file
 import com.google.firebase.auth.GoogleAuthProvider
+// imports `com.google.firebase.auth.OAuthProvider` for use in this file
 import com.google.firebase.auth.OAuthProvider
+// imports `kotlinx.coroutines.tasks.await` for use in this file
 import kotlinx.coroutines.tasks.await
 
-/**
- * Thin wrapper around Firebase Auth. Every screen that needs to sign a
- * user in, out, or fetch the token to authorize a call to the team's REST
- * API should go through here rather than touching [FirebaseAuth] directly.
- */
+// declares object `AuthRepository` and opens its body
 object AuthRepository {
 
+    // declares private read-only property `auth` of type `FirebaseAuth`, delegated to `lazy { FirebaseAuth.getInstance() }`
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
-    /** Null when nobody is signed in - check this on app start to skip onboarding. */
+    // declares read-only property `currentUser` of type `FirebaseUser?`
     val currentUser: FirebaseUser?
+        // continues the statement started above: `get() = auth.currentUser`
         get() = auth.currentUser
 
+    // declares read-only property `isSignedIn` of type `Boolean`
     val isSignedIn: Boolean
+        // custom getter: returns `currentUser != null`
         get() = currentUser != null
 
-    /** Exchanges a Google ID token (from Credential Manager) for a signed-in Firebase user. */
+    // declares suspend function `signInWithGoogleIdToken` taking 1 parameter (`idToken`), returning `FirebaseUser` and opens its body
     suspend fun signInWithGoogleIdToken(idToken: String): FirebaseUser {
+        // declares read-only property `credential`, initialised with the result of calling `GoogleAuthProvider.getCredential(…)`
         val credential = GoogleAuthProvider.getCredential(idToken, null)
+        // declares read-only property `result`, initialised with the result of calling `auth.signInWithCredential(…)`
         val result = auth.signInWithCredential(credential).await()
+        // returns `result.user ?: error("Firebase sign-in succeeded but returned no user…` from the current function
         return result.user ?: error("Firebase sign-in succeeded but returned no user")
+    // closes the function `signInWithGoogleIdToken`
     }
 
-    /**
-     * GitHub has no native Android sign-in SDK (unlike Google's Credential
-     * Manager), so this goes through Firebase's generic OAuthProvider flow:
-     * a Chrome Custom Tab opens GitHub's own consent page, then redirects
-     * back into the app via a scheme Firebase registers automatically at
-     * build time (no manifest changes needed here). Requires GitHub to be
-     * enabled as a sign-in provider in the Firebase console first - see
-     * README for the console-side setup steps.
-     */
+    // declares suspend function `signInWithGitHub` taking 1 parameter (`activity`), returning `FirebaseUser` and opens its body
     suspend fun signInWithGitHub(activity: Activity): FirebaseUser {
+        // declares read-only property `provider`, initialised with the result of calling `OAuthProvider.newBuilder(…)`
         val provider = OAuthProvider.newBuilder("github.com").build()
+        // declares read-only property `result`, initialised with the result of calling `auth.startActivityForSignInWithProvider(…)`
         val result = auth.startActivityForSignInWithProvider(activity, provider).await()
+        // returns `result.user ?: error("Firebase sign-in succeeded but returned no user…` from the current function
         return result.user ?: error("Firebase sign-in succeeded but returned no user")
+    // closes the function `signInWithGitHub`
     }
 
-    /**
-     * If the app process was killed mid-redirect (e.g. the OS reclaimed
-     * memory while GitHub's consent page was in front), the in-flight
-     * OAuthProvider result is still recoverable here once the app resumes -
-     * call this from the same place restoreSessionIfSignedIn() is called.
-     * Returns null when there's nothing pending, which is the common case.
-     */
+    // declares suspend function `recoverPendingGitHubSignIn` taking no parameters, returning `FirebaseUser?`; its body is the expression ``
     suspend fun recoverPendingGitHubSignIn(): FirebaseUser? =
+        // continues the statement started above: `auth.pendingAuthResult?.await()?.user`
         auth.pendingAuthResult?.await()?.user
 
-    /**
-     * The Firebase ID token for the current user, to send as a Bearer token
-     * on requests to the team's REST API so it can verify the caller with
-     * the Firebase Admin SDK. Null if nobody is signed in.
-     */
+    // declares suspend function `getIdToken` taking 1 parameter (`forceRefresh`), returning `String?`; its body is the expression ``
     suspend fun getIdToken(forceRefresh: Boolean = false): String? =
+        // continues the statement started above: `auth.currentUser?.getIdToken(forceRefresh)?.await()?.token`
         auth.currentUser?.getIdToken(forceRefresh)?.await()?.token
 
+    // declares function `signOut` taking no parameters and opens its body
     fun signOut() {
+        // calls `signOut` on `auth` with arguments `()`
         auth.signOut()
+    // closes the function `signOut`
     }
+// closes the object `AuthRepository`
 }

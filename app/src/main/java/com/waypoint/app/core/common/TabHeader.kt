@@ -1,131 +1,226 @@
+// declares that this file belongs to the package `com.waypoint.app.core.common`
 package com.waypoint.app.core.common
 
+// imports `androidx.compose.foundation.background` for use in this file
 import androidx.compose.foundation.background
+// imports `androidx.compose.foundation.clickable` for use in this file
 import androidx.compose.foundation.clickable
+// imports `androidx.compose.foundation.layout.Arrangement` for use in this file
 import androidx.compose.foundation.layout.Arrangement
+// imports `androidx.compose.foundation.layout.Box` for use in this file
 import androidx.compose.foundation.layout.Box
+// imports `androidx.compose.foundation.layout.Row` for use in this file
 import androidx.compose.foundation.layout.Row
+// imports `androidx.compose.foundation.layout.fillMaxWidth` for use in this file
 import androidx.compose.foundation.layout.fillMaxWidth
+// imports `androidx.compose.foundation.layout.padding` for use in this file
 import androidx.compose.foundation.layout.padding
+// imports `androidx.compose.foundation.layout.size` for use in this file
 import androidx.compose.foundation.layout.size
+// imports `androidx.compose.foundation.shape.CircleShape` for use in this file
 import androidx.compose.foundation.shape.CircleShape
+// imports `androidx.compose.material3.Icon` for use in this file
 import androidx.compose.material3.Icon
+// imports `androidx.compose.material3.Text` for use in this file
 import androidx.compose.material3.Text
+// imports `androidx.compose.runtime.Composable` for use in this file
 import androidx.compose.runtime.Composable
+// imports `androidx.compose.runtime.getValue` for use in this file
 import androidx.compose.runtime.getValue
+// imports `androidx.compose.runtime.mutableStateOf` for use in this file
 import androidx.compose.runtime.mutableStateOf
+// imports `androidx.compose.runtime.remember` for use in this file
 import androidx.compose.runtime.remember
+// imports `androidx.compose.runtime.setValue` for use in this file
 import androidx.compose.runtime.setValue
+// imports `androidx.compose.ui.Alignment` for use in this file
 import androidx.compose.ui.Alignment
+// imports `androidx.compose.ui.Modifier` for use in this file
 import androidx.compose.ui.Modifier
+// imports `androidx.compose.ui.draw.clip` for use in this file
 import androidx.compose.ui.draw.clip
+// imports `androidx.compose.ui.layout.ContentScale` for use in this file
 import androidx.compose.ui.layout.ContentScale
+// imports `androidx.compose.ui.res.painterResource` for use in this file
 import androidx.compose.ui.res.painterResource
+// imports `androidx.compose.ui.res.stringResource` for use in this file
 import androidx.compose.ui.res.stringResource
+// imports `androidx.compose.ui.text.font.FontWeight` for use in this file
 import androidx.compose.ui.text.font.FontWeight
+// imports `androidx.compose.ui.unit.dp` for use in this file
 import androidx.compose.ui.unit.dp
+// imports `androidx.compose.ui.unit.sp` for use in this file
 import androidx.compose.ui.unit.sp
+// imports `androidx.compose.ui.window.Dialog` for use in this file
 import androidx.compose.ui.window.Dialog
+// imports `coil.compose.AsyncImage` for use in this file
 import coil.compose.AsyncImage
+// imports `com.waypoint.app.R` for use in this file
 import com.waypoint.app.R
+// imports `com.waypoint.app.core.db.SessionManager` for use in this file
 import com.waypoint.app.core.db.SessionManager
+// imports `com.waypoint.app.features.notifications.ui.NotificationHistoryModal` for use in this file
 import com.waypoint.app.features.notifications.ui.NotificationHistoryModal
+// imports `com.waypoint.app.core.theme.WaypointCard` for use in this file
 import com.waypoint.app.core.theme.WaypointCard
+// imports `com.waypoint.app.core.theme.WaypointTerracotta` for use in this file
 import com.waypoint.app.core.theme.WaypointTerracotta
+// imports `com.waypoint.app.core.theme.WaypointTextPrimary` for use in this file
 import com.waypoint.app.core.theme.WaypointTextPrimary
 
-/**
- * Shared tab-root header (brand name + bell-with-badge, optionally an
- * avatar) used by Home/Trips/Explore/Profile - each tab's own header in
- * Figma is this same layout, only Profile omits the avatar since the big
- * avatar below is that screen's own subject.
- *
- * While offline, the avatar slot is replaced by [OfflineHeaderIndicator]
- * (Figma "Offline Mode" section, node 332:424) - tapping it surfaces the
- * still-offline reminder bubble. [isOnline] defaults to true so existing
- * callers that don't pass it keep their current (online) appearance.
- */
+// annotation `@Composable` applied to the declaration that follows
 @Composable
+// expression: `fun TabHeader(`
 fun TabHeader(
-    /** Null (the default) opens the shared notification-history modal. */
+    // continues the statement started above: `onBellClick: (() -> Unit)? = null,`
     onBellClick: (() -> Unit)? = null,
+    // continues the statement started above: `showAvatar: Boolean = true,`
     showAvatar: Boolean = true,
-    /** Tapping the avatar; Home uses it to jump to Profile. */
+    // continues the statement started above: `onAvatarClick: () -> Unit = {},`
     onAvatarClick: () -> Unit = {},
+    // continues the statement started above: `isOnline: Boolean = true,`
     isOnline: Boolean = true,
+    // continues the statement started above: `modifier: Modifier = Modifier,`
     modifier: Modifier = Modifier,
+// ends the argument list started above and opens the block that follows
 ) {
+    // declares mutable property `showHistory`, delegated to `remember { mutableStateOf(false) }`
     var showHistory by remember { mutableStateOf(false) }
+    // `if` statement: the block below runs when `showHistory` is true
     if (showHistory) {
+        // calls `Dialog` with arguments `(onDismissRequest = { showHistory = false })`
         Dialog(onDismissRequest = { showHistory = false }) { NotificationHistoryModal() }
+    // closes the if block
     }
 
+    // calls `Row` with an argument list that continues on the following lines
     Row(
+        // continues the statement started above: `modifier = modifier.fillMaxWidth(),`
         modifier = modifier.fillMaxWidth(),
+        // continues the statement started above: `horizontalArrangement = Arrangement.SpaceBetween,`
         horizontalArrangement = Arrangement.SpaceBetween,
+        // continues the statement started above: `verticalAlignment = Alignment.CenterVertically,`
         verticalAlignment = Alignment.CenterVertically,
+    // ends the argument list started above and opens the block that follows
     ) {
+        // calls `Text` with an argument list that continues on the following lines
         Text(
+            // continues the statement started above: `text = stringResource(R.string.brand_name),`
             text = stringResource(R.string.brand_name),
+            // continues the statement started above: `color = WaypointTerracotta,`
             color = WaypointTerracotta,
+            // continues the statement started above: `fontSize = 24.sp,`
             fontSize = 24.sp,
+            // continues the statement started above: `fontWeight = FontWeight.Bold,`
             fontWeight = FontWeight.Bold,
-            // Top-aligned so the brand sits at the same y as on Home, whose
-            // header has no 40dp avatar pushing the row's centre line down.
+            // continues the statement started above: `modifier = Modifier.align(Alignment.Top),`
             modifier = Modifier.align(Alignment.Top),
+        // closes the multi-line argument list started above
         )
+        // calls `Row` with arguments `(verticalAlignment = Alignment.CenterVertical…)` and opens a trailing lambda / block
         Row(verticalAlignment = Alignment.CenterVertically) {
+            // calls `BellWithBadge` with arguments `(onClick = onBellClick ?: { showHistory = tru…)`
             BellWithBadge(onClick = onBellClick ?: { showHistory = true })
+            // `if` statement: the block below runs when `showAvatar` is true
             if (showAvatar) {
+                // `if` statement: the block below runs when `isOnline` is true
                 if (isOnline) {
+                    // calls `AsyncImage` with an argument list that continues on the following lines
                     AsyncImage(
+                        // continues the statement started above: `model = SessionManager.photoUrl.ifBlank { null },`
                         model = SessionManager.photoUrl.ifBlank { null },
+                        // continues the statement started above: `contentDescription = stringResource(R.string.tab_header_ava…`
                         contentDescription = stringResource(R.string.tab_header_avatar_cd),
+                        // continues the statement started above: `contentScale = ContentScale.Crop,`
                         contentScale = ContentScale.Crop,
+                        // continues the statement started above: `placeholder = painterResource(R.drawable.img_mock_avatar),`
                         placeholder = painterResource(R.drawable.img_mock_avatar),
+                        // continues the statement started above: `error = painterResource(R.drawable.img_mock_avatar),`
                         error = painterResource(R.drawable.img_mock_avatar),
+                        // continues the statement started above: `fallback = painterResource(R.drawable.img_mock_avatar),`
                         fallback = painterResource(R.drawable.img_mock_avatar),
+                        // continues the statement started above: `modifier = Modifier`
                         modifier = Modifier
+                            // continues the statement started above: `.padding(start = 14.dp)`
                             .padding(start = 14.dp)
+                            // continues the statement started above: `.size(40.dp)`
                             .size(40.dp)
+                            // continues the statement started above: `.clip(CircleShape)`
                             .clip(CircleShape)
+                            // continues the statement started above: `.clickable(onClick = onAvatarClick),`
                             .clickable(onClick = onAvatarClick),
+                    // closes the multi-line argument list started above
                     )
+                // closes the previous branch and opens the `else` branch, which runs when none of the conditions above matched
                 } else {
+                    // calls `OfflineHeaderIndicator` with an argument list that continues on the following lines
                     OfflineHeaderIndicator(
+                        // continues the statement started above: `isOnline = false,`
                         isOnline = false,
+                        // continues the statement started above: `modifier = Modifier.padding(start = 14.dp),`
                         modifier = Modifier.padding(start = 14.dp),
+                    // closes the multi-line argument list started above
                     )
+                // closes the else branch
                 }
+            // closes the if block
             }
+        // closes the lambda passed to `Row`
         }
+    // closes the block
     }
+// closes the block
 }
 
-/** Bell icon with a small unread-notification dot, top-end of the icon. */
+// annotation `@Composable` applied to the declaration that follows
 @Composable
+// declares function `BellWithBadge` taking 1 parameter (`onClick`) and opens its body
 fun BellWithBadge(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    // calls `Box` with arguments `(modifier = modifier)` and opens a trailing lambda / block
     Box(modifier = modifier) {
+        // calls `Icon` with an argument list that continues on the following lines
         Icon(
+            // continues the statement started above: `painter = painterResource(R.drawable.ic_bell),`
             painter = painterResource(R.drawable.ic_bell),
+            // continues the statement started above: `contentDescription = stringResource(R.string.tab_header_bel…`
             contentDescription = stringResource(R.string.tab_header_bell_cd),
+            // continues the statement started above: `tint = WaypointTextPrimary,`
             tint = WaypointTextPrimary,
+            // continues the statement started above: `modifier = Modifier`
             modifier = Modifier
+                // continues the statement started above: `.size(24.dp)`
                 .size(24.dp)
+                // continues the statement started above: `.clickable(onClick = onClick),`
                 .clickable(onClick = onClick),
+        // closes the multi-line argument list started above
         )
+        // calls `Box` with an argument list that continues on the following lines
         Box(
+            // continues the statement started above: `modifier = Modifier`
             modifier = Modifier
+                // continues the statement started above: `.align(Alignment.TopEnd)`
                 .align(Alignment.TopEnd)
+                // continues the statement started above: `.size(9.dp)`
                 .size(9.dp)
+                // continues the statement started above: `.background(WaypointCard, CircleShape),`
                 .background(WaypointCard, CircleShape),
+        // ends the argument list started above and opens the block that follows
         ) {
+            // calls `Box` with an argument list that continues on the following lines
             Box(
+                // continues the statement started above: `modifier = Modifier`
                 modifier = Modifier
+                    // continues the statement started above: `.align(Alignment.Center)`
                     .align(Alignment.Center)
+                    // continues the statement started above: `.size(6.dp)`
                     .size(6.dp)
+                    // continues the statement started above: `.background(WaypointTerracotta, CircleShape),`
                     .background(WaypointTerracotta, CircleShape),
+            // closes the multi-line argument list started above
             )
+        // closes the block
         }
+    // closes the lambda passed to `Box`
     }
+// closes the function `BellWithBadge`
 }

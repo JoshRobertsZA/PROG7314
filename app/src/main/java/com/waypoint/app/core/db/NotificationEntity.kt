@@ -1,14 +1,17 @@
+// declares that this file belongs to the package `com.waypoint.app.core.db`
 package com.waypoint.app.core.db
 
-/**
- * One notification the app has posted, kept so the Profile bell can show a
- * history. Scoped by [accountId] like trips, so switching Google accounts on
- * the same device never leaks another user's alerts.
- */
+// expression: `data class NotificationEntity(`
 data class NotificationEntity(
-    val id: String,          // UUID
+    // continues the statement started above: `val id: String,`
+    val id: String,
+    // continues the statement started above: `val accountId: String,`
     val accountId: String,
+    // continues the statement started above: `val title: String,`
     val title: String,
+    // continues the statement started above: `val body: String,`
     val body: String,
+    // continues the statement started above: `val createdAtMs: Long,`
     val createdAtMs: Long,
+// closes the multi-line argument list started above
 )

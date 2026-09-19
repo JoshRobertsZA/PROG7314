@@ -1,39 +1,47 @@
+// declares that this file belongs to the package `com.waypoint.app.core.navigation`
 package com.waypoint.app.core.navigation
 
-/**
- * Route constants for the top-level flat NavHost hosted in MainActivity:
- *
- *   Main -> TripCalendar, ViewItinerary, EditItinerary, AllTrips,
- *           Settings, Explore, Home (all temporary scratch nav)
- *   Splash -> Home if a session is already restored, otherwise Welcome
- *   Welcome -> Home (Google/GitHub SSO handles both sign-in and sign-up -
- *           there's no separate Login/Register flow)
- *   Home -> renders MainNavShell, which owns its own nested NavHost for
- *           the Home/Trips/Explore/Profile tabs (see MainNavShell.kt) -
- *           NewTrip is pushed on the top-level controller from inside it,
- *           covering the shell entirely.
- *   NewTrip / TripCalendar / EditItinerary / ViewItinerary / AllTrips /
- *   Explore / Settings / PlaceDetail -> back (finish()/popBackStack only)
- */
+// declares object `Routes` and opens its body
 object Routes {
+    // declares const read-only property `Main`, initialised to the string literal "main"
     const val Main = "main"
+    // declares const read-only property `Splash`, initialised to the string literal "splash"
     const val Splash = "splash"
+    // declares const read-only property `Welcome`, initialised to the string literal "welcome"
     const val Welcome = "welcome"
+    // declares const read-only property `Home`, initialised to the string literal "home"
     const val Home = "home"
+    // declares const read-only property `NewTrip`, initialised to the string literal "new_trip"
     const val NewTrip = "new_trip"
+    // declares const read-only property `TripCalendar`, initialised to the string literal "trip_calendar/{tripId}"
     const val TripCalendar = "trip_calendar/{tripId}"
+    // declares function `tripCalendar` taking 1 parameter (`tripId`); its body is the expression `"trip_calendar/$tripId"`
     fun tripCalendar(tripId: String) = "trip_calendar/$tripId"
+    // declares const read-only property `AllTrips`, initialised to the string literal "all_trips"
     const val AllTrips = "all_trips"
+    // declares const read-only property `EditItinerary`, initialised to the string literal "edit_itinerary/{tripId}"
     const val EditItinerary = "edit_itinerary/{tripId}"
+    // declares function `editItinerary` taking 1 parameter (`tripId`); its body is the expression `"edit_itinerary/$tripId"`
     fun editItinerary(tripId: String) = "edit_itinerary/$tripId"
+    // declares const read-only property `ViewItinerary`, initialised to the string literal "view_itinerary/{tripId}"
     const val ViewItinerary = "view_itinerary/{tripId}"
+    // declares function `viewItinerary` taking 1 parameter (`tripId`); its body is the expression `"view_itinerary/$tripId"`
     fun viewItinerary(tripId: String) = "view_itinerary/$tripId"
+    // declares const read-only property `Explore`, initialised to the string literal "explore"
     const val Explore = "explore"
+    // declares const read-only property `Settings`, initialised to the string literal "settings"
     const val Settings = "settings"
+    // declares const read-only property `Notifications`, initialised to the string literal "notifications"
     const val Notifications = "notifications"
+    // declares const read-only property `PlaceDetail`, initialised to the string literal "place_detail"
     const val PlaceDetail = "place_detail"
+    // declares const read-only property `PlacePicker`, initialised to the string literal "place_picker/{tripId}/{dayId}/{categor…
     const val PlacePicker = "place_picker/{tripId}/{dayId}/{category}"
+    // declares function `placePicker` taking 3 parameters (`tripId`, `dayId`, `category`); its body is the expression `"place_picker/$tripId/$dayId/$category"`
     fun placePicker(tripId: String, dayId: String, category: String) = "place_picker/$tripId/$dayId/$category"
+    // declares const read-only property `PlaceDetailPicker`, initialised to the string literal "place_detail_picker/{tripId}/{dayId}/{…
     const val PlaceDetailPicker = "place_detail_picker/{tripId}/{dayId}/{category}/{placeId}"
+    // declares function `placeDetailPicker` taking 4 parameters (`tripId`, `dayId`, `category`, `placeId`); its body is the expression `"place_detail_picker/$tripId/$dayId/$categor…`
     fun placeDetailPicker(tripId: String, dayId: String, category: String, placeId: String) = "place_detail_picker/$tripId/$dayId/$category/$placeId"
+// closes the object `Routes`
 }
