@@ -77,6 +77,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 // imports `androidx.compose.ui.draw.alpha` for use in this file
 import androidx.compose.ui.draw.alpha
+// imports `androidx.compose.ui.draw.clip` for use in this file
 import androidx.compose.ui.draw.clip
 // imports `androidx.compose.ui.graphics.Color` for use in this file
 import androidx.compose.ui.graphics.Color
@@ -108,10 +109,13 @@ import com.waypoint.app.core.common.CircleIconButton
 import com.waypoint.app.core.common.RowSurface
 // imports `com.waypoint.app.core.common.StatusBadge` for use in this file
 import com.waypoint.app.core.common.StatusBadge
-// imports `com.waypoint.app.core.common.ThumbnailBlock` for use in this file
+// imports `coil.compose.SubcomposeAsyncImage` for use in this file
 import coil.compose.SubcomposeAsyncImage
+// imports `coil.request.ImageRequest` for use in this file
 import coil.request.ImageRequest
+// imports `androidx.compose.ui.layout.ContentScale` for use in this file
 import androidx.compose.ui.layout.ContentScale
+// imports `com.waypoint.app.core.common.ThumbnailBlock` for use in this file
 import com.waypoint.app.core.common.ThumbnailBlock
 // imports `com.waypoint.app.core.theme.RadiusButton` for use in this file
 import com.waypoint.app.core.theme.RadiusButton
@@ -139,7 +143,9 @@ import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
 // imports `com.waypoint.app.core.theme.WaypointTripBadgeText` for use in this file
 import com.waypoint.app.core.theme.WaypointTripBadgeText
+// imports `androidx.compose.material3.Icon` for use in this file
 import androidx.compose.material3.Icon
+// imports `androidx.compose.ui.res.painterResource` for use in this file
 import androidx.compose.ui.res.painterResource
 
 // annotation `@Composable` applied to the declaration that follows
@@ -253,18 +259,31 @@ fun EditItineraryScreen(
         Box(modifier = Modifier.fillMaxWidth()) {
             // calls `CircleIconButton` with an argument list that continues on the following lines
             CircleIconButton(
+                // continues the statement started above: `onClick = onBackClick,`
                 onClick = onBackClick,
+                // continues the statement started above: `modifier = Modifier.align(Alignment.CenterStart),`
                 modifier = Modifier.align(Alignment.CenterStart),
+                // continues the statement started above: `size = 40.dp,`
                 size = 40.dp,
+                // continues the statement started above: `fillColor = WaypointTerracotta,`
                 fillColor = WaypointTerracotta,
+                // continues the statement started above: `borderColor = null,`
                 borderColor = null,
+            // ends the argument list started above and opens the block that follows
             ) {
+                // calls `Icon` with an argument list that continues on the following lines
                 Icon(
+                    // continues the statement started above: `painter = painterResource(R.drawable.ic_back_arrow),`
                     painter = painterResource(R.drawable.ic_back_arrow),
+                    // continues the statement started above: `contentDescription = null,`
                     contentDescription = null,
+                    // continues the statement started above: `tint = WaypointCard,`
                     tint = WaypointCard,
+                    // continues the statement started above: `modifier = Modifier.size(18.dp),`
                     modifier = Modifier.size(18.dp),
+                // closes the multi-line argument list started above
                 )
+            // closes the block
             }
             // calls `Column` with an argument list that continues on the following lines
             Column(
@@ -713,19 +732,31 @@ private fun FlightCard(
             verticalAlignment = Alignment.CenterVertically,
         // ends the argument list started above and opens the block that follows
         ) {
-            // shows airline logo if a carrier code can be derived, falling back to the accent block
+            // declares read-only property `logoUrl`, initialised with the result of calling `airlineLogoUrl(…)`
             val logoUrl = airlineLogoUrl(flight.flightNumber)
+            // `if` statement: the block below runs when `logoUrl != null` is true
             if (logoUrl != null) {
+                // calls `SubcomposeAsyncImage` with an argument list that continues on the following lines
                 SubcomposeAsyncImage(
+                    // continues the statement started above: `model = ImageRequest.Builder(LocalContext.current).data(log…`
                     model              = ImageRequest.Builder(LocalContext.current).data(logoUrl).crossfade(true).build(),
+                    // continues the statement started above: `contentDescription = flight.flightNumber,`
                     contentDescription = flight.flightNumber,
+                    // continues the statement started above: `contentScale = ContentScale.Fit,`
                     contentScale       = ContentScale.Fit,
+                    // continues the statement started above: `modifier = Modifier.size(44.dp).clip(RoundedCornerShape(Rad…`
                     modifier           = Modifier.size(44.dp).clip(RoundedCornerShape(RadiusThumbnail)).background(Color.White),
+                    // continues the statement started above: `loading = { ThumbnailBlock(accentColor = WaypointPlaceAccen…`
                     loading = { ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail) },
+                    // continues the statement started above: `error = { ThumbnailBlock(accentColor = WaypointPlaceAccent4…`
                     error   = { ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail) },
+                // closes the multi-line argument list started above
                 )
+            // closes the previous branch and opens the `else` branch, which runs when none of the conditions above matched
             } else {
+                // calls `ThumbnailBlock` with arguments `(accentColor = WaypointPlaceAccent4, size = 4…)`
                 ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail)
+            // closes the else branch
             }
             // calls `Column` with arguments `(modifier = Modifier.weight(1f).padding(start…)` and opens a trailing lambda / block
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
@@ -943,23 +974,39 @@ private fun PlaceCard(
             verticalAlignment = Alignment.CenterVertically,
         // ends the argument list started above and opens the block that follows
         ) {
-            // show place photo if available, otherwise fall back to accent block
+            // declares read-only property `placePhotoUrl`, initialised to `place.photoUrl`
             val placePhotoUrl = place.photoUrl
+            // `if` statement: the block below runs when `placePhotoUrl != null` is true
             if (placePhotoUrl != null) {
+                // calls `SubcomposeAsyncImage` with an argument list that continues on the following lines
                 SubcomposeAsyncImage(
+                    // continues the statement started above: `model = ImageRequest.Builder(LocalContext.current).data(pla…`
                     model              = ImageRequest.Builder(LocalContext.current).data(placePhotoUrl).crossfade(true).build(),
+                    // continues the statement started above: `contentDescription = place.name,`
                     contentDescription = place.name,
+                    // continues the statement started above: `contentScale = ContentScale.Crop,`
                     contentScale       = ContentScale.Crop,
+                    // continues the statement started above: `modifier = Modifier.size(44.dp).clip(RoundedCornerShape(Rad…`
                     modifier           = Modifier.size(44.dp).clip(RoundedCornerShape(RadiusThumbnail)),
+                    // continues the statement started above: `loading = { ThumbnailBlock(accentColor = WaypointPlaceAccen…`
                     loading = { ThumbnailBlock(accentColor = WaypointPlaceAccent1, size = 44.dp, cornerRadius = RadiusThumbnail) },
+                    // continues the statement started above: `error = { ThumbnailBlock(accentColor = WaypointPlaceAccent1…`
                     error   = { ThumbnailBlock(accentColor = WaypointPlaceAccent1, size = 44.dp, cornerRadius = RadiusThumbnail) },
+                // closes the multi-line argument list started above
                 )
+            // closes the previous branch and opens the `else` branch, which runs when none of the conditions above matched
             } else {
+                // calls `ThumbnailBlock` with an argument list that continues on the following lines
                 ThumbnailBlock(
+                    // continues the statement started above: `accentColor = WaypointPlaceAccent1,`
                     accentColor  = WaypointPlaceAccent1,
+                    // continues the statement started above: `size = 44.dp,`
                     size         = 44.dp,
+                    // continues the statement started above: `cornerRadius = RadiusThumbnail,`
                     cornerRadius = RadiusThumbnail,
+                // closes the multi-line argument list started above
                 )
+            // closes the else branch
             }
             // calls `Column` with arguments `(modifier = Modifier.weight(1f).padding(start…)` and opens a trailing lambda / block
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
@@ -1109,10 +1156,13 @@ private fun IconActionButton(
 }
 
 
-// derives a carrier logo URL from the flight number prefix, or null if the code can't be determined
+// declares private function `airlineLogoUrl` taking 1 parameter (`flightNumber`), returning `String?` and opens its body
 private fun airlineLogoUrl(flightNumber: String): String? {
+    // declares read-only property `code`, initialised with the result of calling `flightNumber.replace(…)`
     val code = flightNumber.replace(" ", "").uppercase().take(2).takeIf { it.length == 2 } ?: return null
+    // returns `"https://pics.avs.io/100/100/$code.png"` from the current function
     return "https://pics.avs.io/100/100/$code.png"
+// closes the function `airlineLogoUrl`
 }
 
 // declares private function `pdfFileName` taking 1 parameter (`uri`), returning `String` and opens its body

@@ -133,7 +133,9 @@ import java.time.LocalDate
 import java.time.YearMonth
 // imports `java.time.format.DateTimeFormatter` for use in this file
 import java.time.format.DateTimeFormatter
+// imports `androidx.compose.material3.Icon` for use in this file
 import androidx.compose.material3.Icon
+// imports `androidx.compose.ui.res.painterResource` for use in this file
 import androidx.compose.ui.res.painterResource
 
 // expression: `private enum class DayState { BLANK, MUTED, RANGE, SELECTED }`
@@ -192,7 +194,7 @@ private fun buildCalendarGrid(
 fun TripCalendarScreen(
     // continues the statement started above: `onBackClick: () -> Unit,`
     onBackClick: () -> Unit,
-    // continues the statement started above: `onEditItineraryClick: (tripId: String, selectedDates: String) -> Unit = { _, _ -> },`
+    // continues the statement started above: `onEditItineraryClick: (tripId: String, selectedDates: Strin…`
     onEditItineraryClick: (tripId: String, selectedDates: String) -> Unit = { _, _ -> },
     // continues the statement started above: `onViewItineraryClick: (tripId: String) -> Unit = {},`
     onViewItineraryClick: (tripId: String) -> Unit = {},
@@ -349,7 +351,7 @@ fun TripCalendarScreen(
         when (val t = navTarget) {
             // `when` branch `is TripCalendarViewModel.ItineraryNavTa…`: opens a block
             is TripCalendarViewModel.ItineraryNavTarget.EditItinerary -> {
-                // calls `onEditItineraryClick` with arguments `(t.tripId)`
+                // calls `onEditItineraryClick` with arguments `(t.tripId, t.selectedDates)`
                 onEditItineraryClick(t.tripId, t.selectedDates)
                 // calls `onNavConsumed` on `viewModel` with arguments `()`
                 viewModel.onNavConsumed()
@@ -504,20 +506,33 @@ fun TripCalendarScreen(
     ) {
         // calls `Box` with arguments `(modifier = Modifier.fillMaxWidth())` and opens a trailing lambda / block
         Box(modifier = Modifier.fillMaxWidth()) {
-            // calls `CircleIconButton` with arguments `(onClick = onBackClick, modifier = Modifier.a…)` and opens a trailing lambda / block
+            // calls `CircleIconButton` with an argument list that continues on the following lines
             CircleIconButton(
+                // continues the statement started above: `onClick = onBackClick,`
                 onClick = onBackClick,
+                // continues the statement started above: `modifier = Modifier.align(Alignment.CenterStart),`
                 modifier = Modifier.align(Alignment.CenterStart),
+                // continues the statement started above: `size = 40.dp,`
                 size = 40.dp,
+                // continues the statement started above: `fillColor = WaypointTerracotta,`
                 fillColor = WaypointTerracotta,
+                // continues the statement started above: `borderColor = null,`
                 borderColor = null,
+            // ends the argument list started above and opens the block that follows
             ) {
+                // calls `Icon` with an argument list that continues on the following lines
                 Icon(
+                    // continues the statement started above: `painter = painterResource(R.drawable.ic_back_arrow),`
                     painter = painterResource(R.drawable.ic_back_arrow),
+                    // continues the statement started above: `contentDescription = null,`
                     contentDescription = null,
+                    // continues the statement started above: `tint = WaypointCard,`
                     tint = WaypointCard,
+                    // continues the statement started above: `modifier = Modifier.size(18.dp),`
                     modifier = Modifier.size(18.dp),
+                // closes the multi-line argument list started above
                 )
+            // closes the block
             }
             // `if` statement: the block below runs when `!uiState.isLoading && uiState.tripName.isNotBlank()` is true
             if (!uiState.isLoading && uiState.tripName.isNotBlank()) {

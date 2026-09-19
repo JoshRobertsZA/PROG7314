@@ -40,12 +40,12 @@ class ViewItineraryViewModel(
     // declares private read-only property `repo`, initialised with the result of calling `ItineraryRepository(…)`
     private val repo = ItineraryRepository(application)
 
-    // companion object holding a log tag for this ViewModel
+    // expression: `companion object { private const val TAG = "ViewItineraryVM" }`
     companion object { private const val TAG = "ViewItineraryVM" }
 
-    // in-memory cache: flight IATA -> (fetchedAtMillis, result); cleared when ViewModel is cleared
+    // declares private read-only property `flightStatusCache`, initialised with the result of calling `HashMap(…)`
     private val flightStatusCache = HashMap<String, Pair<Long, AirLabsRepository.FlightStatusResult>>()
-    // cache TTL: 10 minutes
+    // declares private read-only property `CACHE_TTL_MS`, initialised to the number 10 * 60 * 1_000L
     private val CACHE_TTL_MS = 10 * 60 * 1_000L
 
     // declares private read-only property `_uiState`, initialised with the result of calling `MutableStateFlow(…)`
@@ -157,56 +157,91 @@ class ViewItineraryViewModel(
     // closes the function `onPlaceDismissed`
     }
 
-    // declares function `onFlightStatusTap` that triggers a live status fetch for the given flight number
+    // declares function `onFlightStatusTap` taking 1 parameter (`flightNumber`) and opens its body
     fun onFlightStatusTap(flightNumber: String) {
+        // opens a block after `viewModelScope.launch`
         viewModelScope.launch {
+            // declares read-only property `iata`, initialised with the result of calling `flightNumber.replace(…)`
             val iata = flightNumber.replace(" ", "").uppercase()
-            // check in-memory cache first
+            // declares read-only property `cached`, initialised to `flightStatusCache[iata]`
             val cached = flightStatusCache[iata]
+            // `if` statement: the block below runs when `cached != null && (System.currentTimeMillis() - cached.first) < CACHE…` is true
             if (cached != null && (System.currentTimeMillis() - cached.first) < CACHE_TTL_MS) {
+                // calls `d` on `Log` with arguments `(TAG, "Flight status cache hit for $iata")`
                 Log.d(TAG, "Flight status cache hit for $iata")
+                // expression: `_uiState.update { it.copy(flightStatus = FlightStatusState.Succe…`
                 _uiState.update { it.copy(flightStatus = FlightStatusState.Success(cached.second)) }
+                // expression: `return@launch`
                 return@launch
+            // closes the if block
             }
-            // show spinner while fetching
+            // expression: `_uiState.update { it.copy(flightStatus = FlightStatusState.Loadi…`
             _uiState.update { it.copy(flightStatus = FlightStatusState.Loading) }
+            // declares read-only property `result`, initialised with the result of calling `AirLabsRepository.fetchFlightStatus(…)`
             val result = AirLabsRepository.fetchFlightStatus(iata)
+            // `if` statement: the block below runs when `result != null` is true
             if (result != null) {
+                // assigns `flightStatusCache[iata]` the value `Pair(System.currentTimeMillis(), result)`
                 flightStatusCache[iata] = Pair(System.currentTimeMillis(), result)
+                // expression: `_uiState.update { it.copy(flightStatus = FlightStatusState.Succe…`
                 _uiState.update { it.copy(flightStatus = FlightStatusState.Success(result)) }
-                // refresh flight list so arrival time updates on the card for active/landed flights
+                // declares read-only property `dayId`, initialised with the result of calling `_uiState.value.days.getOrNull(…)`
                 val dayId = _uiState.value.days.getOrNull(_uiState.value.activeDayIndex)?.dayId
+                // `if` statement: the block below runs when `dayId != null` is true
                 if (dayId != null) {
+                    // expression: `_uiState.update { it.copy(flightsForActiveDay = loadFlightsFor(d…`
                     _uiState.update { it.copy(flightsForActiveDay = loadFlightsFor(dayId)) }
+                // closes the if block
                 }
+            // closes the previous branch and opens the `else` branch, which runs when none of the conditions above matched
             } else {
-                // cache the miss for 2 minutes so rapid re-taps on an unknown flight don't burn quota
+                // declares read-only property `missResult`, initialised with the result of calling `AirLabsRepository.FlightStatusResult(…)`
                 val missResult = AirLabsRepository.FlightStatusResult(iata, "not_found", "", "", "", "", "", "", 0, 0)
+                // assigns `flightStatusCache[iata]` the value `Pair(System.currentTimeMillis() - CACHE_TTL_MS + …`
                 flightStatusCache[iata] = Pair(System.currentTimeMillis() - CACHE_TTL_MS + 2 * 60 * 1_000L, missResult)
+                // expression: `_uiState.update { it.copy(flightStatus = FlightStatusState.Error…`
                 _uiState.update { it.copy(flightStatus = FlightStatusState.Error("No flight found for $iata")) }
+            // closes the else branch
             }
+        // closes the block
         }
+    // closes the function `onFlightStatusTap`
     }
 
-    // declares function `onFlightStatusDismissed` that hides the modal
+    // declares function `onFlightStatusDismissed` taking no parameters and opens its body
     fun onFlightStatusDismissed() {
+        // expression: `_uiState.update { it.copy(flightStatus = FlightStatusState.Idle)…`
         _uiState.update { it.copy(flightStatus = FlightStatusState.Idle) }
+    // closes the function `onFlightStatusDismissed`
     }
 
     // declares private suspend function `loadFlightsFor` taking 1 parameter (`dayId`), returning `List<ViewFlightItem>`; its body is the expression ``
     private suspend fun loadFlightsFor(dayId: String): List<ViewFlightItem> =
+        // continues the statement started above: `repo.getFlightsForDays(listOf(dayId)).map { f ->`
         repo.getFlightsForDays(listOf(dayId)).map { f ->
+            // continues the statement started above: `val iata = f.flightNumber?.replace(" ", "")?.uppercase()`
             val iata = f.flightNumber?.replace(" ", "")?.uppercase()
+            // declares read-only property `cached`, initialised with the result of calling `if(…)`
             val cached = if (iata != null) flightStatusCache[iata] else null
+            // declares read-only property `isAirborne`, initialised to `cached != null && cached.second.status.lower…`
             val isAirborne = cached != null && cached.second.status.lowercase() in listOf("active", "landed")
+            // calls `ViewFlightItem` with an argument list that continues on the following lines
             ViewFlightItem(
+                // continues the statement started above: `id = f.id,`
                 id            = f.id,
+                // continues the statement started above: `flightNumber = f.flightNumber,`
                 flightNumber  = f.flightNumber,
+                // continues the statement started above: `pdfUri = f.pdfUri,`
                 pdfUri        = f.pdfUri,
+                // continues the statement started above: `departureTime = f.departureTime?.takeIf { it != AirLabsRepo…`
                 departureTime = f.departureTime?.takeIf { it != AirLabsRepository.AIRLABS_MISS },
+                // continues the statement started above: `arrivalTime = if (isAirborne) cached!!.second.arrTime.subst…`
                 arrivalTime   = if (isAirborne) cached!!.second.arrTime.substringAfter(" ", cached.second.arrTime).takeIf { it.isNotBlank() } else null,
+                // continues the statement started above: `docName = f.docName,`
                 docName       = f.docName,
+            // closes the multi-line argument list started above
             )
+        // closes the block
         }
 
     // declares private suspend function `loadPlacesFor` taking 1 parameter (`dayId`), returning `Map<String, List<ViewPlaceItem>>` and opens its body

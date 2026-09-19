@@ -23,9 +23,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 // imports `kotlinx.coroutines.flow.update` for use in this file
 import kotlinx.coroutines.flow.update
-// imports `kotlinx.coroutines.launch` for use in this file
+// imports `kotlinx.coroutines.delay` for use in this file
 import kotlinx.coroutines.delay
+// imports `kotlinx.coroutines.Job` for use in this file
 import kotlinx.coroutines.Job
+// imports `kotlinx.coroutines.launch` for use in this file
 import kotlinx.coroutines.launch
 // imports `java.time.LocalDate` for use in this file
 import java.time.LocalDate
@@ -41,13 +43,14 @@ class EditItineraryViewModel(
 
     // declares read-only property `tripId` of type `String`, initialised with the result of calling `checkNotNull(…)`
     val tripId: String = checkNotNull(savedStateHandle["tripId"])
-    // pipe-separated ISO dates from TripCalendar selection, e.g. "2024-12-23|2024-12-28"
+    // declares private read-only property `selectedDates` of type `Set<String>`, initialised to `(savedStateHandle.get<String>("selectedDates…`
     private val selectedDates: Set<String> = (savedStateHandle.get<String>("selectedDates") ?: "")
+        // chained call `.split` on the previous result with arguments `("|").filter { it.isNotBlank() }.toSet()`
         .split("|").filter { it.isNotBlank() }.toSet()
 
     // declares private read-only property `repo`, initialised with the result of calling `ItineraryRepository(…)`
     private val repo = ItineraryRepository(application)
-    // debounce jobs: one per flight id, cancelled on each new keystroke
+    // declares private read-only property `depTimeLookupJobs`, initialised with the result of calling `HashMap(…)`
     private val depTimeLookupJobs = HashMap<String, Job>()
 
     // declares private read-only property `_uiState`, initialised with the result of calling `MutableStateFlow(…)`
@@ -75,9 +78,11 @@ class EditItineraryViewModel(
             // expression: `_uiState.update { it.copy(isLoading = true) }`
             _uiState.update { it.copy(isLoading = true) }
 
-            // load all stored days then filter to only the ones selected on the calendar
+            // declares read-only property `allDayEntities`, initialised with the result of calling `repo.getSelectedDaysWithIds(…)`
             val allDayEntities = repo.getSelectedDaysWithIds(tripId)
+            // declares read-only property `dayEntities`, initialised with the result of calling `if(…)`
             val dayEntities = if (selectedDates.isEmpty()) allDayEntities
+                              // expression: `else allDayEntities.filter { it.date.toString() in selectedDates…`
                               else allDayEntities.filter { it.date.toString() in selectedDates }
             // declares read-only property `days`, initialised to a lambda / arrow function
             val days        = dayEntities.map { e -> DayItem(dayId = e.id, date = e.date) }
@@ -145,7 +150,7 @@ class EditItineraryViewModel(
                 flightNumber = f.flightNumber.orEmpty(),
                 // continues the statement started above: `pdfUri = f.pdfUri,`
                 pdfUri       = f.pdfUri,
-                // continues the statement started above: `departureTime = f.departureTime,`
+                // continues the statement started above: `departureTime = f.departureTime?.takeIf { it != AirLabsRepo…`
                 departureTime = f.departureTime?.takeIf { it != AirLabsRepository.AIRLABS_MISS },
                 // continues the statement started above: `docName = f.docName,`
                 docName      = f.docName,
@@ -367,33 +372,59 @@ class EditItineraryViewModel(
 
     // declares function `onFlightNumberChanged` taking 2 parameters (`flightId`, `number`) and opens its body
     fun onFlightNumberChanged(flightId: String, number: String) {
+        // expression: `_uiState.update { state ->`
         _uiState.update { state ->
+            // continues the statement started above: `state.copy(`
             state.copy(
+                // continues the statement started above: `flightsForActiveDay = state.flightsForActiveDay.map { f ->`
                 flightsForActiveDay = state.flightsForActiveDay.map { f ->
+                    // continues the statement started above: `if (f.id == flightId) f.copy(flightNumber = number) else f`
                     if (f.id == flightId) f.copy(flightNumber = number) else f
+                // closes the block
                 }
+            // closes the multi-line argument list started above
             )
+        // closes the block
         }
+        // expression: `viewModelScope.launch { repo.updateFlightNumber(flightId, number…`
         viewModelScope.launch { repo.updateFlightNumber(flightId, number) }
-        // auto-fill departure time: debounce 1.5 s then call AirLabs
+        // statement: `depTimeLookupJobs[flightId]?.cancel()`
         depTimeLookupJobs[flightId]?.cancel()
+        // declares read-only property `iata`, initialised with the result of calling `number.replace(…)`
         val iata = number.replace(" ", "").uppercase()
+        // `if` statement: the block below runs when `iata.length >= 4` is true
         if (iata.length >= 4) {
+            // assigns `depTimeLookupJobs[flightId]` the value `viewModelScope.launch {`
             depTimeLookupJobs[flightId] = viewModelScope.launch {
+                // calls `delay` with arguments `(1_500)`
                 delay(1_500)
+                // declares read-only property `time`, initialised with the result of calling `AirLabsRepository.lookupDepartureTime(…)`
                 val time = AirLabsRepository.lookupDepartureTime(iata)
+                // `if` statement: the block below runs when `time != null` is true
                 if (time != null) {
+                    // calls `updateFlightDepartureTime` on `repo` with arguments `(flightId, time)`
                     repo.updateFlightDepartureTime(flightId, time)
+                    // expression: `_uiState.update { state ->`
                     _uiState.update { state ->
+                        // continues the statement started above: `state.copy(`
                         state.copy(
+                            // continues the statement started above: `flightsForActiveDay = state.flightsForActiveDay.map { f ->`
                             flightsForActiveDay = state.flightsForActiveDay.map { f ->
+                                // continues the statement started above: `if (f.id == flightId) f.copy(departureTime = time) else f`
                                 if (f.id == flightId) f.copy(departureTime = time) else f
+                            // closes the block
                             }
+                        // closes the multi-line argument list started above
                         )
+                    // closes the block
                     }
+                // closes the if block
                 }
+            // closes the block
             }
+        // closes the if block
         }
+    // closes the function `onFlightNumberChanged`
     }
 
     // declares function `onFlightDepartureTimeChanged` taking 2 parameters (`flightId`, `time`) and opens its body

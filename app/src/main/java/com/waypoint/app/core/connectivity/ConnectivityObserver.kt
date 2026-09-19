@@ -75,12 +75,17 @@ fun rememberIsOnline(): State<Boolean> {
     // closes the lambda passed to `DisposableEffect`
     }
 
-    // poll every 5 seconds as a fallback in case NetworkCallback misses an event
+    // calls `LaunchedEffect` with arguments `(Unit)` and opens a trailing lambda / block
     LaunchedEffect(Unit) {
+        // `while` loop: repeats the block below as long as `true` is true
         while (true) {
+            // calls `delay` with arguments `(5_000L)`
             delay(5_000L)
+            // assigns `isOnline.value` the value `connectivityManager.isCurrentlyOnline()`
             isOnline.value = connectivityManager.isCurrentlyOnline()
+        // closes the while loop
         }
+    // closes the lambda passed to `LaunchedEffect`
     }
 
     // returns `isOnline` from the current function

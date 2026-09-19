@@ -71,8 +71,8 @@ class ItineraryRepository(context: Context) {
                 }
                 // expression: `map`
                 map
-            // closes the lambda assigned to `existing`
 
+            // closes the lambda assigned to `existing`
             }
 
             // declares read-only property `datesToAdd`, initialised to `days - existing.keys`

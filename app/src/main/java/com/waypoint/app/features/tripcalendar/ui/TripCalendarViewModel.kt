@@ -59,7 +59,7 @@ class TripCalendarViewModel(
 
     // declares sealed interface `ItineraryNavTarget` and opens its body
     sealed interface ItineraryNavTarget {
-        // declares data class `EditItinerary` with a primary constructor taking 1 parameter (`tripId`), inheriting from `ItineraryNavTarget`
+        // declares data class `EditItinerary` with a primary constructor taking 2 parameters (`tripId`, `selectedDates`), inheriting from `ItineraryNavTarget`
         data class EditItinerary(val tripId: String, val selectedDates: String) : ItineraryNavTarget
         // declares data class `ViewItinerary` with a primary constructor taking 1 parameter (`tripId`), inheriting from `ItineraryNavTarget`
         data class ViewItinerary(val tripId: String) : ItineraryNavTarget
@@ -105,9 +105,11 @@ class TripCalendarViewModel(
             // declares read-only property `dayCount`, initialised with the result of calling `if(…)`
             val dayCount = if (start != null && end != null) (ChronoUnit.DAYS.between(start, end) + 1).toInt() else 0
 
-            // declares read-only property `dayIds`, initialised with the result of calling `itineraryRepo.getSelectedDaysWithIds(…)`
+            // declares read-only property `storedDays`, initialised with the result of calling `itineraryRepo.getSelectedDaysWithIds(…)`
             val storedDays = itineraryRepo.getSelectedDaysWithIds(trip.id)
+            // declares read-only property `dayIds`, initialised to a lambda / arrow function
             val dayIds   = storedDays.map { d -> d.id }
+            // declares read-only property `selectedDayDates`, initialised to a lambda / arrow function
             val selectedDayDates = storedDays.map { d -> d.date }.toSet()
             // declares read-only property `flights`, initialised with the result of calling `itineraryRepo.getFlightsForDays(…)`
             val flights  = itineraryRepo.getFlightsForDays(dayIds).size
@@ -267,7 +269,9 @@ class TripCalendarViewModel(
         viewModelScope.launch {
             // calls `replaceSelectedDays` on `itineraryRepo` with arguments `(state.tripId, state.selectedDays)`
             itineraryRepo.replaceSelectedDays(state.tripId, state.selectedDays)
+            // declares read-only property `selectedDates`, initialised with the result of calling `state.selectedDays.joinToString(…)`
             val selectedDates = state.selectedDays.joinToString("|") { it.toString() }
+            // assigns `_navTarget.value` the value `ItineraryNavTarget.EditItinerary(state.tripId, se…`
             _navTarget.value = ItineraryNavTarget.EditItinerary(state.tripId, selectedDates)
         // closes the block
         }

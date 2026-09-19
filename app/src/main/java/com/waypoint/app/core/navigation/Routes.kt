@@ -19,10 +19,13 @@ object Routes {
     fun tripCalendar(tripId: String) = "trip_calendar/$tripId"
     // declares const read-only property `AllTrips`, initialised to the string literal "all_trips"
     const val AllTrips = "all_trips"
-    // selectedDates is a query param (optional) — pipe-separated ISO dates e.g. "2024-12-23|2024-12-28"
+    // declares const read-only property `EditItinerary`, initialised to the string literal "edit_itinerary/{tripId}?selectedDates=…
     const val EditItinerary = "edit_itinerary/{tripId}?selectedDates={selectedDates}"
+    // declares function `editItinerary` taking 2 parameters (`tripId`, `selectedDates`); its body is the expression ``
     fun editItinerary(tripId: String, selectedDates: String = "") =
+        // continues the statement started above: `if (selectedDates.isEmpty()) "edit_itinerary/$tripId"`
         if (selectedDates.isEmpty()) "edit_itinerary/$tripId"
+        // expression: `else "edit_itinerary/$tripId?selectedDates=$selectedDates"`
         else "edit_itinerary/$tripId?selectedDates=$selectedDates"
     // declares const read-only property `ViewItinerary`, initialised to the string literal "view_itinerary/{tripId}"
     const val ViewItinerary = "view_itinerary/{tripId}"

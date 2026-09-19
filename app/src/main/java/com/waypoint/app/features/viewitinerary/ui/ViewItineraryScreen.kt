@@ -157,9 +157,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.material3.AlertDialog
 // imports `androidx.compose.material3.TextButton` for use in this file
 import androidx.compose.material3.TextButton
-// imports `androidx.compose.material3.Divider` for use in this file
+// imports `androidx.compose.material3.HorizontalDivider` for use in this file
 import androidx.compose.material3.HorizontalDivider
+// imports `androidx.compose.material3.Icon` for use in this file
 import androidx.compose.material3.Icon
+// imports `androidx.compose.ui.res.painterResource` for use in this file
 import androidx.compose.ui.res.painterResource
 
 // annotation `@Composable` applied to the declaration that follows
@@ -194,13 +196,19 @@ fun ViewItineraryScreen(
     // closes the block
     }
 
-    // show the flight status modal when the state is Loading, Success or Error
+    // declares read-only property `flightStatus`, initialised to `state.flightStatus`
     val flightStatus = state.flightStatus
+    // `if` statement: the block below runs when `flightStatus !is FlightStatusState.Idle` is true
     if (flightStatus !is FlightStatusState.Idle) {
+        // calls `FlightStatusModal` with an argument list that continues on the following lines
         FlightStatusModal(
+            // continues the statement started above: `status = flightStatus,`
             status    = flightStatus,
+            // continues the statement started above: `onDismiss = viewModel::onFlightStatusDismissed,`
             onDismiss = viewModel::onFlightStatusDismissed,
+        // closes the multi-line argument list started above
         )
+    // closes the if block
     }
 
     // `if` statement: the block below runs when `state.isLoading` is true
@@ -236,18 +244,31 @@ fun ViewItineraryScreen(
         Box(modifier = Modifier.fillMaxWidth()) {
             // calls `CircleIconButton` with an argument list that continues on the following lines
             CircleIconButton(
+                // continues the statement started above: `onClick = onBackClick,`
                 onClick  = onBackClick,
+                // continues the statement started above: `modifier = Modifier.align(Alignment.CenterStart),`
                 modifier = Modifier.align(Alignment.CenterStart),
+                // continues the statement started above: `size = 40.dp,`
                 size = 40.dp,
+                // continues the statement started above: `fillColor = WaypointTerracotta,`
                 fillColor = WaypointTerracotta,
+                // continues the statement started above: `borderColor = null,`
                 borderColor = null,
+            // ends the argument list started above and opens the block that follows
             ) {
+                // calls `Icon` with an argument list that continues on the following lines
                 Icon(
+                    // continues the statement started above: `painter = painterResource(R.drawable.ic_back_arrow),`
                     painter = painterResource(R.drawable.ic_back_arrow),
+                    // continues the statement started above: `contentDescription = null,`
                     contentDescription = null,
+                    // continues the statement started above: `tint = WaypointCard,`
                     tint = WaypointCard,
+                    // continues the statement started above: `modifier = Modifier.size(18.dp),`
                     modifier = Modifier.size(18.dp),
+                // closes the multi-line argument list started above
                 )
+            // closes the block
             }
             // calls `Column` with an argument list that continues on the following lines
             Column(
@@ -314,13 +335,19 @@ fun ViewItineraryScreen(
         } else {
             // expression: `state.flightsForActiveDay.forEach { f ->`
             state.flightsForActiveDay.forEach { f ->
-                // continues the statement started above: `ViewFlightCard(flight = f, onStatusClick = …)`
+                // continues the statement started above: `ViewFlightCard(`
                 ViewFlightCard(
+                    // continues the statement started above: `flight = f,`
                     flight        = f,
+                    // continues the statement started above: `onStatusClick = {`
                     onStatusClick = {
+                        // declares read-only property `fn`, initialised to `f.flightNumber?.takeIf { it.isNotBlank() }`
                         val fn = f.flightNumber?.takeIf { it.isNotBlank() }
+                        // `if` statement: executes `viewModel.onFlightStatusTap(fn)` when `fn != null` is true
                         if (fn != null) viewModel.onFlightStatusTap(fn)
+                    // closes the block
                     },
+                // closes the multi-line argument list started above
                 )
             // closes the block
             }
@@ -547,44 +574,73 @@ private fun ViewFlightCard(flight: ViewFlightItem, onStatusClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         // ends the argument list started above and opens the block that follows
         ) {
-            // shows the airline logo if a carrier code can be derived from the flight number, falling back to the accent block
+            // declares read-only property `logoUrl`, initialised with the result of calling `airlineLogoUrl(…)`
             val logoUrl = airlineLogoUrl(flight.flightNumber)
+            // `if` statement: the block below runs when `logoUrl != null` is true
             if (logoUrl != null) {
+                // calls `SubcomposeAsyncImage` with an argument list that continues on the following lines
                 SubcomposeAsyncImage(
+                    // continues the statement started above: `model = ImageRequest.Builder(context).data(logoUrl).crossfa…`
                     model              = ImageRequest.Builder(context).data(logoUrl).crossfade(true).build(),
+                    // continues the statement started above: `contentDescription = flight.flightNumber,`
                     contentDescription = flight.flightNumber,
+                    // continues the statement started above: `contentScale = ContentScale.Fit,`
                     contentScale       = ContentScale.Fit,
+                    // continues the statement started above: `modifier = Modifier`
                     modifier           = Modifier
+                        // continues the statement started above: `.size(44.dp)`
                         .size(44.dp)
+                        // continues the statement started above: `.clip(RoundedCornerShape(RadiusThumbnail))`
                         .clip(RoundedCornerShape(RadiusThumbnail))
+                        // continues the statement started above: `.background(androidx.compose.ui.graphics.Color.White),`
                         .background(androidx.compose.ui.graphics.Color.White),
+                    // continues the statement started above: `loading = { ThumbnailBlock(accentColor = WaypointPlaceAccen…`
                     loading = { ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail) },
+                    // continues the statement started above: `error = { ThumbnailBlock(accentColor = WaypointPlaceAccent4…`
                     error   = { ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail) },
+                // closes the multi-line argument list started above
                 )
+            // closes the previous branch and opens the `else` branch, which runs when none of the conditions above matched
             } else {
+                // calls `ThumbnailBlock` with arguments `(accentColor = WaypointPlaceAccent4, size = 4…)`
                 ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail)
+            // closes the else branch
             }
             // calls `Column` with arguments `(modifier = Modifier.weight(1f).padding(start…)` and opens a trailing lambda / block
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
                 // declares read-only property `label`, initialised to `flight.flightNumber?.takeIf { it.isNotBlank(…`
                 val label = flight.flightNumber?.takeIf { it.isNotBlank() } ?: stringResource(R.string.reminder_flight_unnamed)
-                // calls `Text` with arguments `(label, color = WaypointTextPrimary, fontSize…)` and a clickable modifier so tapping the number opens live status
+                // calls `Text` with an argument list that continues on the following lines
                 Text(
+                    // continues the statement started above: `text = label,`
                     text       = label,
+                    // continues the statement started above: `color = WaypointTerracotta,`
                     color      = WaypointTerracotta,
+                    // continues the statement started above: `fontSize = 13.sp,`
                     fontSize   = 13.sp,
+                    // continues the statement started above: `fontWeight = FontWeight.Bold,`
                     fontWeight = FontWeight.Bold,
+                    // continues the statement started above: `modifier = Modifier.clickable(enabled = flight.flightNumber…`
                     modifier   = Modifier.clickable(enabled = flight.flightNumber?.isNotBlank() == true) { onStatusClick() },
+                // closes the multi-line argument list started above
                 )
-                // show arrival time when airborne, departure time otherwise
+                // declares read-only property `timeText`, initialised to `flight.arrivalTime?.let { "Arrives $it" }`
                 val timeText = flight.arrivalTime?.let { "Arrives $it" }
+                    // expression: `?: flight.departureTime?.let { stringResource(R.string.edit_itin…`
                     ?: flight.departureTime?.let { stringResource(R.string.edit_itinerary_flight_departs, it) }
+                    // statement: `?: stringResource(R.string.view_itinerary_flight_no_time)`
                     ?: stringResource(R.string.view_itinerary_flight_no_time)
+                // calls `Text` with an argument list that continues on the following lines
                 Text(
+                    // continues the statement started above: `text = timeText,`
                     text     = timeText,
+                    // continues the statement started above: `color = WaypointTextMuted,`
                     color    = WaypointTextMuted,
+                    // continues the statement started above: `fontSize = 11.sp,`
                     fontSize = 11.sp,
+                    // continues the statement started above: `modifier = Modifier.padding(top = 3.dp),`
                     modifier = Modifier.padding(top = 3.dp),
+                // closes the multi-line argument list started above
                 )
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
@@ -1062,106 +1118,185 @@ private fun ViewPlaceDetailOverlay(
 
 // annotation `@Composable` applied to the declaration that follows
 @Composable
-// declares private function `FlightStatusModal` showing live AirLabs status in an AlertDialog
+// expression: `private fun FlightStatusModal(`
 private fun FlightStatusModal(
     // continues the statement started above: `status: FlightStatusState,`
     status: FlightStatusState,
     // continues the statement started above: `onDismiss: () -> Unit,`
     onDismiss: () -> Unit,
+// ends the argument list started above and opens the block that follows
 ) {
-    // builds the dialog title text from the current state
+    // declares read-only property `title`, initialised with the result of calling `when(…)` and opens a lambda / block
     val title = when (status) {
+        // lambda `is FlightStatusState.Loading -> "Fetching flight status…"`
         is FlightStatusState.Loading -> "Fetching flight status…"
+        // lambda `is FlightStatusState.Success -> status.result.flightIata`
         is FlightStatusState.Success -> status.result.flightIata
+        // lambda `is FlightStatusState.Error -> "Error"`
         is FlightStatusState.Error   -> "Error"
+        // `else` branch of the `when`: evaluates `""`
         else                         -> ""
+    // closes the lambda assigned to `title`
     }
+    // calls `AlertDialog` with an argument list that continues on the following lines
     AlertDialog(
+        // continues the statement started above: `onDismissRequest = onDismiss,`
         onDismissRequest   = onDismiss,
+        // continues the statement started above: `containerColor = WaypointCard,`
         containerColor     = WaypointCard,
+        // continues the statement started above: `title = { Text(title, color = WaypointTextPrimary, fontWeig…`
         title              = { Text(title, color = WaypointTextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp) },
+        // continues the statement started above: `text = {`
         text               = {
+            // `when` expression on the value of `status`: the first matching branch below runs
             when (status) {
+                // `when` branch `is FlightStatusState.Loading`: opens a block
                 is FlightStatusState.Loading -> {
+                    // calls `Box` with arguments `(modifier = Modifier.fillMaxWidth(), contentA…)` and opens a trailing lambda / block
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        // calls `CircularProgressIndicator` with arguments `(color = WaypointTerracotta, modifier = Modif…)`
                         CircularProgressIndicator(color = WaypointTerracotta, modifier = Modifier.size(36.dp))
+                    // closes the lambda passed to `Box`
                     }
+                // closes the when branch
                 }
+                // `when` branch `is FlightStatusState.Error`: opens a block
                 is FlightStatusState.Error -> {
+                    // calls `Text` with arguments `(status.message, color = WaypointTextMuted, f…)`
                     Text(status.message, color = WaypointTextMuted, fontSize = 13.sp)
+                // closes the when branch
                 }
+                // `when` branch `is FlightStatusState.Success`: opens a block
                 is FlightStatusState.Success -> {
+                    // declares read-only property `r`, initialised to `status.result`
                     val r = status.result
+                    // calls `Column` with arguments `(modifier = Modifier.fillMaxWidth())` and opens a trailing lambda / block
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        // status badge
+                        // calls `val` with arguments `(badgeColor, badgeLabel)` and opens a trailing lambda / block
                         val (badgeColor, badgeLabel) = when (r.status.lowercase()) {
+                            // lambda `"active" -> Pair(WaypointTerracotta, "In …`
                             "active"    -> Pair(WaypointTerracotta,     "In Flight")
+                            // lambda `"landed" -> Pair(WaypointPlaceAccent1, "L…`
                             "landed"    -> Pair(WaypointPlaceAccent1,   "Landed")
+                            // lambda `"scheduled" -> Pair(WaypointPlaceAccent2, "S…`
                             "scheduled" -> Pair(WaypointPlaceAccent2,   "Scheduled")
+                            // lambda `"cancelled" -> Pair(WaypointTextMuted, "Canc…`
                             "cancelled" -> Pair(WaypointTextMuted,      "Cancelled")
+                            // `else` branch of the `when`: evaluates `Pair(WaypointTextMuted, r.status.replaceFirstChar { it.uppercaseChar(…`
                             else        -> Pair(WaypointTextMuted,      r.status.replaceFirstChar { it.uppercaseChar() })
+                        // closes the lambda passed to `val`
                         }
+                        // calls `Box` with an argument list that continues on the following lines
                         Box(
+                            // continues the statement started above: `modifier = Modifier`
                             modifier         = Modifier
+                                // continues the statement started above: `.background(badgeColor.copy(alpha = 0.15f), androidx.compos…`
                                 .background(badgeColor.copy(alpha = 0.15f), androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
+                                // continues the statement started above: `.padding(horizontal = 12.dp, vertical = 4.dp),`
                                 .padding(horizontal = 12.dp, vertical = 4.dp),
+                        // ends the argument list started above and opens the block that follows
                         ) {
+                            // calls `Text` with arguments `(badgeLabel, color = badgeColor, fontSize = 1…)`
                             Text(badgeLabel, color = badgeColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        // closes the block
                         }
+                        // calls `Spacer` with arguments `(Modifier.height(12.dp))`
                         Spacer(Modifier.height(12.dp))
+                        // calls `HorizontalDivider` with arguments `(color = WaypointTextMuted.copy(alpha = 0.15f))`
                         HorizontalDivider(color = WaypointTextMuted.copy(alpha = 0.15f))
+                        // calls `Spacer` with arguments `(Modifier.height(12.dp))`
                         Spacer(Modifier.height(12.dp))
-                        // departure row
+                        // `if` statement: the block below runs when `r.depIata.isNotBlank()` is true
                         if (r.depIata.isNotBlank()) {
+                            // calls `Row` with arguments `(modifier = Modifier.fillMaxWidth(), horizont…)` and opens a trailing lambda / block
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                // calls `Text` with arguments `("Departure", color = WaypointTextMuted, font…)`
                                 Text("Departure", color = WaypointTextMuted, fontSize = 11.sp)
+                                // calls `Column` with arguments `(horizontalAlignment = Alignment.End)` and opens a trailing lambda / block
                                 Column(horizontalAlignment = Alignment.End) {
+                                    // calls `Text` with arguments `(r.depIata, color = WaypointTextPrimary, font…)`
                                     Text(r.depIata, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                    // `if` statement: executes `Text(r.depTime, color = WaypointTextMuted, f…` when `r.depTime.isNotBlank()` is true
                                     if (r.depTime.isNotBlank()) Text(r.depTime, color = WaypointTextMuted, fontSize = 11.sp)
+                                    // `if` statement: executes `Text("Terminal ${r.depTerminal}", color = Wa…` when `r.depTerminal.isNotBlank()` is true
                                     if (r.depTerminal.isNotBlank()) Text("Terminal ${r.depTerminal}", color = WaypointTextMuted, fontSize = 10.sp)
+                                    // `if` statement: executes `Text("Gate ${r.depGate}", color = WaypointTe…` when `r.depGate.isNotBlank()` is true
                                     if (r.depGate.isNotBlank())     Text("Gate ${r.depGate}", color = WaypointTextMuted, fontSize = 10.sp)
+                                // closes the lambda passed to `Column`
                                 }
+                            // closes the lambda passed to `Row`
                             }
+                            // calls `Spacer` with arguments `(Modifier.height(8.dp))`
                             Spacer(Modifier.height(8.dp))
+                        // closes the if block
                         }
-                        // arrival row
+                        // `if` statement: the block below runs when `r.arrIata.isNotBlank()` is true
                         if (r.arrIata.isNotBlank()) {
+                            // calls `Row` with arguments `(modifier = Modifier.fillMaxWidth(), horizont…)` and opens a trailing lambda / block
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                // calls `Text` with arguments `("Arrival", color = WaypointTextMuted, fontSi…)`
                                 Text("Arrival", color = WaypointTextMuted, fontSize = 11.sp)
+                                // calls `Column` with arguments `(horizontalAlignment = Alignment.End)` and opens a trailing lambda / block
                                 Column(horizontalAlignment = Alignment.End) {
+                                    // calls `Text` with arguments `(r.arrIata, color = WaypointTextPrimary, font…)`
                                     Text(r.arrIata, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                    // `if` statement: executes `Text(r.arrTime, color = WaypointTextMuted, f…` when `r.arrTime.isNotBlank()` is true
                                     if (r.arrTime.isNotBlank()) Text(r.arrTime, color = WaypointTextMuted, fontSize = 11.sp)
+                                // closes the lambda passed to `Column`
                                 }
+                            // closes the lambda passed to `Row`
                             }
+                            // calls `Spacer` with arguments `(Modifier.height(8.dp))`
                             Spacer(Modifier.height(8.dp))
+                        // closes the if block
                         }
-                        // delay and duration
+                        // `if` statement: the block below runs when `r.depDelayedMin > 0` is true
                         if (r.depDelayedMin > 0) {
+                            // calls `Text` with arguments `("Delayed ${r.depDelayedMin} min", color = Wa…)`
                             Text("Delayed ${r.depDelayedMin} min", color = WaypointTerracotta, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            // calls `Spacer` with arguments `(Modifier.height(4.dp))`
                             Spacer(Modifier.height(4.dp))
+                        // closes the if block
                         }
+                        // `if` statement: the block below runs when `r.durationMin > 0` is true
                         if (r.durationMin > 0) {
+                            // calls `Text` with arguments `("Duration: ${r.durationMin / 60}h ${r.durati…)`
                             Text("Duration: ${r.durationMin / 60}h ${r.durationMin % 60}m", color = WaypointTextMuted, fontSize = 11.sp)
+                        // closes the if block
                         }
+                    // closes the lambda passed to `Column`
                     }
+                // closes the when branch
                 }
+                // `else` branch of the `when`: opens a block
                 else -> {}
+            // closes the when block
             }
+        // closes the block
         },
+        // continues the statement started above: `confirmButton = {`
         confirmButton = {
+            // calls `TextButton` with arguments `(onClick = onDismiss)` and opens a trailing lambda / block
             TextButton(onClick = onDismiss) {
+                // calls `Text` with arguments `("Close", color = WaypointTerracotta, fontWei…)`
                 Text("Close", color = WaypointTerracotta, fontWeight = FontWeight.Bold)
+            // closes the lambda passed to `TextButton`
             }
+        // closes the block
         },
+    // closes the multi-line argument list started above
     )
+// closes the block
 }
 
 
-// declares private function `airlineLogoUrl` that derives a carrier logo URL from the flight number, or null if the code can't be determined
+// declares private function `airlineLogoUrl` taking 1 parameter (`flightNumber`), returning `String?` and opens its body
 private fun airlineLogoUrl(flightNumber: String?): String? {
-    // strip spaces, uppercase, take the first two characters (IATA carrier codes are always two characters)
+    // declares read-only property `code`, initialised to `flightNumber?.replace(" ", "")?.uppercase()?…`
     val code = flightNumber?.replace(" ", "")?.uppercase()?.take(2)?.takeIf { it.length == 2 } ?: return null
+    // returns `"https://pics.avs.io/100/100/$code.png"` from the current function
     return "https://pics.avs.io/100/100/$code.png"
+// closes the function `airlineLogoUrl`
 }
 
 

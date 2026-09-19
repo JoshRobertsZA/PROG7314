@@ -21,9 +21,11 @@ data class ViewFlightItem(
     val flightNumber: String?,
     // continues the statement started above: `val pdfUri: String,`
     val pdfUri: String,
+    // continues the statement started above: `val departureTime: String? = null,`
     val departureTime: String? = null,
-    // arrival time populated from AirLabs status cache when flight is active or landed
+    // continues the statement started above: `val arrivalTime: String? = null,`
     val arrivalTime: String? = null,
+    // continues the statement started above: `val docName: String? = null,`
     val docName: String? = null,
 // closes the multi-line argument list started above
 )
@@ -73,16 +75,17 @@ data class ViewPlaceItem(
 // closes the multi-line argument list started above
 )
 
-// sealed class representing the loading/success/idle states for the flight status modal
+// declares sealed class `FlightStatusState` and opens its body
 sealed class FlightStatusState {
-    // idle: modal is not visible
+    // statement: `object Idle : FlightStatusState()`
     object Idle : FlightStatusState()
-    // loading: fetch is in progress, shows spinner
+    // statement: `object Loading : FlightStatusState()`
     object Loading : FlightStatusState()
-    // success: fetch returned data, shows modal
+    // declares data class `Success` with a primary constructor taking 1 parameter (`result`), inheriting from `FlightStatusState()`
     data class Success(val result: com.waypoint.app.core.network.AirLabsRepository.FlightStatusResult) : FlightStatusState()
-    // error: fetch failed, shows error text
+    // declares data class `Error` with a primary constructor taking 1 parameter (`message`), inheriting from `FlightStatusState()`
     data class Error(val message: String) : FlightStatusState()
+// closes the class `FlightStatusState`
 }
 
 // expression: `data class ViewItineraryUiState(`
@@ -103,7 +106,7 @@ data class ViewItineraryUiState(
     val placesForActiveDay: Map<String, List<ViewPlaceItem>> = emptyMap(),
     // continues the statement started above: `val selectedPlace: ViewPlaceItem? = null,`
     val selectedPlace: ViewPlaceItem? = null,
-    // continues the statement started above: `val flightStatus: FlightStatusState = FlightStatusState.Idle,`
+    // continues the statement started above: `val flightStatus: FlightStatusState = FlightStatusState.Idl…`
     val flightStatus: FlightStatusState = FlightStatusState.Idle,
 // ends the argument list started above and opens the block that follows
 ) {

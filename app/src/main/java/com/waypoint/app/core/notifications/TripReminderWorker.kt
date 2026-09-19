@@ -277,10 +277,13 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
         RemoteSecrets.ensureLoaded()
         // declares read-only property `looked`, initialised with the result of calling `AirLabsRepository.lookupDepartureTime(…)`
         val looked = AirLabsRepository.lookupDepartureTime(number)
-        // if AirLabs returned nothing (unknown / fake flight number) store the sentinel so this flight is never looked up again
+        // `if` statement: the block below runs when `looked == null` is true
         if (looked == null) {
+            // calls `updateFlightDepartureTime` on `itinerary` with arguments `(flight.id, AirLabsRepository.AIRLABS_MISS)`
             itinerary.updateFlightDepartureTime(flight.id, AirLabsRepository.AIRLABS_MISS)
+            // returns `null` from the current function
             return null
+        // closes the if block
         }
         // calls `updateFlightDepartureTime` on `itinerary` with arguments `(flight.id, looked)`
         itinerary.updateFlightDepartureTime(flight.id, looked)

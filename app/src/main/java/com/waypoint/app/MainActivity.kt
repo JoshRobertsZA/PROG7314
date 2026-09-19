@@ -427,10 +427,13 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         composable(
             // continues the statement started above: `route = Routes.TripCalendar,`
             route = Routes.TripCalendar,
-            // continues the statement started above: `arguments = listOf(navArgument("tripId") { type = NavType.S…`
+            // continues the statement started above: `arguments = listOf(`
             arguments = listOf(
+                // continues the statement started above: `navArgument("tripId") { type = NavType.StringType },`
                 navArgument("tripId") { type = NavType.StringType },
+                // continues the statement started above: `navArgument("selectedDates") { type = NavType.StringType; d…`
                 navArgument("selectedDates") { type = NavType.StringType; defaultValue = "" },
+            // closes the multi-line argument list started above
             ),
         // ends the argument list started above and opens the block that follows
         ) {
@@ -438,7 +441,7 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
             TripCalendarScreen(
                 // continues the statement started above: `onBackClick = { navController.popBackStack() },`
                 onBackClick = { navController.popBackStack() },
-                // continues the statement started above: `onEditItineraryClick = { tripId -> navController.navigate(R…`
+                // continues the statement started above: `onEditItineraryClick = { tripId, selectedDates -> navContro…`
                 onEditItineraryClick = { tripId, selectedDates -> navController.navigate(Routes.editItinerary(tripId, selectedDates)) },
                 // continues the statement started above: `onViewItineraryClick = { tripId -> navController.navigate(R…`
                 onViewItineraryClick = { tripId -> navController.navigate(Routes.viewItinerary(tripId)) },
@@ -464,10 +467,13 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         composable(
             // continues the statement started above: `route = Routes.EditItinerary,`
             route = Routes.EditItinerary,
-            // continues the statement started above: `arguments = listOf(navArgument("tripId") { type = NavType.S…`
+            // continues the statement started above: `arguments = listOf(`
             arguments = listOf(
+                // continues the statement started above: `navArgument("tripId") { type = NavType.StringType },`
                 navArgument("tripId") { type = NavType.StringType },
+                // continues the statement started above: `navArgument("selectedDates") { type = NavType.StringType; d…`
                 navArgument("selectedDates") { type = NavType.StringType; defaultValue = "" },
+            // closes the multi-line argument list started above
             ),
         // continues the statement started above: `) { backStackEntry ->`
         ) { backStackEntry ->
@@ -499,10 +505,13 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         composable(
             // continues the statement started above: `route = Routes.ViewItinerary,`
             route = Routes.ViewItinerary,
-            // continues the statement started above: `arguments = listOf(navArgument("tripId") { type = NavType.S…`
+            // continues the statement started above: `arguments = listOf(`
             arguments = listOf(
+                // continues the statement started above: `navArgument("tripId") { type = NavType.StringType },`
                 navArgument("tripId") { type = NavType.StringType },
+                // continues the statement started above: `navArgument("selectedDates") { type = NavType.StringType; d…`
                 navArgument("selectedDates") { type = NavType.StringType; defaultValue = "" },
+            // closes the multi-line argument list started above
             ),
         // ends the argument list started above and opens the block that follows
         ) {

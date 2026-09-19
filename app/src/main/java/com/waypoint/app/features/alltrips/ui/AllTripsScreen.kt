@@ -113,7 +113,9 @@ import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
 // imports `com.waypoint.app.core.theme.White` for use in this file
 import com.waypoint.app.core.theme.White
+// imports `androidx.compose.material3.Icon` for use in this file
 import androidx.compose.material3.Icon
+// imports `androidx.compose.ui.res.painterResource` for use in this file
 import androidx.compose.ui.res.painterResource
 
 // annotation `@OptIn` with arguments `(ExperimentalMaterial3Api::class)` applied to the declaration that follows
@@ -176,20 +178,33 @@ fun AllTripsScreen(
         ) {
             // calls `Box` with arguments `(modifier = Modifier.fillMaxWidth())` and opens a trailing lambda / block
             Box(modifier = Modifier.fillMaxWidth()) {
-                // calls `CircleIconButton` with arguments `(onClick = onBackClick, modifier = Modifier.a…)` and opens a trailing lambda / block
+                // calls `CircleIconButton` with an argument list that continues on the following lines
                 CircleIconButton(
+                    // continues the statement started above: `onClick = onBackClick,`
                     onClick = onBackClick,
+                    // continues the statement started above: `modifier = Modifier.align(Alignment.CenterStart),`
                     modifier = Modifier.align(Alignment.CenterStart),
+                    // continues the statement started above: `size = 40.dp,`
                     size = 40.dp,
+                    // continues the statement started above: `fillColor = WaypointTerracotta,`
                     fillColor = WaypointTerracotta,
+                    // continues the statement started above: `borderColor = null,`
                     borderColor = null,
+                // ends the argument list started above and opens the block that follows
                 ) {
+                    // calls `Icon` with an argument list that continues on the following lines
                     Icon(
+                        // continues the statement started above: `painter = painterResource(R.drawable.ic_back_arrow),`
                         painter = painterResource(R.drawable.ic_back_arrow),
+                        // continues the statement started above: `contentDescription = null,`
                         contentDescription = null,
+                        // continues the statement started above: `tint = WaypointCard,`
                         tint = WaypointCard,
+                        // continues the statement started above: `modifier = Modifier.size(18.dp),`
                         modifier = Modifier.size(18.dp),
+                    // closes the multi-line argument list started above
                     )
+                // closes the block
                 }
                 // calls `Text` with an argument list that continues on the following lines
                 Text(

@@ -94,12 +94,13 @@ fun TabHeader(
 ) {
     // declares mutable property `showHistory`, delegated to `remember { mutableStateOf(false) }`
     var showHistory by remember { mutableStateOf(false) }
-    // scope the notification VM here so all TabHeader instances share the same unread state
+    // declares read-only property `notifVm` of type `NotificationHistoryViewModel`, initialised with the result of calling `viewModel(…)`
     val notifVm: NotificationHistoryViewModel = viewModel()
+    // declares read-only property `notifState`, delegated to `notifVm.uiState.collectAsState()`
     val notifState by notifVm.uiState.collectAsState()
-    // load notifications on first composition
+    // calls `LaunchedEffect` with arguments `(Unit)`
     LaunchedEffect(Unit) { notifVm.load() }
-    // observe connectivity so the offline indicator updates on all screens
+    // declares read-only property `isOnline`, delegated to `rememberIsOnline()`
     val isOnline by rememberIsOnline()
     // `if` statement: the block below runs when `showHistory` is true
     if (showHistory) {
@@ -209,7 +210,7 @@ fun BellWithBadge(onClick: () -> Unit, hasUnread: Boolean = false, modifier: Mod
                 .clickable(onClick = onClick),
         // closes the multi-line argument list started above
         )
-        // only show the red dot when there are unread notifications
+        // `if` statement: the block below runs when `hasUnread` is true
         if (hasUnread) {
             // calls `Box` with an argument list that continues on the following lines
             Box(

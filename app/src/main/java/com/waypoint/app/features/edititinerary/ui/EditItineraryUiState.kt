@@ -95,6 +95,7 @@ data class PlaceItem(
     val category: String,
     // continues the statement started above: `val note: String?,`
     val note: String?,
+    // continues the statement started above: `val photoUrl: String? = null,`
     val photoUrl: String? = null,
 // closes the multi-line argument list started above
 )

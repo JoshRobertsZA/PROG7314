@@ -28,10 +28,11 @@ data class NotificationHistoryUiState(
     val isLoading: Boolean = true,
     // continues the statement started above: `val items: List<NotificationItem> = emptyList(),`
     val items: List<NotificationItem> = emptyList(),
-// closes the multi-line argument list started above
+// ends the argument list started above and opens the block that follows
 ) {
-    // true when there are notifications the user has not yet cleared
+    // statement: `val hasUnread: Boolean get() = items.isNotEmpty()`
     val hasUnread: Boolean get() = items.isNotEmpty()
+// closes the block
 }
 
 // declares class `NotificationHistoryViewModel` with a primary constructor taking 1 parameter (`app`), inheriting from `AndroidViewModel(app)` and opens its body
