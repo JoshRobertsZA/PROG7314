@@ -108,8 +108,8 @@ object AirLabsRepository {
                 arrIata      = flight.optString("arr_iata", ""),
                 depTime      = flight.optString("dep_time", "").substringAfter(' ', ""),
                 arrTime      = flight.optString("arr_time", "").substringAfter(' ', ""),
-                depTerminal  = flight.optString("dep_terminal", ""),
-                depGate      = flight.optString("dep_gate", ""),
+                depTerminal  = flight.optString("dep_terminal", "").let { if (it == "null") "" else it },
+                depGate      = flight.optString("dep_gate",     "").let { if (it == "null") "" else it },
                 depDelayedMin = flight.optInt("dep_delayed", 0),
                 durationMin  = flight.optInt("duration", 0),
             )
