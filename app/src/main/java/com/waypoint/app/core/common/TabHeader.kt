@@ -67,6 +67,14 @@ import com.waypoint.app.core.theme.WaypointCard
 import com.waypoint.app.core.theme.WaypointTerracotta
 // imports `com.waypoint.app.core.theme.WaypointTextPrimary` for use in this file
 import com.waypoint.app.core.theme.WaypointTextPrimary
+// imports `androidx.compose.runtime.LaunchedEffect` for use in this file
+import androidx.compose.runtime.LaunchedEffect
+// imports `androidx.compose.runtime.collectAsState` for use in this file
+import androidx.compose.runtime.collectAsState
+// imports `androidx.lifecycle.viewmodel.compose.viewModel` for use in this file
+import androidx.lifecycle.viewmodel.compose.viewModel
+// imports `com.waypoint.app.features.notifications.ui.NotificationHistoryViewModel` for use in this file
+import com.waypoint.app.features.notifications.ui.NotificationHistoryViewModel
 
 // annotation `@Composable` applied to the declaration that follows
 @Composable
@@ -86,6 +94,11 @@ fun TabHeader(
 ) {
     // declares mutable property `showHistory`, delegated to `remember { mutableStateOf(false) }`
     var showHistory by remember { mutableStateOf(false) }
+    // scope the notification VM here so all TabHeader instances share the same unread state
+    val notifVm: NotificationHistoryViewModel = viewModel()
+    val notifState by notifVm.uiState.collectAsState()
+    // load notifications on first composition
+    LaunchedEffect(Unit) { notifVm.load() }
     // `if` statement: the block below runs when `showHistory` is true
     if (showHistory) {
         // calls `Dialog` with arguments `(onDismissRequest = { showHistory = false })`
@@ -120,7 +133,7 @@ fun TabHeader(
         // calls `Row` with arguments `(verticalAlignment = Alignment.CenterVertical…)` and opens a trailing lambda / block
         Row(verticalAlignment = Alignment.CenterVertically) {
             // calls `BellWithBadge` with arguments `(onClick = onBellClick ?: { showHistory = tru…)`
-            BellWithBadge(onClick = onBellClick ?: { showHistory = true })
+            BellWithBadge(onClick = onBellClick ?: { showHistory = true }, hasUnread = notifState.hasUnread)
             // `if` statement: the block below runs when `showAvatar` is true
             if (showAvatar) {
                 // `if` statement: the block below runs when `isOnline` is true
@@ -175,7 +188,7 @@ fun TabHeader(
 // annotation `@Composable` applied to the declaration that follows
 @Composable
 // declares function `BellWithBadge` taking 1 parameter (`onClick`) and opens its body
-fun BellWithBadge(onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun BellWithBadge(onClick: () -> Unit, hasUnread: Boolean = false, modifier: Modifier = Modifier) {
     // calls `Box` with arguments `(modifier = modifier)` and opens a trailing lambda / block
     Box(modifier = modifier) {
         // calls `Icon` with an argument list that continues on the following lines
@@ -194,31 +207,35 @@ fun BellWithBadge(onClick: () -> Unit, modifier: Modifier = Modifier) {
                 .clickable(onClick = onClick),
         // closes the multi-line argument list started above
         )
-        // calls `Box` with an argument list that continues on the following lines
-        Box(
-            // continues the statement started above: `modifier = Modifier`
-            modifier = Modifier
-                // continues the statement started above: `.align(Alignment.TopEnd)`
-                .align(Alignment.TopEnd)
-                // continues the statement started above: `.size(9.dp)`
-                .size(9.dp)
-                // continues the statement started above: `.background(WaypointCard, CircleShape),`
-                .background(WaypointCard, CircleShape),
-        // ends the argument list started above and opens the block that follows
-        ) {
+        // only show the red dot when there are unread notifications
+        if (hasUnread) {
             // calls `Box` with an argument list that continues on the following lines
             Box(
                 // continues the statement started above: `modifier = Modifier`
                 modifier = Modifier
-                    // continues the statement started above: `.align(Alignment.Center)`
-                    .align(Alignment.Center)
-                    // continues the statement started above: `.size(6.dp)`
-                    .size(6.dp)
-                    // continues the statement started above: `.background(WaypointTerracotta, CircleShape),`
-                    .background(WaypointTerracotta, CircleShape),
-            // closes the multi-line argument list started above
-            )
-        // closes the block
+                    // continues the statement started above: `.align(Alignment.TopEnd)`
+                    .align(Alignment.TopEnd)
+                    // continues the statement started above: `.size(9.dp)`
+                    .size(9.dp)
+                    // continues the statement started above: `.background(WaypointCard, CircleShape),`
+                    .background(WaypointCard, CircleShape),
+            // ends the argument list started above and opens the block that follows
+            ) {
+                // calls `Box` with an argument list that continues on the following lines
+                Box(
+                    // continues the statement started above: `modifier = Modifier`
+                    modifier = Modifier
+                        // continues the statement started above: `.align(Alignment.Center)`
+                        .align(Alignment.Center)
+                        // continues the statement started above: `.size(6.dp)`
+                        .size(6.dp)
+                        // continues the statement started above: `.background(WaypointTerracotta, CircleShape),`
+                        .background(WaypointTerracotta, CircleShape),
+                // closes the multi-line argument list started above
+                )
+            // closes the block
+            }
+        // closes the if block
         }
     // closes the lambda passed to `Box`
     }
