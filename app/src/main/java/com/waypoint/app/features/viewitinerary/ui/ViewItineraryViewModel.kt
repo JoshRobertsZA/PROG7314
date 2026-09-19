@@ -174,6 +174,11 @@ class ViewItineraryViewModel(
             if (result != null) {
                 flightStatusCache[iata] = Pair(System.currentTimeMillis(), result)
                 _uiState.update { it.copy(flightStatus = FlightStatusState.Success(result)) }
+                // refresh flight list so arrival time updates on the card for active/landed flights
+                val dayId = _uiState.value.days.getOrNull(_uiState.value.activeDayIndex)?.dayId
+                if (dayId != null) {
+                    _uiState.update { it.copy(flightsForActiveDay = loadFlightsFor(dayId)) }
+                }
             } else {
                 // cache the miss for 2 minutes so rapid re-taps on an unknown flight don't burn quota
                 val missResult = AirLabsRepository.FlightStatusResult(iata, "not_found", "", "", "", "", "", "", 0, 0)
@@ -190,11 +195,18 @@ class ViewItineraryViewModel(
 
     // declares private suspend function `loadFlightsFor` taking 1 parameter (`dayId`), returning `List<ViewFlightItem>`; its body is the expression ``
     private suspend fun loadFlightsFor(dayId: String): List<ViewFlightItem> =
-        // continues the statement started above: `repo.getFlightsForDays(listOf(dayId)).map { f ->`
         repo.getFlightsForDays(listOf(dayId)).map { f ->
-            // continues the statement started above: `ViewFlightItem(id = f.id, flightNumber = f.flightNumber, pd…`
-            ViewFlightItem(id = f.id, flightNumber = f.flightNumber, pdfUri = f.pdfUri, departureTime = f.departureTime?.takeIf { it != AirLabsRepository.AIRLABS_MISS }, docName = f.docName)
-        // closes the block
+            val iata = f.flightNumber?.replace(" ", "")?.uppercase()
+            val cached = if (iata != null) flightStatusCache[iata] else null
+            val isAirborne = cached != null && cached.second.status.lowercase() in listOf("active", "landed")
+            ViewFlightItem(
+                id            = f.id,
+                flightNumber  = f.flightNumber,
+                pdfUri        = f.pdfUri,
+                departureTime = f.departureTime?.takeIf { it != AirLabsRepository.AIRLABS_MISS },
+                arrivalTime   = if (isAirborne) cached!!.second.arrTime.substringAfter(" ", cached.second.arrTime).takeIf { it.isNotBlank() } else null,
+                docName       = f.docName,
+            )
         }
 
     // declares private suspend function `loadPlacesFor` taking 1 parameter (`dayId`), returning `Map<String, List<ViewPlaceItem>>` and opens its body

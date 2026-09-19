@@ -24,6 +24,10 @@ import kotlinx.coroutines.flow.asStateFlow
 // imports `kotlinx.coroutines.flow.update` for use in this file
 import kotlinx.coroutines.flow.update
 // imports `kotlinx.coroutines.launch` for use in this file
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 // imports `java.time.LocalDate` for use in this file
 import java.time.LocalDate
@@ -42,6 +46,8 @@ class EditItineraryViewModel(
 
     // declares private read-only property `repo`, initialised with the result of calling `ItineraryRepository(…)`
     private val repo = ItineraryRepository(application)
+    // debounce jobs: one per flight id, cancelled on each new keystroke
+    private val depTimeLookupJobs = HashMap<String, Job>()
 
     // declares private read-only property `_uiState`, initialised with the result of calling `MutableStateFlow(…)`
     private val _uiState = MutableStateFlow(EditItineraryUiState())
@@ -356,23 +362,33 @@ class EditItineraryViewModel(
 
     // declares function `onFlightNumberChanged` taking 2 parameters (`flightId`, `number`) and opens its body
     fun onFlightNumberChanged(flightId: String, number: String) {
-        // expression: `_uiState.update { state ->`
         _uiState.update { state ->
-            // continues the statement started above: `state.copy(`
             state.copy(
-                // continues the statement started above: `flightsForActiveDay = state.flightsForActiveDay.map { f ->`
                 flightsForActiveDay = state.flightsForActiveDay.map { f ->
-                    // continues the statement started above: `if (f.id == flightId) f.copy(flightNumber = number) else f`
                     if (f.id == flightId) f.copy(flightNumber = number) else f
-                // closes the block
                 }
-            // closes the multi-line argument list started above
             )
-        // closes the block
         }
-        // expression: `viewModelScope.launch { repo.updateFlightNumber(flightId, number…`
         viewModelScope.launch { repo.updateFlightNumber(flightId, number) }
-    // closes the function `onFlightNumberChanged`
+        // auto-fill departure time: debounce 1.5 s then call AirLabs
+        depTimeLookupJobs[flightId]?.cancel()
+        val iata = number.replace(" ", "").uppercase()
+        if (iata.length >= 4) {
+            depTimeLookupJobs[flightId] = viewModelScope.launch {
+                delay(1_500)
+                val time = AirLabsRepository.lookupDepartureTime(iata)
+                if (time != null) {
+                    repo.updateFlightDepartureTime(flightId, time)
+                    _uiState.update { state ->
+                        state.copy(
+                            flightsForActiveDay = state.flightsForActiveDay.map { f ->
+                                if (f.id == flightId) f.copy(departureTime = time) else f
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 
     // declares function `onFlightDepartureTimeChanged` taking 2 parameters (`flightId`, `time`) and opens its body

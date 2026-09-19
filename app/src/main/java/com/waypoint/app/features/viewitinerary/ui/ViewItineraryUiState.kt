@@ -21,9 +21,9 @@ data class ViewFlightItem(
     val flightNumber: String?,
     // continues the statement started above: `val pdfUri: String,`
     val pdfUri: String,
-    // continues the statement started above: `val departureTime: String? = null,`
     val departureTime: String? = null,
-    // continues the statement started above: `val docName: String? = null,`
+    // arrival time populated from AirLabs status cache when flight is active or landed
+    val arrivalTime: String? = null,
     val docName: String? = null,
 // closes the multi-line argument list started above
 )

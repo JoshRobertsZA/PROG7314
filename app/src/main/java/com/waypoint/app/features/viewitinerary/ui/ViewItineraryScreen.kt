@@ -581,19 +581,15 @@ private fun ViewFlightCard(flight: ViewFlightItem, onStatusClick: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     modifier   = Modifier.clickable(enabled = flight.flightNumber?.isNotBlank() == true) { onStatusClick() },
                 )
-                // calls `Text` with an argument list that continues on the following lines
+                // show arrival time when airborne, departure time otherwise
+                val timeText = flight.arrivalTime?.let { "Arrives $it" }
+                    ?: flight.departureTime?.let { stringResource(R.string.edit_itinerary_flight_departs, it) }
+                    ?: stringResource(R.string.view_itinerary_flight_no_time)
                 Text(
-                    // continues the statement started above: `text = flight.departureTime?.let { stringResource(R.string.…`
-                    text     = flight.departureTime?.let { stringResource(R.string.edit_itinerary_flight_departs, it) }
-                               // continues the statement started above: `?: stringResource(R.string.view_itinerary_flight_no_time),`
-                               ?: stringResource(R.string.view_itinerary_flight_no_time),
-                    // continues the statement started above: `color = WaypointTextMuted,`
+                    text     = timeText,
                     color    = WaypointTextMuted,
-                    // continues the statement started above: `fontSize = 11.sp,`
                     fontSize = 11.sp,
-                    // continues the statement started above: `modifier = Modifier.padding(top = 3.dp),`
                     modifier = Modifier.padding(top = 3.dp),
-                // closes the multi-line argument list started above
                 )
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
