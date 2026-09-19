@@ -72,25 +72,7 @@ class ItineraryRepository(context: Context) {
                 // expression: `map`
                 map
             // closes the lambda assigned to `existing`
-            }
 
-            // declares read-only property `datesToRemove`, initialised to `existing.keys - days`
-            val datesToRemove = existing.keys - days
-            // `for` loop: iterates over `datesToRemove`, binding each element to `date`
-            for (date in datesToRemove) {
-                // declares read-only property `id`, initialised to `existing[date] ?: continue`
-                val id = existing[date] ?: continue
-                // calls `delete` on `write` with an argument list that continues on the following lines
-                write.delete(
-                    // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_DAYS,`
-                    WaypointDbHelper.TABLE_ITIN_DAYS,
-                    // continues the statement started above: `"${WaypointDbHelper.COL_IDAY_ID} = ?",`
-                    "${WaypointDbHelper.COL_IDAY_ID} = ?",
-                    // continues the statement started above: `arrayOf(id),`
-                    arrayOf(id),
-                // closes the multi-line argument list started above
-                )
-            // closes the for loop
             }
 
             // declares read-only property `datesToAdd`, initialised to `days - existing.keys`
