@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="25dp"
+    android:height="25dp"
+    android:viewportWidth="25"
+    android:viewportHeight="25"
+    android:tint="@color/waypoint_terracotta">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M13.3516,2.83594C12.8711,2.39062 12.1289,2.39062 11.6523,2.83594L2.90234,10.9609C2.52734,11.3125 2.40234,11.8555 2.58984,12.332C2.77734,12.8086 3.23437,13.125 3.75,13.125H4.375V20C4.375,21.3789 5.49609,22.5 6.875,22.5H18.125C19.5039,22.5 20.625,21.3789 20.625,20V13.125H21.25C21.7656,13.125 22.2266,12.8086 22.4141,12.332C22.6016,11.8555 22.4766,11.3086 22.1016,10.9609L13.3516,2.83594ZM11.875,15H13.125C14.1602,15 15,15.8398 15,16.875V20.625H10V16.875C10,15.8398 10.8398,15 11.875,15Z" />
+</vector>

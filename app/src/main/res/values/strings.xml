@@ -1,0 +1,368 @@
+<resources>
+    <string name="app_name" translatable="false">Waypoint</string>
+
+    <!-- Shared branding, used by TabHeader and HomeScreen -->
+    <string name="brand_name" translatable="false">Waypoint</string>
+    <string name="brand_tagline">Plan the route. Keep the story.</string>
+
+    <!-- Temporary nav on MainActivity until the real home/first screen is decided -->
+    <string name="main_go_to_trip_calendar">Go to Trip Calendar</string>
+    <string name="main_go_to_view_itinerary">Go to View Itinerary</string>
+    <string name="main_go_to_edit_itinerary">Go to Edit Itinerary</string>
+    <string name="main_go_to_all_trips">Go to All Trips</string>
+    <string name="main_go_to_settings">Go to Settings</string>
+    <string name="main_go_to_nearby_places">Go to Nearby Places</string>
+    <string name="main_go_to_home">Go to Home</string>
+
+    <!-- View itinerary screen (Figma node 58:2, "05 Waypoint — View Itinerary").
+         Trip name/dates, per-day weather, and every booking/place row's
+         content are intentionally left inline in activity_view_itinerary.xml,
+         not here, since they're mock content that will be set from code
+         once real trip/booking data exists. -->
+    <string name="itinerary_back_cd">Back</string>
+    <string name="itinerary_back_glyph" translatable="false">←</string>
+    <string name="itinerary_title">Itinerary</string>
+    <string name="itinerary_header_flights">Flights</string>
+    <string name="itinerary_header_lodging">Lodging</string>
+    <string name="itinerary_header_car">Car rental</string>
+    <string name="itinerary_header_food">Restaurants &amp; cafes</string>
+    <string name="itinerary_header_attractions">Attractions</string>
+    <string name="itinerary_header_entertainment">Entertainment</string>
+    <string name="itinerary_view_pdf">View PDF</string>
+    <string name="itinerary_empty_entertainment">No entertainment added for these days</string>
+
+    <!-- Trip calendar screen (Figma node 56:2, "04 Waypoint — Trip Calendar").
+         Trip name, date range, month label, day numbers, and the
+         selected-days summary are intentionally left inline in
+         activity_trip_calendar.xml, not here, since they're mock content
+         that will be set from code once real trip/date data exists. -->
+    <string name="calendar_back_cd">Back</string>
+    <string name="calendar_back_glyph" translatable="false">←</string>
+    <string name="calendar_edit_trip_glyph" translatable="false">✎</string>
+    <string name="calendar_prev_month_glyph" translatable="false">‹</string>
+    <string name="calendar_next_month_glyph" translatable="false">›</string>
+    <string name="calendar_wd_sun" translatable="false">S</string>
+    <string name="calendar_wd_mon" translatable="false">M</string>
+    <string name="calendar_wd_tue" translatable="false">T</string>
+    <string name="calendar_wd_wed" translatable="false">W</string>
+    <string name="calendar_wd_thu" translatable="false">T</string>
+    <string name="calendar_wd_fri" translatable="false">F</string>
+    <string name="calendar_wd_sat" translatable="false">S</string>
+    <string name="calendar_view_itinerary">View itinerary</string>
+    <string name="view_itinerary_title">View itinerary</string>
+    <string name="view_itinerary_back_glyph" translatable="false">&#8592;</string>
+    <string name="view_itinerary_back_cd">Back</string>
+    <string name="view_itinerary_no_flights">No flights uploaded</string>
+    <string name="view_itinerary_flight_no_time">Departure time not set</string>
+    <string name="view_itinerary_no_pdf_viewer">No app found to open PDFs</string>
+    <string name="view_itinerary_no_lodging">No lodging document</string>
+    <string name="view_itinerary_no_car">No car rental document</string>
+    <string name="view_itinerary_no_places">No places added</string>
+    <string name="view_itinerary_open_pdf_cd">Open PDF</string>
+    <string name="calendar_edit_itinerary">Edit itinerary</string>
+    <string name="calendar_edit_dates">Edit dates</string>
+    <string name="calendar_delete_trip">Delete trip</string>
+    <string name="calendar_delete_confirm_title">Delete this trip?</string>
+    <string name="calendar_delete_confirm_body">%1$s and its itinerary will be removed. This can\'t be undone.</string>
+    <string name="calendar_edit_dates_title">Change trip dates</string>
+    <string name="calendar_edit_dates_pick_start">Tap the new start date</string>
+    <string name="calendar_edit_dates_pick_end">Now tap the end date, then save</string>
+    <string name="common_cancel">Cancel</string>
+
+    <!-- Home screen (Figma node 47:30, "03 Waypoint — Home").
+         Reuses login_brand_name / login_tagline for the header, since the
+         brand name and tagline are shared across screens.
+         Mock content (trip name/dates/status, weather, currency, nearby
+         place names/subtitles) is intentionally left inline in
+         activity_home.xml, not here, since it will be replaced with
+         real/dynamic values set from code once the backend is wired up. -->
+    <string name="home_settings_cd">Settings</string>
+    <string name="home_upcoming_trip_label">UPCOMING TRIP</string>
+    <string name="home_ongoing_trip_label">ONGOING TRIP</string>
+    <string name="home_view_all_trips">View all trips</string>
+    <string name="home_new_trip">+ New trip</string>
+    <string name="home_nearby_places_title">Nearby places</string>
+    <string name="home_nearby_source">via LocationIQ</string>
+    <string name="home_map_cta">View all nearby places on map</string>
+    <string name="home_map_cta_arrow" translatable="false">→</string>
+    <string name="home_nav_home">Home</string>
+    <string name="home_nav_trips">Trips</string>
+    <string name="home_nav_explore">Explore</string>
+    <string name="home_nav_profile">Profile</string>
+
+    <!-- Welcome screen (Figma node 363:20, "Account Setup") -->
+    <string name="welcome_pin_cd">Location pin</string>
+    <string name="welcome_heading">Welcome</string>
+    <string name="welcome_subtitle">Sign in or create an account to start planning your trips.</string>
+    <string name="welcome_destinations_heading">Popular destinations</string>
+    <string name="welcome_google_cta">Continue with Google</string>
+    <string name="welcome_github_cta">Continue with GitHub</string>
+    <string name="welcome_disclaimer">By continuing, you agree to our Terms of Service and Privacy Policy.</string>
+
+    <!-- Shared Firebase Google Sign-In state (Welcome/Login/Register), see AuthViewModel -->
+    <string name="auth_signing_in">Signing in…</string>
+
+    <!-- Edit itinerary screen (Figma node 59:2, "06 Waypoint — Edit Itinerary").
+         Trip name/dates, per-day weather, and every booking/place row's
+         content are intentionally left inline in activity_edit_itinerary.xml,
+         not here, since they're mock content that will be set from code
+         once real trip/booking data exists. -->
+    <string name="edit_itinerary_back_cd">Back</string>
+    <string name="edit_itinerary_back_glyph" translatable="false">←</string>
+    <string name="edit_itinerary_title">Edit itinerary</string>
+    <string name="edit_itinerary_header_flights">Flights</string>
+    <string name="edit_itinerary_header_lodging">Lodging</string>
+    <string name="edit_itinerary_header_car">Car rental</string>
+    <string name="edit_itinerary_header_food">Restaurants &amp; cafes</string>
+    <string name="edit_itinerary_header_hotels">Hotels</string>
+    <string name="edit_itinerary_header_parks">Parks</string>
+    <string name="edit_itinerary_header_pubs">Pubs</string>
+    <string name="edit_itinerary_header_cinemas">Cinemas</string>
+    <string name="edit_itinerary_no_places">No places added yet</string>
+    <string name="edit_itinerary_remove_place_cd">Remove place</string>
+    <string name="edit_itinerary_note_hint">Add a note...</string>
+    <string name="edit_itinerary_upload_chip">+ Upload</string>
+    <string name="edit_itinerary_add_chip">+ Add</string>
+    <string name="edit_itinerary_undo_glyph" translatable="false">↺</string>
+    <string name="edit_itinerary_close_glyph" translatable="false">✕</string>
+    <string name="edit_itinerary_edit_glyph" translatable="false">✎</string>
+    <string name="edit_itinerary_replace_flight_doc_cd">Replace flight document</string>
+    <string name="edit_itinerary_remove_flight_cd">Remove flight</string>
+    <string name="edit_itinerary_replace_lodging_doc_cd">Replace lodging document</string>
+    <string name="edit_itinerary_remove_lodging_cd">Remove lodging</string>
+    <string name="edit_itinerary_replace_car_doc_cd">Replace car rental document</string>
+    <string name="edit_itinerary_remove_car_cd">Remove car rental</string>
+    <string name="edit_itinerary_edit_place_cd">Edit place</string>
+    <string name="edit_itinerary_flight_number_hint">Flight number (e.g. SA 123)</string>
+    <string name="edit_itinerary_lodging_doc">Lodging document</string>
+    <string name="edit_itinerary_car_doc">Car rental document</string>
+    <string name="edit_itinerary_remove_doc_cd">Remove document</string>
+    <string name="edit_itinerary_no_pdf_uploaded">No PDF uploaded yet</string>
+    <string name="edit_itinerary_day_label_cd">Day card</string>
+
+    <!-- All trips screen (Figma node 60:2, "07 Waypoint — All Trips").
+         Every trip card's content (name, destination, dates, and the
+         status badge text - "In 8 days"/"Ongoing"/"Completed"/etc.) is
+         intentionally left inline in activity_all_trips.xml, not here,
+         since it's mock content that will be computed/set from code once
+         real trip data exists. -->
+    <string name="all_trips_back_cd">Back</string>
+    <string name="all_trips_back_glyph" translatable="false">←</string>
+    <string name="all_trips_title">All trips</string>
+    <string name="all_trips_search_hint">Search trips by name or date</string>
+    <string name="all_trips_filter_all">All</string>
+    <string name="all_trips_filter_upcoming">Upcoming</string>
+    <string name="all_trips_filter_ongoing">Ongoing</string>
+    <string name="all_trips_filter_past">Past</string>
+
+    <!-- New trip screen (Figma node 61:2, "08 Waypoint — New Trip").
+         The displayed month, "today", and the selected day range are
+         intentionally left inline in activity_new_trip.xml, not here,
+         since they're mock content that will be computed from the real
+         device date and user selection once this screen is wired up. -->
+    <string name="new_trip_close_cd">Close</string>
+    <string name="new_trip_close_glyph" translatable="false">✕</string>
+    <string name="new_trip_title">New trip</string>
+    <string name="new_trip_name_label">Trip name</string>
+    <string name="new_trip_name_hint">e.g. Cape Town Getaway</string>
+    <string name="new_trip_dates_label">Select trip dates</string>
+    <string name="new_trip_dates_subtitle">Only today and future dates can be selected</string>
+    <string name="new_trip_prev_month_glyph" translatable="false">‹</string>
+    <string name="new_trip_next_month_glyph" translatable="false">›</string>
+    <string name="new_trip_wd_sun" translatable="false">S</string>
+    <string name="new_trip_wd_mon" translatable="false">M</string>
+    <string name="new_trip_wd_tue" translatable="false">T</string>
+    <string name="new_trip_wd_wed" translatable="false">W</string>
+    <string name="new_trip_wd_thu" translatable="false">T</string>
+    <string name="new_trip_wd_fri" translatable="false">F</string>
+    <string name="new_trip_wd_sat" translatable="false">S</string>
+    <string name="new_trip_save_button">Save trip</string>
+    <string name="new_trip_footer_hint">You’ll land on the edit itinerary screen next — your trip will only have a name and dates until you add flights, stays, and places.</string>
+
+    <!-- Explore screen (Figma node 62:2, "Core Navigation" section - the
+         Explore tab root). Was previously misnamed NearbyPlacesScreen and
+         given a back-button header; that name is reserved for the actual
+         Figma node 408:12 "Nearby Places" screen, which doesn't exist yet.
+         The entered town, results header, and each place's name/category/
+         distance are intentionally left inline, not here, since they're
+         mock content that will be set from code once real LocationIQ/
+         Wikipedia data exists. -->
+    <string name="explore_search_glyph" translatable="false">→</string>
+    <string name="explore_helper">Enter a town or city — e.g. Cape Town, London</string>
+    <string name="explore_filter_all">All</string>
+    <string name="explore_filter_restaurants">Restaurants</string>
+    <string name="explore_filter_cafes">Cafes</string>
+    <string name="explore_filter_parks">Parks</string>
+    <string name="explore_filter_pubs">Pubs</string>
+    <string name="explore_filter_cinemas">Cinemas</string>
+    <string name="explore_filter_hotels">Hotels</string>
+    <string name="explore_attribution">via LocationIQ</string>
+
+    <!-- Shared tab-root header (core/common/TabHeader.kt): brand + bell
+         (+ avatar on every tab except Profile, whose own avatar is the
+         screen's subject). -->
+    <string name="tab_header_avatar_cd">Profile photo</string>
+    <string name="tab_header_bell_cd">Notifications</string>
+    <string name="tab_header_offline_cd">Offline indicator</string>
+
+    <!-- Profile screen (Figma node 281:20, "Core Navigation" section -
+         the Profile tab root, replacing the old Settings screen that was
+         built against the wrong node, 83:2). -->
+    <string name="profile_stat_planned_label">Planned this year</string>
+    <string name="profile_stat_created_label">Created on Waypoint</string>
+    <plurals name="profile_stat_trips">
+        <item quantity="one">%d trip</item>
+        <item quantity="other">%d trips</item>
+    </plurals>
+    <string name="profile_preferences_header">Preferences</string>
+    <string name="profile_notifications_title">Notifications</string>
+    <string name="profile_notifications_subtitle">Flight, weather, and trip alerts</string>
+    <string name="profile_language_title">Language</string>
+    <string name="profile_language_subtitle">App display language</string>
+    <string name="profile_biometric_title">Biometric login</string>
+    <string name="profile_biometric_subtitle">Face ID or fingerprint sign-in</string>
+    <string name="profile_biometric_unavailable_no_hardware">Not supported on this device</string>
+    <string name="profile_biometric_unavailable_none_enrolled">No biometrics set up on this device</string>
+    <string name="profile_biometric_enable_title">Enable biometric login</string>
+    <string name="profile_biometric_enable_subtitle">Confirm it\'s you to turn this on</string>
+    <string name="profile_chevron_glyph" translatable="false">›</string>
+    <string name="profile_logout">Log out</string>
+
+    <!-- Biometric app-unlock overlay, shown when Settings' "Biometric
+         login" is enabled and the app resumes from the background. -->
+    <string name="biometric_lock_title">Unlock Waypoint</string>
+    <string name="biometric_lock_subtitle">Confirm it\'s you to continue</string>
+    <string name="biometric_lock_prompt_title">Unlock Waypoint</string>
+    <string name="biometric_lock_prompt_subtitle">Use your face or fingerprint to continue</string>
+    <string name="biometric_lock_unlock_button">Unlock</string>
+    <string name="biometric_lock_cancel">Cancel</string>
+
+    <!-- Language modal (Figma node 394:62, "Settings — Change language").
+         Option labels come from AppLanguage.displayName, not string
+         resources - language names are shown in their own native form
+         regardless of the app's current locale, so they aren't
+         translated the way language_modal_title is. Its Save button
+         reuses modal_save_button (see SelectionModal) rather than its
+         own string, since it's the same shared shell as the Currency
+         Change modal. -->
+    <string name="language_modal_title">Change language</string>
+    <!-- Offline dialog (core/common/OfflineDialog.kt) -->
+    <string name="offline_dialog_title">No internet connection</string>
+    <string name="offline_dialog_body">Check your connection and try again. Some features may be unavailable while you\'re offline.</string>
+    <string name="offline_dialog_okay">Okay</string>
+    <string name="offline_bubble_body">You\'re still offline. Some features may be unavailable until you reconnect.</string>
+
+    <!-- Notifications screen (Figma section 312:1175) -->
+    <string name="notifications_back_glyph" translatable="false">←</string>
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_mark_all_read">Mark all read</string>
+    <string name="notifications_clear_all">Clear all</string>
+    <string name="notifications_empty_title">You\'re all caught up</string>
+    <string name="notifications_empty_subtitle">New notifications will appear here</string>
+    <string name="notifications_empty_check_cd">All caught up</string>
+    <!-- Place Detail screen (Figma node 380:12, "Place Detail" - tap-through
+         target from the node 408:12 "Nearby Places" screen, which doesn't
+         exist yet). Place name/category/distance, weather, hours, and the
+         About description are intentionally left inline in code, not here,
+         since they're mock content that will be set from real LocationIQ/
+         Wikipedia data once the backend is wired up. -->
+    <string name="place_detail_back_cd">Back</string>
+    <string name="place_detail_back_glyph" translatable="false">←</string>
+    <string name="place_detail_about_header">About</string>
+    <string name="place_detail_wikipedia_attribution">via Wikipedia</string>
+    <string name="place_detail_location_header">Location</string>
+    <string name="place_detail_open_in_maps">Open in Maps →</string>
+    <string name="place_detail_add_to_itinerary">+ Add to itinerary</string>
+
+    <!-- Shared modal shell (core/common/SelectionModal.kt). Currently used
+         by the Currency Change modal (Figma node 392:12); the Language
+         modal (Figma node 394:62) is the same shell but is being built on
+         its own branch. -->
+    <string name="modal_save_button">Save</string>
+
+    <!-- Currency Change modal (Figma node 392:12). The USD/ZAR values are
+         intentionally left inline in code, not here, since they're mock
+         content that will be set from real ExchangeRate-API data once the
+         backend is wired up. -->
+    <string name="currency_modal_title">Currency change</string>
+    <string name="currency_modal_arrow_glyph" translatable="false">→</string>
+
+    <!-- Push notifications (Firebase Cloud Messaging) -->
+    <string name="notification_channel_id" translatable="false">waypoint_default</string>
+    <string name="notification_channel_name">Trip updates</string>
+    <string name="notification_channel_description">Reminders and alerts about your trips</string>
+    <string name="notification_welcome_title">Welcome back!</string>
+    <string name="notification_welcome_title_named">Welcome back, %1$s!</string>
+    <string name="notification_welcome_body">Your trips are ready whenever you are.</string>
+    <!-- Flight departure time (Edit Itinerary) -->
+    <string name="edit_itinerary_flight_set_time">Set departure time</string>
+    <string name="edit_itinerary_flight_departs">Departs %1$s</string>
+
+    <!-- Scheduled trip reminders (TripReminderWorker) -->
+    <string name="reminder_countdown_title">%1$d days to go!</string>
+    <string name="reminder_countdown_body">%1$s to %2$s is coming up. Time to check your itinerary.</string>
+    <string name="reminder_no_plan_title">%1$s is in 5 days</string>
+    <string name="reminder_no_plan_body">You haven\'t planned anything for %1$s yet. Open Waypoint to add your itinerary.</string>
+    <string name="reminder_start_title">%1$s starts today!</string>
+    <string name="reminder_start_body">Have a great time in %1$s. Your itinerary is ready in the app.</string>
+    <string name="reminder_digest_title">Day %1$d of %2$s</string>
+    <string name="reminder_digest_places">Today: %1$s.</string>
+    <string name="reminder_digest_lodging">Check-in at your accommodation today.</string>
+    <string name="reminder_digest_car">Pick up your rental car today.</string>
+    <string name="reminder_digest_empty">Nothing planned for day %1$d in %2$s yet. Open the app to add something.</string>
+    <string name="reminder_flight_title">Flight reminder</string>
+    <string name="reminder_flight_unnamed">Your flight</string>
+    <string name="reminder_flight_today_body">%1$s departs today at %2$s. Check in and have your documents ready.</string>
+    <string name="reminder_flight_today_body_no_time">%1$s departs today. Check the time on your booking.</string>
+    <string name="reminder_flight_tomorrow_body">Early start: %1$s departs tomorrow at %2$s. Pack tonight.</string>
+    <string name="reminder_ended_title">How was %1$s?</string>
+    <string name="reminder_ended_body">Welcome home. Thanks for planning with Waypoint.</string>
+    <string name="reminder_weather_title">Weather in %1$s</string>
+    <string name="reminder_weather_body">%1$s and %2$d°C at your destination. Plan tomorrow accordingly.</string>
+    <!-- Localization sweep: strings previously hardcoded in Kotlin -->
+    <string name="all_trips_empty">No trips yet. Tap the button below to plan one!</string>
+    <string name="trip_badge_tomorrow">Tomorrow</string>
+    <string name="trip_badge_in_days">In %1$d days</string>
+    <string name="trip_badge_ongoing">Ongoing</string>
+    <string name="trip_badge_completed">Completed</string>
+    <string name="home_no_trips">No upcoming trips. Tap New Trip to get started!</string>
+    <string name="home_weather_unavailable">Weather unavailable</string>
+    <string name="home_tap_set_city">Tap to set city</string>
+    <string name="home_fetching_rate">Fetching rate…</string>
+    <string name="home_live_rate">Live rate</string>
+    <string name="home_rate_unavailable">Rate unavailable</string>
+    <string name="home_tap_retry">Tap to retry</string>
+    <string name="home_finding_places">Finding places near you…</string>
+    <string name="home_places_error">Could not load nearby places. Check your connection.</string>
+    <string name="home_places_permission">Allow location access to see places near you.</string>
+    <string name="explore_no_places">No places found for this filter.</string>
+    <string name="explore_load_error">Could not load places. Check your connection and try again.</string>
+    <string name="common_try_again">Try again</string>
+    <string name="common_loading">Loading…</string>
+    <string name="city_search_title">Select a city</string>
+    <string name="city_search_hint">Type a city name…</string>
+    <string name="city_search_no_results">No results found</string>
+    <string name="currency_modal_select">Select currency</string>
+    <string name="new_trip_destination_label">Destination</string>
+    <string name="year_picker_hint">Tap a month to jump to it</string>
+    <string name="calendar_overview">Trip overview</string>
+    <string name="calendar_duration">Duration</string>
+    <string name="calendar_destination">Destination</string>
+    <string name="calendar_add_destination">Add destination</string>
+    <string name="calendar_flight">Flight</string>
+    <string name="calendar_stay">Stay</string>
+    <string name="calendar_rental">Rental</string>
+    <string name="calendar_rename_trip">Rename trip</string>
+    <string name="view_itinerary_tap_details">Tap for details</string>
+    <string name="view_itinerary_no_description">No description available.</string>
+    <string name="view_itinerary_open_maps">Open in Maps</string>
+    <string name="place_at_location">At this location</string>
+    <plurals name="day_count">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="night_count_suffix">
+        <item quantity="one">night</item>
+        <item quantity="other">nights</item>
+    </plurals>
+</resources>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Waypoint brand palette (login screen, Figma node 64:2) -->
+    <color name="waypoint_splash_bg">#0F172A</color>
+    <color name="waypoint_cream">#F2E9D3</color>
+    <color name="waypoint_terracotta">#C1673D</color>
+    <color name="waypoint_text_primary">#473021</color>
+    <color name="waypoint_text_muted">#8C7866</color>
+    <color name="waypoint_border">#DADCDF</color>
+    <color name="waypoint_google_blue">#4285F4</color>
+    <color name="waypoint_google_text">#3C3D43</color>
+    <color name="waypoint_deco_text">#FFEBDE</color>
+
+    <!-- Shared "card" surface, reused across screens (Figma waypoint
+         cream #FCF8F0 fill: badges, buttons, widgets, rows, chips) -->
+    <color name="waypoint_card">#FCF8F0</color>
+    <color name="waypoint_border_soft">#D9CCB5</color>
+    <color name="waypoint_trip_badge_text">#A9522E</color>
+    <color name="waypoint_place_accent_1">#F1BD8A</color>
+    <color name="waypoint_place_accent_2">#C88C5A</color>
+    <color name="waypoint_place_accent_3">#E39D6B</color>
+
+    <!-- View / edit itinerary screens (Figma nodes 58:2, 59:2) -->
+    <color name="waypoint_place_accent_4">#A57F5B</color>
+
+    <!-- Trip calendar screen (Figma node 56:2, "04 Waypoint — Trip Calendar") -->
+    <color name="waypoint_day_muted">#B5AEA5</color>
+    <color name="waypoint_trip_range">#5B7FA5</color>
+
+    <!-- Home screen (Figma node 47:30, "03 Waypoint — Home") -->
+    <color name="waypoint_trip_label">#D9FFEBDE</color>
+
+    <!-- Shared bottom nav active-tab pill (Figma node 270:37, terracotta at 12% alpha) -->
+    <color name="waypoint_nav_active_pill">#1FC1673D</color>
+
+    <!-- Profile screen log out button border (Figma node 281:47) -->
+    <!-- Profile screen log out button border (Figma node 281:47) -->
+    <color name="waypoint_logout_border">#E8B4A0</color>
+
+    <!-- Welcome screen (Figma node 363:20)-->
+    <color name="welcome_gradient_top">#FFD9A0</color>
+    <color name="welcome_gradient_upper_mid">#FFB199</color>
+    <color name="welcome_gradient_mid">#E8848C</color>
+    <color name="welcome_gradient_lower_mid">#7C6B96</color>
+    <color name="welcome_gradient_bottom">#4B3B62</color>
+    <color name="welcome_pin_circle_bg">#26FFFFFF</color>
+    <color name="welcome_card_scrim">#BF000000</color>
+    <color name="welcome_card_accent_1">#C97FA8</color>
+    <color name="welcome_card_accent_2">#6B2F52</color>
+    <color name="welcome_card_accent_3">#6BC9C9</color>
+    <color name="welcome_card_accent_4">#2F6B6B</color>
+
+    <!-- Language modal -->
+    <color name="waypoint_radio_border_unselected">#E6DCC4</color>
+    <color name="waypoint_modal_scrim">#80000000</color>
+
+    <!-- Offline dialog -->
+    <color name="waypoint_offline_title">#261F1A</color>
+
+    <!-- Notifications screen -->
+    <color name="waypoint_notif_row_border">#E8C9A0</color>
+</resources>

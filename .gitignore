@@ -1,0 +1,49 @@
+# Built application files
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+/build
+/captures
+.externalNativeBuild
+.cxx
+
+# Gradle files
+.gradle/
+build/
+
+# Kotlin compiler session files (local build cache, not project state)
+.kotlin/
+
+# Local configuration file (SDK path, etc.)
+local.properties
+
+# API keys / secrets - never commit these
+apikey.properties
+secrets.properties
+/secrets/
+
+# Android Studio project files (excluding entire .idea)
+.idea/
+*.iml
+
+# Keystore files
+*.jks
+*.keystore
+
+# Log files
+*.log
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

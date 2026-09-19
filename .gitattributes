@@ -1,0 +1,22 @@
+# Force a consistent line ending (LF) for all text files, regardless of
+# which OS/tool checks them out (Windows GitHub Desktop vs. the Linux
+# sandbox used for parts of this project's tooling). Without this, Git's
+# per-platform autocrlf behavior flips files between CRLF/LF on checkout,
+# which shows up as every file being "modified" with no real content
+# change. Android/Gradle/Kotlin tooling doesn't care about LF vs CRLF, so
+# standardizing on LF avoids the churn entirely.
+* text=auto eol=lf
+
+# Common binary types some check-in soon (icons/keystores/fonts) - never
+# text-normalize these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.jar binary
+*.keystore binary
+*.jks binary
+*.ttf binary
+*.otf binary

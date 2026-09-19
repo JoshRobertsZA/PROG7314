@@ -1,0 +1,26 @@
+# Copy this file to apikey.properties (in the project root) and fill in
+# real values. apikey.properties is gitignored — never commit it.
+#
+# Where each key comes from:
+#   OPENWEATHER_API_KEY     -> https://openweathermap.org/api
+#   EXCHANGERATE_API_KEY    -> https://www.exchangerate-api.com/
+#   LOCATIONIQ_API_KEY      -> https://locationiq.com/
+#   AIRLABS_API_KEY         -> https://airlabs.co/
+#   COUNTERAPI_API_KEY      -> https://counterapi.dev/ (v2 requires a key)
+#   FIREBASE_WEB_CLIENT_ID  -> Firebase console -> Authentication -> Sign-in
+#                              method -> Google -> Web SDK configuration
+#                              ("Web client ID"). Also needs app/google-services.json
+#                              in place - see README for full Firebase setup steps.
+#
+# Leave a key blank to fall back to the shared team key cache instead -
+# see RemoteSecrets.kt. Only fill one in if you want to override it with
+# your own personal quota (a non-blank value here always wins).
+
+OPENWEATHER_API_KEY=
+EXCHANGERATE_API_KEY=
+LOCATIONIQ_API_KEY=
+AIRLABS_API_KEY=
+COUNTERAPI_API_KEY=
+COUNTERAPI_WORKSPACE=
+COUNTERAPI_PLACES_SLUG=
+FIREBASE_WEB_CLIENT_ID=

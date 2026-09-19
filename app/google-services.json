@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "287180570190",
+    "project_id": "waypoint-f040b",
+    "storage_bucket": "waypoint-f040b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:287180570190:android:4154f7ff7b2ddfaccd4d1f",
+        "android_client_info": {
+          "package_name": "com.waypoint.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "287180570190-qh6n4g28dsu6mi7jthgldvvbn70063f1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.waypoint.app",
+            "certificate_hash": "7a33aa3146ad790a1eecac33507aad7db24687d5"
+          }
+        },
+        {
+          "client_id": "287180570190-hfpuvtle0gggt4qmj5ua834s7t3fu4r7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsEEeOo7KEugmAUKWsOYivtHPtV8fb2ks"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "287180570190-hfpuvtle0gggt4qmj5ua834s7t3fu4r7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

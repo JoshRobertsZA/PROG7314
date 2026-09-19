@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static artwork extracted from waypoint.svg (the halo ring is animated
+     there via CSS, which Android's vector drawables can't run - the halo
+     is redrawn as its own animated Compose layer instead, see
+     PulsingPinBadge in WelcomeScreen.kt, using the same scale/opacity/
+     timing as the SVG's @keyframes pulse rule). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="46dp"
+    android:height="58dp"
+    android:viewportWidth="165"
+    android:viewportHeight="205">
+    <path
+        android:fillColor="#C1673D"
+        android:pathData="M137.14,117.71C143.466,107.893 147.029,96.5523 147.457,84.8814C147.884,73.2104 145.159,61.6399 139.567,51.3864C133.976,41.1328 125.726,32.5751 115.684,26.6128C105.642,20.6505 94.1788,17.5039 82.5,17.5039C70.8212,17.5039 59.3581,20.6505 49.316,26.6128C39.2738,32.5751 31.0235,41.1328 25.4325,51.3864C19.8415,61.6399 17.1163,73.2104 17.5435,84.8814C17.9707,96.5523 21.5344,107.893 27.86,117.71L82.5,202.5L137.14,117.71Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M82.5,110.5C97.964,110.5 110.5,97.964 110.5,82.5C110.5,67.036 97.964,54.5 82.5,54.5C67.036,54.5 54.5,67.036 54.5,82.5C54.5,97.964 67.036,110.5 82.5,110.5Z" />
+</vector>
