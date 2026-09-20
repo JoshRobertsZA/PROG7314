@@ -87,6 +87,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 // imports `androidx.compose.ui.window.Dialog` for use in this file
 import androidx.compose.ui.window.Dialog
+// imports `androidx.compose.ui.window.DialogProperties` for use in this file
 import androidx.compose.ui.window.DialogProperties
 // imports `androidx.lifecycle.viewmodel.compose.viewModel` for use in this file
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -100,8 +101,9 @@ import com.waypoint.app.core.common.AppButtonOutline
 import com.waypoint.app.core.common.TabHeader
 // imports `com.waypoint.app.core.common.RowSurface` for use in this file
 import com.waypoint.app.core.common.RowSurface
-// imports `com.waypoint.app.core.common.ThumbnailBlock` for use in this file
+// imports `com.waypoint.app.core.common.PlaceThumbnail` for use in this file
 import com.waypoint.app.core.common.PlaceThumbnail
+// imports `com.waypoint.app.core.common.ThumbnailBlock` for use in this file
 import com.waypoint.app.core.common.ThumbnailBlock
 // imports `com.waypoint.app.core.connectivity.rememberIsOnline` for use in this file
 import com.waypoint.app.core.connectivity.rememberIsOnline
@@ -167,11 +169,17 @@ fun placeTypeEmoji(type: String): String = when (type) {
 @Composable
 // expression: `fun HomeScreen(`
 fun HomeScreen(
+    // continues the statement started above: `onNewTripClick: () -> Unit,`
     onNewTripClick: () -> Unit,
+    // continues the statement started above: `onViewAllTripsClick: () -> Unit,`
     onViewAllTripsClick: () -> Unit,
+    // continues the statement started above: `onSettingsClick: () -> Unit,`
     onSettingsClick: () -> Unit,
+    // continues the statement started above: `onNotificationsClick: () -> Unit = {},`
     onNotificationsClick: () -> Unit = {},
+    // continues the statement started above: `onTripClick: (tripId: String) -> Unit = {},`
     onTripClick: (tripId: String) -> Unit = {},
+    // continues the statement started above: `modifier: Modifier = Modifier,`
     modifier: Modifier = Modifier,
     // continues the statement started above: `homeViewModel: HomeViewModel = viewModel(),`
     homeViewModel: HomeViewModel = viewModel(),
@@ -229,27 +237,49 @@ fun HomeScreen(
 
     // `if` statement: the block below runs when `showCurrencyModal` is true
     if (showCurrencyModal) {
+        // calls `Dialog` with an argument list that continues on the following lines
         Dialog(
+            // continues the statement started above: `onDismissRequest = { showCurrencyModal = false },`
             onDismissRequest = { showCurrencyModal = false },
+            // continues the statement started above: `properties = DialogProperties(usePlatformDefaultWidth = fal…`
             properties = DialogProperties(usePlatformDefaultWidth = false),
+        // ends the argument list started above and opens the block that follows
         ) {
+            // declares read-only property `currencyState`, initialised to `state.currency`
             val currencyState = state.currency
+            // calls `Box` with an argument list that continues on the following lines
             Box(
+                // continues the statement started above: `modifier = Modifier`
                 modifier = Modifier
+                    // continues the statement started above: `.fillMaxWidth()`
                     .fillMaxWidth()
+                    // continues the statement started above: `.padding(horizontal = 16.dp),`
                     .padding(horizontal = 16.dp),
+            // ends the argument list started above and opens the block that follows
             ) {
+                // calls `CurrencyExchangeModal` with an argument list that continues on the following lines
                 CurrencyExchangeModal(
+                    // continues the statement started above: `onSaveClick = { showCurrencyModal = false },`
                     onSaveClick = { showCurrencyModal = false },
+                    // continues the statement started above: `fromCode = state.selectedFromCurrency,`
                     fromCode = state.selectedFromCurrency,
+                    // continues the statement started above: `rate = if (currencyState is CurrencyState.Success) currency…`
                     rate = if (currencyState is CurrencyState.Success) currencyState.data.rate else null,
+                    // continues the statement started above: `isLoading = currencyState is CurrencyState.Loading,`
                     isLoading = currencyState is CurrencyState.Loading,
+                    // continues the statement started above: `onFromCodeChanged = { code ->`
                     onFromCodeChanged = { code ->
+                        // continues the statement started above: `homeViewModel.selectFromCurrency(code)`
                         homeViewModel.selectFromCurrency(code)
+                    // closes the block
                     },
+                // closes the multi-line argument list started above
                 )
+            // closes the block
             }
+        // closes the block
         }
+    // closes the if block
     }
 
     // calls `Column` with an argument list that continues on the following lines
@@ -302,9 +332,13 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState()),
         // ends the argument list started above and opens the block that follows
         ) {
+            // calls `TabHeader` with an argument list that continues on the following lines
             TabHeader(
+                // continues the statement started above: `onAvatarClick = onSettingsClick,`
                 onAvatarClick = onSettingsClick,
+                // continues the statement started above: `onBellClick = onNotificationsClick,`
                 onBellClick = onNotificationsClick,
+            // closes the multi-line argument list started above
             )
 
             // calls `Text` with an argument list that continues on the following lines
@@ -829,7 +863,7 @@ fun HomeScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                 // ends the argument list started above and opens the block that follows
                                 ) {
-                                    // calls `ThumbnailBlock` with arguments `(accentColor = accent, cornerRadius = RadiusT…)`
+                                    // calls `PlaceThumbnail` with arguments `(type = place.type, accentColor = accent, lab…)`
                                     PlaceThumbnail(type = place.type, accentColor = accent, label = placeTypeEmoji(place.type))
                                     // calls `Column` with arguments `(modifier = Modifier.padding(start = 12.dp))` and opens a trailing lambda / block
                                     Column(modifier = Modifier.padding(start = 12.dp)) {

@@ -97,8 +97,9 @@ import com.waypoint.app.core.cache.ExplorePlace
 import com.waypoint.app.core.common.RowSurface
 // imports `com.waypoint.app.core.common.TabHeader` for use in this file
 import com.waypoint.app.core.common.TabHeader
-// imports `com.waypoint.app.core.common.ThumbnailBlock` for use in this file
+// imports `com.waypoint.app.core.common.PlaceThumbnail` for use in this file
 import com.waypoint.app.core.common.PlaceThumbnail
+// imports `com.waypoint.app.core.common.ThumbnailBlock` for use in this file
 import com.waypoint.app.core.common.ThumbnailBlock
 // imports `com.waypoint.app.core.theme.RadiusButton` for use in this file
 import com.waypoint.app.core.theme.RadiusButton
@@ -148,9 +149,13 @@ private val accentCycle = listOf(
 @Composable
 // expression: `fun ExploreScreen(`
 fun ExploreScreen(
+    // continues the statement started above: `exploreViewModel: ExploreViewModel,`
     exploreViewModel: ExploreViewModel,
+    // continues the statement started above: `modifier: Modifier = Modifier,`
     modifier: Modifier = Modifier,
+    // continues the statement started above: `onNotificationsClick: () -> Unit = {},`
     onNotificationsClick: () -> Unit = {},
+// ends the argument list started above and opens the block that follows
 ) {
     // declares read-only property `state`, delegated to `exploreViewModel.uiState.collectAsState…`
     val state by exploreViewModel.uiState.collectAsState()
@@ -264,6 +269,7 @@ fun ExploreScreen(
                 .verticalScroll(rememberScrollState()),
         // ends the argument list started above and opens the block that follows
         ) {
+            // calls `TabHeader` with arguments `(onBellClick = onNotificationsClick)`
             TabHeader(onBellClick = onNotificationsClick)
 
             // calls `Box` with an argument list that continues on the following lines
@@ -594,11 +600,15 @@ private fun PlacesList(places: List<ExplorePlace>) {
                     verticalAlignment = Alignment.CenterVertically,
                 // ends the argument list started above and opens the block that follows
                 ) {
-                    // calls `ThumbnailBlock` with an argument list that continues on the following lines
+                    // calls `PlaceThumbnail` with an argument list that continues on the following lines
                     PlaceThumbnail(
+                        // continues the statement started above: `type = place.type,`
                         type        = place.type,
+                        // continues the statement started above: `accentColor = accentCycle[index % accentCycle.size],`
                         accentColor = accentCycle[index % accentCycle.size],
+                        // continues the statement started above: `label = placeTypeEmoji(place.type),`
                         label       = placeTypeEmoji(place.type),
+                    // closes the multi-line argument list started above
                     )
                     // calls `Column` with arguments `(modifier = Modifier.padding(start = 12.dp))` and opens a trailing lambda / block
                     Column(modifier = Modifier.padding(start = 12.dp)) {

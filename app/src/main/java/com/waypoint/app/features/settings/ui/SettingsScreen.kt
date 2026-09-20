@@ -11,17 +11,29 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 // imports `androidx.compose.foundation.clickable` for use in this file
 import androidx.compose.foundation.clickable
+// imports `androidx.compose.foundation.layout.Arrangement` for use in this file
 import androidx.compose.foundation.layout.Arrangement
+// imports `androidx.compose.foundation.layout.Box` for use in this file
 import androidx.compose.foundation.layout.Box
+// imports `androidx.compose.foundation.layout.Column` for use in this file
 import androidx.compose.foundation.layout.Column
+// imports `androidx.compose.foundation.layout.Row` for use in this file
 import androidx.compose.foundation.layout.Row
+// imports `androidx.compose.foundation.layout.Spacer` for use in this file
 import androidx.compose.foundation.layout.Spacer
+// imports `androidx.compose.foundation.layout.WindowInsets` for use in this file
 import androidx.compose.foundation.layout.WindowInsets
+// imports `androidx.compose.foundation.layout.fillMaxSize` for use in this file
 import androidx.compose.foundation.layout.fillMaxSize
+// imports `androidx.compose.foundation.layout.fillMaxWidth` for use in this file
 import androidx.compose.foundation.layout.fillMaxWidth
+// imports `androidx.compose.foundation.layout.height` for use in this file
 import androidx.compose.foundation.layout.height
+// imports `androidx.compose.foundation.layout.padding` for use in this file
 import androidx.compose.foundation.layout.padding
+// imports `androidx.compose.foundation.layout.size` for use in this file
 import androidx.compose.foundation.layout.size
+// imports `com.waypoint.app.core.theme.White` for use in this file
 import com.waypoint.app.core.theme.White
 // imports `androidx.compose.foundation.layout.statusBars` for use in this file
 import androidx.compose.foundation.layout.statusBars
@@ -77,6 +89,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 // imports `androidx.compose.ui.window.Dialog` for use in this file
 import androidx.compose.ui.window.Dialog
+// imports `androidx.compose.ui.window.DialogProperties` for use in this file
 import androidx.compose.ui.window.DialogProperties
 // imports `androidx.core.os.LocaleListCompat` for use in this file
 import androidx.core.os.LocaleListCompat
@@ -123,18 +136,26 @@ import com.waypoint.app.core.theme.WaypointTextPrimary
 @Composable
 // expression: `fun SettingsScreen(`
 fun SettingsScreen(
+    // continues the statement started above: `modifier: Modifier = Modifier,`
     modifier: Modifier = Modifier,
+    // continues the statement started above: `onLogoutClick: () -> Unit = {},`
     onLogoutClick: () -> Unit = {},
+    // continues the statement started above: `onNotificationsClick: () -> Unit = {},`
     onNotificationsClick: () -> Unit = {},
+    // continues the statement started above: `viewModel: SettingsViewModel = viewModel(),`
     viewModel: SettingsViewModel = viewModel(),
+// ends the argument list started above and opens the block that follows
 ) {
     // declares read-only property `uiState`, delegated to `viewModel.uiState.collectAsState()`
     val uiState by viewModel.uiState.collectAsState()
     // calls `LaunchedEffect` with arguments `(Unit)`
     LaunchedEffect(Unit) { viewModel.loadTripCounts() }
 
+    // declares mutable property `selectedLanguage`, delegated to `remember { mutableStateOf(AppLanguage.c…`
     var selectedLanguage by remember { mutableStateOf(AppLanguage.current()) }
+    // declares mutable property `showLanguageModal`, delegated to `remember { mutableStateOf(false) }`
     var showLanguageModal by remember { mutableStateOf(false) }
+    // declares mutable property `showLogoutModal`, delegated to `remember { mutableStateOf(false) }`
     var showLogoutModal by remember { mutableStateOf(false) }
 
     // calls `Column` with an argument list that continues on the following lines
@@ -163,6 +184,7 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
         // ends the argument list started above and opens the block that follows
         ) {
+            // calls `TabHeader` with arguments `(showAvatar = false, onBellClick = onNotifica…)`
             TabHeader(showAvatar = false, onBellClick = onNotificationsClick)
 
             // calls `AsyncImage` with an argument list that continues on the following lines
@@ -397,8 +419,11 @@ fun SettingsScreen(
                     .padding(top = 16.dp, bottom = 16.dp)
                     // continues the statement started above: `.background(WaypointCard, RoundedCornerShape(RadiusRow))`
                     .background(WaypointCard, RoundedCornerShape(RadiusRow))
+                    // continues the statement started above: `.border(1.dp, WaypointLogoutBorder, RoundedCornerShape(Radi…`
                     .border(1.dp, WaypointLogoutBorder, RoundedCornerShape(RadiusRow))
+                    // continues the statement started above: `.clickable { showLogoutModal = true }`
                     .clickable { showLogoutModal = true }
+                    // continues the statement started above: `.padding(vertical = 12.dp),`
                     .padding(vertical = 12.dp),
                 // continues the statement started above: `contentAlignment = Alignment.Center,`
                 contentAlignment = Alignment.Center,
@@ -406,153 +431,283 @@ fun SettingsScreen(
             ) {
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
+                    // continues the statement started above: `text = stringResource(R.string.profile_logout),`
                     text = stringResource(R.string.profile_logout),
+                    // continues the statement started above: `color = WaypointTerracotta,`
                     color = WaypointTerracotta,
+                    // continues the statement started above: `fontSize = 13.sp,`
                     fontSize = 13.sp,
+                    // continues the statement started above: `fontWeight = FontWeight.SemiBold,`
                     fontWeight = FontWeight.SemiBold,
+                // closes the multi-line argument list started above
                 )
+            // closes the block
             }
+        // closes the block
         }
 
+        // `if` statement: the block below runs when `showLanguageModal` is true
         if (showLanguageModal) {
+            // calls `Dialog` with an argument list that continues on the following lines
             Dialog(
+                // continues the statement started above: `onDismissRequest = { showLanguageModal = false },`
                 onDismissRequest = { showLanguageModal = false },
+                // continues the statement started above: `properties = DialogProperties(usePlatformDefaultWidth = fal…`
                 properties = DialogProperties(usePlatformDefaultWidth = false),
+            // ends the argument list started above and opens the block that follows
             ) {
+                // calls `Box` with an argument list that continues on the following lines
                 Box(
+                    // continues the statement started above: `modifier = Modifier`
                     modifier = Modifier
+                        // continues the statement started above: `.fillMaxWidth()`
                         .fillMaxWidth()
+                        // continues the statement started above: `.padding(horizontal = 16.dp),`
                         .padding(horizontal = 16.dp),
+                // ends the argument list started above and opens the block that follows
                 ) {
+                    // calls `LanguageModal` with an argument list that continues on the following lines
                     LanguageModal(
+                        // continues the statement started above: `selectedLanguage = selectedLanguage,`
                         selectedLanguage = selectedLanguage,
+                        // continues the statement started above: `onLanguageSelected = { selectedLanguage = it },`
                         onLanguageSelected = { selectedLanguage = it },
+                        // continues the statement started above: `onSaveClick = {`
                         onSaveClick = {
+                            // calls `setApplicationLocales` on `AppCompatDelegate` with an argument list that continues on the following lines
                             AppCompatDelegate.setApplicationLocales(
+                                // continues the statement started above: `LocaleListCompat.forLanguageTags(selectedLanguage.localeTag…`
                                 LocaleListCompat.forLanguageTags(selectedLanguage.localeTag),
+                            // closes the multi-line argument list started above
                             )
+                            // assigns `showLanguageModal` the value `false`
                             showLanguageModal = false
+                        // closes the block
                         },
+                    // closes the multi-line argument list started above
                     )
+                // closes the block
                 }
+            // closes the block
             }
+        // closes the if block
         }
 
+        // `if` statement: the block below runs when `showLogoutModal` is true
         if (showLogoutModal) {
+            // calls `LogoutConfirmationModal` with an argument list that continues on the following lines
             LogoutConfirmationModal(
+                // continues the statement started above: `onConfirmLogout = {`
                 onConfirmLogout = {
+                    // assigns `showLogoutModal` the value `false`
                     showLogoutModal = false
+                    // calls `onLogoutClick` with arguments `()`
                     onLogoutClick()
+                // closes the block
                 },
+                // continues the statement started above: `onDismiss = { showLogoutModal = false },`
                 onDismiss = { showLogoutModal = false },
+            // closes the multi-line argument list started above
             )
+        // closes the if block
         }
+    // closes the block
     }
+// closes the block
 }
 
+// annotation `@Composable` applied to the declaration that follows
 @Composable
+// expression: `private fun LogoutConfirmationModal(`
 private fun LogoutConfirmationModal(
+    // continues the statement started above: `onConfirmLogout: () -> Unit,`
     onConfirmLogout: () -> Unit,
+    // continues the statement started above: `onDismiss: () -> Unit,`
     onDismiss: () -> Unit,
+    // continues the statement started above: `modifier: Modifier = Modifier,`
     modifier: Modifier = Modifier,
+// ends the argument list started above and opens the block that follows
 ) {
+    // calls `Dialog` with an argument list that continues on the following lines
     Dialog(
+        // continues the statement started above: `onDismissRequest = onDismiss,`
         onDismissRequest = onDismiss,
+        // continues the statement started above: `properties = DialogProperties(usePlatformDefaultWidth = fal…`
         properties = DialogProperties(usePlatformDefaultWidth = false),
+    // ends the argument list started above and opens the block that follows
     ) {
+        // calls `Box` with an argument list that continues on the following lines
         Box(
+            // continues the statement started above: `modifier = Modifier`
             modifier = Modifier
+                // continues the statement started above: `.fillMaxWidth()`
                 .fillMaxWidth()
+                // continues the statement started above: `.padding(horizontal = 20.dp),`
                 .padding(horizontal = 20.dp),
+        // ends the argument list started above and opens the block that follows
         ) {
+            // calls `Column` with an argument list that continues on the following lines
             Column(
+                // continues the statement started above: `modifier = modifier`
                 modifier = modifier
+                    // continues the statement started above: `.fillMaxWidth()`
                     .fillMaxWidth()
+                    // continues the statement started above: `.background(WaypointCard, RoundedCornerShape(22.dp))`
                     .background(WaypointCard, RoundedCornerShape(22.dp))
+                    // continues the statement started above: `.border(1.dp, WaypointBorderSoft, RoundedCornerShape(22.dp))`
                     .border(1.dp, WaypointBorderSoft, RoundedCornerShape(22.dp))
+                    // continues the statement started above: `.padding(22.dp),`
                     .padding(22.dp),
+                // continues the statement started above: `horizontalAlignment = Alignment.CenterHorizontally,`
                 horizontalAlignment = Alignment.CenterHorizontally,
+                // continues the statement started above: `verticalArrangement = Arrangement.spacedBy(16.dp),`
                 verticalArrangement = Arrangement.spacedBy(16.dp),
+            // ends the argument list started above and opens the block that follows
             ) {
-                // Exit / Logout Icon Badge
+                // calls `Box` with an argument list that continues on the following lines
                 Box(
+                    // continues the statement started above: `modifier = Modifier`
                     modifier = Modifier
+                        // continues the statement started above: `.size(56.dp)`
                         .size(56.dp)
+                        // continues the statement started above: `.clip(CircleShape)`
                         .clip(CircleShape)
+                        // continues the statement started above: `.background(WaypointTerracotta.copy(alpha = 0.12f)),`
                         .background(WaypointTerracotta.copy(alpha = 0.12f)),
+                    // continues the statement started above: `contentAlignment = Alignment.Center,`
                     contentAlignment = Alignment.Center,
+                // ends the argument list started above and opens the block that follows
                 ) {
+                    // calls `Text` with arguments `("👋", fontSize = 28.sp)`
                     Text("👋", fontSize = 28.sp)
+                // closes the block
                 }
 
-                // Title & Description
+                // calls `Column` with an argument list that continues on the following lines
                 Column(
+                    // continues the statement started above: `horizontalAlignment = Alignment.CenterHorizontally,`
                     horizontalAlignment = Alignment.CenterHorizontally,
+                    // continues the statement started above: `verticalArrangement = Arrangement.spacedBy(6.dp),`
                     verticalArrangement = Arrangement.spacedBy(6.dp),
+                // ends the argument list started above and opens the block that follows
                 ) {
+                    // calls `Text` with an argument list that continues on the following lines
                     Text(
+                        // continues the statement started above: `text = "Log out of Waypoint?",`
                         text = "Log out of Waypoint?",
+                        // continues the statement started above: `color = WaypointTextPrimary,`
                         color = WaypointTextPrimary,
+                        // continues the statement started above: `fontSize = 19.sp,`
                         fontSize = 19.sp,
+                        // continues the statement started above: `fontWeight = FontWeight.Bold,`
                         fontWeight = FontWeight.Bold,
+                        // continues the statement started above: `textAlign = TextAlign.Center,`
                         textAlign = TextAlign.Center,
+                    // closes the multi-line argument list started above
                     )
 
+                    // calls `Text` with an argument list that continues on the following lines
                     Text(
+                        // continues the statement started above: `text = "Are you sure you want to log out? You can sign back…`
                         text = "Are you sure you want to log out? You can sign back in anytime to access your trips and saved itineraries.",
+                        // continues the statement started above: `color = WaypointTextMuted,`
                         color = WaypointTextMuted,
+                        // continues the statement started above: `fontSize = 13.sp,`
                         fontSize = 13.sp,
+                        // continues the statement started above: `textAlign = TextAlign.Center,`
                         textAlign = TextAlign.Center,
+                    // closes the multi-line argument list started above
                     )
+                // closes the block
                 }
 
+                // calls `Spacer` with arguments `(modifier = Modifier.height(4.dp))`
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Action Buttons
+                // calls `Column` with an argument list that continues on the following lines
                 Column(
+                    // continues the statement started above: `modifier = Modifier.fillMaxWidth(),`
                     modifier = Modifier.fillMaxWidth(),
+                    // continues the statement started above: `verticalArrangement = Arrangement.spacedBy(10.dp),`
                     verticalArrangement = Arrangement.spacedBy(10.dp),
+                // ends the argument list started above and opens the block that follows
                 ) {
-                    // Confirm Logout Button
+                    // calls `Box` with an argument list that continues on the following lines
                     Box(
+                        // continues the statement started above: `modifier = Modifier`
                         modifier = Modifier
+                            // continues the statement started above: `.fillMaxWidth()`
                             .fillMaxWidth()
+                            // continues the statement started above: `.height(48.dp)`
                             .height(48.dp)
+                            // continues the statement started above: `.clip(RoundedCornerShape(RadiusButton))`
                             .clip(RoundedCornerShape(RadiusButton))
+                            // continues the statement started above: `.background(WaypointTerracotta)`
                             .background(WaypointTerracotta)
+                            // continues the statement started above: `.clickable(onClick = onConfirmLogout),`
                             .clickable(onClick = onConfirmLogout),
+                        // continues the statement started above: `contentAlignment = Alignment.Center,`
                         contentAlignment = Alignment.Center,
+                    // ends the argument list started above and opens the block that follows
                     ) {
+                        // calls `Text` with an argument list that continues on the following lines
                         Text(
+                            // continues the statement started above: `text = stringResource(R.string.profile_logout),`
                             text = stringResource(R.string.profile_logout),
+                            // continues the statement started above: `color = White,`
                             color = White,
+                            // continues the statement started above: `fontSize = 16.sp,`
                             fontSize = 16.sp,
+                            // continues the statement started above: `fontWeight = FontWeight.Bold,`
                             fontWeight = FontWeight.Bold,
+                        // closes the multi-line argument list started above
                         )
+                    // closes the block
                     }
 
-                    // Cancel Button
+                    // calls `Box` with an argument list that continues on the following lines
                     Box(
+                        // continues the statement started above: `modifier = Modifier`
                         modifier = Modifier
+                            // continues the statement started above: `.fillMaxWidth()`
                             .fillMaxWidth()
+                            // continues the statement started above: `.height(48.dp)`
                             .height(48.dp)
+                            // continues the statement started above: `.clip(RoundedCornerShape(RadiusButton))`
                             .clip(RoundedCornerShape(RadiusButton))
+                            // continues the statement started above: `.background(WaypointCream)`
                             .background(WaypointCream)
+                            // continues the statement started above: `.border(1.dp, WaypointBorderSoft, RoundedCornerShape(Radius…`
                             .border(1.dp, WaypointBorderSoft, RoundedCornerShape(RadiusButton))
+                            // continues the statement started above: `.clickable(onClick = onDismiss),`
                             .clickable(onClick = onDismiss),
+                        // continues the statement started above: `contentAlignment = Alignment.Center,`
                         contentAlignment = Alignment.Center,
+                    // ends the argument list started above and opens the block that follows
                     ) {
+                        // calls `Text` with an argument list that continues on the following lines
                         Text(
+                            // continues the statement started above: `text = "Cancel",`
                             text = "Cancel",
+                            // continues the statement started above: `color = WaypointTextPrimary,`
                             color = WaypointTextPrimary,
+                            // continues the statement started above: `fontSize = 15.sp,`
                             fontSize = 15.sp,
+                            // continues the statement started above: `fontWeight = FontWeight.SemiBold,`
                             fontWeight = FontWeight.SemiBold,
+                        // closes the multi-line argument list started above
                         )
+                    // closes the block
                     }
+                // closes the block
                 }
+            // closes the block
             }
+        // closes the block
         }
+    // closes the block
     }
+// closes the block
 }
 
 // annotation `@Composable` applied to the declaration that follows

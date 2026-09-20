@@ -50,11 +50,17 @@ import com.waypoint.app.features.settings.ui.SettingsScreen
 @Composable
 // expression: `fun MainNavShell(`
 fun MainNavShell(
+    // continues the statement started above: `onNewTripClick: () -> Unit,`
     onNewTripClick: () -> Unit,
+    // continues the statement started above: `onTripClick: (tripId: String) -> Unit,`
     onTripClick: (tripId: String) -> Unit,
+    // continues the statement started above: `onLogoutClick: () -> Unit,`
     onLogoutClick: () -> Unit,
+    // continues the statement started above: `onNotificationsClick: () -> Unit = {},`
     onNotificationsClick: () -> Unit = {},
+    // continues the statement started above: `modifier: Modifier = Modifier,`
     modifier: Modifier = Modifier,
+// ends the argument list started above and opens the block that follows
 ) {
     // declares read-only property `tabNavController`, initialised with the result of calling `rememberNavController(…)`
     val tabNavController = rememberNavController()
@@ -125,30 +131,55 @@ fun MainNavShell(
                     },
                     // continues the statement started above: `onSettingsClick = {`
                     onSettingsClick = {
+                        // calls `navigate` on `tabNavController` with arguments `(NavTab.PROFILE.route)`
                         tabNavController.navigate(NavTab.PROFILE.route) { launchSingleTop = true }
+                    // closes the block
                     },
+                    // continues the statement started above: `onNotificationsClick = onNotificationsClick,`
                     onNotificationsClick = onNotificationsClick,
+                    // continues the statement started above: `onTripClick = onTripClick,`
                     onTripClick = onTripClick,
+                // closes the multi-line argument list started above
                 )
+            // closes the lambda passed to `composable`
             }
+            // calls `composable` with arguments `(NavTab.TRIPS.route)` and opens a trailing lambda / block
             composable(NavTab.TRIPS.route) {
+                // calls `AllTripsScreen` with an argument list that continues on the following lines
                 AllTripsScreen(
+                    // continues the statement started above: `onBackClick = goHome,`
                     onBackClick    = goHome,
+                    // continues the statement started above: `onNewTripClick = onNewTripClick,`
                     onNewTripClick = onNewTripClick,
+                    // continues the statement started above: `onTripClick = onTripClick,`
                     onTripClick    = onTripClick,
+                // closes the multi-line argument list started above
                 )
+            // closes the lambda passed to `composable`
             }
+            // calls `composable` with arguments `(NavTab.EXPLORE.route)` and opens a trailing lambda / block
             composable(NavTab.EXPLORE.route) {
+                // calls `ExploreScreen` with an argument list that continues on the following lines
                 ExploreScreen(
+                    // continues the statement started above: `exploreViewModel = exploreViewModel,`
                     exploreViewModel = exploreViewModel,
+                    // continues the statement started above: `onNotificationsClick = onNotificationsClick,`
                     onNotificationsClick = onNotificationsClick,
+                // closes the multi-line argument list started above
                 )
+            // closes the lambda passed to `composable`
             }
+            // calls `composable` with arguments `(NavTab.PROFILE.route)` and opens a trailing lambda / block
             composable(NavTab.PROFILE.route) {
+                // calls `SettingsScreen` with an argument list that continues on the following lines
                 SettingsScreen(
+                    // continues the statement started above: `onLogoutClick = onLogoutClick,`
                     onLogoutClick = onLogoutClick,
+                    // continues the statement started above: `onNotificationsClick = onNotificationsClick,`
                     onNotificationsClick = onNotificationsClick,
+                // closes the multi-line argument list started above
                 )
+            // closes the lambda passed to `composable`
             }
         // closes the block
         }

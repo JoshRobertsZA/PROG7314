@@ -231,8 +231,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             // declares read-only property `token`, initialised to `runCatching { user.getIdToken(false).await()…`
             val token = runCatching { user.getIdToken(false).await()?.token }.getOrNull()
-            // `if` statement: logs the Firebase ID token so it can be pasted into the
-            // Swagger UI at /docs. Debug builds only - never logs in release.
+            // `if` statement: executes `Log.d(SWAGGER_TAG, token)` when `BuildConfig.DEBUG && token != null` is true
             if (BuildConfig.DEBUG && token != null) Log.d(SWAGGER_TAG, token)
             // `if` statement: executes `tripRepository.pullAndMergeTrips(token, user…` when `token != null` is true
             if (token != null) tripRepository.pullAndMergeTrips(token, user.uid)
@@ -256,7 +255,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private companion object {
         // declares const read-only property `TAG`, initialised to the string literal "AuthViewModel"
         const val TAG = "AuthViewModel"
-        // declares const read-only property `SWAGGER_TAG`, the logcat tag carrying the ID token
+        // declares const read-only property `SWAGGER_TAG`, initialised to the string literal "SWAGGER_TOKEN"
         const val SWAGGER_TAG = "SWAGGER_TOKEN"
     // closes the companion object
     }
