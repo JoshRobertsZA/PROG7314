@@ -80,63 +80,31 @@ import com.waypoint.app.features.notifications.ui.NotificationHistoryViewModel
 
 // annotation `@Composable` applied to the declaration that follows
 @Composable
-// expression: `fun TabHeader(`
 fun TabHeader(
-    // continues the statement started above: `onBellClick: (() -> Unit)? = null,`
     onBellClick: (() -> Unit)? = null,
-    // continues the statement started above: `showAvatar: Boolean = true,`
     showAvatar: Boolean = true,
-    // continues the statement started above: `onAvatarClick: () -> Unit = {},`
     onAvatarClick: () -> Unit = {},
-    // continues the statement started above: `modifier: Modifier = Modifier,`
     modifier: Modifier = Modifier,
-// ends the argument list started above and opens the block that follows
 ) {
-    // declares mutable property `showHistory`, delegated to `remember { mutableStateOf(false) }`
-    var showHistory by remember { mutableStateOf(false) }
-    // declares read-only property `notifVm` of type `NotificationHistoryViewModel`, initialised with the result of calling `viewModel(…)`
     val notifVm: NotificationHistoryViewModel = viewModel()
-    // declares read-only property `notifState`, delegated to `notifVm.uiState.collectAsState()`
     val notifState by notifVm.uiState.collectAsState()
-    // calls `LaunchedEffect` with arguments `(Unit)`
     LaunchedEffect(Unit) { notifVm.load() }
-    // declares read-only property `isOnline`, delegated to `rememberIsOnline()`
     val isOnline by rememberIsOnline()
-    // `if` statement: the block below runs when `showHistory` is true
-    if (showHistory) {
-        // calls `Dialog` with arguments `(onDismissRequest = { showHistory = false })`
-        Dialog(onDismissRequest = { showHistory = false }) { NotificationHistoryModal() }
-    // closes the if block
-    }
 
-    // calls `Row` with an argument list that continues on the following lines
     Row(
-        // continues the statement started above: `modifier = modifier.fillMaxWidth(),`
         modifier = modifier.fillMaxWidth(),
-        // continues the statement started above: `horizontalArrangement = Arrangement.SpaceBetween,`
         horizontalArrangement = Arrangement.SpaceBetween,
-        // continues the statement started above: `verticalAlignment = Alignment.CenterVertically,`
         verticalAlignment = Alignment.CenterVertically,
-    // ends the argument list started above and opens the block that follows
     ) {
-        // calls `Text` with an argument list that continues on the following lines
         Text(
-            // continues the statement started above: `text = stringResource(R.string.brand_name),`
             text = stringResource(R.string.brand_name),
-            // continues the statement started above: `color = WaypointTerracotta,`
             color = WaypointTerracotta,
-            // continues the statement started above: `fontSize = 24.sp,`
             fontSize = 24.sp,
-            // continues the statement started above: `fontWeight = FontWeight.Bold,`
             fontWeight = FontWeight.Bold,
-            // continues the statement started above: `modifier = Modifier.align(Alignment.Top),`
             modifier = Modifier.align(Alignment.Top),
-        // closes the multi-line argument list started above
         )
-        // calls `Row` with arguments `(verticalAlignment = Alignment.CenterVertical…)` and opens a trailing lambda / block
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // calls `BellWithBadge` with arguments `(onClick = onBellClick ?: { showHistory = tru…)`
-            BellWithBadge(onClick = onBellClick ?: { showHistory = true }, hasUnread = notifState.hasUnread)
+            BellWithBadge(onClick = { onBellClick?.invoke() }, hasUnread = notifState.hasUnread)
             // `if` statement: the block below runs when `showAvatar` is true
             if (showAvatar) {
                 // `if` statement: the block below runs when `isOnline` is true

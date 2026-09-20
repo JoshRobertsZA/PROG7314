@@ -87,6 +87,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 // imports `androidx.compose.ui.window.Dialog` for use in this file
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 // imports `androidx.lifecycle.viewmodel.compose.viewModel` for use in this file
 import androidx.lifecycle.viewmodel.compose.viewModel
 // imports `com.waypoint.app.R` for use in this file
@@ -100,6 +101,7 @@ import com.waypoint.app.core.common.TabHeader
 // imports `com.waypoint.app.core.common.RowSurface` for use in this file
 import com.waypoint.app.core.common.RowSurface
 // imports `com.waypoint.app.core.common.ThumbnailBlock` for use in this file
+import com.waypoint.app.core.common.PlaceThumbnail
 import com.waypoint.app.core.common.ThumbnailBlock
 // imports `com.waypoint.app.core.connectivity.rememberIsOnline` for use in this file
 import com.waypoint.app.core.connectivity.rememberIsOnline
@@ -165,15 +167,11 @@ fun placeTypeEmoji(type: String): String = when (type) {
 @Composable
 // expression: `fun HomeScreen(`
 fun HomeScreen(
-    // continues the statement started above: `onNewTripClick: () -> Unit,`
     onNewTripClick: () -> Unit,
-    // continues the statement started above: `onViewAllTripsClick: () -> Unit,`
     onViewAllTripsClick: () -> Unit,
-    // continues the statement started above: `onSettingsClick: () -> Unit,`
     onSettingsClick: () -> Unit,
-    // continues the statement started above: `onTripClick: (tripId: String) -> Unit = {},`
+    onNotificationsClick: () -> Unit = {},
     onTripClick: (tripId: String) -> Unit = {},
-    // continues the statement started above: `modifier: Modifier = Modifier,`
     modifier: Modifier = Modifier,
     // continues the statement started above: `homeViewModel: HomeViewModel = viewModel(),`
     homeViewModel: HomeViewModel = viewModel(),
@@ -231,31 +229,27 @@ fun HomeScreen(
 
     // `if` statement: the block below runs when `showCurrencyModal` is true
     if (showCurrencyModal) {
-        // calls `Dialog` with arguments `(onDismissRequest = { showCurrencyModal = fal…)` and opens a trailing lambda / block
-        Dialog(onDismissRequest = { showCurrencyModal = false }) {
-            // declares read-only property `currencyState`, initialised to `state.currency`
+        Dialog(
+            onDismissRequest = { showCurrencyModal = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
             val currencyState = state.currency
-            // calls `CurrencyExchangeModal` with an argument list that continues on the following lines
-            CurrencyExchangeModal(
-                // continues the statement started above: `onSaveClick = { showCurrencyModal = false },`
-                onSaveClick = { showCurrencyModal = false },
-                // continues the statement started above: `fromCode = state.selectedFromCurrency,`
-                fromCode = state.selectedFromCurrency,
-                // continues the statement started above: `rate = if (currencyState is CurrencyState.Success) currency…`
-                rate = if (currencyState is CurrencyState.Success) currencyState.data.rate else null,
-                // continues the statement started above: `isLoading = currencyState is CurrencyState.Loading,`
-                isLoading = currencyState is CurrencyState.Loading,
-                // continues the statement started above: `onFromCodeChanged = { code ->`
-                onFromCodeChanged = { code ->
-                    // continues the statement started above: `homeViewModel.selectFromCurrency(code)`
-                    homeViewModel.selectFromCurrency(code)
-                // closes the block
-                },
-            // closes the multi-line argument list started above
-            )
-        // closes the lambda passed to `Dialog`
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+            ) {
+                CurrencyExchangeModal(
+                    onSaveClick = { showCurrencyModal = false },
+                    fromCode = state.selectedFromCurrency,
+                    rate = if (currencyState is CurrencyState.Success) currencyState.data.rate else null,
+                    isLoading = currencyState is CurrencyState.Loading,
+                    onFromCodeChanged = { code ->
+                        homeViewModel.selectFromCurrency(code)
+                    },
+                )
+            }
         }
-    // closes the if block
     }
 
     // calls `Column` with an argument list that continues on the following lines
@@ -308,8 +302,10 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState()),
         // ends the argument list started above and opens the block that follows
         ) {
-            // calls `TabHeader` with arguments `(onAvatarClick = onSettingsClick)`
-            TabHeader(onAvatarClick = onSettingsClick)
+            TabHeader(
+                onAvatarClick = onSettingsClick,
+                onBellClick = onNotificationsClick,
+            )
 
             // calls `Text` with an argument list that continues on the following lines
             Text(
@@ -834,7 +830,7 @@ fun HomeScreen(
                                 // ends the argument list started above and opens the block that follows
                                 ) {
                                     // calls `ThumbnailBlock` with arguments `(accentColor = accent, cornerRadius = RadiusT…)`
-                                    ThumbnailBlock(accentColor = accent, cornerRadius = RadiusThumbnail, label = placeTypeEmoji(place.type))
+                                    PlaceThumbnail(type = place.type, accentColor = accent, label = placeTypeEmoji(place.type))
                                     // calls `Column` with arguments `(modifier = Modifier.padding(start = 12.dp))` and opens a trailing lambda / block
                                     Column(modifier = Modifier.padding(start = 12.dp)) {
                                         // calls `Text` with an argument list that continues on the following lines

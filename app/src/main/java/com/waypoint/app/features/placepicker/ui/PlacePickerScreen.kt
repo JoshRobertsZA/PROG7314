@@ -64,6 +64,7 @@ import com.waypoint.app.core.common.CircleIconButton
 // imports `com.waypoint.app.core.common.RowSurface` for use in this file
 import com.waypoint.app.core.common.RowSurface
 // imports `com.waypoint.app.core.common.ThumbnailBlock` for use in this file
+import com.waypoint.app.core.common.PlaceThumbnail
 import com.waypoint.app.core.common.ThumbnailBlock
 // imports `com.waypoint.app.core.theme.WaypointCream` for use in this file
 import com.waypoint.app.core.theme.WaypointCream
@@ -324,12 +325,10 @@ private fun PlaceRow(
         // ends the argument list started above and opens the block that follows
         ) {
             // calls `ThumbnailBlock` with an argument list that continues on the following lines
-            ThumbnailBlock(
-                // continues the statement started above: `accentColor = accentCycle[index % accentCycle.size],`
+            PlaceThumbnail(
+                type        = place.type,
                 accentColor = accentCycle[index % accentCycle.size],
-                // continues the statement started above: `label = placeTypeEmoji(place.type),`
                 label       = placeTypeEmoji(place.type),
-            // closes the multi-line argument list started above
             )
             // calls `Column` with arguments `(modifier = Modifier.padding(start = 12.dp))` and opens a trailing lambda / block
             Column(modifier = Modifier.padding(start = 12.dp)) {
