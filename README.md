@@ -4,6 +4,35 @@
 
 [![Android CI](https://github.com/JoshRobertsZA/PROG7314/actions/workflows/android-ci.yml/badge.svg)](https://github.com/JoshRobertsZA/PROG7314/actions/workflows/android-ci.yml)
 
+### Submission Links
+
+[![API Documentation](https://img.shields.io/badge/API_Documentation-Swagger_UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://prog7314-git-287180570190.africa-south1.run.app/docs) &nbsp; [![Demonstration Video](https://img.shields.io/badge/Demonstration_Video-YouTube-red?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/kx_R5qv70TE)
+
+The Swagger page is public and needs no setup — it documents all 25 endpoints and can
+call them live. `GET /health` and `GET /counter/{key}` work straight away; every other
+endpoint requires a Firebase ID token and returns `401` without one. The raw
+specification is at
+[openapi.json](https://prog7314-git-287180570190.africa-south1.run.app/openapi.json).
+
+---
+
+## Contents
+
+- [About](#about)
+- [Features](#features)
+- [Architecture](#architecture)
+- [APIs Used](#apis-used)
+- [Cloud Sync Architecture](#cloud-sync-architecture)
+- [CI/CD and Deployment](#cicd-and-deployment)
+  - [Android CI - GitHub Actions](#android-ci---github-actions)
+  - [REST API - Google Cloud Run](#rest-api---google-cloud-run)
+- [Cloud Data Verification](#cloud-data-verification)
+- [Screenshots](#screenshots)
+- [Demo Video](#demo-video)
+- [AI Usage](#ai-usage)
+- [Running the Project Locally](#running-the-project-locally)
+- [Team](#team)
+
 ---
 
 ## About
@@ -77,17 +106,95 @@ This means the app works fully offline and data is restored automatically when s
 
 ---
 
-## GitHub Actions CI/CD
+## CI/CD and Deployment
 
-Every push and pull request to `main` or `dev` triggers three parallel jobs:
+Two pipelines: automated continuous integration for the Android app, and container
+deployment for the REST API.
 
-1. **Lint** - runs `./gradlew lint` and uploads the HTML report as an artifact
-2. **Unit Tests** - runs `./gradlew test` and uploads the XML test results
-3. **Build** - runs `./gradlew assembleDebug` and uploads the debug APK
+### Android CI - GitHub Actions
 
-A Discord webhook posts a per-job status update and a final summary so the team is notified without checking GitHub. The workflow can also be triggered manually via `workflow_dispatch`.
+Every push and pull request to `main` or `dev` triggers three parallel jobs on
+`ubuntu-latest` with JDK 17 and a cached Gradle setup:
+
+1. **Lint** - runs `./gradlew lintDebug` and uploads the HTML report as an artifact
+2. **Unit Tests** - runs `./gradlew testDebugUnitTest`, uploads the XML results, and
+   publishes a pass/fail summary as a PR check
+3. **Build** - runs `./gradlew assembleDebug` and uploads the debug APK as an artifact
+
+A `concurrency` group cancels superseded runs so only the newest commit on a branch is
+tested. A Discord webhook posts a per-job status update and a final summary, so the team
+is notified without checking GitHub. The workflow can also be triggered manually via
+`workflow_dispatch`.
 
 CI configuration: [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml)
+
+### REST API - Google Cloud Run
+
+The API in [`api/`](api/) is containerised and deployed to Cloud Run:
+
+```bash
+gcloud run deploy prog7314-git --source api --region africa-south1
+```
+
+This builds the [`api/Dockerfile`](api/Dockerfile) (a slim Node 20 image installing
+production dependencies only), pushes the image to Artifact Registry tagged with the
+current Git commit SHA, and rolls out a new revision.
+
+| Setting | Value |
+|---|---|
+| Service | `prog7314-git` |
+| Region | `africa-south1` (Johannesburg, lowest latency for South African users) |
+| Resources | 1 vCPU, 512 MiB |
+| Scaling | 0 to 20 instances - scales to zero when idle |
+| Credentials | Secret Manager secret `firebase-secret`, injected at runtime as `FIREBASE_SERVICE_ACCOUNT` |
+| Ingress | Public, with authorisation enforced per-request by Firebase ID token |
+
+Two properties worth noting. The Firestore service account key is never in the
+repository or the container image - Cloud Run injects it from Secret Manager at runtime,
+so it can be rotated without a code change. And because each image is tagged with the
+commit it was built from, every running revision traces back to an exact point in the
+source history; Cloud Run retains previous revisions, so a bad deploy is rolled back by
+shifting traffic rather than rebuilding.
+
+API deployment is run manually rather than from GitHub Actions, which keeps a deliberate
+gate between merging code and changing the live service the app depends on.
+
+---
+
+## Cloud Data Verification
+
+The demonstration video covers the app and the REST API layer. This section covers the
+other end of the pipeline: the hosted authentication service and the Firestore database,
+showing that data written in the app is captured and modified in the cloud.
+
+### Firebase Authentication
+
+Users signing in with Google SSO appear in the Firebase Authentication user table. Each
+user's UID is the `accountId` written onto every trip, which is how the API scopes data
+to its owner.
+
+![Firebase Authentication users](assets/firebase-auth-users.png)
+
+### Firestore - trips collection
+
+Trips created in the app are written to Firestore through the REST API. The `accountId`
+field matches the signed-in user's Firebase UID, and no document can be read or written
+by another account.
+
+![Firestore trips collection](assets/firestore-trips.png)
+
+### Firestore - itinerary collections
+
+The API also exposes itinerary endpoints backed by their own collections, linked by
+`tripId` and `dayId`: `itinerary_days`, `itinerary_flights`, `itinerary_lodging`,
+`itinerary_cars` and `itinerary_places`. Each enforces the same ownership check by
+resolving the parent trip's `accountId` before any read or write.
+
+These records are written through the REST API. In the current build the Android app
+syncs trips to the cloud and keeps itinerary detail in local SQLite, so the collections
+below were populated by calling the documented endpoints directly.
+
+![Firestore itinerary collections](assets/firestore-itinerary.png)
 
 ---
 
@@ -103,7 +210,7 @@ CI configuration: [`.github/workflows/android-ci.yml`](.github/workflows/android
 
 ## Demo Video
 
-[Watch on YouTube](https://youtu.be/PLACEHOLDER) *(link will be updated before submission)*
+[Watch on YouTube](https://youtu.be/kx_R5qv70TE)
 
 The video walks through: signing in, creating a trip, adding itinerary days and flights, exploring nearby places, checking weather and currency, and receiving a push notification.
 
