@@ -85,12 +85,13 @@ fun CurrencyExchangeModal(
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier,
     fromCode: String = "USD",
+    initialAmount: String = "1",
     rate: Double? = null,
     isLoading: Boolean = false,
     onFromCodeChanged: (String) -> Unit = {},
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
-    var amountText by remember { mutableStateOf("35") }
+    var amountText by remember { mutableStateOf(initialAmount) }
 
     val fromInfo = currencyInfo(fromCode)
     val toInfo = currencyInfo("ZAR")
