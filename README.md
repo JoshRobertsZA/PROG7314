@@ -128,6 +128,26 @@ is notified without checking GitHub. The workflow can also be triggered manually
 
 CI configuration: [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml)
 
+**Unit tests:** 22 JUnit tests covering local persistence models, cache staleness rules,
+and pure business logic. Run locally with `./gradlew testDebugUnitTest`; results land in
+`app/build/reports/tests/testDebugUnitTest/`, the same report CI uploads as the
+`unit-test-report` artifact.
+
+<details>
+<summary>Test class breakdown</summary>
+
+| Test class | What it covers |
+|---|---|
+| [`TripEntityTest`](app/src/test/java/com/waypoint/app/TripEntityTest.kt) | Trip entity creation, chronological date sorting, nullable destination handling |
+| [`ItineraryEntitiesTest`](app/src/test/java/com/waypoint/app/ItineraryEntitiesTest.kt) | Itinerary day, flight, lodging/car rental, and place entity initialization |
+| [`CacheModelsTest`](app/src/test/java/com/waypoint/app/CacheModelsTest.kt) | Weather, currency, and places cache staleness thresholds |
+| [`WeatherRepositoryTest`](app/src/test/java/com/waypoint/app/WeatherRepositoryTest.kt) | City-name-to-slug conversion for weather lookups |
+| [`ExplorePlaceFilterTest`](app/src/test/java/com/waypoint/app/ExplorePlaceFilterTest.kt) | Category filtering (restaurants, parks, all) on Explore results |
+| [`AppLanguageTest`](app/src/test/java/com/waypoint/app/AppLanguageTest.kt) | Supported locale tags and display names |
+| [`ExampleUnitTest`](app/src/test/java/com/waypoint/app/ExampleUnitTest.kt) | Default Android Studio template test |
+
+</details>
+
 ### REST API - Google Cloud Run
 
 The API in [`api/`](api/) is containerised and deployed to Cloud Run:
