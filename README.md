@@ -95,7 +95,7 @@ CI configuration: [`.github/workflows/android-ci.yml`](.github/workflows/android
 
 | Welcome | Home | Itinerary | Explore |
 |---|---|---|---|
-| ![Welcome](docs/screenshots/welcome.png) | ![Home](docs/screenshots/home.png) | ![Itinerary](docs/screenshots/itinerary.png) | ![Explore](docs/screenshots/explore.png) |
+| ![Welcome](assets/welcome.png) | ![Home](assets/home.png) | ![Itinerary](assets/itinerary.png) | ![Explore](assets/explore.png) |
 
 *(Screenshots captured on a physical Android device)*
 
