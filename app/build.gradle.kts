@@ -177,6 +177,8 @@ android {
 
         // calls `buildConfigField` with arguments `("String", "buildFingerprint", "\"AMryLc5QyN\…)`
         buildConfigField("String", "buildFingerprint", "\"AMryLc5QyN\"")
+        // calls `buildConfigField` with arguments `("String", "WAYPOINT_API_BASE_URL", "\"https:…)`
+        buildConfigField("String", "WAYPOINT_API_BASE_URL", "\"https://prog7314-git-287180570190.africa-south1.run.app\"")
     // closes the block
     }
 

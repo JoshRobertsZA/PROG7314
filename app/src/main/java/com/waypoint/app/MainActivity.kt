@@ -391,6 +391,8 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
                 onNewTripClick = { navController.navigate(Routes.NewTrip) },
                 // continues the statement started above: `onTripClick = { tripId -> navController.navigate(Routes.tri…`
                 onTripClick    = { tripId -> navController.navigate(Routes.tripCalendar(tripId)) },
+                // continues the statement started above: `onNotificationsClick = { navController.navigate(Routes.Noti…`
+                onNotificationsClick = { navController.navigate(Routes.Notifications) },
                 // continues the statement started above: `onLogoutClick = {`
                 onLogoutClick = {
                     // calls `signOut` on `authViewModel` with arguments `()`

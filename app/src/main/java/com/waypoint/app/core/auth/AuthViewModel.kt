@@ -17,6 +17,8 @@ import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.AndroidViewModel
 // imports `androidx.lifecycle.viewModelScope` for use in this file
 import androidx.lifecycle.viewModelScope
+// imports `com.waypoint.app.BuildConfig` for use in this file
+import com.waypoint.app.BuildConfig
 // imports `com.waypoint.app.core.db.AccountEntity` for use in this file
 import com.waypoint.app.core.db.AccountEntity
 // imports `com.waypoint.app.core.db.SessionManager` for use in this file
@@ -43,6 +45,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 // imports `kotlinx.coroutines.launch` for use in this file
 import kotlinx.coroutines.launch
+// imports `kotlinx.coroutines.tasks.await` for use in this file
+import kotlinx.coroutines.tasks.await
 
 // declares enum class `AuthProvider` and opens its body
 enum class AuthProvider {
@@ -223,6 +227,16 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             )
         // closes the lambda passed to `launch`
         }
+        // calls `launch` on `viewModelScope` with arguments `(Dispatchers.IO)` and opens a trailing lambda / block
+        viewModelScope.launch(Dispatchers.IO) {
+            // declares read-only property `token`, initialised to `runCatching { user.getIdToken(false).await()…`
+            val token = runCatching { user.getIdToken(false).await()?.token }.getOrNull()
+            // `if` statement: executes `Log.d(SWAGGER_TAG, token)` when `BuildConfig.DEBUG && token != null` is true
+            if (BuildConfig.DEBUG && token != null) Log.d(SWAGGER_TAG, token)
+            // `if` statement: executes `tripRepository.pullAndMergeTrips(token, user…` when `token != null` is true
+            if (token != null) tripRepository.pullAndMergeTrips(token, user.uid)
+        // closes the lambda passed to `launch`
+        }
     // closes the function `applySignedInUser`
     }
 
@@ -241,6 +255,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private companion object {
         // declares const read-only property `TAG`, initialised to the string literal "AuthViewModel"
         const val TAG = "AuthViewModel"
+        // declares const read-only property `SWAGGER_TAG`, initialised to the string literal "SWAGGER_TOKEN"
+        const val SWAGGER_TAG = "SWAGGER_TOKEN"
     // closes the companion object
     }
 // closes the class `AuthViewModel`

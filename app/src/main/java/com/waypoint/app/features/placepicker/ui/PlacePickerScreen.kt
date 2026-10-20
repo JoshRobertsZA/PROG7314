@@ -63,6 +63,8 @@ import com.waypoint.app.core.cache.ExplorePlace
 import com.waypoint.app.core.common.CircleIconButton
 // imports `com.waypoint.app.core.common.RowSurface` for use in this file
 import com.waypoint.app.core.common.RowSurface
+// imports `com.waypoint.app.core.common.PlaceThumbnail` for use in this file
+import com.waypoint.app.core.common.PlaceThumbnail
 // imports `com.waypoint.app.core.common.ThumbnailBlock` for use in this file
 import com.waypoint.app.core.common.ThumbnailBlock
 // imports `com.waypoint.app.core.theme.WaypointCream` for use in this file
@@ -323,8 +325,10 @@ private fun PlaceRow(
             verticalAlignment = Alignment.CenterVertically,
         // ends the argument list started above and opens the block that follows
         ) {
-            // calls `ThumbnailBlock` with an argument list that continues on the following lines
-            ThumbnailBlock(
+            // calls `PlaceThumbnail` with an argument list that continues on the following lines
+            PlaceThumbnail(
+                // continues the statement started above: `type = place.type,`
+                type        = place.type,
                 // continues the statement started above: `accentColor = accentCycle[index % accentCycle.size],`
                 accentColor = accentCycle[index % accentCycle.size],
                 // continues the statement started above: `label = placeTypeEmoji(place.type),`

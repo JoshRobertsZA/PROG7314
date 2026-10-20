@@ -92,8 +92,6 @@ fun TabHeader(
     modifier: Modifier = Modifier,
 // ends the argument list started above and opens the block that follows
 ) {
-    // declares mutable property `showHistory`, delegated to `remember { mutableStateOf(false) }`
-    var showHistory by remember { mutableStateOf(false) }
     // declares read-only property `notifVm` of type `NotificationHistoryViewModel`, initialised with the result of calling `viewModel(…)`
     val notifVm: NotificationHistoryViewModel = viewModel()
     // declares read-only property `notifState`, delegated to `notifVm.uiState.collectAsState()`
@@ -102,12 +100,6 @@ fun TabHeader(
     LaunchedEffect(Unit) { notifVm.load() }
     // declares read-only property `isOnline`, delegated to `rememberIsOnline()`
     val isOnline by rememberIsOnline()
-    // `if` statement: the block below runs when `showHistory` is true
-    if (showHistory) {
-        // calls `Dialog` with arguments `(onDismissRequest = { showHistory = false })`
-        Dialog(onDismissRequest = { showHistory = false }) { NotificationHistoryModal() }
-    // closes the if block
-    }
 
     // calls `Row` with an argument list that continues on the following lines
     Row(
@@ -135,8 +127,8 @@ fun TabHeader(
         )
         // calls `Row` with arguments `(verticalAlignment = Alignment.CenterVertical…)` and opens a trailing lambda / block
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // calls `BellWithBadge` with arguments `(onClick = onBellClick ?: { showHistory = tru…)`
-            BellWithBadge(onClick = onBellClick ?: { showHistory = true }, hasUnread = notifState.hasUnread)
+            // calls `BellWithBadge` with arguments `(onClick = { onBellClick?.invoke() }, hasUnre…)`
+            BellWithBadge(onClick = { onBellClick?.invoke() }, hasUnread = notifState.hasUnread)
             // `if` statement: the block below runs when `showAvatar` is true
             if (showAvatar) {
                 // `if` statement: the block below runs when `isOnline` is true

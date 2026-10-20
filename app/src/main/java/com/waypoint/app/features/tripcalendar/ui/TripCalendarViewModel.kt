@@ -35,6 +35,10 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 // imports `com.waypoint.app.features.edititinerary.data.ItineraryRepository` for use in this file
 import com.waypoint.app.features.edititinerary.data.ItineraryRepository
+// imports `com.google.firebase.auth.FirebaseAuth` for use in this file
+import com.google.firebase.auth.FirebaseAuth
+// imports `kotlinx.coroutines.tasks.await` for use in this file
+import kotlinx.coroutines.tasks.await
 
 // expression: `class TripCalendarViewModel(`
 class TripCalendarViewModel(
@@ -219,6 +223,10 @@ class TripCalendarViewModel(
                 destPhotoUrl = state.destPhotoUrl,
             // closes the multi-line argument list started above
             )
+            // declares read-only property `nameToken`, initialised to `runCatching { FirebaseAuth.getInstance().cur…`
+            val nameToken = runCatching { FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token }.getOrNull()
+            // `if` statement: executes `repo.syncTripUpdate(nameToken, tripId)` when `nameToken != null` is true
+            if (nameToken != null) repo.syncTripUpdate(nameToken, tripId)
         // closes the block
         }
     // closes the function `onConfirmNameEdit`
@@ -313,6 +321,10 @@ class TripCalendarViewModel(
         viewModelScope.launch {
             // calls `deleteTrip` on `repo` with arguments `(tripId, SessionManager.accountId)`
             repo.deleteTrip(tripId, SessionManager.accountId)
+            // declares read-only property `delToken`, initialised to `runCatching { FirebaseAuth.getInstance().cur…`
+            val delToken = runCatching { FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token }.getOrNull()
+            // `if` statement: executes `repo.syncTripDelete(delToken, tripId)` when `delToken != null` is true
+            if (delToken != null) repo.syncTripDelete(delToken, tripId)
             // expression: `_uiState.update { it.copy(showDeleteConfirm = false, deleted = t…`
             _uiState.update { it.copy(showDeleteConfirm = false, deleted = true) }
         // closes the block
@@ -371,6 +383,10 @@ class TripCalendarViewModel(
         viewModelScope.launch {
             // calls `updateTripDates` on `repo` with arguments `(tripId, start.toString(), end.toString())`
             repo.updateTripDates(tripId, start.toString(), end.toString())
+            // declares read-only property `datesToken`, initialised to `runCatching { FirebaseAuth.getInstance().cur…`
+            val datesToken = runCatching { FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token }.getOrNull()
+            // `if` statement: executes `repo.syncTripUpdate(datesToken, tripId)` when `datesToken != null` is true
+            if (datesToken != null) repo.syncTripUpdate(datesToken, tripId)
             // calls `removeDaysOutside` on `itineraryRepo` with arguments `(tripId, start, end)`
             itineraryRepo.removeDaysOutside(tripId, start, end)
             // expression: `_uiState.update { it.copy(showEditDates = false) }`
@@ -432,6 +448,10 @@ class TripCalendarViewModel(
                 destPhotoUrl = photo,
             // closes the multi-line argument list started above
             )
+            // declares read-only property `destToken`, initialised to `runCatching { FirebaseAuth.getInstance().cur…`
+            val destToken = runCatching { FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token }.getOrNull()
+            // `if` statement: executes `repo.syncTripUpdate(destToken, tripId)` when `destToken != null` is true
+            if (destToken != null) repo.syncTripUpdate(destToken, tripId)
         // closes the block
         }
     // closes the function `onDestinationSelected`

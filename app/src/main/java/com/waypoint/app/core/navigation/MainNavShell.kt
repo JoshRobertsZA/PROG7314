@@ -56,6 +56,8 @@ fun MainNavShell(
     onTripClick: (tripId: String) -> Unit,
     // continues the statement started above: `onLogoutClick: () -> Unit,`
     onLogoutClick: () -> Unit,
+    // continues the statement started above: `onNotificationsClick: () -> Unit = {},`
+    onNotificationsClick: () -> Unit = {},
     // continues the statement started above: `modifier: Modifier = Modifier,`
     modifier: Modifier = Modifier,
 // ends the argument list started above and opens the block that follows
@@ -133,6 +135,8 @@ fun MainNavShell(
                         tabNavController.navigate(NavTab.PROFILE.route) { launchSingleTop = true }
                     // closes the block
                     },
+                    // continues the statement started above: `onNotificationsClick = onNotificationsClick,`
+                    onNotificationsClick = onNotificationsClick,
                     // continues the statement started above: `onTripClick = onTripClick,`
                     onTripClick = onTripClick,
                 // closes the multi-line argument list started above
@@ -153,10 +157,30 @@ fun MainNavShell(
                 )
             // closes the lambda passed to `composable`
             }
-            // calls `composable` with arguments `(NavTab.EXPLORE.route)`
-            composable(NavTab.EXPLORE.route) { ExploreScreen(exploreViewModel = exploreViewModel) }
-            // calls `composable` with arguments `(NavTab.PROFILE.route)`
-            composable(NavTab.PROFILE.route) { SettingsScreen(onLogoutClick = onLogoutClick) }
+            // calls `composable` with arguments `(NavTab.EXPLORE.route)` and opens a trailing lambda / block
+            composable(NavTab.EXPLORE.route) {
+                // calls `ExploreScreen` with an argument list that continues on the following lines
+                ExploreScreen(
+                    // continues the statement started above: `exploreViewModel = exploreViewModel,`
+                    exploreViewModel = exploreViewModel,
+                    // continues the statement started above: `onNotificationsClick = onNotificationsClick,`
+                    onNotificationsClick = onNotificationsClick,
+                // closes the multi-line argument list started above
+                )
+            // closes the lambda passed to `composable`
+            }
+            // calls `composable` with arguments `(NavTab.PROFILE.route)` and opens a trailing lambda / block
+            composable(NavTab.PROFILE.route) {
+                // calls `SettingsScreen` with an argument list that continues on the following lines
+                SettingsScreen(
+                    // continues the statement started above: `onLogoutClick = onLogoutClick,`
+                    onLogoutClick = onLogoutClick,
+                    // continues the statement started above: `onNotificationsClick = onNotificationsClick,`
+                    onNotificationsClick = onNotificationsClick,
+                // closes the multi-line argument list started above
+                )
+            // closes the lambda passed to `composable`
+            }
         // closes the block
         }
     // closes the block
