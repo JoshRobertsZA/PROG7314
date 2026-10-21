@@ -56,8 +56,7 @@ class WaypointDbHelper private constructor(context: Context) :
         db.execSQL(CREATE_NOTIFICATIONS_ACCOUNT_IDX)
         // calls `execSQL` on `db` with arguments `(CREATE_REMINDER_LOG)`
         db.execSQL(CREATE_REMINDER_LOG)
-        db.execSQL(CREATE_SYNC_OUTBOX)
-        db.execSQL(CREATE_SYNC_OUTBOX_ENTITY_IDX)
+        applyV9Migration(db)
     // closes the function `onCreate`
     }
 
@@ -134,10 +133,32 @@ class WaypointDbHelper private constructor(context: Context) :
         // closes the if block
         }
         if (oldVersion < 9) {
-            db.execSQL(CREATE_SYNC_OUTBOX)
-            db.execSQL(CREATE_SYNC_OUTBOX_ENTITY_IDX)
+            applyV9Migration(db)
         }
     // closes the function `onUpgrade`
+    }
+
+    // Shared by onCreate (fresh installs, right after the base CREATE_*
+    // calls) and onUpgrade's `oldVersion < 9` branch, so the two paths can
+    // never apply these statements a different number of times and collide
+    // on a duplicate column/table - unlike the older migrations above,
+    // which bake added columns directly into their CREATE_* constant and
+    // rely on onUpgrade's historical if-blocks never re-adding the same
+    // column for a device jumping multiple versions at once.
+    private fun applyV9Migration(db: SQLiteDatabase) {
+        db.execSQL(CREATE_SYNC_OUTBOX)
+        db.execSQL(CREATE_SYNC_OUTBOX_ENTITY_IDX)
+        db.execSQL("ALTER TABLE $TABLE_TRIPS ADD COLUMN $COL_TRIP_DELETED INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE $TABLE_ITIN_DAYS ADD COLUMN $COL_IDAY_UPDATED INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE $TABLE_ITIN_DAYS ADD COLUMN $COL_IDAY_DELETED INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE $TABLE_ITIN_FLIGHTS ADD COLUMN $COL_IFLIGHT_UPDATED INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE $TABLE_ITIN_FLIGHTS ADD COLUMN $COL_IFLIGHT_DELETED INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE $TABLE_ITIN_LODGING ADD COLUMN $COL_ILODGE_UPDATED INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE $TABLE_ITIN_LODGING ADD COLUMN $COL_ILODGE_DELETED INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE $TABLE_ITIN_CAR ADD COLUMN $COL_ICAR_UPDATED INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE $TABLE_ITIN_CAR ADD COLUMN $COL_ICAR_DELETED INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE $TABLE_ITIN_PLACES ADD COLUMN $COL_IPLACE_UPDATED INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE $TABLE_ITIN_PLACES ADD COLUMN $COL_IPLACE_DELETED INTEGER NOT NULL DEFAULT 0")
     }
 
     // declares the companion object holding members shared by all instances of the enclosing class
@@ -184,6 +205,9 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_TRIP_DEST_LNG    = "dest_lng"
         // declares const read-only property `COL_TRIP_DEST_PHOTO`, initialised to the string literal "dest_photo_url"
         const val COL_TRIP_DEST_PHOTO  = "dest_photo_url"
+        // Tombstone for sync: 0/1. Trips already has updated_at_ms (v1), so
+        // only the delete flag is new here - see applyV9Migration.
+        const val COL_TRIP_DELETED     = "deleted"
 
         // declares const read-only property `TABLE_ITIN_DAYS`, initialised to the string literal "itinerary_days"
         const val TABLE_ITIN_DAYS      = "itinerary_days"
@@ -193,6 +217,8 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_IDAY_TRIP_ID     = "trip_id"
         // declares const read-only property `COL_IDAY_DATE`, initialised to the string literal "date"
         const val COL_IDAY_DATE        = "date"
+        const val COL_IDAY_UPDATED     = "updated_at_ms"
+        const val COL_IDAY_DELETED     = "deleted"
 
         // declares const read-only property `TABLE_ITIN_FLIGHTS`, initialised to the string literal "itinerary_flights"
         const val TABLE_ITIN_FLIGHTS   = "itinerary_flights"
@@ -210,6 +236,8 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_IFLIGHT_DEPARTURE     = "departure_time"
         // declares const read-only property `COL_IFLIGHT_DOC_NAME`, initialised to the string literal "doc_name"
         const val COL_IFLIGHT_DOC_NAME      = "doc_name"
+        const val COL_IFLIGHT_UPDATED       = "updated_at_ms"
+        const val COL_IFLIGHT_DELETED       = "deleted"
 
         // declares const read-only property `TABLE_ITIN_LODGING`, initialised to the string literal "itinerary_lodging"
         const val TABLE_ITIN_LODGING   = "itinerary_lodging"
@@ -227,6 +255,8 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_ILODGE_CREATED   = "created_at_ms"
         // declares const read-only property `COL_ILODGE_DOC_NAME`, initialised to the string literal "doc_name"
         const val COL_ILODGE_DOC_NAME  = "doc_name"
+        const val COL_ILODGE_UPDATED   = "updated_at_ms"
+        const val COL_ILODGE_DELETED   = "deleted"
 
         // declares const read-only property `TABLE_ITIN_CAR`, initialised to the string literal "itinerary_car_rental"
         const val TABLE_ITIN_CAR       = "itinerary_car_rental"
@@ -244,6 +274,8 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_ICAR_CREATED     = "created_at_ms"
         // declares const read-only property `COL_ICAR_DOC_NAME`, initialised to the string literal "doc_name"
         const val COL_ICAR_DOC_NAME    = "doc_name"
+        const val COL_ICAR_UPDATED     = "updated_at_ms"
+        const val COL_ICAR_DELETED     = "deleted"
 
         // declares const read-only property `TABLE_ITIN_PLACES`, initialised to the string literal "itinerary_places"
         const val TABLE_ITIN_PLACES       = "itinerary_places"
@@ -265,6 +297,8 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_IPLACE_CREATED      = "created_at_ms"
         // declares const read-only property `COL_IPLACE_PHOTO_URL`, initialised to the string literal "photo_url"
         const val COL_IPLACE_PHOTO_URL    = "photo_url"
+        const val COL_IPLACE_UPDATED      = "updated_at_ms"
+        const val COL_IPLACE_DELETED      = "deleted"
 
         // declares const read-only property `TABLE_NOTIFICATIONS`, initialised to the string literal "notifications"
         const val TABLE_NOTIFICATIONS  = "notifications"
