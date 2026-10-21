@@ -132,10 +132,15 @@ function createPath({ tag, summary, bodySchema, schema }) {
       responses: {
         // expression: `201: jsonRes('Created', schema),`
         201: jsonRes('Created', schema),
+        200: jsonRes(
+          'The caller already owns a record at this id - treated as a successful retry of a create whose response was lost in transit',
+          schema
+        ),
         // continues the statement started above: `400: err('Required fields missing from the request body'),`
-        400: err('Required fields missing from the request body'),
+        400: err('Required fields missing from the request body, or a field failed validation (id/parent id not a UUID, invalid date, name too long, dates out of order, lat/lng out of range)'),
         // continues the statement started above: `404: err('Parent trip or day not found'),`
         404: err('Parent trip or day not found'),
+        409: err('This id is already in use by a record owned by a different trip'),
         // continues the statement started above: `...authErrors,`
         ...authErrors,
       // closes the block
@@ -427,6 +432,13 @@ const openapiSpec = {
         },
       // closes the block
       },
+      DayUpdate: {
+        type: 'object',
+        description: 'Only `date` is mutable; `tripId` is the parent link.',
+        properties: {
+          date: { type: 'string', example: '2026-04-02' },
+        },
+      },
 
       // continues the statement started above: `Flight: {`
       Flight: {
@@ -484,6 +496,16 @@ const openapiSpec = {
         },
       // closes the block
       },
+      FlightUpdate: {
+        type: 'object',
+        description: 'Any subset of the mutable flight fields; `dayId` is the parent link and `createdAtMs` is immutable.',
+        properties: {
+          flightNumber: { type: 'string', nullable: true, example: 'NH204' },
+          departureTime: { type: 'string', nullable: true, example: '2026-04-02T09:45' },
+          pdfUri: { type: 'string', nullable: true },
+          docName: { type: 'string', nullable: true },
+        },
+      },
 
       // continues the statement started above: `Lodging: {`
       Lodging: {
@@ -533,6 +555,16 @@ const openapiSpec = {
         },
       // closes the block
       },
+      LodgingUpdate: {
+        type: 'object',
+        description: 'Any subset of the mutable lodging fields; `tripId` is the parent link and `createdAtMs` is immutable.',
+        properties: {
+          fromDate: { type: 'string', nullable: true, example: '2026-04-02' },
+          toDate: { type: 'string', nullable: true, example: '2026-04-09' },
+          pdfUri: { type: 'string', nullable: true },
+          docName: { type: 'string', nullable: true },
+        },
+      },
 
       // continues the statement started above: `Car: {`
       Car: {
@@ -581,6 +613,16 @@ const openapiSpec = {
         // closes the block
         },
       // closes the block
+      },
+      CarUpdate: {
+        type: 'object',
+        description: 'Any subset of the mutable car-rental fields; `tripId` is the parent link and `createdAtMs` is immutable.',
+        properties: {
+          fromDate: { type: 'string', nullable: true, example: '2026-04-09' },
+          toDate: { type: 'string', nullable: true, example: '2026-04-12' },
+          pdfUri: { type: 'string', nullable: true },
+          docName: { type: 'string', nullable: true },
+        },
       },
 
       // continues the statement started above: `Place: {`
@@ -735,8 +777,13 @@ const openapiSpec = {
         responses: {
           // expression: `201: jsonRes('Created', 'Trip'),`
           201: jsonRes('Created', 'Trip'),
+          200: jsonRes(
+            'The caller already owns a trip at this id - treated as a successful retry of a create whose response was lost in transit',
+            'Trip'
+          ),
           // continues the statement started above: `400: err('`id` and `name` are required'),`
-          400: err('`id` and `name` are required'),
+          400: err('`id` and `name` are required, or a field failed validation (id not a UUID, name too long, invalid date, or startDate after endDate)'),
+          409: err('This id is already in use by a trip owned by a different account'),
           // continues the statement started above: `...authErrors,`
           ...authErrors,
         // closes the block
@@ -779,6 +826,7 @@ const openapiSpec = {
         responses: {
           // expression: `200: jsonRes('The applied updates', 'Trip'),`
           200: jsonRes('The applied updates', 'Trip'),
+          400: err('A field failed validation (name too long, invalid date, or the resulting startDate/endDate out of order)'),
           // continues the statement started above: `404: err('Trip not found'),`
           404: err('Trip not found'),
           // continues the statement started above: `...authErrors,`
@@ -794,7 +842,7 @@ const openapiSpec = {
         // continues the statement started above: `summary: 'Delete a trip',`
         summary: 'Delete a trip',
         // continues the statement started above: `description: 'Deletes the trip document only; itinerary rec…`
-        description: 'Deletes the trip document only; itinerary records are not cascaded.',
+        description: 'Cascades: every itinerary day, flight, lodging booking, car rental and place that references this trip is deleted first, then the trip document itself.',
         // continues the statement started above: `responses: {`
         responses: {
           // expression: `200: jsonRes('Deleted', 'Deleted'),`
@@ -838,6 +886,18 @@ const openapiSpec = {
     }),
     // continues the statement started above: `'/itinerary/days/{id}': {`
     '/itinerary/days/{id}': {
+      put: {
+        tags: ['Itinerary — Days'],
+        summary: 'Update a day',
+        parameters: [pathParam('id', 'Day identifier')],
+        requestBody: jsonBody('DayUpdate'),
+        responses: {
+          200: jsonRes('The applied updates', 'Day'),
+          400: err('date failed validation'),
+          404: err('Day not found'),
+          ...authErrors,
+        },
+      },
       // opens a block after `delete: deleteOp(`
       delete: deleteOp({
         // expression: `tag: 'Itinerary — Days',`
@@ -879,6 +939,17 @@ const openapiSpec = {
     }),
     // continues the statement started above: `'/itinerary/flights/{id}': {`
     '/itinerary/flights/{id}': {
+      put: {
+        tags: ['Itinerary — Flights'],
+        summary: 'Update a flight',
+        parameters: [pathParam('id', 'Flight identifier')],
+        requestBody: jsonBody('FlightUpdate'),
+        responses: {
+          200: jsonRes('The applied updates', 'Flight'),
+          404: err('Flight not found'),
+          ...authErrors,
+        },
+      },
       // opens a block after `delete: deleteOp(`
       delete: deleteOp({
         // expression: `tag: 'Itinerary — Flights',`
@@ -920,6 +991,18 @@ const openapiSpec = {
     }),
     // continues the statement started above: `'/itinerary/lodging/{id}': {`
     '/itinerary/lodging/{id}': {
+      put: {
+        tags: ['Itinerary — Lodging'],
+        summary: 'Update a lodging booking',
+        parameters: [pathParam('id', 'Lodging identifier')],
+        requestBody: jsonBody('LodgingUpdate'),
+        responses: {
+          200: jsonRes('The applied updates', 'Lodging'),
+          400: err('fromDate/toDate failed validation or are out of order'),
+          404: err('Lodging not found'),
+          ...authErrors,
+        },
+      },
       // opens a block after `delete: deleteOp(`
       delete: deleteOp({
         // expression: `tag: 'Itinerary — Lodging',`
@@ -961,6 +1044,18 @@ const openapiSpec = {
     }),
     // continues the statement started above: `'/itinerary/cars/{id}': {`
     '/itinerary/cars/{id}': {
+      put: {
+        tags: ['Itinerary — Cars'],
+        summary: 'Update a car rental',
+        parameters: [pathParam('id', 'Car rental identifier')],
+        requestBody: jsonBody('CarUpdate'),
+        responses: {
+          200: jsonRes('The applied updates', 'Car'),
+          400: err('fromDate/toDate failed validation or are out of order'),
+          404: err('Car rental not found'),
+          ...authErrors,
+        },
+      },
       // opens a block after `delete: deleteOp(`
       delete: deleteOp({
         // expression: `tag: 'Itinerary — Cars',`
@@ -1016,6 +1111,7 @@ const openapiSpec = {
         responses: {
           // expression: `200: jsonRes('The applied updates', 'Place'),`
           200: jsonRes('The applied updates', 'Place'),
+          400: err('name, lat or lng failed validation'),
           // continues the statement started above: `404: err('Place not found'),`
           404: err('Place not found'),
           // continues the statement started above: `...authErrors,`
@@ -1046,7 +1142,9 @@ const openapiSpec = {
         // continues the statement started above: `summary: 'Read a counter',`
         summary: 'Read a counter',
         // continues the statement started above: `description: 'Public read. An unknown key reports a count o…`
-        description: 'Public read. An unknown key reports a count of `0` rather than 404.',
+        description:
+          'Public read. An unknown key reports a count of `0` rather than 404. ' +
+          'Key must match `^[a-z][a-z0-9_-]{0,63}$`.',
         // continues the statement started above: `security: [],`
         security: [],
         // continues the statement started above: `parameters: [pathParam('key', 'Counter name, e.g. `trips_cr…`
@@ -1055,6 +1153,7 @@ const openapiSpec = {
         responses: {
           // expression: `200: jsonRes('Current value', 'Counter'),`
           200: jsonRes('Current value', 'Counter'),
+          400: err('Counter key does not match the allowed pattern'),
           // continues the statement started above: `500: err('Unexpected server error'),`
           500: err('Unexpected server error'),
         // closes the block
@@ -1083,30 +1182,7 @@ const openapiSpec = {
         responses: {
           // expression: `200: jsonRes('Value after incrementing', 'Counter'),`
           200: jsonRes('Value after incrementing', 'Counter'),
-          // continues the statement started above: `401: err('Missing, invalid or expired Firebase ID token'),`
-          401: err('Missing, invalid or expired Firebase ID token'),
-          // continues the statement started above: `500: err('Unexpected server error'),`
-          500: err('Unexpected server error'),
-        // closes the block
-        },
-      // closes the block
-      },
-    // closes the block
-    },
-    // continues the statement started above: `'/counter/{key}/reset': {`
-    '/counter/{key}/reset': {
-      // opens a block after `post:`
-      post: {
-        // expression: `tags: ['Counter'],`
-        tags: ['Counter'],
-        // continues the statement started above: `summary: 'Reset a counter to zero',`
-        summary: 'Reset a counter to zero',
-        // continues the statement started above: `parameters: [pathParam('key', 'Counter name')],`
-        parameters: [pathParam('key', 'Counter name')],
-        // continues the statement started above: `responses: {`
-        responses: {
-          // expression: `200: jsonRes('Value after resetting', 'Counter'),`
-          200: jsonRes('Value after resetting', 'Counter'),
+          400: err('Counter key does not match the allowed pattern'),
           // continues the statement started above: `401: err('Missing, invalid or expired Firebase ID token'),`
           401: err('Missing, invalid or expired Firebase ID token'),
           // continues the statement started above: `500: err('Unexpected server error'),`

@@ -26,6 +26,17 @@ app.use(cors());
 // calls `use` on `app` with arguments `(express.json())`
 app.use(express.json());
 
+// Every request gets one log line with the method, path, status and actual
+// time taken, written on 'finish' so the status code and duration are both
+// known by the time it's logged (not available yet at request start).
+app.use((req, res, next) => {
+  const startedAtMs = Date.now();
+  res.on('finish', () => {
+    console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${Date.now() - startedAtMs}ms`);
+  });
+  next();
+});
+
 // calls `get` on `app` with arguments `('/health', (req, res) => res.json({ status: …)`
 app.get('/health', (req, res) => res.json({ status: 'ok', service: 'waypoint-api' }));
 
@@ -49,6 +60,21 @@ app.use('/counter', counterRouter);
 
 // calls `use` on `app` with arguments `((req, res) => res.status(404).json({ error: …)`
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
+
+// Express only recognises a 4-argument function as error-handling
+// middleware. This is the last resort for anything a route's own
+// try/catch didn't reach (a thrown error in other middleware, a malformed
+// JSON body rejected by express.json(), a bug that escapes a try block).
+// Errors route handlers throw deliberately (verifyTripOwnership, the
+// create()/ALREADY_EXISTS handling, validation.js) already carry a safe
+// err.status and err.message; anything without a status is unexpected,
+// logged in full server-side, and never has its raw message sent back.
+app.use((err, req, res, next) => {
+  console.error(`${req.method} ${req.originalUrl} error:`, err);
+  const status = err.status || 500;
+  const message = err.status ? err.message : 'Internal server error';
+  res.status(status).json({ error: message });
+});
 
 // calls `listen` on `app`; its first argument is a callback whose body follows
 app.listen(PORT, () => {
