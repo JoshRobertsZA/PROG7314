@@ -10,6 +10,21 @@ const { requireAuth } = require('../middleware/auth');
 // declares const `COLLECTION`, initialised to the string literal 'trips'
 const COLLECTION = 'trips';
 
+// Firestore batch writes cap out at 500 operations, so a trip with enough
+// itinerary children needs more than one batch to delete them all.
+async function deleteDocsInBatches(docs) {
+  for (let i = 0; i < docs.length; i += 500) {
+    const batch = db.batch();
+    for (const doc of docs.slice(i, i + 500)) batch.delete(doc.ref);
+    await batch.commit();
+  }
+}
+
+async function deleteByQuery(query) {
+  const snap = await query.get();
+  await deleteDocsInBatches(snap.docs);
+}
+
 // calls `get` on `router`; its first argument is a callback whose body follows
 router.get('/', requireAuth, async (req, res) => {
   // `try` block: exceptions thrown inside are handled by the `catch` below
@@ -159,7 +174,25 @@ router.delete('/:id', requireAuth, async (req, res) => {
     if (!doc.exists) return res.status(404).json({ error: 'Trip not found' });
     // `if` statement: executes `return res.status(403).json({ error: 'Forbid…` when `doc.data().accountId !== req.user.uid` is true
     if (doc.data().accountId !== req.user.uid) return res.status(403).json({ error: 'Forbidden' });
-    // awaits the call to `delete` on `ref` with arguments `()`
+
+    // Itinerary data lives in root collections keyed by tripId (lodging,
+    // cars) or by dayId one level further down (flights, places), not as
+    // Firestore subcollections - so cascading means querying each one
+    // explicitly rather than a recursive delete. Days are resolved first
+    // since flights/places are found via their dayId, not tripId.
+    const tripId = req.params.id;
+    const daysSnap = await db.collection('itinerary_days').where('tripId', '==', tripId).get();
+    for (const dayDoc of daysSnap.docs) {
+      await deleteByQuery(db.collection('itinerary_flights').where('dayId', '==', dayDoc.id));
+      await deleteByQuery(db.collection('itinerary_places').where('dayId', '==', dayDoc.id));
+    }
+    await deleteByQuery(db.collection('itinerary_lodging').where('tripId', '==', tripId));
+    await deleteByQuery(db.collection('itinerary_cars').where('tripId', '==', tripId));
+    await deleteDocsInBatches(daysSnap.docs);
+
+    // The trip itself is deleted last, after every child is confirmed
+    // gone, so a failure partway through cascading never leaves the trip
+    // deleted with orphaned children still referencing it.
     await ref.delete();
     // calls `json` on `res` with arguments `({ deleted: req.params.id })`
     res.json({ deleted: req.params.id });
