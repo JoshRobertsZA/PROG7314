@@ -56,6 +56,8 @@ class WaypointDbHelper private constructor(context: Context) :
         db.execSQL(CREATE_NOTIFICATIONS_ACCOUNT_IDX)
         // calls `execSQL` on `db` with arguments `(CREATE_REMINDER_LOG)`
         db.execSQL(CREATE_REMINDER_LOG)
+        db.execSQL(CREATE_SYNC_OUTBOX)
+        db.execSQL(CREATE_SYNC_OUTBOX_ENTITY_IDX)
     // closes the function `onCreate`
     }
 
@@ -131,6 +133,10 @@ class WaypointDbHelper private constructor(context: Context) :
             db.execSQL("ALTER TABLE $TABLE_ITIN_CAR ADD COLUMN $COL_ICAR_DOC_NAME TEXT")
         // closes the if block
         }
+        if (oldVersion < 9) {
+            db.execSQL(CREATE_SYNC_OUTBOX)
+            db.execSQL(CREATE_SYNC_OUTBOX_ENTITY_IDX)
+        }
     // closes the function `onUpgrade`
     }
 
@@ -138,8 +144,8 @@ class WaypointDbHelper private constructor(context: Context) :
     companion object {
         // declares private const read-only property `DB_NAME`, initialised to the string literal "waypoint.db"
         private const val DB_NAME    = "waypoint.db"
-        // declares private const read-only property `DB_VERSION`, initialised to the number 8
-        private const val DB_VERSION = 8
+        // declares private const read-only property `DB_VERSION`, initialised to the number 9
+        private const val DB_VERSION = 9
 
         // declares const read-only property `TABLE_ACCOUNTS`, initialised to the string literal "accounts"
         const val TABLE_ACCOUNTS       = "accounts"
@@ -279,6 +285,20 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_RLOG_KEY         = "key"
         // declares const read-only property `COL_RLOG_SENT`, initialised to the string literal "sent_at_ms"
         const val COL_RLOG_SENT        = "sent_at_ms"
+
+        // Durable queue of local changes waiting to reach the API. Each row is
+        // one pending CREATE/UPDATE/DELETE for one entity (trip or itinerary
+        // item); OutboxRepository owns enqueue/coalesce/retry logic on top of
+        // this table.
+        const val TABLE_SYNC_OUTBOX          = "sync_outbox"
+        const val COL_OUTBOX_ID              = "id"
+        const val COL_OUTBOX_ENTITY_TYPE     = "entity_type"
+        const val COL_OUTBOX_ENTITY_ID       = "entity_id"
+        const val COL_OUTBOX_OPERATION       = "operation"
+        const val COL_OUTBOX_PAYLOAD_JSON    = "payload_json"
+        const val COL_OUTBOX_CREATED         = "created_at_ms"
+        const val COL_OUTBOX_ATTEMPTS        = "attempts"
+        const val COL_OUTBOX_LAST_ERROR      = "last_error"
 
 
         // declares private read-only property `CREATE_ACCOUNTS`, initialised to a multi-line raw string (its lines follow)
@@ -436,6 +456,28 @@ class WaypointDbHelper private constructor(context: Context) :
                 $COL_RLOG_SENT INTEGER NOT NULL
             )
         """.trimIndent()
+
+        // No FOREIGN KEY on entity_id: the referenced row (a trip, day,
+        // flight...) can legitimately be gone by the time this entry is sent
+        // (e.g. a DELETE queued right after a CREATE that hasn't synced yet),
+        // and a constraint would block inserting that DELETE entry.
+        private val CREATE_SYNC_OUTBOX = """
+            CREATE TABLE $TABLE_SYNC_OUTBOX (
+                $COL_OUTBOX_ID           TEXT PRIMARY KEY,
+                $COL_OUTBOX_ENTITY_TYPE  TEXT NOT NULL,
+                $COL_OUTBOX_ENTITY_ID    TEXT NOT NULL,
+                $COL_OUTBOX_OPERATION    TEXT NOT NULL,
+                $COL_OUTBOX_PAYLOAD_JSON TEXT,
+                $COL_OUTBOX_CREATED      INTEGER NOT NULL,
+                $COL_OUTBOX_ATTEMPTS     INTEGER NOT NULL DEFAULT 0,
+                $COL_OUTBOX_LAST_ERROR   TEXT
+            )
+        """.trimIndent()
+
+        // Lets OutboxRepository find an entity's existing pending entry (for
+        // coalescing) without scanning the whole table.
+        private const val CREATE_SYNC_OUTBOX_ENTITY_IDX =
+            "CREATE INDEX idx_sync_outbox_entity ON $TABLE_SYNC_OUTBOX($COL_OUTBOX_ENTITY_TYPE, $COL_OUTBOX_ENTITY_ID)"
 
         // declares private mutable property `instance` of type `WaypointDbHelper?`, initialised to null
         @Volatile private var instance: WaypointDbHelper? = null
