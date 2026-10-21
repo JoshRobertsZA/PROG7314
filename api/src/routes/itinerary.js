@@ -20,6 +20,48 @@ async function verifyTripOwnership(tripId, uid) {
 // closes the function `verifyTripOwnership`
 }
 
+// Shared by every itinerary POST route: create() is atomic (unlike the
+// read-then-set this replaces), so a client-supplied id collision can't
+// silently overwrite another user's document. On a collision, ownerCheck
+// decides whether this is the same owner retrying a dropped response
+// (safe to treat as success) or someone else's id (409). Ownership for
+// itinerary docs runs through the parent trip, not a direct accountId
+// field, hence the callback instead of a flat equality check.
+async function createOrConflict(ref, data, ownerCheck) {
+  try {
+    await ref.create(data);
+    return { created: true };
+  } catch (createErr) {
+    // gRPC status 6 = ALREADY_EXISTS; anything else is a real failure.
+    if (createErr.code !== 6) throw createErr;
+    const existing = await ref.get();
+    if (existing.exists && await ownerCheck(existing.data())) {
+      return { created: false, existing: existing.data() };
+    }
+    throw Object.assign(new Error('Id already in use'), { status: 409 });
+  }
+}
+
+// Resolves ownership for itinerary docs that store `tripId` directly
+// (days, lodging, cars).
+function ownerOfTrip(uid) {
+  return async (data) => {
+    const trip = await db.collection('trips').doc(data.tripId).get();
+    return trip.exists && trip.data().accountId === uid;
+  };
+}
+
+// Resolves ownership for itinerary docs that only store `dayId` (flights,
+// places) by following day -> trip.
+function ownerOfDay(uid) {
+  return async (data) => {
+    const day = await db.collection('itinerary_days').doc(data.dayId).get();
+    if (!day.exists) return false;
+    const trip = await db.collection('trips').doc(day.data().tripId).get();
+    return trip.exists && trip.data().accountId === uid;
+  };
+}
+
 
 // calls `get` on `router`; its first argument is a callback whose body follows
 router.get('/days/:tripId', requireAuth, async (req, res) => {
@@ -58,8 +100,9 @@ router.post('/days', requireAuth, async (req, res) => {
     await verifyTripOwnership(tripId, req.user.uid);
     // declares const `data`, initialised to a lambda / arrow function
     const data = { tripId, date };
-    // awaits the call to `collection` on `db` with arguments `('itinerary_days')`, then chains `.doc(id)`, `.set(data)`
-    await db.collection('itinerary_days').doc(id).set(data);
+    const ref = db.collection('itinerary_days').doc(id);
+    const result = await createOrConflict(ref, data, ownerOfTrip(req.user.uid));
+    if (!result.created) return res.status(200).json({ id, ...result.existing });
     // calls `status` on `res` with arguments `(201)`, then chains `.json({ id, ...data })`
     res.status(201).json({ id, ...data });
   // `catch` block: handles a thrown `exception` bound to `err`
@@ -142,8 +185,9 @@ router.post('/flights', requireAuth, async (req, res) => {
     await verifyTripOwnership(day.data().tripId, req.user.uid);
     // declares const `data`, initialised to a lambda / arrow function
     const data = { dayId, flightNumber: flightNumber ?? null, pdfUri: pdfUri ?? null, departureTime: departureTime ?? null, docName: docName ?? null, createdAtMs: Date.now() };
-    // awaits the call to `collection` on `db` with arguments `('itinerary_flights')`, then chains `.doc(id)`, `.set(data)`
-    await db.collection('itinerary_flights').doc(id).set(data);
+    const ref = db.collection('itinerary_flights').doc(id);
+    const result = await createOrConflict(ref, data, ownerOfDay(req.user.uid));
+    if (!result.created) return res.status(200).json({ id, ...result.existing });
     // calls `status` on `res` with arguments `(201)`, then chains `.json({ id, ...data })`
     res.status(201).json({ id, ...data });
   // `catch` block: handles a thrown `exception` bound to `err`
@@ -220,8 +264,9 @@ router.post('/lodging', requireAuth, async (req, res) => {
     await verifyTripOwnership(tripId, req.user.uid);
     // declares const `data`, initialised to a lambda / arrow function
     const data = { tripId, fromDate: fromDate ?? null, toDate: toDate ?? null, pdfUri: pdfUri ?? null, docName: docName ?? null, createdAtMs: Date.now() };
-    // awaits the call to `collection` on `db` with arguments `('itinerary_lodging')`, then chains `.doc(id)`, `.set(data)`
-    await db.collection('itinerary_lodging').doc(id).set(data);
+    const ref = db.collection('itinerary_lodging').doc(id);
+    const result = await createOrConflict(ref, data, ownerOfTrip(req.user.uid));
+    if (!result.created) return res.status(200).json({ id, ...result.existing });
     // calls `status` on `res` with arguments `(201)`, then chains `.json({ id, ...data })`
     res.status(201).json({ id, ...data });
   // `catch` block: handles a thrown `exception` bound to `err`
@@ -296,8 +341,9 @@ router.post('/cars', requireAuth, async (req, res) => {
     await verifyTripOwnership(tripId, req.user.uid);
     // declares const `data`, initialised to a lambda / arrow function
     const data = { tripId, fromDate: fromDate ?? null, toDate: toDate ?? null, pdfUri: pdfUri ?? null, docName: docName ?? null, createdAtMs: Date.now() };
-    // awaits the call to `collection` on `db` with arguments `('itinerary_cars')`, then chains `.doc(id)`, `.set(data)`
-    await db.collection('itinerary_cars').doc(id).set(data);
+    const ref = db.collection('itinerary_cars').doc(id);
+    const result = await createOrConflict(ref, data, ownerOfTrip(req.user.uid));
+    if (!result.created) return res.status(200).json({ id, ...result.existing });
     // calls `status` on `res` with arguments `(201)`, then chains `.json({ id, ...data })`
     res.status(201).json({ id, ...data });
   // `catch` block: handles a thrown `exception` bound to `err`
@@ -380,8 +426,9 @@ router.post('/places', requireAuth, async (req, res) => {
     await verifyTripOwnership(day.data().tripId, req.user.uid);
     // declares const `data`, initialised to a lambda / arrow function
     const data = { dayId, name, category: category ?? null, lat: lat ?? null, lng: lng ?? null, note: note ?? null, photoUrl: photoUrl ?? null, createdAtMs: Date.now() };
-    // awaits the call to `collection` on `db` with arguments `('itinerary_places')`, then chains `.doc(id)`, `.set(data)`
-    await db.collection('itinerary_places').doc(id).set(data);
+    const ref = db.collection('itinerary_places').doc(id);
+    const result = await createOrConflict(ref, data, ownerOfDay(req.user.uid));
+    if (!result.created) return res.status(200).json({ id, ...result.existing });
     // calls `status` on `res` with arguments `(201)`, then chains `.json({ id, ...data })`
     res.status(201).json({ id, ...data });
   // `catch` block: handles a thrown `exception` bound to `err`
