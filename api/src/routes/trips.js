@@ -65,51 +65,54 @@ router.get('/:id', requireAuth, async (req, res) => {
 
 // calls `post` on `router`; its first argument is a callback whose body follows
 router.post('/', requireAuth, async (req, res) => {
-  // `try` block: exceptions thrown inside are handled by the `catch` below
   try {
-    // declares const `{ id, name, startDate, endDate, destina…`, initialised to `req.body`
     const { id, name, startDate, endDate, destination, destLat, destLng, destPhotoUrl, createdAtMs, updatedAtMs } = req.body;
-    // `if` statement: executes `return res.status(400).json({ error: 'id and…` when `!id || !name` is true
     if (!id || !name) return res.status(400).json({ error: 'id and name are required' });
 
-    // declares const `tripData`,  and opens a multi-line initialiser
     const tripData = {
-      // expression: `accountId: req.user.uid,`
       accountId: req.user.uid,
-      // continues the statement started above: `name,`
       name,
-      // continues the statement started above: `startDate: startDate ?? null,`
       startDate: startDate ?? null,
-      // continues the statement started above: `endDate: endDate ?? null,`
       endDate: endDate ?? null,
-      // continues the statement started above: `destination: destination ?? null,`
       destination: destination ?? null,
-      // continues the statement started above: `destLat: destLat ?? null,`
       destLat: destLat ?? null,
-      // continues the statement started above: `destLng: destLng ?? null,`
       destLng: destLng ?? null,
-      // continues the statement started above: `destPhotoUrl: destPhotoUrl ?? null,`
       destPhotoUrl: destPhotoUrl ?? null,
-      // continues the statement started above: `createdAtMs: createdAtMs ?? Date.now(),`
       createdAtMs: createdAtMs ?? Date.now(),
-      // continues the statement started above: `updatedAtMs: updatedAtMs ?? Date.now(),`
       updatedAtMs: updatedAtMs ?? Date.now(),
-    // closes the initialiser of `tripData`
     };
 
-    // awaits the call to `collection` on `db` with arguments `(COLLECTION)`, then chains `.doc(id)`, `.set(tripData)`
-    await db.collection(COLLECTION).doc(id).set(tripData);
-    // calls `status` on `res` with arguments `(201)`, then chains `.json({ id, ...tripData })`
+    const docRef = db.collection(COLLECTION).doc(id);
+    try {
+      // create() is atomic and rejects if a document already exists at this id,
+      // unlike set() which would silently overwrite it (including one owned by
+      // another user). See:
+      // https://googleapis.dev/nodejs/firestore/latest/DocumentReference.html#create
+      await docRef.create(tripData);
+    } catch (createErr) {
+      // gRPC status 6 = ALREADY_EXISTS, per the Firestore client's documented
+      // create() contract (@google-cloud/firestore, pinned to 7.11.6 in
+      // package-lock.json). Anything else is a real failure, not an id clash.
+      if (createErr.code !== 6) throw createErr;
+
+      const existing = await docRef.get();
+      if (existing.exists && existing.data().accountId === req.user.uid) {
+        // The same user retrying a create whose response was lost in transit
+        // would otherwise see a 409 for a trip they already own - treat it as
+        // success so retries are safe.
+        return res.status(200).json({ id: existing.id, ...existing.data() });
+      }
+      // Covers both another user's trip and a document that was deleted
+      // between create() and this get() - either way the id is unusable
+      // right now, and the client may retry with a different id.
+      return res.status(409).json({ error: 'Trip id already in use' });
+    }
+
     res.status(201).json({ id, ...tripData });
-  // `catch` block: handles a thrown `exception` bound to `err`
   } catch (err) {
-    // calls `error` on `console` with arguments `('POST /trips error:', err)`
     console.error('POST /trips error:', err);
-    // calls `status` on `res` with arguments `(500)`, then chains `.json({ error: err.message })`
     res.status(500).json({ error: err.message });
-  // closes the catch block
   }
-// closes the callback passed to `post`
 });
 
 // calls `put` on `router`; its first argument is a callback whose body follows
