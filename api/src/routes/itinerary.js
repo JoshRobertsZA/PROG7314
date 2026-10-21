@@ -6,6 +6,7 @@ const router = express.Router();
 const { db } = require('../firebase');
 // declares const `{ requireAuth }`, initialised with the result of calling `require(…)`
 const { requireAuth } = require('../middleware/auth');
+const { isValidId, isValidName, isValidDateString, isValidDateOrder, isValidLat, isValidLng } = require('../validation');
 
 // declares async function `verifyTripOwnership` taking 2 parameters (`tripId`, `uid`) and opens its body
 async function verifyTripOwnership(tripId, uid) {
@@ -107,6 +108,8 @@ router.post('/days', requireAuth, async (req, res) => {
     const { id, tripId, date } = req.body;
     // `if` statement: executes `return res.status(400).json({ error: 'id, tr…` when `!id || !tripId || !date` is true
     if (!id || !tripId || !date) return res.status(400).json({ error: 'id, tripId, date required' });
+    if (!isValidId(id) || !isValidId(tripId)) return res.status(400).json({ error: 'id and tripId must be UUIDs' });
+    if (!isValidDateString(date)) return res.status(400).json({ error: 'date must be a valid YYYY-MM-DD date' });
     // awaits the call to `verifyTripOwnership` with arguments `(tripId, req.user.uid)`
     await verifyTripOwnership(tripId, req.user.uid);
     // declares const `data`, initialised to a lambda / arrow function
@@ -136,6 +139,9 @@ router.put('/days/:id', requireAuth, async (req, res) => {
     if (!doc.exists) return res.status(404).json({ error: 'Day not found' });
     await verifyTripOwnership(doc.data().tripId, req.user.uid);
     const updates = pickFields(req.body, DAY_FIELDS);
+    if (updates.date != null && !isValidDateString(updates.date)) {
+      return res.status(400).json({ error: 'date must be a valid YYYY-MM-DD date' });
+    }
     await ref.update(updates);
     res.json({ id: req.params.id, ...doc.data(), ...updates });
   } catch (err) {
@@ -206,6 +212,7 @@ router.post('/flights', requireAuth, async (req, res) => {
     const { id, dayId, flightNumber, pdfUri, departureTime, docName } = req.body;
     // `if` statement: executes `return res.status(400).json({ error: 'id and…` when `!id || !dayId` is true
     if (!id || !dayId) return res.status(400).json({ error: 'id and dayId required' });
+    if (!isValidId(id) || !isValidId(dayId)) return res.status(400).json({ error: 'id and dayId must be UUIDs' });
     // declares const `day`, initialised to the awaited result of `db.collection('itinerary_days').doc(day…`
     const day = await db.collection('itinerary_days').doc(dayId).get();
     // `if` statement: executes `return res.status(404).json({ error: 'Day no…` when `!day.exists` is true
@@ -308,6 +315,16 @@ router.post('/lodging', requireAuth, async (req, res) => {
     const { id, tripId, fromDate, toDate, pdfUri, docName } = req.body;
     // `if` statement: executes `return res.status(400).json({ error: 'id and…` when `!id || !tripId` is true
     if (!id || !tripId) return res.status(400).json({ error: 'id and tripId required' });
+    if (!isValidId(id) || !isValidId(tripId)) return res.status(400).json({ error: 'id and tripId must be UUIDs' });
+    if (fromDate != null && !isValidDateString(fromDate)) {
+      return res.status(400).json({ error: 'fromDate must be a valid YYYY-MM-DD date' });
+    }
+    if (toDate != null && !isValidDateString(toDate)) {
+      return res.status(400).json({ error: 'toDate must be a valid YYYY-MM-DD date' });
+    }
+    if (!isValidDateOrder(fromDate, toDate)) {
+      return res.status(400).json({ error: 'fromDate must not be after toDate' });
+    }
     // awaits the call to `verifyTripOwnership` with arguments `(tripId, req.user.uid)`
     await verifyTripOwnership(tripId, req.user.uid);
     // declares const `data`, initialised to a lambda / arrow function
@@ -336,6 +353,17 @@ router.put('/lodging/:id', requireAuth, async (req, res) => {
     if (!doc.exists) return res.status(404).json({ error: 'Lodging not found' });
     await verifyTripOwnership(doc.data().tripId, req.user.uid);
     const updates = pickFields(req.body, LODGING_FIELDS);
+    if (updates.fromDate != null && !isValidDateString(updates.fromDate)) {
+      return res.status(400).json({ error: 'fromDate must be a valid YYYY-MM-DD date' });
+    }
+    if (updates.toDate != null && !isValidDateString(updates.toDate)) {
+      return res.status(400).json({ error: 'toDate must be a valid YYYY-MM-DD date' });
+    }
+    const finalFrom = updates.fromDate !== undefined ? updates.fromDate : doc.data().fromDate;
+    const finalTo = updates.toDate !== undefined ? updates.toDate : doc.data().toDate;
+    if (!isValidDateOrder(finalFrom, finalTo)) {
+      return res.status(400).json({ error: 'fromDate must not be after toDate' });
+    }
     await ref.update(updates);
     res.json({ id: req.params.id, ...doc.data(), ...updates });
   } catch (err) {
@@ -402,6 +430,16 @@ router.post('/cars', requireAuth, async (req, res) => {
     const { id, tripId, fromDate, toDate, pdfUri, docName } = req.body;
     // `if` statement: executes `return res.status(400).json({ error: 'id and…` when `!id || !tripId` is true
     if (!id || !tripId) return res.status(400).json({ error: 'id and tripId required' });
+    if (!isValidId(id) || !isValidId(tripId)) return res.status(400).json({ error: 'id and tripId must be UUIDs' });
+    if (fromDate != null && !isValidDateString(fromDate)) {
+      return res.status(400).json({ error: 'fromDate must be a valid YYYY-MM-DD date' });
+    }
+    if (toDate != null && !isValidDateString(toDate)) {
+      return res.status(400).json({ error: 'toDate must be a valid YYYY-MM-DD date' });
+    }
+    if (!isValidDateOrder(fromDate, toDate)) {
+      return res.status(400).json({ error: 'fromDate must not be after toDate' });
+    }
     // awaits the call to `verifyTripOwnership` with arguments `(tripId, req.user.uid)`
     await verifyTripOwnership(tripId, req.user.uid);
     // declares const `data`, initialised to a lambda / arrow function
@@ -430,6 +468,17 @@ router.put('/cars/:id', requireAuth, async (req, res) => {
     if (!doc.exists) return res.status(404).json({ error: 'Car rental not found' });
     await verifyTripOwnership(doc.data().tripId, req.user.uid);
     const updates = pickFields(req.body, CAR_FIELDS);
+    if (updates.fromDate != null && !isValidDateString(updates.fromDate)) {
+      return res.status(400).json({ error: 'fromDate must be a valid YYYY-MM-DD date' });
+    }
+    if (updates.toDate != null && !isValidDateString(updates.toDate)) {
+      return res.status(400).json({ error: 'toDate must be a valid YYYY-MM-DD date' });
+    }
+    const finalFrom = updates.fromDate !== undefined ? updates.fromDate : doc.data().fromDate;
+    const finalTo = updates.toDate !== undefined ? updates.toDate : doc.data().toDate;
+    if (!isValidDateOrder(finalFrom, finalTo)) {
+      return res.status(400).json({ error: 'fromDate must not be after toDate' });
+    }
     await ref.update(updates);
     res.json({ id: req.params.id, ...doc.data(), ...updates });
   } catch (err) {
@@ -500,6 +549,10 @@ router.post('/places', requireAuth, async (req, res) => {
     const { id, dayId, name, category, lat, lng, note, photoUrl } = req.body;
     // `if` statement: executes `return res.status(400).json({ error: 'id, da…` when `!id || !dayId || !name` is true
     if (!id || !dayId || !name) return res.status(400).json({ error: 'id, dayId, name required' });
+    if (!isValidId(id) || !isValidId(dayId)) return res.status(400).json({ error: 'id and dayId must be UUIDs' });
+    if (!isValidName(name)) return res.status(400).json({ error: 'name must be 1-200 characters' });
+    if (lat != null && !isValidLat(lat)) return res.status(400).json({ error: 'lat must be between -90 and 90' });
+    if (lng != null && !isValidLng(lng)) return res.status(400).json({ error: 'lng must be between -180 and 180' });
     // declares const `day`, initialised to the awaited result of `db.collection('itinerary_days').doc(day…`
     const day = await db.collection('itinerary_days').doc(dayId).get();
     // `if` statement: executes `return res.status(404).json({ error: 'Day no…` when `!day.exists` is true
@@ -543,6 +596,15 @@ router.put('/places/:id', requireAuth, async (req, res) => {
     // awaits the call to `verifyTripOwnership` with arguments `(day.data().tripId, req.user.uid)`
     await verifyTripOwnership(day.data().tripId, req.user.uid);
     const updates = pickFields(req.body, PLACE_FIELDS);
+    if (updates.name != null && !isValidName(updates.name)) {
+      return res.status(400).json({ error: 'name must be 1-200 characters' });
+    }
+    if (updates.lat != null && !isValidLat(updates.lat)) {
+      return res.status(400).json({ error: 'lat must be between -90 and 90' });
+    }
+    if (updates.lng != null && !isValidLng(updates.lng)) {
+      return res.status(400).json({ error: 'lng must be between -180 and 180' });
+    }
     await ref.update(updates);
     res.json({ id: req.params.id, ...doc.data(), ...updates });
   // `catch` block: handles a thrown `exception` bound to `err`

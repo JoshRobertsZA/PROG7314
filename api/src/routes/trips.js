@@ -6,6 +6,7 @@ const router = express.Router();
 const { db } = require('../firebase');
 // declares const `{ requireAuth }`, initialised with the result of calling `require(…)`
 const { requireAuth } = require('../middleware/auth');
+const { isValidId, isValidName, isValidDateString, isValidDateOrder } = require('../validation');
 
 // declares const `COLLECTION`, initialised to the string literal 'trips'
 const COLLECTION = 'trips';
@@ -83,6 +84,17 @@ router.post('/', requireAuth, async (req, res) => {
   try {
     const { id, name, startDate, endDate, destination, destLat, destLng, destPhotoUrl, createdAtMs, updatedAtMs } = req.body;
     if (!id || !name) return res.status(400).json({ error: 'id and name are required' });
+    if (!isValidId(id)) return res.status(400).json({ error: 'id must be a UUID' });
+    if (!isValidName(name)) return res.status(400).json({ error: 'name must be 1-200 characters' });
+    if (startDate != null && !isValidDateString(startDate)) {
+      return res.status(400).json({ error: 'startDate must be a valid YYYY-MM-DD date' });
+    }
+    if (endDate != null && !isValidDateString(endDate)) {
+      return res.status(400).json({ error: 'endDate must be a valid YYYY-MM-DD date' });
+    }
+    if (!isValidDateOrder(startDate, endDate)) {
+      return res.status(400).json({ error: 'startDate must not be after endDate' });
+    }
 
     const tripData = {
       accountId: req.user.uid,
@@ -147,6 +159,25 @@ router.put('/:id', requireAuth, async (req, res) => {
     const updates = { ...req.body, updatedAtMs: Date.now() };
     // statement: `delete updates.accountId;`
     delete updates.accountId;
+
+    if (updates.name != null && !isValidName(updates.name)) {
+      return res.status(400).json({ error: 'name must be 1-200 characters' });
+    }
+    if (updates.startDate != null && !isValidDateString(updates.startDate)) {
+      return res.status(400).json({ error: 'startDate must be a valid YYYY-MM-DD date' });
+    }
+    if (updates.endDate != null && !isValidDateString(updates.endDate)) {
+      return res.status(400).json({ error: 'endDate must be a valid YYYY-MM-DD date' });
+    }
+    // Order must hold for the dates the trip will have after this update,
+    // not just the ones present in the request body - a PUT that only
+    // changes endDate still has to respect the existing startDate.
+    const finalStart = updates.startDate !== undefined ? updates.startDate : doc.data().startDate;
+    const finalEnd = updates.endDate !== undefined ? updates.endDate : doc.data().endDate;
+    if (!isValidDateOrder(finalStart, finalEnd)) {
+      return res.status(400).json({ error: 'startDate must not be after endDate' });
+    }
+
     // awaits the call to `update` on `ref` with arguments `(updates)`
     await ref.update(updates);
     // calls `json` on `res` with arguments `({ id: req.params.id, ...updates })`
