@@ -1046,7 +1046,9 @@ const openapiSpec = {
         // continues the statement started above: `summary: 'Read a counter',`
         summary: 'Read a counter',
         // continues the statement started above: `description: 'Public read. An unknown key reports a count o…`
-        description: 'Public read. An unknown key reports a count of `0` rather than 404.',
+        description:
+          'Public read. An unknown key reports a count of `0` rather than 404. ' +
+          'Key must match `^[a-z][a-z0-9_-]{0,63}$`.',
         // continues the statement started above: `security: [],`
         security: [],
         // continues the statement started above: `parameters: [pathParam('key', 'Counter name, e.g. `trips_cr…`
@@ -1055,6 +1057,7 @@ const openapiSpec = {
         responses: {
           // expression: `200: jsonRes('Current value', 'Counter'),`
           200: jsonRes('Current value', 'Counter'),
+          400: err('Counter key does not match the allowed pattern'),
           // continues the statement started above: `500: err('Unexpected server error'),`
           500: err('Unexpected server error'),
         // closes the block
@@ -1083,30 +1086,7 @@ const openapiSpec = {
         responses: {
           // expression: `200: jsonRes('Value after incrementing', 'Counter'),`
           200: jsonRes('Value after incrementing', 'Counter'),
-          // continues the statement started above: `401: err('Missing, invalid or expired Firebase ID token'),`
-          401: err('Missing, invalid or expired Firebase ID token'),
-          // continues the statement started above: `500: err('Unexpected server error'),`
-          500: err('Unexpected server error'),
-        // closes the block
-        },
-      // closes the block
-      },
-    // closes the block
-    },
-    // continues the statement started above: `'/counter/{key}/reset': {`
-    '/counter/{key}/reset': {
-      // opens a block after `post:`
-      post: {
-        // expression: `tags: ['Counter'],`
-        tags: ['Counter'],
-        // continues the statement started above: `summary: 'Reset a counter to zero',`
-        summary: 'Reset a counter to zero',
-        // continues the statement started above: `parameters: [pathParam('key', 'Counter name')],`
-        parameters: [pathParam('key', 'Counter name')],
-        // continues the statement started above: `responses: {`
-        responses: {
-          // expression: `200: jsonRes('Value after resetting', 'Counter'),`
-          200: jsonRes('Value after resetting', 'Counter'),
+          400: err('Counter key does not match the allowed pattern'),
           // continues the statement started above: `401: err('Missing, invalid or expired Firebase ID token'),`
           401: err('Missing, invalid or expired Firebase ID token'),
           // continues the statement started above: `500: err('Unexpected server error'),`
