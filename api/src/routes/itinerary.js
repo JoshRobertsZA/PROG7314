@@ -62,6 +62,17 @@ function ownerOfDay(uid) {
   };
 }
 
+// Builds a PUT update object from only the named fields, so a client can
+// never use a PUT body to rewrite tripId/dayId (which would move a record
+// onto a trip/day it doesn't own) or any other field we don't expect.
+function pickFields(body, fields) {
+  const updates = {};
+  for (const field of fields) {
+    if (Object.prototype.hasOwnProperty.call(body, field)) updates[field] = body[field];
+  }
+  return updates;
+}
+
 
 // calls `get` on `router`; its first argument is a callback whose body follows
 router.get('/days/:tripId', requireAuth, async (req, res) => {
@@ -112,6 +123,24 @@ router.post('/days', requireAuth, async (req, res) => {
   // closes the catch block
   }
 // closes the callback passed to `post`
+});
+
+// Only `date` is mutable on a day; `tripId` is the parent link and must
+// never move via PUT.
+const DAY_FIELDS = ['date'];
+
+router.put('/days/:id', requireAuth, async (req, res) => {
+  try {
+    const ref = db.collection('itinerary_days').doc(req.params.id);
+    const doc = await ref.get();
+    if (!doc.exists) return res.status(404).json({ error: 'Day not found' });
+    await verifyTripOwnership(doc.data().tripId, req.user.uid);
+    const updates = pickFields(req.body, DAY_FIELDS);
+    await ref.update(updates);
+    res.json({ id: req.params.id, ...doc.data(), ...updates });
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
 });
 
 // calls `delete` on `router`; its first argument is a callback whose body follows
@@ -199,6 +228,25 @@ router.post('/flights', requireAuth, async (req, res) => {
 // closes the callback passed to `post`
 });
 
+// `dayId` is the parent link and `createdAtMs` is an immutable creation
+// stamp; neither is mutable via PUT.
+const FLIGHT_FIELDS = ['flightNumber', 'pdfUri', 'departureTime', 'docName'];
+
+router.put('/flights/:id', requireAuth, async (req, res) => {
+  try {
+    const ref = db.collection('itinerary_flights').doc(req.params.id);
+    const doc = await ref.get();
+    if (!doc.exists) return res.status(404).json({ error: 'Flight not found' });
+    const day = await db.collection('itinerary_days').doc(doc.data().dayId).get();
+    await verifyTripOwnership(day.data().tripId, req.user.uid);
+    const updates = pickFields(req.body, FLIGHT_FIELDS);
+    await ref.update(updates);
+    res.json({ id: req.params.id, ...doc.data(), ...updates });
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
 // calls `delete` on `router`; its first argument is a callback whose body follows
 router.delete('/flights/:id', requireAuth, async (req, res) => {
   // `try` block: exceptions thrown inside are handled by the `catch` below
@@ -278,6 +326,23 @@ router.post('/lodging', requireAuth, async (req, res) => {
 // closes the callback passed to `post`
 });
 
+// `tripId` is the parent link and `createdAtMs` is immutable.
+const LODGING_FIELDS = ['fromDate', 'toDate', 'pdfUri', 'docName'];
+
+router.put('/lodging/:id', requireAuth, async (req, res) => {
+  try {
+    const ref = db.collection('itinerary_lodging').doc(req.params.id);
+    const doc = await ref.get();
+    if (!doc.exists) return res.status(404).json({ error: 'Lodging not found' });
+    await verifyTripOwnership(doc.data().tripId, req.user.uid);
+    const updates = pickFields(req.body, LODGING_FIELDS);
+    await ref.update(updates);
+    res.json({ id: req.params.id, ...doc.data(), ...updates });
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
 // calls `delete` on `router`; its first argument is a callback whose body follows
 router.delete('/lodging/:id', requireAuth, async (req, res) => {
   // `try` block: exceptions thrown inside are handled by the `catch` below
@@ -353,6 +418,23 @@ router.post('/cars', requireAuth, async (req, res) => {
   // closes the catch block
   }
 // closes the callback passed to `post`
+});
+
+// `tripId` is the parent link and `createdAtMs` is immutable.
+const CAR_FIELDS = ['fromDate', 'toDate', 'pdfUri', 'docName'];
+
+router.put('/cars/:id', requireAuth, async (req, res) => {
+  try {
+    const ref = db.collection('itinerary_cars').doc(req.params.id);
+    const doc = await ref.get();
+    if (!doc.exists) return res.status(404).json({ error: 'Car rental not found' });
+    await verifyTripOwnership(doc.data().tripId, req.user.uid);
+    const updates = pickFields(req.body, CAR_FIELDS);
+    await ref.update(updates);
+    res.json({ id: req.params.id, ...doc.data(), ...updates });
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
 });
 
 // calls `delete` on `router`; its first argument is a callback whose body follows
@@ -440,6 +522,12 @@ router.post('/places', requireAuth, async (req, res) => {
 // closes the callback passed to `post`
 });
 
+// `dayId` is the parent link and `createdAtMs` is immutable; everything
+// else about a place can be edited (the audit flagged this route doing
+// `ref.update(req.body)` directly, which let a client rewrite `dayId` to
+// move a place onto a day in a trip it doesn't own).
+const PLACE_FIELDS = ['name', 'category', 'lat', 'lng', 'note', 'photoUrl'];
+
 // calls `put` on `router`; its first argument is a callback whose body follows
 router.put('/places/:id', requireAuth, async (req, res) => {
   // `try` block: exceptions thrown inside are handled by the `catch` below
@@ -454,10 +542,9 @@ router.put('/places/:id', requireAuth, async (req, res) => {
     const day = await db.collection('itinerary_days').doc(doc.data().dayId).get();
     // awaits the call to `verifyTripOwnership` with arguments `(day.data().tripId, req.user.uid)`
     await verifyTripOwnership(day.data().tripId, req.user.uid);
-    // awaits the call to `update` on `ref` with arguments `(req.body)`
-    await ref.update(req.body);
-    // calls `json` on `res` with arguments `({ id: req.params.id, ...req.body })`
-    res.json({ id: req.params.id, ...req.body });
+    const updates = pickFields(req.body, PLACE_FIELDS);
+    await ref.update(updates);
+    res.json({ id: req.params.id, ...doc.data(), ...updates });
   // `catch` block: handles a thrown `exception` bound to `err`
   } catch (err) {
     // calls `status` on `res` with arguments `(err.status || 500)`, then chains `.json({ error: err.message })`
