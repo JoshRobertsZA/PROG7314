@@ -130,7 +130,11 @@ class OutboxRepository(context: Context) {
     //                       create call, carrying the latest field values)
     //   CREATE + DELETE -> cancelled entirely: the entity never reached the
     //                       cloud, so there is nothing there to delete
-    //   UPDATE + UPDATE -> UPDATE, keeping only the newest payload
+    //   UPDATE + UPDATE -> UPDATE, merged the same way as CREATE + UPDATE
+    //                       (newer field values win, older fields not
+    //                       touched by the newer call are kept - two
+    //                       partial updates to different fields of the
+    //                       same entity must not clobber each other)
     //   UPDATE + DELETE -> DELETE (the update is moot once the row is gone)
     //   nothing queued  -> the new operation, unchanged
     // A DELETE followed by another operation on the same id isn't a real
@@ -150,7 +154,7 @@ class OutboxRepository(context: Context) {
             OutboxOperation.CREATE to OutboxOperation.DELETE ->
                 null
             OutboxOperation.UPDATE to OutboxOperation.UPDATE ->
-                OutboxOperation.UPDATE to newPayload
+                OutboxOperation.UPDATE to mergeJson(existing.payloadJson, newPayload)
             OutboxOperation.UPDATE to OutboxOperation.DELETE ->
                 OutboxOperation.DELETE to null
             else -> {
