@@ -7,6 +7,17 @@ import android.util.Log
 import com.waypoint.app.BuildConfig
 // imports `com.waypoint.app.core.db.TripEntity` for use in this file
 import com.waypoint.app.core.db.TripEntity
+// Itinerary entities live in a feature package (edititinerary), not
+// core/db like TripEntity - a core module importing from a feature
+// package is backwards layering. Matching createTrip/updateTrip's
+// existing typed-entity pattern here anyway rather than inventing a
+// different shape; moving these entities into core/db is a larger,
+// separate refactor that would also touch ItineraryRepository.
+import com.waypoint.app.features.edititinerary.data.CarRentalEntity
+import com.waypoint.app.features.edititinerary.data.FlightEntity
+import com.waypoint.app.features.edititinerary.data.ItineraryDayEntity
+import com.waypoint.app.features.edititinerary.data.LodgingEntity
+import com.waypoint.app.features.edititinerary.data.PlaceEntity
 // imports `kotlinx.coroutines.Dispatchers` for use in this file
 import kotlinx.coroutines.Dispatchers
 // imports `kotlinx.coroutines.withContext` for use in this file
@@ -254,6 +265,256 @@ object WaypointApiRepository {
         // closes the catch block
         }
     // closes the block
+    }
+
+
+    // --- Itinerary: days ---
+    // Write-only for now (create/update/delete): pulling and merging
+    // itinerary data from the cloud is PR 2b's job, not this commit's.
+
+    suspend fun createDay(idToken: String, day: ItineraryDayEntity): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val json = JSONObject().apply {
+                put("id", day.id)
+                put("tripId", day.tripId)
+                put("date", day.date.toString())
+            }.toString().toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/days").post(json).build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "POST /itinerary/days HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "createDay failed: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun updateDay(idToken: String, day: ItineraryDayEntity): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val json = JSONObject().apply {
+                put("date", day.date.toString())
+            }.toString().toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/days/${day.id}").put(json).build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "PUT /itinerary/days/${day.id} HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "updateDay failed: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun deleteDay(idToken: String, dayId: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/days/$dayId").delete().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "DELETE /itinerary/days/$dayId HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "deleteDay failed: ${e.message}")
+            false
+        }
+    }
+
+
+    // --- Itinerary: flights ---
+
+    suspend fun createFlight(idToken: String, flight: FlightEntity): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val json = JSONObject().apply {
+                put("id", flight.id)
+                put("dayId", flight.dayId)
+                if (flight.flightNumber != null) put("flightNumber", flight.flightNumber)
+                put("pdfUri", flight.pdfUri)
+                if (flight.departureTime != null) put("departureTime", flight.departureTime)
+                if (flight.docName != null) put("docName", flight.docName)
+            }.toString().toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/flights").post(json).build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "POST /itinerary/flights HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "createFlight failed: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun updateFlight(idToken: String, flight: FlightEntity): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val json = JSONObject().apply {
+                put("flightNumber", flight.flightNumber ?: JSONObject.NULL)
+                put("pdfUri", flight.pdfUri)
+                put("departureTime", flight.departureTime ?: JSONObject.NULL)
+                put("docName", flight.docName ?: JSONObject.NULL)
+            }.toString().toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/flights/${flight.id}").put(json).build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "PUT /itinerary/flights/${flight.id} HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "updateFlight failed: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun deleteFlight(idToken: String, flightId: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/flights/$flightId").delete().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "DELETE /itinerary/flights/$flightId HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "deleteFlight failed: ${e.message}")
+            false
+        }
+    }
+
+
+    // --- Itinerary: lodging ---
+
+    suspend fun createLodging(idToken: String, lodging: LodgingEntity): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val json = JSONObject().apply {
+                put("id", lodging.id)
+                put("tripId", lodging.tripId)
+                put("fromDate", lodging.fromDate.toString())
+                put("toDate", lodging.toDate.toString())
+                put("pdfUri", lodging.pdfUri)
+                if (lodging.docName != null) put("docName", lodging.docName)
+            }.toString().toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/lodging").post(json).build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "POST /itinerary/lodging HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "createLodging failed: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun updateLodging(idToken: String, lodging: LodgingEntity): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val json = JSONObject().apply {
+                put("fromDate", lodging.fromDate.toString())
+                put("toDate", lodging.toDate.toString())
+                put("pdfUri", lodging.pdfUri)
+                put("docName", lodging.docName ?: JSONObject.NULL)
+            }.toString().toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/lodging/${lodging.id}").put(json).build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "PUT /itinerary/lodging/${lodging.id} HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "updateLodging failed: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun deleteLodging(idToken: String, lodgingId: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/lodging/$lodgingId").delete().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "DELETE /itinerary/lodging/$lodgingId HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "deleteLodging failed: ${e.message}")
+            false
+        }
+    }
+
+
+    // --- Itinerary: cars ---
+
+    suspend fun createCar(idToken: String, car: CarRentalEntity): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val json = JSONObject().apply {
+                put("id", car.id)
+                put("tripId", car.tripId)
+                put("fromDate", car.fromDate.toString())
+                put("toDate", car.toDate.toString())
+                put("pdfUri", car.pdfUri)
+                if (car.docName != null) put("docName", car.docName)
+            }.toString().toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/cars").post(json).build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "POST /itinerary/cars HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "createCar failed: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun updateCar(idToken: String, car: CarRentalEntity): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val json = JSONObject().apply {
+                put("fromDate", car.fromDate.toString())
+                put("toDate", car.toDate.toString())
+                put("pdfUri", car.pdfUri)
+                put("docName", car.docName ?: JSONObject.NULL)
+            }.toString().toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/cars/${car.id}").put(json).build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "PUT /itinerary/cars/${car.id} HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "updateCar failed: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun deleteCar(idToken: String, carId: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/cars/$carId").delete().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "DELETE /itinerary/cars/$carId HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "deleteCar failed: ${e.message}")
+            false
+        }
+    }
+
+
+    // --- Itinerary: places ---
+
+    suspend fun createPlace(idToken: String, place: PlaceEntity): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val json = JSONObject().apply {
+                put("id", place.id)
+                put("dayId", place.dayId)
+                put("name", place.name)
+                put("category", place.category)
+                if (place.lat != null) put("lat", place.lat)
+                if (place.lng != null) put("lng", place.lng)
+                if (place.note != null) put("note", place.note)
+                if (place.photoUrl != null) put("photoUrl", place.photoUrl)
+            }.toString().toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/places").post(json).build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "POST /itinerary/places HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "createPlace failed: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun updatePlace(idToken: String, place: PlaceEntity): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val json = JSONObject().apply {
+                put("name", place.name)
+                put("category", place.category)
+                put("lat", place.lat ?: JSONObject.NULL)
+                put("lng", place.lng ?: JSONObject.NULL)
+                put("note", place.note ?: JSONObject.NULL)
+                put("photoUrl", place.photoUrl ?: JSONObject.NULL)
+            }.toString().toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/places/${place.id}").put(json).build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "PUT /itinerary/places/${place.id} HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "updatePlace failed: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun deletePlace(idToken: String, placeId: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/places/$placeId").delete().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "DELETE /itinerary/places/$placeId HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "deletePlace failed: ${e.message}")
+            false
+        }
     }
 // closes the object `WaypointApiRepository`
 }

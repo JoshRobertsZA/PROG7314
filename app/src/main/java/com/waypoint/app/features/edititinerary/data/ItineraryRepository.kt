@@ -15,12 +15,17 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 // imports `java.util.UUID` for use in this file
 import java.util.UUID
+import com.waypoint.app.core.sync.OutboxEntityType
+import com.waypoint.app.core.sync.OutboxOperation
+import com.waypoint.app.core.sync.OutboxRepository
+import org.json.JSONObject
 
 // declares class `ItineraryRepository` with a primary constructor taking 1 parameter (`context`) and opens its body
 class ItineraryRepository(context: Context) {
 
     // declares private read-only property `db`, initialised with the result of calling `WaypointDbHelper.getInstance(…)`
     private val db = WaypointDbHelper.getInstance(context)
+    private val outbox = OutboxRepository(context)
 
 
     // expression: `suspend fun replaceSelectedDays(`
@@ -33,6 +38,10 @@ class ItineraryRepository(context: Context) {
     ) = withContext(Dispatchers.IO) {
         // declares read-only property `write`, initialised to `db.writableDatabase`
         val write = db.writableDatabase
+        // Collected inside the transaction below, enqueued after it
+        // commits (outbox.enqueue() opens its own transaction on this same
+        // database, so it must run after this one has ended).
+        val createdDays = mutableListOf<Pair<String, LocalDate>>()
         // calls `beginTransaction` on `write` with arguments `()`
         write.beginTransaction()
         // `try` block: exceptions thrown inside are handled by the `catch` below
@@ -80,9 +89,10 @@ class ItineraryRepository(context: Context) {
             // `for` loop: iterates over `datesToAdd`, binding each element to `date`
             for (date in datesToAdd) {
                 // declares read-only property `cv`, initialised with the result of calling `ContentValues(…)` and opens a lambda / block
+                val newId = UUID.randomUUID().toString()
                 val cv = ContentValues().apply {
                     // calls `put` with arguments `(WaypointDbHelper.COL_IDAY_ID, UUID.randomUUI…)`
-                    put(WaypointDbHelper.COL_IDAY_ID,      UUID.randomUUID().toString())
+                    put(WaypointDbHelper.COL_IDAY_ID,      newId)
                     // calls `put` with arguments `(WaypointDbHelper.COL_IDAY_TRIP_ID, tripId)`
                     put(WaypointDbHelper.COL_IDAY_TRIP_ID, tripId)
                     // calls `put` with arguments `(WaypointDbHelper.COL_IDAY_DATE, date.toStrin…)`
@@ -91,6 +101,7 @@ class ItineraryRepository(context: Context) {
                 }
                 // calls `insert` on `write` with arguments `(WaypointDbHelper.TABLE_ITIN_DAYS, null, cv)`
                 write.insert(WaypointDbHelper.TABLE_ITIN_DAYS, null, cv)
+                createdDays += newId to date
             // closes the for loop
             }
 
@@ -102,6 +113,15 @@ class ItineraryRepository(context: Context) {
             write.endTransaction()
         // closes the finally block
         }
+
+        for ((dayId, date) in createdDays) {
+            val payload = JSONObject().apply {
+                put("id", dayId)
+                put("tripId", tripId)
+                put("date", date.toString())
+            }.toString()
+            outbox.enqueue(OutboxEntityType.DAY, dayId, OutboxOperation.CREATE, payload)
+        }
     // closes the block
     }
 
@@ -109,16 +129,50 @@ class ItineraryRepository(context: Context) {
     suspend fun removeDaysOutside(tripId: String, start: LocalDate, end: LocalDate) =
         // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
+            val whereClause = "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ? AND " +
+                "(${WaypointDbHelper.COL_IDAY_DATE} < ? OR ${WaypointDbHelper.COL_IDAY_DATE} > ?)"
+            val whereArgs = arrayOf(tripId, start.toString(), end.toString())
+
+            // Must read which days (and the flights/places under them) are
+            // about to go before deleting: ON DELETE CASCADE (enabled in
+            // WaypointDbHelper.onConfigure) removes those flights/places
+            // locally as a side effect of the day delete below, without
+            // ever going through deleteFlight()/deletePlace() - so their
+            // own outbox DELETE entries have to be queued here, or the
+            // server never finds out those records are gone.
+            val removedDayIds = mutableListOf<String>()
+            db.readableDatabase.query(
+                WaypointDbHelper.TABLE_ITIN_DAYS, arrayOf(WaypointDbHelper.COL_IDAY_ID),
+                whereClause, whereArgs, null, null, null,
+            ).use { cursor -> while (cursor.moveToNext()) removedDayIds += cursor.getString(0) }
+
+            if (removedDayIds.isEmpty()) return@withContext
+
+            val removedFlightIds = mutableListOf<String>()
+            val removedPlaceIds = mutableListOf<String>()
+            for (dayId in removedDayIds) {
+                db.readableDatabase.query(
+                    WaypointDbHelper.TABLE_ITIN_FLIGHTS, arrayOf(WaypointDbHelper.COL_IFLIGHT_ID),
+                    "${WaypointDbHelper.COL_IFLIGHT_DAY_ID} = ?", arrayOf(dayId), null, null, null,
+                ).use { cursor -> while (cursor.moveToNext()) removedFlightIds += cursor.getString(0) }
+                db.readableDatabase.query(
+                    WaypointDbHelper.TABLE_ITIN_PLACES, arrayOf(WaypointDbHelper.COL_IPLACE_ID),
+                    "${WaypointDbHelper.COL_IPLACE_DAY_ID} = ?", arrayOf(dayId), null, null, null,
+                ).use { cursor -> while (cursor.moveToNext()) removedPlaceIds += cursor.getString(0) }
+            }
+
             // calls `delete` on `db.writableDatabase` with an argument list that continues on the following lines
             db.writableDatabase.delete(
                 // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_DAYS,`
                 WaypointDbHelper.TABLE_ITIN_DAYS,
-                // continues the statement started above: `"${WaypointDbHelper.COL_IDAY_TRIP_ID} = ? AND (${WaypointDb…`
-                "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ? AND (${WaypointDbHelper.COL_IDAY_DATE} < ? OR ${WaypointDbHelper.COL_IDAY_DATE} > ?)",
-                // continues the statement started above: `arrayOf(tripId, start.toString(), end.toString()),`
-                arrayOf(tripId, start.toString(), end.toString()),
+                whereClause,
+                whereArgs,
             // closes the multi-line argument list started above
             )
+
+            for (flightId in removedFlightIds) outbox.enqueue(OutboxEntityType.FLIGHT, flightId, OutboxOperation.DELETE, null)
+            for (placeId in removedPlaceIds) outbox.enqueue(OutboxEntityType.PLACE, placeId, OutboxOperation.DELETE, null)
+            for (dayId in removedDayIds) outbox.enqueue(OutboxEntityType.DAY, dayId, OutboxOperation.DELETE, null)
         // closes the block
         }
 
@@ -242,6 +296,15 @@ class ItineraryRepository(context: Context) {
             }
             // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_FLIGHTS, null, cv)`
             db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_FLIGHTS, null, cv)
+
+            val payload = JSONObject().apply {
+                put("id", id)
+                put("dayId", dayId)
+                put("pdfUri", pdfUri)
+                if (docName != null) put("docName", docName)
+            }.toString()
+            outbox.enqueue(OutboxEntityType.FLIGHT, id, OutboxOperation.CREATE, payload)
+
             // expression: `id`
             id
         // closes the block
@@ -269,6 +332,9 @@ class ItineraryRepository(context: Context) {
                 arrayOf(flightId),
             // closes the multi-line argument list started above
             )
+
+            val payload = JSONObject().apply { put("flightNumber", number) }.toString()
+            outbox.enqueue(OutboxEntityType.FLIGHT, flightId, OutboxOperation.UPDATE, payload)
         // closes the block
         }
 
@@ -292,6 +358,9 @@ class ItineraryRepository(context: Context) {
                 "${WaypointDbHelper.COL_IFLIGHT_ID} = ?", arrayOf(flightId),
             // closes the multi-line argument list started above
             )
+
+            val payload = JSONObject().apply { put("departureTime", time ?: JSONObject.NULL) }.toString()
+            outbox.enqueue(OutboxEntityType.FLIGHT, flightId, OutboxOperation.UPDATE, payload)
         // closes the block
         }
 
@@ -380,6 +449,7 @@ class ItineraryRepository(context: Context) {
                 arrayOf(flightId),
             // closes the multi-line argument list started above
             )
+            outbox.enqueue(OutboxEntityType.FLIGHT, flightId, OutboxOperation.DELETE, null)
         // closes the block
         }
 
@@ -420,6 +490,17 @@ class ItineraryRepository(context: Context) {
         }
         // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)`
         db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)
+
+        val payload = JSONObject().apply {
+            put("id", id)
+            put("tripId", tripId)
+            put("fromDate", fromDate.toString())
+            put("toDate", toDate.toString())
+            put("pdfUri", pdfUri)
+            if (docName != null) put("docName", docName)
+        }.toString()
+        outbox.enqueue(OutboxEntityType.LODGING, id, OutboxOperation.CREATE, payload)
+
         // expression: `id`
         id
     // closes the block
@@ -488,6 +569,7 @@ class ItineraryRepository(context: Context) {
                 arrayOf(lodgingId),
             // closes the multi-line argument list started above
             )
+            outbox.enqueue(OutboxEntityType.LODGING, lodgingId, OutboxOperation.DELETE, null)
         // closes the block
         }
 
@@ -528,6 +610,17 @@ class ItineraryRepository(context: Context) {
         }
         // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)`
         db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)
+
+        val payload = JSONObject().apply {
+            put("id", id)
+            put("tripId", tripId)
+            put("fromDate", fromDate.toString())
+            put("toDate", toDate.toString())
+            put("pdfUri", pdfUri)
+            if (docName != null) put("docName", docName)
+        }.toString()
+        outbox.enqueue(OutboxEntityType.CAR, id, OutboxOperation.CREATE, payload)
+
         // expression: `id`
         id
     // closes the block
@@ -596,6 +689,7 @@ class ItineraryRepository(context: Context) {
                 arrayOf(carRentalId),
             // closes the multi-line argument list started above
             )
+            outbox.enqueue(OutboxEntityType.CAR, carRentalId, OutboxOperation.DELETE, null)
         // closes the block
         }
 
@@ -644,6 +738,19 @@ class ItineraryRepository(context: Context) {
         }
         // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_PLACES, null, cv)`
         db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_PLACES, null, cv)
+
+        val payload = JSONObject().apply {
+            put("id", id)
+            put("dayId", dayId)
+            put("name", placeName)
+            put("category", category)
+            if (lat != null) put("lat", lat)
+            if (lng != null) put("lng", lng)
+            if (note != null) put("note", note)
+            if (photoUrl != null) put("photoUrl", photoUrl)
+        }.toString()
+        outbox.enqueue(OutboxEntityType.PLACE, id, OutboxOperation.CREATE, payload)
+
         // expression: `id`
         id
     // closes the block
@@ -730,6 +837,7 @@ class ItineraryRepository(context: Context) {
                 arrayOf(placeId),
             // closes the multi-line argument list started above
             )
+            outbox.enqueue(OutboxEntityType.PLACE, placeId, OutboxOperation.DELETE, null)
         // closes the block
         }
 // closes the class `ItineraryRepository`

@@ -55,12 +55,17 @@ import kotlinx.coroutines.withContext
 import java.util.UUID
 // imports `com.waypoint.app.core.network.WaypointApiRepository` for use in this file
 import com.waypoint.app.core.network.WaypointApiRepository
+import com.waypoint.app.core.sync.OutboxEntityType
+import com.waypoint.app.core.sync.OutboxOperation
+import com.waypoint.app.core.sync.OutboxRepository
+import org.json.JSONObject
 
 // declares class `TripRepository` with a primary constructor taking 1 parameter (`context`) and opens its body
 class TripRepository(context: Context) {
 
     // declares private read-only property `db`, initialised with the result of calling `WaypointDbHelper.getInstance(…)`
     private val db = WaypointDbHelper.getInstance(context)
+    private val outbox = OutboxRepository(context)
 
 
     // declares suspend function `upsertAccount` taking 1 parameter (`account`); its body is the expression `withContext(Dispatchers.IO) {`
@@ -141,6 +146,22 @@ class TripRepository(context: Context) {
         }
         // calls `insertOrThrow` on `db.writableDatabase` with arguments `(TABLE_TRIPS, null, cv)`
         db.writableDatabase.insertOrThrow(TABLE_TRIPS, null, cv)
+
+        // Queue the create for the sync worker (PR 2b) to send later. The
+        // payload shape matches WaypointApiRepository.createTrip's own
+        // request body exactly, since that's what eventually gets POSTed.
+        val payload = JSONObject().apply {
+            put("id", id)
+            put("name", name)
+            put("startDate", startDate)
+            put("endDate", endDate)
+            if (destination != null) put("destination", destination)
+            if (destLat != null) put("destLat", destLat)
+            if (destLng != null) put("destLng", destLng)
+            if (destPhotoUrl != null) put("destPhotoUrl", destPhotoUrl)
+        }.toString()
+        outbox.enqueue(OutboxEntityType.TRIP, id, OutboxOperation.CREATE, payload)
+
         // expression: `id`
         id
     // closes the block
@@ -248,6 +269,20 @@ class TripRepository(context: Context) {
             arrayOf(id),
         // closes the multi-line argument list started above
         )
+
+        // Only the fields this call actually changes go in the payload -
+        // not the full trip - so a coalesced CREATE+UPDATE merge (see
+        // OutboxRepository) only overwrites what really changed, and an
+        // UPDATE sent on its own doesn't clobber startDate/endDate with
+        // stale values this function never touched.
+        val payload = JSONObject().apply {
+            put("name", name)
+            put("destination", destination ?: JSONObject.NULL)
+            put("destLat", destLat ?: JSONObject.NULL)
+            put("destLng", destLng ?: JSONObject.NULL)
+            put("destPhotoUrl", destPhotoUrl ?: JSONObject.NULL)
+        }.toString()
+        outbox.enqueue(OutboxEntityType.TRIP, id, OutboxOperation.UPDATE, payload)
     // closes the block
     }
 
@@ -265,6 +300,12 @@ class TripRepository(context: Context) {
         }
         // calls `update` on `db.writableDatabase` with arguments `(TABLE_TRIPS, cv, "$COL_TRIP_ID = ?", arrayOf…)`
         db.writableDatabase.update(TABLE_TRIPS, cv, "$COL_TRIP_ID = ?", arrayOf(id))
+
+        val payload = JSONObject().apply {
+            put("startDate", startDate)
+            put("endDate", endDate)
+        }.toString()
+        outbox.enqueue(OutboxEntityType.TRIP, id, OutboxOperation.UPDATE, payload)
     // closes the block
     }
 
@@ -325,6 +366,13 @@ class TripRepository(context: Context) {
             arrayOf(id, accountId),
         // closes the multi-line argument list started above
         )
+
+        // Still a hard delete locally, same as before this commit - the
+        // deleted tombstone column added earlier isn't consumed here. It
+        // exists for PR 2b's pull/merge logic (not written yet) to tell
+        // "deleted elsewhere" apart from "not synced yet"; a device's own
+        // delete of its own row doesn't need to keep that row around.
+        outbox.enqueue(OutboxEntityType.TRIP, id, OutboxOperation.DELETE, null)
     // closes the block
     }
 
