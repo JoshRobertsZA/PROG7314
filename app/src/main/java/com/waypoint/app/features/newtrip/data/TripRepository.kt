@@ -60,6 +60,17 @@ import com.waypoint.app.core.sync.OutboxOperation
 import com.waypoint.app.core.sync.OutboxRepository
 import org.json.JSONObject
 
+// Top-level (not a member function) so TripMergeTest can call it without
+// constructing TripRepository, whose constructor needs a real Context -
+// pure logic, no SQLite dependency, split out from pullAndMergeTrips
+// specifically to be testable without Robolectric (not set up in this
+// project's unit tests, which run on the plain JVM). null localUpdatedAtMs
+// means "no local row yet" (first-ever pull), which always applies cloud.
+internal fun shouldApplyCloudTrip(localUpdatedAtMs: Long?, cloudUpdatedAtMs: Long): Boolean {
+    if (localUpdatedAtMs != null && localUpdatedAtMs > cloudUpdatedAtMs) return false
+    return true
+}
+
 // declares class `TripRepository` with a primary constructor taking 1 parameter (`context`) and opens its body
 class TripRepository(context: Context) {
 
@@ -422,8 +433,7 @@ class TripRepository(context: Context) {
         for (t in cloudTrips) {
             if (t.id in pending) continue
 
-            val localUpdatedAt = localUpdatedAtMs(wdb, t.id)
-            if (localUpdatedAt != null && localUpdatedAt > t.updatedAtMs) continue
+            if (!shouldApplyCloudTrip(localUpdatedAtMs(wdb, t.id), t.updatedAtMs)) continue
 
             val cv = ContentValues().apply {
                 put(COL_TRIP_ACCOUNT_ID,  t.accountId)

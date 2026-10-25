@@ -47,6 +47,64 @@ data class OutboxEntry(
     val lastError: String?,
 )
 
+// Coalescing rules (PR 2a commit 3 in the project plan):
+//   CREATE + UPDATE -> CREATE, with the update's fields merged into the
+//                       create's payload (the cloud only ever sees one
+//                       create call, carrying the latest field values)
+//   CREATE + DELETE -> cancelled entirely: the entity never reached the
+//                       cloud, so there is nothing there to delete
+//   UPDATE + UPDATE -> UPDATE, merged the same way as CREATE + UPDATE
+//                       (newer field values win, older fields not
+//                       touched by the newer call are kept - two
+//                       partial updates to different fields of the
+//                       same entity must not clobber each other)
+//   UPDATE + DELETE -> DELETE (the update is moot once the row is gone)
+//   nothing queued  -> the new operation, unchanged
+// A DELETE followed by another operation on the same id isn't a real
+// case today (ids are fresh UUIDs per create, never reused for a new
+// entity), so it has no rule here; the fallback is "newest operation
+// wins," logged as unexpected rather than silently assumed correct.
+//
+// Top-level (not a member of OutboxRepository), same reason as
+// TripRepository.shouldApplyCloudTrip: pure logic with no SQLite
+// dependency, but OutboxRepository's constructor needs a real Context, and
+// this project's unit tests run on the plain JVM with no Robolectric.
+internal fun coalesce(
+    existing: OutboxEntry?,
+    newOp: OutboxOperation,
+    newPayload: String?,
+): Pair<OutboxOperation, String?>? {
+    if (existing == null) return newOp to newPayload
+
+    return when (existing.operation to newOp) {
+        OutboxOperation.CREATE to OutboxOperation.UPDATE ->
+            OutboxOperation.CREATE to mergeJson(existing.payloadJson, newPayload)
+        OutboxOperation.CREATE to OutboxOperation.DELETE ->
+            null
+        OutboxOperation.UPDATE to OutboxOperation.UPDATE ->
+            OutboxOperation.UPDATE to mergeJson(existing.payloadJson, newPayload)
+        OutboxOperation.UPDATE to OutboxOperation.DELETE ->
+            OutboxOperation.DELETE to null
+        else -> {
+            Log.w(
+                "OutboxRepository",
+                "Unexpected outbox transition ${existing.operation} -> $newOp " +
+                    "for ${existing.entityType}/${existing.entityId}; keeping the newest operation",
+            )
+            newOp to newPayload
+        }
+    }
+}
+
+internal fun mergeJson(base: String?, updates: String?): String? {
+    if (updates == null) return base
+    if (base == null) return updates
+    val merged = JSONObject(base)
+    val updateObj = JSONObject(updates)
+    updateObj.keys().forEach { key -> merged.put(key, updateObj.get(key)) }
+    return merged.toString()
+}
+
 // Durable queue of local changes waiting to reach the API. One row per
 // entity with a pending change - enqueue() coalesces a new operation with
 // whatever is already queued for that entity instead of appending a
@@ -144,59 +202,6 @@ class OutboxRepository(context: Context) {
         }
     }
 
-    // Coalescing rules (PR 2a commit 3 in the project plan):
-    //   CREATE + UPDATE -> CREATE, with the update's fields merged into the
-    //                       create's payload (the cloud only ever sees one
-    //                       create call, carrying the latest field values)
-    //   CREATE + DELETE -> cancelled entirely: the entity never reached the
-    //                       cloud, so there is nothing there to delete
-    //   UPDATE + UPDATE -> UPDATE, merged the same way as CREATE + UPDATE
-    //                       (newer field values win, older fields not
-    //                       touched by the newer call are kept - two
-    //                       partial updates to different fields of the
-    //                       same entity must not clobber each other)
-    //   UPDATE + DELETE -> DELETE (the update is moot once the row is gone)
-    //   nothing queued  -> the new operation, unchanged
-    // A DELETE followed by another operation on the same id isn't a real
-    // case today (ids are fresh UUIDs per create, never reused for a new
-    // entity), so it has no rule here; the fallback is "newest operation
-    // wins," logged as unexpected rather than silently assumed correct.
-    private fun coalesce(
-        existing: OutboxEntry?,
-        newOp: OutboxOperation,
-        newPayload: String?,
-    ): Pair<OutboxOperation, String?>? {
-        if (existing == null) return newOp to newPayload
-
-        return when (existing.operation to newOp) {
-            OutboxOperation.CREATE to OutboxOperation.UPDATE ->
-                OutboxOperation.CREATE to mergeJson(existing.payloadJson, newPayload)
-            OutboxOperation.CREATE to OutboxOperation.DELETE ->
-                null
-            OutboxOperation.UPDATE to OutboxOperation.UPDATE ->
-                OutboxOperation.UPDATE to mergeJson(existing.payloadJson, newPayload)
-            OutboxOperation.UPDATE to OutboxOperation.DELETE ->
-                OutboxOperation.DELETE to null
-            else -> {
-                Log.w(
-                    TAG,
-                    "Unexpected outbox transition ${existing.operation} -> $newOp " +
-                        "for ${existing.entityType}/${existing.entityId}; keeping the newest operation",
-                )
-                newOp to newPayload
-            }
-        }
-    }
-
-    private fun mergeJson(base: String?, updates: String?): String? {
-        if (updates == null) return base
-        if (base == null) return updates
-        val merged = JSONObject(base)
-        val updateObj = JSONObject(updates)
-        updateObj.keys().forEach { key -> merged.put(key, updateObj.get(key)) }
-        return merged.toString()
-    }
-
     private fun findPending(wdb: SQLiteDatabase, entityType: OutboxEntityType, entityId: String): OutboxEntry? {
         wdb.query(
             TABLE_SYNC_OUTBOX,
@@ -232,9 +237,5 @@ class OutboxRepository(context: Context) {
             attempts = getInt(getColumnIndexOrThrow(COL_OUTBOX_ATTEMPTS)),
             lastError = if (lastErrorIdx >= 0 && !isNull(lastErrorIdx)) getString(lastErrorIdx) else null,
         )
-    }
-
-    private companion object {
-        const val TAG = "OutboxRepository"
     }
 }
