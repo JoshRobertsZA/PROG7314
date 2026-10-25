@@ -485,7 +485,7 @@ object WaypointApiRepository {
                 put("id", flight.id)
                 put("dayId", flight.dayId)
                 if (flight.flightNumber != null) put("flightNumber", flight.flightNumber)
-                put("pdfUri", flight.pdfUri)
+                // pdfUri is a device-local content:// URI, deliberately not sent.
                 if (flight.departureTime != null) put("departureTime", flight.departureTime)
                 if (flight.docName != null) put("docName", flight.docName)
             }.toString().toRequestBody(JSON_TYPE)
@@ -502,7 +502,7 @@ object WaypointApiRepository {
         try {
             val json = JSONObject().apply {
                 put("flightNumber", flight.flightNumber ?: JSONObject.NULL)
-                put("pdfUri", flight.pdfUri)
+                // pdfUri is a device-local content:// URI, deliberately not sent.
                 put("departureTime", flight.departureTime ?: JSONObject.NULL)
                 put("docName", flight.docName ?: JSONObject.NULL)
             }.toString().toRequestBody(JSON_TYPE)
@@ -536,7 +536,7 @@ object WaypointApiRepository {
                 put("tripId", lodging.tripId)
                 put("fromDate", lodging.fromDate.toString())
                 put("toDate", lodging.toDate.toString())
-                put("pdfUri", lodging.pdfUri)
+                // pdfUri is a device-local content:// URI, deliberately not sent.
                 if (lodging.docName != null) put("docName", lodging.docName)
             }.toString().toRequestBody(JSON_TYPE)
             val req = authBuilder(idToken).url("$BASE_URL/itinerary/lodging").post(json).build()
@@ -553,7 +553,7 @@ object WaypointApiRepository {
             val json = JSONObject().apply {
                 put("fromDate", lodging.fromDate.toString())
                 put("toDate", lodging.toDate.toString())
-                put("pdfUri", lodging.pdfUri)
+                // pdfUri is a device-local content:// URI, deliberately not sent.
                 put("docName", lodging.docName ?: JSONObject.NULL)
             }.toString().toRequestBody(JSON_TYPE)
             val req = authBuilder(idToken).url("$BASE_URL/itinerary/lodging/${lodging.id}").put(json).build()
@@ -586,7 +586,7 @@ object WaypointApiRepository {
                 put("tripId", car.tripId)
                 put("fromDate", car.fromDate.toString())
                 put("toDate", car.toDate.toString())
-                put("pdfUri", car.pdfUri)
+                // pdfUri is a device-local content:// URI, deliberately not sent.
                 if (car.docName != null) put("docName", car.docName)
             }.toString().toRequestBody(JSON_TYPE)
             val req = authBuilder(idToken).url("$BASE_URL/itinerary/cars").post(json).build()
@@ -603,7 +603,7 @@ object WaypointApiRepository {
             val json = JSONObject().apply {
                 put("fromDate", car.fromDate.toString())
                 put("toDate", car.toDate.toString())
-                put("pdfUri", car.pdfUri)
+                // pdfUri is a device-local content:// URI, deliberately not sent.
                 put("docName", car.docName ?: JSONObject.NULL)
             }.toString().toRequestBody(JSON_TYPE)
             val req = authBuilder(idToken).url("$BASE_URL/itinerary/cars/${car.id}").put(json).build()

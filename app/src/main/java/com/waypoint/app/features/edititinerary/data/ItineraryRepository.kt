@@ -298,10 +298,12 @@ class ItineraryRepository(context: Context) {
             // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_FLIGHTS, null, cv)`
             db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_FLIGHTS, null, cv)
 
+            // pdfUri is a device-local content:// URI - meaningless on any
+            // other device, so it's never sent. docName (the filename the
+            // user picked) is still useful cross-device metadata.
             val payload = JSONObject().apply {
                 put("id", id)
                 put("dayId", dayId)
-                put("pdfUri", pdfUri)
                 if (docName != null) put("docName", docName)
             }.toString()
             outbox.enqueue(OutboxEntityType.FLIGHT, id, OutboxOperation.CREATE, payload)
@@ -492,12 +494,12 @@ class ItineraryRepository(context: Context) {
         // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)`
         db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)
 
+        // pdfUri is device-local, never synced - see insertFlight.
         val payload = JSONObject().apply {
             put("id", id)
             put("tripId", tripId)
             put("fromDate", fromDate.toString())
             put("toDate", toDate.toString())
-            put("pdfUri", pdfUri)
             if (docName != null) put("docName", docName)
         }.toString()
         outbox.enqueue(OutboxEntityType.LODGING, id, OutboxOperation.CREATE, payload)
@@ -612,12 +614,12 @@ class ItineraryRepository(context: Context) {
         // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)`
         db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)
 
+        // pdfUri is device-local, never synced - see insertFlight.
         val payload = JSONObject().apply {
             put("id", id)
             put("tripId", tripId)
             put("fromDate", fromDate.toString())
             put("toDate", toDate.toString())
-            put("pdfUri", pdfUri)
             if (docName != null) put("docName", docName)
         }.toString()
         outbox.enqueue(OutboxEntityType.CAR, id, OutboxOperation.CREATE, payload)
@@ -919,17 +921,24 @@ class ItineraryRepository(context: Context) {
 
         for (f in cloudFlights) {
             if (f.id in pending) continue
+            // pdfUri is deliberately absent here - it's device-local and
+            // was never in the cloud payload to begin with (see
+            // insertFlight), so this never overwrites whatever PDF this
+            // device already has attached to the flight.
             val cv = ContentValues().apply {
                 put(WaypointDbHelper.COL_IFLIGHT_DAY_ID, f.dayId)
                 put(WaypointDbHelper.COL_IFLIGHT_FLIGHT_NUMBER, f.flightNumber)
-                put(WaypointDbHelper.COL_IFLIGHT_PDF_URI, f.pdfUri)
                 put(WaypointDbHelper.COL_IFLIGHT_DEPARTURE, f.departureTime)
                 put(WaypointDbHelper.COL_IFLIGHT_DOC_NAME, f.docName)
                 put(WaypointDbHelper.COL_IFLIGHT_CREATED, f.createdAtMs)
             }
             val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_FLIGHTS, cv, "${WaypointDbHelper.COL_IFLIGHT_ID} = ?", arrayOf(f.id))
             if (updated == 0) {
+                // pdf_uri is NOT NULL with no column default - only the
+                // INSERT path needs an explicit value, since this device
+                // has never had one for an id it's only just learned about.
                 cv.put(WaypointDbHelper.COL_IFLIGHT_ID, f.id)
+                cv.put(WaypointDbHelper.COL_IFLIGHT_PDF_URI, "")
                 wdb.insert(WaypointDbHelper.TABLE_ITIN_FLIGHTS, null, cv)
             }
         }
@@ -953,17 +962,18 @@ class ItineraryRepository(context: Context) {
 
         for (l in cloudLodging) {
             if (l.id in pending) continue
+            // pdfUri deliberately absent - see mergeFlights.
             val cv = ContentValues().apply {
                 put(WaypointDbHelper.COL_ILODGE_TRIP_ID, l.tripId)
                 put(WaypointDbHelper.COL_ILODGE_FROM_DATE, l.fromDate)
                 put(WaypointDbHelper.COL_ILODGE_TO_DATE, l.toDate)
-                put(WaypointDbHelper.COL_ILODGE_PDF_URI, l.pdfUri)
                 put(WaypointDbHelper.COL_ILODGE_DOC_NAME, l.docName)
                 put(WaypointDbHelper.COL_ILODGE_CREATED, l.createdAtMs)
             }
             val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_LODGING, cv, "${WaypointDbHelper.COL_ILODGE_ID} = ?", arrayOf(l.id))
             if (updated == 0) {
                 cv.put(WaypointDbHelper.COL_ILODGE_ID, l.id)
+                cv.put(WaypointDbHelper.COL_ILODGE_PDF_URI, "")
                 wdb.insert(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)
             }
         }
@@ -987,17 +997,18 @@ class ItineraryRepository(context: Context) {
 
         for (c0 in cloudCars) {
             if (c0.id in pending) continue
+            // pdfUri deliberately absent - see mergeFlights.
             val cv = ContentValues().apply {
                 put(WaypointDbHelper.COL_ICAR_TRIP_ID, c0.tripId)
                 put(WaypointDbHelper.COL_ICAR_FROM_DATE, c0.fromDate)
                 put(WaypointDbHelper.COL_ICAR_TO_DATE, c0.toDate)
-                put(WaypointDbHelper.COL_ICAR_PDF_URI, c0.pdfUri)
                 put(WaypointDbHelper.COL_ICAR_DOC_NAME, c0.docName)
                 put(WaypointDbHelper.COL_ICAR_CREATED, c0.createdAtMs)
             }
             val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_CAR, cv, "${WaypointDbHelper.COL_ICAR_ID} = ?", arrayOf(c0.id))
             if (updated == 0) {
                 cv.put(WaypointDbHelper.COL_ICAR_ID, c0.id)
+                cv.put(WaypointDbHelper.COL_ICAR_PDF_URI, "")
                 wdb.insert(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)
             }
         }
