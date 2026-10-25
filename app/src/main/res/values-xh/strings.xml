@@ -127,6 +127,11 @@
         <item quantity="one">%d uhambo</item>
         <item quantity="other">%d iindlela</item>
     </plurals>
+    <!-- Draft translation, needs native isiXhosa speaker review. -->
+    <plurals name="profile_pending_changes_count">
+        <item quantity="one">%d utshintsho olulindileyo ukuze luvunyelwaniswe</item>
+        <item quantity="other">%d iinguqu ezilindileyo ukuze zivunyelwaniswe</item>
+    </plurals>
     <string name="profile_preferences_header">Ezikhethwayo</string>
     <string name="profile_notifications_title">Izaziso</string>
     <string name="profile_notifications_subtitle">Izilumkiso zenqwelomoya, imozulu, nohambo</string>

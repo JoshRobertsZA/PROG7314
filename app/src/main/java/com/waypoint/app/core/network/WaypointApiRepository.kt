@@ -64,7 +64,53 @@ object WaypointApiRepository {
         val destPhotoUrl: String?,
         // continues the statement started above: `val accountId: String,`
         val accountId: String,
+        val createdAtMs: Long,
+        val updatedAtMs: Long,
     // closes the multi-line argument list started above
+    )
+
+    data class DayPayload(val id: String, val tripId: String, val date: String)
+
+    data class FlightPayload(
+        val id: String,
+        val dayId: String,
+        val flightNumber: String?,
+        val pdfUri: String,
+        val departureTime: String?,
+        val docName: String?,
+        val createdAtMs: Long,
+    )
+
+    data class LodgingPayload(
+        val id: String,
+        val tripId: String,
+        val fromDate: String?,
+        val toDate: String?,
+        val pdfUri: String,
+        val docName: String?,
+        val createdAtMs: Long,
+    )
+
+    data class CarPayload(
+        val id: String,
+        val tripId: String,
+        val fromDate: String?,
+        val toDate: String?,
+        val pdfUri: String,
+        val docName: String?,
+        val createdAtMs: Long,
+    )
+
+    data class PlacePayload(
+        val id: String,
+        val dayId: String,
+        val name: String,
+        val category: String?,
+        val lat: Double?,
+        val lng: Double?,
+        val note: String?,
+        val photoUrl: String?,
+        val createdAtMs: Long,
     )
 
 
@@ -116,6 +162,8 @@ object WaypointApiRepository {
                     destPhotoUrl = o.optString("destPhotoUrl").takeIf { it.isNotBlank() && it != "null" },
                     // continues the statement started above: `accountId = o.getString("accountId"),`
                     accountId    = o.getString("accountId"),
+                    createdAtMs  = o.optLong("createdAtMs"),
+                    updatedAtMs  = o.optLong("updatedAtMs"),
                 // closes the multi-line argument list started above
                 )
             // closes the block
@@ -268,9 +316,124 @@ object WaypointApiRepository {
     }
 
 
-    // --- Itinerary: days ---
-    // Write-only for now (create/update/delete): pulling and merging
-    // itinerary data from the cloud is PR 2b's job, not this commit's.
+    // --- Itinerary: pull (added here in PR 2b; PR 2a was write-only) ---
+
+    suspend fun getDaysForTrip(idToken: String, tripId: String): List<DayPayload>? = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/days/$tripId").get().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            if (!resp.isSuccessful) { Log.w(TAG, "GET /itinerary/days/$tripId HTTP ${resp.code}"); return@withContext null }
+            val arr = JSONArray(resp.body?.string() ?: return@withContext null)
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                DayPayload(id = o.getString("id"), tripId = o.getString("tripId"), date = o.getString("date"))
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "getDaysForTrip failed: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun getFlightsForDay(idToken: String, dayId: String): List<FlightPayload>? = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/flights/$dayId").get().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            if (!resp.isSuccessful) { Log.w(TAG, "GET /itinerary/flights/$dayId HTTP ${resp.code}"); return@withContext null }
+            val arr = JSONArray(resp.body?.string() ?: return@withContext null)
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                FlightPayload(
+                    id = o.getString("id"),
+                    dayId = o.getString("dayId"),
+                    flightNumber = o.optString("flightNumber").takeIf { it.isNotBlank() && it != "null" },
+                    pdfUri = o.optString("pdfUri"),
+                    departureTime = o.optString("departureTime").takeIf { it.isNotBlank() && it != "null" },
+                    docName = o.optString("docName").takeIf { it.isNotBlank() && it != "null" },
+                    createdAtMs = o.optLong("createdAtMs"),
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "getFlightsForDay failed: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun getLodgingForTrip(idToken: String, tripId: String): List<LodgingPayload>? = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/lodging/$tripId").get().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            if (!resp.isSuccessful) { Log.w(TAG, "GET /itinerary/lodging/$tripId HTTP ${resp.code}"); return@withContext null }
+            val arr = JSONArray(resp.body?.string() ?: return@withContext null)
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                LodgingPayload(
+                    id = o.getString("id"),
+                    tripId = o.getString("tripId"),
+                    fromDate = o.optString("fromDate").takeIf { it.isNotBlank() && it != "null" },
+                    toDate = o.optString("toDate").takeIf { it.isNotBlank() && it != "null" },
+                    pdfUri = o.optString("pdfUri"),
+                    docName = o.optString("docName").takeIf { it.isNotBlank() && it != "null" },
+                    createdAtMs = o.optLong("createdAtMs"),
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "getLodgingForTrip failed: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun getCarsForTrip(idToken: String, tripId: String): List<CarPayload>? = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/cars/$tripId").get().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            if (!resp.isSuccessful) { Log.w(TAG, "GET /itinerary/cars/$tripId HTTP ${resp.code}"); return@withContext null }
+            val arr = JSONArray(resp.body?.string() ?: return@withContext null)
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                CarPayload(
+                    id = o.getString("id"),
+                    tripId = o.getString("tripId"),
+                    fromDate = o.optString("fromDate").takeIf { it.isNotBlank() && it != "null" },
+                    toDate = o.optString("toDate").takeIf { it.isNotBlank() && it != "null" },
+                    pdfUri = o.optString("pdfUri"),
+                    docName = o.optString("docName").takeIf { it.isNotBlank() && it != "null" },
+                    createdAtMs = o.optLong("createdAtMs"),
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "getCarsForTrip failed: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun getPlacesForDay(idToken: String, dayId: String): List<PlacePayload>? = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/places/$dayId").get().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            if (!resp.isSuccessful) { Log.w(TAG, "GET /itinerary/places/$dayId HTTP ${resp.code}"); return@withContext null }
+            val arr = JSONArray(resp.body?.string() ?: return@withContext null)
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                PlacePayload(
+                    id = o.getString("id"),
+                    dayId = o.getString("dayId"),
+                    name = o.getString("name"),
+                    category = o.optString("category").takeIf { it.isNotBlank() && it != "null" },
+                    lat = if (o.has("lat") && !o.isNull("lat")) o.getDouble("lat") else null,
+                    lng = if (o.has("lng") && !o.isNull("lng")) o.getDouble("lng") else null,
+                    note = o.optString("note").takeIf { it.isNotBlank() && it != "null" },
+                    photoUrl = o.optString("photoUrl").takeIf { it.isNotBlank() && it != "null" },
+                    createdAtMs = o.optLong("createdAtMs"),
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "getPlacesForDay failed: ${e.message}")
+            null
+        }
+    }
+
+
+    // --- Itinerary: days (create/update/delete) ---
 
     suspend fun createDay(idToken: String, day: ItineraryDayEntity): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -322,7 +485,7 @@ object WaypointApiRepository {
                 put("id", flight.id)
                 put("dayId", flight.dayId)
                 if (flight.flightNumber != null) put("flightNumber", flight.flightNumber)
-                put("pdfUri", flight.pdfUri)
+                // pdfUri is a device-local content:// URI, deliberately not sent.
                 if (flight.departureTime != null) put("departureTime", flight.departureTime)
                 if (flight.docName != null) put("docName", flight.docName)
             }.toString().toRequestBody(JSON_TYPE)
@@ -339,7 +502,7 @@ object WaypointApiRepository {
         try {
             val json = JSONObject().apply {
                 put("flightNumber", flight.flightNumber ?: JSONObject.NULL)
-                put("pdfUri", flight.pdfUri)
+                // pdfUri is a device-local content:// URI, deliberately not sent.
                 put("departureTime", flight.departureTime ?: JSONObject.NULL)
                 put("docName", flight.docName ?: JSONObject.NULL)
             }.toString().toRequestBody(JSON_TYPE)
@@ -373,7 +536,7 @@ object WaypointApiRepository {
                 put("tripId", lodging.tripId)
                 put("fromDate", lodging.fromDate.toString())
                 put("toDate", lodging.toDate.toString())
-                put("pdfUri", lodging.pdfUri)
+                // pdfUri is a device-local content:// URI, deliberately not sent.
                 if (lodging.docName != null) put("docName", lodging.docName)
             }.toString().toRequestBody(JSON_TYPE)
             val req = authBuilder(idToken).url("$BASE_URL/itinerary/lodging").post(json).build()
@@ -390,7 +553,7 @@ object WaypointApiRepository {
             val json = JSONObject().apply {
                 put("fromDate", lodging.fromDate.toString())
                 put("toDate", lodging.toDate.toString())
-                put("pdfUri", lodging.pdfUri)
+                // pdfUri is a device-local content:// URI, deliberately not sent.
                 put("docName", lodging.docName ?: JSONObject.NULL)
             }.toString().toRequestBody(JSON_TYPE)
             val req = authBuilder(idToken).url("$BASE_URL/itinerary/lodging/${lodging.id}").put(json).build()
@@ -423,7 +586,7 @@ object WaypointApiRepository {
                 put("tripId", car.tripId)
                 put("fromDate", car.fromDate.toString())
                 put("toDate", car.toDate.toString())
-                put("pdfUri", car.pdfUri)
+                // pdfUri is a device-local content:// URI, deliberately not sent.
                 if (car.docName != null) put("docName", car.docName)
             }.toString().toRequestBody(JSON_TYPE)
             val req = authBuilder(idToken).url("$BASE_URL/itinerary/cars").post(json).build()
@@ -440,7 +603,7 @@ object WaypointApiRepository {
             val json = JSONObject().apply {
                 put("fromDate", car.fromDate.toString())
                 put("toDate", car.toDate.toString())
-                put("pdfUri", car.pdfUri)
+                // pdfUri is a device-local content:// URI, deliberately not sent.
                 put("docName", car.docName ?: JSONObject.NULL)
             }.toString().toRequestBody(JSON_TYPE)
             val req = authBuilder(idToken).url("$BASE_URL/itinerary/cars/${car.id}").put(json).build()
@@ -516,5 +679,41 @@ object WaypointApiRepository {
             false
         }
     }
+
+
+    // HTTP status of a sendOutboxPayload() call, or -1 for a network-level
+    // failure (no response at all - timeout, DNS, connection refused...).
+    // SyncWorker classifies this to decide retry vs give up: 2xx succeeds,
+    // 4xx is a permanent failure (retrying a bad request forever
+    // accomplishes nothing), 5xx/-1 is retryable.
+    data class SendResult(val httpStatus: Int, val successful: Boolean)
+
+    // Sends a pre-built JSON body straight through, unlike the typed
+    // create*/update*/delete* functions above. The sync worker drains
+    // OutboxRepository, whose entries already carry a payload shaped to
+    // match each endpoint exactly (built in TripRepository /
+    // ItineraryRepository at enqueue time - see the coalescing rules in
+    // OutboxRepository), so there's no full typed entity to reconstruct it
+    // from, and a partial UPDATE payload (e.g. just { "flightNumber": ... })
+    // wouldn't fit updateFlight(entity: FlightEntity)'s all-fields shape
+    // anyway.
+    suspend fun sendOutboxPayload(idToken: String, method: String, path: String, bodyJson: String?): SendResult =
+        withContext(Dispatchers.IO) {
+            try {
+                val builder = authBuilder(idToken).url("$BASE_URL$path")
+                when (method) {
+                    "POST" -> builder.post((bodyJson ?: "{}").toRequestBody(JSON_TYPE))
+                    "PUT" -> builder.put((bodyJson ?: "{}").toRequestBody(JSON_TYPE))
+                    "DELETE" -> builder.delete()
+                    else -> error("Unsupported method for sendOutboxPayload: $method")
+                }
+                val resp = HttpClient.instance.newCall(builder.build()).execute()
+                if (!resp.isSuccessful) Log.w(TAG, "$method $path HTTP ${resp.code}")
+                SendResult(resp.code, resp.isSuccessful)
+            } catch (e: Exception) {
+                Log.w(TAG, "$method $path failed: ${e.message}")
+                SendResult(-1, false)
+            }
+        }
 // closes the object `WaypointApiRepository`
 }

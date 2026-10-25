@@ -269,6 +269,23 @@ fun SettingsScreen(
             // closes the lambda passed to `Row`
             }
 
+            // Only shown when there's actually something queued - most of
+            // the time this is 0 and the row just isn't there, rather than
+            // always showing "0 changes waiting."
+            if (uiState.pendingChangeCount > 0) {
+                Text(
+                    text = pluralStringResource(
+                        R.plurals.profile_pending_changes_count,
+                        uiState.pendingChangeCount,
+                        uiState.pendingChangeCount,
+                    ),
+                    color = WaypointTextMuted,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 8.dp).fillMaxWidth(),
+                )
+            }
+
             // calls `Text` with an argument list that continues on the following lines
             Text(
                 // continues the statement started above: `text = stringResource(R.string.profile_preferences_header),`

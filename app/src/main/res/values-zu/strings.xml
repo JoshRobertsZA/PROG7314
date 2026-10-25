@@ -128,6 +128,11 @@
         <item quantity="one">%d uhambo</item>
         <item quantity="other">%d izinhambo</item>
     </plurals>
+    <!-- Draft translation, needs native isiZulu speaker review. -->
+    <plurals name="profile_pending_changes_count">
+        <item quantity="one">%d ushintsho olulindele ukuvumelaniswa</item>
+        <item quantity="other">%d izinguquko ezilindele ukuvumelaniswa</item>
+    </plurals>
     <string name="profile_preferences_header">Okuncanyelwayo</string>
     <string name="profile_notifications_title">Izaziso</string>
     <string name="profile_notifications_subtitle">Izexwayiso zendiza, isimo sezulu, nohambo</string>

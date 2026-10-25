@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.waypoint.app.core.db.SessionManager
 // imports `com.waypoint.app.features.newtrip.data.TripRepository` for use in this file
 import com.waypoint.app.features.newtrip.data.TripRepository
+import com.waypoint.app.core.sync.OutboxRepository
 // imports `kotlinx.coroutines.flow.MutableStateFlow` for use in this file
 import kotlinx.coroutines.flow.MutableStateFlow
 // imports `kotlinx.coroutines.flow.StateFlow` for use in this file
@@ -27,6 +28,7 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
 
     // declares private read-only property `repo`, initialised with the result of calling `TripRepository(…)`
     private val repo = TripRepository(app)
+    private val outbox = OutboxRepository(app)
 
     // declares private read-only property `_uiState`, initialised with the result of calling `MutableStateFlow(…)`
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -51,6 +53,7 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
             val trips       = repo.getTripsForAccount(SessionManager.accountId)
             // declares read-only property `currentYear`, initialised with the result of calling `LocalDate.now(…)`
             val currentYear = LocalDate.now().year.toString()
+            val pending     = outbox.count()
 
             // opens a block after `_uiState.update`
             _uiState.update {
@@ -62,6 +65,7 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
                     plannedThisYear = trips.count { trip -> trip.startDate.startsWith(currentYear) },
                     // continues the statement started above: `totalTrips = trips.size,`
                     totalTrips      = trips.size,
+                    pendingChangeCount = pending,
                 // closes the multi-line argument list started above
                 )
             // closes the block

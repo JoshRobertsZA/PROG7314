@@ -27,6 +27,7 @@ import com.waypoint.app.core.db.SessionManager
 import com.waypoint.app.core.notifications.WelcomeNotifier
 // imports `com.waypoint.app.core.secrets.RemoteSecrets` for use in this file
 import com.waypoint.app.core.secrets.RemoteSecrets
+import com.waypoint.app.core.sync.SyncScheduler
 // imports `com.waypoint.app.features.newtrip.data.TripRepository` for use in this file
 import com.waypoint.app.features.newtrip.data.TripRepository
 // imports `com.google.firebase.auth.FirebaseAuthWebException` for use in this file
@@ -235,6 +236,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             if (BuildConfig.DEBUG && token != null) Log.d(SWAGGER_TAG, token)
             // `if` statement: executes `tripRepository.pullAndMergeTrips(token, user…` when `token != null` is true
             if (token != null) tripRepository.pullAndMergeTrips(token, user.uid)
+            // Drains anything queued from a previous session (app killed
+            // before it synced) and lets WorkManager's own network
+            // constraint hold it until connectivity is actually available.
+            SyncScheduler.enqueue(getApplication())
         // closes the lambda passed to `launch`
         }
     // closes the function `applySignedInUser`

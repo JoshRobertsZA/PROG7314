@@ -159,7 +159,7 @@ fun AllTripsScreen(
             // continues the statement started above: `isRefreshing = uiState.isLoading,`
             isRefreshing = uiState.isLoading,
             // continues the statement started above: `onRefresh = { viewModel.loadTrips() },`
-            onRefresh = { viewModel.loadTrips() },
+            onRefresh = { viewModel.refreshFromCloud() },
             // continues the statement started above: `modifier = Modifier.fillMaxSize(),`
             modifier = Modifier.fillMaxSize(),
         // ends the argument list started above and opens the block that follows

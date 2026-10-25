@@ -18,6 +18,7 @@ import java.util.UUID
 import com.waypoint.app.core.sync.OutboxEntityType
 import com.waypoint.app.core.sync.OutboxOperation
 import com.waypoint.app.core.sync.OutboxRepository
+import com.waypoint.app.core.network.WaypointApiRepository
 import org.json.JSONObject
 
 // declares class `ItineraryRepository` with a primary constructor taking 1 parameter (`context`) and opens its body
@@ -297,10 +298,12 @@ class ItineraryRepository(context: Context) {
             // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_FLIGHTS, null, cv)`
             db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_FLIGHTS, null, cv)
 
+            // pdfUri is a device-local content:// URI - meaningless on any
+            // other device, so it's never sent. docName (the filename the
+            // user picked) is still useful cross-device metadata.
             val payload = JSONObject().apply {
                 put("id", id)
                 put("dayId", dayId)
-                put("pdfUri", pdfUri)
                 if (docName != null) put("docName", docName)
             }.toString()
             outbox.enqueue(OutboxEntityType.FLIGHT, id, OutboxOperation.CREATE, payload)
@@ -491,12 +494,12 @@ class ItineraryRepository(context: Context) {
         // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)`
         db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)
 
+        // pdfUri is device-local, never synced - see insertFlight.
         val payload = JSONObject().apply {
             put("id", id)
             put("tripId", tripId)
             put("fromDate", fromDate.toString())
             put("toDate", toDate.toString())
-            put("pdfUri", pdfUri)
             if (docName != null) put("docName", docName)
         }.toString()
         outbox.enqueue(OutboxEntityType.LODGING, id, OutboxOperation.CREATE, payload)
@@ -611,12 +614,12 @@ class ItineraryRepository(context: Context) {
         // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)`
         db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)
 
+        // pdfUri is device-local, never synced - see insertFlight.
         val payload = JSONObject().apply {
             put("id", id)
             put("tripId", tripId)
             put("fromDate", fromDate.toString())
             put("toDate", toDate.toString())
-            put("pdfUri", pdfUri)
             if (docName != null) put("docName", docName)
         }.toString()
         outbox.enqueue(OutboxEntityType.CAR, id, OutboxOperation.CREATE, payload)
@@ -840,5 +843,225 @@ class ItineraryRepository(context: Context) {
             outbox.enqueue(OutboxEntityType.PLACE, placeId, OutboxOperation.DELETE, null)
         // closes the block
         }
+
+
+    // Pulls this trip's itinerary from the cloud and merges it into local
+    // SQLite. "Last write wins, keeping original timestamps": an entity
+    // with an unsent local change (still in the outbox) is left alone -
+    // the cloud doesn't know about that change yet, so it can't be the
+    // more recent write. Everything else is brought in line with the
+    // cloud, including removing local rows the cloud no longer has (the
+    // API has no per-field updatedAt to compare against, and deletes are
+    // hard deletes server-side, so "missing from the cloud response" is
+    // the only signal available that another device deleted it).
+    //
+    // Known limitation: if a day is removed here while a flight/place
+    // under it has its own unsent pending change, SQLite's ON DELETE
+    // CASCADE still removes that child locally. Its outbox entry is
+    // untouched and gets attempted later by SyncWorker, which fails
+    // cleanly (404, treated as permanent) rather than looping - a rare
+    // concurrent-edit case, not handled more precisely than that.
+    suspend fun pullAndMergeForTrip(idToken: String, tripId: String) = withContext(Dispatchers.IO) {
+        val cloudDays = WaypointApiRepository.getDaysForTrip(idToken, tripId) ?: return@withContext
+        val cloudLodging = WaypointApiRepository.getLodgingForTrip(idToken, tripId) ?: emptyList()
+        val cloudCars = WaypointApiRepository.getCarsForTrip(idToken, tripId) ?: emptyList()
+
+        mergeDays(tripId, cloudDays)
+        mergeLodging(tripId, cloudLodging)
+        mergeCars(tripId, cloudCars)
+
+        for (day in cloudDays) {
+            val cloudFlights = WaypointApiRepository.getFlightsForDay(idToken, day.id) ?: emptyList()
+            val cloudPlaces = WaypointApiRepository.getPlacesForDay(idToken, day.id) ?: emptyList()
+            mergeFlights(day.id, cloudFlights)
+            mergePlaces(day.id, cloudPlaces)
+        }
+    }
+
+    private suspend fun mergeDays(tripId: String, cloudDays: List<WaypointApiRepository.DayPayload>) {
+        val pending = outbox.pendingEntityIds(OutboxEntityType.DAY)
+        val wdb = db.writableDatabase
+        val cloudIds = cloudDays.map { it.id }.toSet()
+
+        for (d in cloudDays) {
+            if (d.id in pending) continue
+            val cv = ContentValues().apply {
+                put(WaypointDbHelper.COL_IDAY_TRIP_ID, d.tripId)
+                put(WaypointDbHelper.COL_IDAY_DATE, d.date)
+            }
+            // Try UPDATE first, INSERT only if no row matched - never
+            // INSERT OR REPLACE here, since itinerary_days is the parent
+            // side of an ON DELETE CASCADE FK (flights/places reference
+            // it); REPLACE deletes-then-reinserts on conflict, which would
+            // cascade-wipe every flight/place under this day as a side
+            // effect of what's meant to be a plain field update.
+            val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_DAYS, cv, "${WaypointDbHelper.COL_IDAY_ID} = ?", arrayOf(d.id))
+            if (updated == 0) {
+                cv.put(WaypointDbHelper.COL_IDAY_ID, d.id)
+                wdb.insert(WaypointDbHelper.TABLE_ITIN_DAYS, null, cv)
+            }
+        }
+
+        val localIds = mutableListOf<String>()
+        wdb.query(
+            WaypointDbHelper.TABLE_ITIN_DAYS, arrayOf(WaypointDbHelper.COL_IDAY_ID),
+            "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ?", arrayOf(tripId), null, null, null,
+        ).use { c -> while (c.moveToNext()) localIds += c.getString(0) }
+        for (id in localIds) {
+            if (id !in cloudIds && id !in pending) {
+                wdb.delete(WaypointDbHelper.TABLE_ITIN_DAYS, "${WaypointDbHelper.COL_IDAY_ID} = ?", arrayOf(id))
+            }
+        }
+    }
+
+    private suspend fun mergeFlights(dayId: String, cloudFlights: List<WaypointApiRepository.FlightPayload>) {
+        val pending = outbox.pendingEntityIds(OutboxEntityType.FLIGHT)
+        val wdb = db.writableDatabase
+        val cloudIds = cloudFlights.map { it.id }.toSet()
+
+        for (f in cloudFlights) {
+            if (f.id in pending) continue
+            // pdfUri is deliberately absent here - it's device-local and
+            // was never in the cloud payload to begin with (see
+            // insertFlight), so this never overwrites whatever PDF this
+            // device already has attached to the flight.
+            val cv = ContentValues().apply {
+                put(WaypointDbHelper.COL_IFLIGHT_DAY_ID, f.dayId)
+                put(WaypointDbHelper.COL_IFLIGHT_FLIGHT_NUMBER, f.flightNumber)
+                put(WaypointDbHelper.COL_IFLIGHT_DEPARTURE, f.departureTime)
+                put(WaypointDbHelper.COL_IFLIGHT_DOC_NAME, f.docName)
+                put(WaypointDbHelper.COL_IFLIGHT_CREATED, f.createdAtMs)
+            }
+            val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_FLIGHTS, cv, "${WaypointDbHelper.COL_IFLIGHT_ID} = ?", arrayOf(f.id))
+            if (updated == 0) {
+                // pdf_uri is NOT NULL with no column default - only the
+                // INSERT path needs an explicit value, since this device
+                // has never had one for an id it's only just learned about.
+                cv.put(WaypointDbHelper.COL_IFLIGHT_ID, f.id)
+                cv.put(WaypointDbHelper.COL_IFLIGHT_PDF_URI, "")
+                wdb.insert(WaypointDbHelper.TABLE_ITIN_FLIGHTS, null, cv)
+            }
+        }
+
+        val localIds = mutableListOf<String>()
+        wdb.query(
+            WaypointDbHelper.TABLE_ITIN_FLIGHTS, arrayOf(WaypointDbHelper.COL_IFLIGHT_ID),
+            "${WaypointDbHelper.COL_IFLIGHT_DAY_ID} = ?", arrayOf(dayId), null, null, null,
+        ).use { c -> while (c.moveToNext()) localIds += c.getString(0) }
+        for (id in localIds) {
+            if (id !in cloudIds && id !in pending) {
+                wdb.delete(WaypointDbHelper.TABLE_ITIN_FLIGHTS, "${WaypointDbHelper.COL_IFLIGHT_ID} = ?", arrayOf(id))
+            }
+        }
+    }
+
+    private suspend fun mergeLodging(tripId: String, cloudLodging: List<WaypointApiRepository.LodgingPayload>) {
+        val pending = outbox.pendingEntityIds(OutboxEntityType.LODGING)
+        val wdb = db.writableDatabase
+        val cloudIds = cloudLodging.map { it.id }.toSet()
+
+        for (l in cloudLodging) {
+            if (l.id in pending) continue
+            // pdfUri deliberately absent - see mergeFlights.
+            val cv = ContentValues().apply {
+                put(WaypointDbHelper.COL_ILODGE_TRIP_ID, l.tripId)
+                put(WaypointDbHelper.COL_ILODGE_FROM_DATE, l.fromDate)
+                put(WaypointDbHelper.COL_ILODGE_TO_DATE, l.toDate)
+                put(WaypointDbHelper.COL_ILODGE_DOC_NAME, l.docName)
+                put(WaypointDbHelper.COL_ILODGE_CREATED, l.createdAtMs)
+            }
+            val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_LODGING, cv, "${WaypointDbHelper.COL_ILODGE_ID} = ?", arrayOf(l.id))
+            if (updated == 0) {
+                cv.put(WaypointDbHelper.COL_ILODGE_ID, l.id)
+                cv.put(WaypointDbHelper.COL_ILODGE_PDF_URI, "")
+                wdb.insert(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)
+            }
+        }
+
+        val localIds = mutableListOf<String>()
+        wdb.query(
+            WaypointDbHelper.TABLE_ITIN_LODGING, arrayOf(WaypointDbHelper.COL_ILODGE_ID),
+            "${WaypointDbHelper.COL_ILODGE_TRIP_ID} = ?", arrayOf(tripId), null, null, null,
+        ).use { c -> while (c.moveToNext()) localIds += c.getString(0) }
+        for (id in localIds) {
+            if (id !in cloudIds && id !in pending) {
+                wdb.delete(WaypointDbHelper.TABLE_ITIN_LODGING, "${WaypointDbHelper.COL_ILODGE_ID} = ?", arrayOf(id))
+            }
+        }
+    }
+
+    private suspend fun mergeCars(tripId: String, cloudCars: List<WaypointApiRepository.CarPayload>) {
+        val pending = outbox.pendingEntityIds(OutboxEntityType.CAR)
+        val wdb = db.writableDatabase
+        val cloudIds = cloudCars.map { it.id }.toSet()
+
+        for (c0 in cloudCars) {
+            if (c0.id in pending) continue
+            // pdfUri deliberately absent - see mergeFlights.
+            val cv = ContentValues().apply {
+                put(WaypointDbHelper.COL_ICAR_TRIP_ID, c0.tripId)
+                put(WaypointDbHelper.COL_ICAR_FROM_DATE, c0.fromDate)
+                put(WaypointDbHelper.COL_ICAR_TO_DATE, c0.toDate)
+                put(WaypointDbHelper.COL_ICAR_DOC_NAME, c0.docName)
+                put(WaypointDbHelper.COL_ICAR_CREATED, c0.createdAtMs)
+            }
+            val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_CAR, cv, "${WaypointDbHelper.COL_ICAR_ID} = ?", arrayOf(c0.id))
+            if (updated == 0) {
+                cv.put(WaypointDbHelper.COL_ICAR_ID, c0.id)
+                cv.put(WaypointDbHelper.COL_ICAR_PDF_URI, "")
+                wdb.insert(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)
+            }
+        }
+
+        val localIds = mutableListOf<String>()
+        wdb.query(
+            WaypointDbHelper.TABLE_ITIN_CAR, arrayOf(WaypointDbHelper.COL_ICAR_ID),
+            "${WaypointDbHelper.COL_ICAR_TRIP_ID} = ?", arrayOf(tripId), null, null, null,
+        ).use { c -> while (c.moveToNext()) localIds += c.getString(0) }
+        for (id in localIds) {
+            if (id !in cloudIds && id !in pending) {
+                wdb.delete(WaypointDbHelper.TABLE_ITIN_CAR, "${WaypointDbHelper.COL_ICAR_ID} = ?", arrayOf(id))
+            }
+        }
+    }
+
+    private suspend fun mergePlaces(dayId: String, cloudPlaces: List<WaypointApiRepository.PlacePayload>) {
+        val pending = outbox.pendingEntityIds(OutboxEntityType.PLACE)
+        val wdb = db.writableDatabase
+        val cloudIds = cloudPlaces.map { it.id }.toSet()
+
+        for (p in cloudPlaces) {
+            if (p.id in pending) continue
+            val cv = ContentValues().apply {
+                put(WaypointDbHelper.COL_IPLACE_DAY_ID, p.dayId)
+                put(WaypointDbHelper.COL_IPLACE_NAME, p.name)
+                // place_category is NOT NULL locally but nullable from the
+                // API (places.js makes it optional on create) - default to
+                // empty rather than violate the constraint.
+                put(WaypointDbHelper.COL_IPLACE_CATEGORY, p.category ?: "")
+                put(WaypointDbHelper.COL_IPLACE_LAT, p.lat)
+                put(WaypointDbHelper.COL_IPLACE_LNG, p.lng)
+                put(WaypointDbHelper.COL_IPLACE_NOTE, p.note)
+                put(WaypointDbHelper.COL_IPLACE_PHOTO_URL, p.photoUrl)
+                put(WaypointDbHelper.COL_IPLACE_CREATED, p.createdAtMs)
+            }
+            val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_PLACES, cv, "${WaypointDbHelper.COL_IPLACE_ID} = ?", arrayOf(p.id))
+            if (updated == 0) {
+                cv.put(WaypointDbHelper.COL_IPLACE_ID, p.id)
+                wdb.insert(WaypointDbHelper.TABLE_ITIN_PLACES, null, cv)
+            }
+        }
+
+        val localIds = mutableListOf<String>()
+        wdb.query(
+            WaypointDbHelper.TABLE_ITIN_PLACES, arrayOf(WaypointDbHelper.COL_IPLACE_ID),
+            "${WaypointDbHelper.COL_IPLACE_DAY_ID} = ?", arrayOf(dayId), null, null, null,
+        ).use { c -> while (c.moveToNext()) localIds += c.getString(0) }
+        for (id in localIds) {
+            if (id !in cloudIds && id !in pending) {
+                wdb.delete(WaypointDbHelper.TABLE_ITIN_PLACES, "${WaypointDbHelper.COL_IPLACE_ID} = ?", arrayOf(id))
+            }
+        }
+    }
 // closes the class `ItineraryRepository`
 }

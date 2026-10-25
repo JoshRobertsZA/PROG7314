@@ -99,6 +99,7 @@ import com.waypoint.app.core.notifications.PushTokenManager
 import com.waypoint.app.core.notifications.WelcomeNotifier
 // imports `com.waypoint.app.core.secrets.RemoteSecrets` for use in this file
 import com.waypoint.app.core.secrets.RemoteSecrets
+import com.waypoint.app.core.sync.SyncScheduler
 // imports `com.waypoint.app.core.theme.WaypointTheme` for use in this file
 import com.waypoint.app.core.theme.WaypointTheme
 // imports `com.waypoint.app.R` for use in this file
@@ -210,6 +211,15 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
     val authUiState by authViewModel.uiState.collectAsState()
     // declares read-only property `context`, initialised to `LocalContext.current`
     val context = LocalContext.current
+
+    // Reconnect trigger: WorkManager's own NetworkType.CONNECTED constraint
+    // already blocks the worker from running while offline, so this only
+    // needs to make sure a request is queued by the time connectivity
+    // returns - it doesn't need to track "was offline, now online"
+    // transitions itself.
+    LaunchedEffect(isOnline) {
+        if (isOnline) SyncScheduler.enqueue(context)
+    }
     // declares read-only property `activity`, initialised to `context as FragmentActivity`
     val activity = context as FragmentActivity
 

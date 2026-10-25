@@ -60,6 +60,17 @@ import com.waypoint.app.core.sync.OutboxOperation
 import com.waypoint.app.core.sync.OutboxRepository
 import org.json.JSONObject
 
+// Top-level (not a member function) so TripMergeTest can call it without
+// constructing TripRepository, whose constructor needs a real Context -
+// pure logic, no SQLite dependency, split out from pullAndMergeTrips
+// specifically to be testable without Robolectric (not set up in this
+// project's unit tests, which run on the plain JVM). null localUpdatedAtMs
+// means "no local row yet" (first-ever pull), which always applies cloud.
+internal fun shouldApplyCloudTrip(localUpdatedAtMs: Long?, cloudUpdatedAtMs: Long): Boolean {
+    if (localUpdatedAtMs != null && localUpdatedAtMs > cloudUpdatedAtMs) return false
+    return true
+}
+
 // declares class `TripRepository` with a primary constructor taking 1 parameter (`context`) and opens its body
 class TripRepository(context: Context) {
 
@@ -402,54 +413,69 @@ class TripRepository(context: Context) {
     }
 
     // declares suspend function `pullAndMergeTrips` taking 2 parameters (`idToken`, `accountId`); its body is the expression `withContext(Dispatchers.IO) {`
+    // Was CONFLICT_IGNORE (local always wins, cloud edits/deletes from
+    // other devices never applied - the audit's original finding). Now a
+    // real merge: an entity with an unsent local change (still in the
+    // outbox) is left alone entirely, since the cloud doesn't know about
+    // that change yet. Otherwise, unlike the itinerary merge in the
+    // previous commit, trips actually carry a server-side updatedAtMs
+    // (trips.js stores it, TripPayload just never parsed it before this
+    // commit), so this can do a genuine last-write-wins comparison instead
+    // of "no pending change = cloud always wins." Caveat inherited from
+    // that timestamp being client-supplied at write time: a device with a
+    // badly wrong clock can still win a conflict it shouldn't.
     suspend fun pullAndMergeTrips(idToken: String, accountId: String) = withContext(Dispatchers.IO) {
-        // declares read-only property `cloudTrips`, initialised with the result of calling `WaypointApiRepository.getTrips(…)`
-        val cloudTrips = WaypointApiRepository.getTrips(idToken) ?: return@withContext
-        // declares read-only property `wdb`, initialised to `db.writableDatabase`
+        val cloudTrips = WaypointApiRepository.getTrips(idToken)?.filter { it.accountId == accountId } ?: return@withContext
+        val pending = outbox.pendingEntityIds(OutboxEntityType.TRIP)
         val wdb = db.writableDatabase
-        // `for` loop: iterates over `cloudTrips`, binding each element to `t`
+        val cloudIds = cloudTrips.map { it.id }.toSet()
+
         for (t in cloudTrips) {
-            // `if` statement: executes `continue` when `t.accountId != accountId` is true
-            if (t.accountId != accountId) continue
-            // declares read-only property `cv`, initialised with the result of calling `ContentValues(…)` and opens a lambda / block
+            if (t.id in pending) continue
+
+            if (!shouldApplyCloudTrip(localUpdatedAtMs(wdb, t.id), t.updatedAtMs)) continue
+
             val cv = ContentValues().apply {
-                // calls `put` with arguments `(COL_TRIP_ID, t.id)`
-                put(COL_TRIP_ID,          t.id)
-                // calls `put` with arguments `(COL_TRIP_ACCOUNT_ID, t.accountId)`
                 put(COL_TRIP_ACCOUNT_ID,  t.accountId)
-                // calls `put` with arguments `(COL_TRIP_NAME, t.name)`
                 put(COL_TRIP_NAME,        t.name)
-                // calls `put` with arguments `(COL_TRIP_START, t.startDate)`
                 put(COL_TRIP_START,       t.startDate)
-                // calls `put` with arguments `(COL_TRIP_END, t.endDate)`
                 put(COL_TRIP_END,         t.endDate)
-                // calls `put` with arguments `(COL_TRIP_DESTINATION, t.destination)`
                 put(COL_TRIP_DESTINATION, t.destination)
-                // `if` statement: executes `put(COL_TRIP_DEST_LAT, t.destLat)` when `t.destLat != null` is true
-                if (t.destLat      != null) put(COL_TRIP_DEST_LAT,  t.destLat)
-                // `if` statement: executes `put(COL_TRIP_DEST_LNG, t.destLng)` when `t.destLng != null` is true
-                if (t.destLng      != null) put(COL_TRIP_DEST_LNG,  t.destLng)
-                // calls `put` with arguments `(COL_TRIP_DEST_PHOTO, t.destPhotoUrl)`
+                if (t.destLat != null) put(COL_TRIP_DEST_LAT, t.destLat) else putNull(COL_TRIP_DEST_LAT)
+                if (t.destLng != null) put(COL_TRIP_DEST_LNG, t.destLng) else putNull(COL_TRIP_DEST_LNG)
                 put(COL_TRIP_DEST_PHOTO,  t.destPhotoUrl)
-                // declares read-only property `now`, initialised with the result of calling `System.currentTimeMillis(…)`
-                val now = System.currentTimeMillis()
-                // calls `put` with arguments `(COL_TRIP_CREATED, now)`
-                put(COL_TRIP_CREATED, now)
-                // calls `put` with arguments `(COL_TRIP_UPDATED, now)`
-                put(COL_TRIP_UPDATED, now)
-            // closes the lambda assigned to `cv`
+                put(COL_TRIP_CREATED,     t.createdAtMs)
+                put(COL_TRIP_UPDATED,     t.updatedAtMs)
             }
-            // calls `insertWithOnConflict` on `wdb` with an argument list that continues on the following lines
-            wdb.insertWithOnConflict(
-                // continues the statement started above: `TABLE_TRIPS, null, cv,`
-                TABLE_TRIPS, null, cv,
-                // continues the statement started above: `android.database.sqlite.SQLiteDatabase.CONFLICT_IGNORE,`
-                android.database.sqlite.SQLiteDatabase.CONFLICT_IGNORE,
-            // closes the multi-line argument list started above
-            )
-        // closes the for loop
+            // Try UPDATE first, INSERT only if no row matched - never
+            // INSERT OR REPLACE: trips is the parent side of an ON DELETE
+            // CASCADE FK (days/lodging/cars reference it), and REPLACE's
+            // delete-then-reinsert would cascade-wipe this trip's entire
+            // itinerary as a side effect of a plain field update.
+            val updated = wdb.update(TABLE_TRIPS, cv, "$COL_TRIP_ID = ?", arrayOf(t.id))
+            if (updated == 0) {
+                cv.put(COL_TRIP_ID, t.id)
+                wdb.insert(TABLE_TRIPS, null, cv)
+            }
         }
-    // closes the block
+
+        val localIds = mutableListOf<String>()
+        wdb.query(
+            TABLE_TRIPS, arrayOf(COL_TRIP_ID),
+            "$COL_TRIP_ACCOUNT_ID = ?", arrayOf(accountId), null, null, null,
+        ).use { c -> while (c.moveToNext()) localIds += c.getString(0) }
+        for (id in localIds) {
+            if (id !in cloudIds && id !in pending) {
+                wdb.delete(TABLE_TRIPS, "$COL_TRIP_ID = ?", arrayOf(id))
+            }
+        }
+    }
+
+    private fun localUpdatedAtMs(wdb: android.database.sqlite.SQLiteDatabase, tripId: String): Long? {
+        wdb.query(
+            TABLE_TRIPS, arrayOf(COL_TRIP_UPDATED),
+            "$COL_TRIP_ID = ?", arrayOf(tripId), null, null, null,
+        ).use { c -> return if (c.moveToFirst()) c.getLong(0) else null }
     }
 
 // closes the class `TripRepository`

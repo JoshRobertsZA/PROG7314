@@ -9,6 +9,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 // imports `com.waypoint.app.core.db.SessionManager` for use in this file
 import com.waypoint.app.core.db.SessionManager
+import com.waypoint.app.core.auth.AuthRepository
+import com.waypoint.app.core.sync.SyncScheduler
 // imports `com.waypoint.app.features.newtrip.data.TripRepository` for use in this file
 import com.waypoint.app.features.newtrip.data.TripRepository
 // imports `kotlinx.coroutines.flow.MutableStateFlow` for use in this file
@@ -71,6 +73,22 @@ class AllTripsViewModel(app: Application) : AndroidViewModel(app) {
         // closes the block
         }
     // closes the function `loadTrips`
+    }
+
+    // Pull-to-refresh: asks the cloud for anything new before re-reading
+    // local SQLite, rather than just re-reading what's already there
+    // (which is all loadTrips() does on its own). Also drains the outbox,
+    // since a user who pulls to refresh almost certainly has a network
+    // connection right now - as good a moment as any to push pending
+    // changes too, not just pull new ones.
+    fun refreshFromCloud() {
+        viewModelScope.launch {
+            val token = AuthRepository.getIdToken()
+            val accountId = SessionManager.accountId
+            if (token != null) repo.pullAndMergeTrips(token, accountId)
+            SyncScheduler.enqueue(getApplication())
+            loadTrips()
+        }
     }
 
     // declares function `onFilterSelected` taking 1 parameter (`filter`) and opens its body

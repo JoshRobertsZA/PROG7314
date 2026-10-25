@@ -9,5 +9,6 @@ data class SettingsUiState(
     val plannedThisYear: Int = 0,
     // continues the statement started above: `val totalTrips: Int = 0,`
     val totalTrips: Int = 0,
+    val pendingChangeCount: Int = 0,
 // closes the multi-line argument list started above
 )
