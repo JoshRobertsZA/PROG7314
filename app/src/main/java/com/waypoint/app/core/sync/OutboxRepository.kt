@@ -92,6 +92,13 @@ class OutboxRepository(context: Context) {
         }
     }
 
+    /** Count of pending entries, for a UI badge - avoids hydrating/sorting every row just to show a number. */
+    suspend fun count(): Int = withContext(Dispatchers.IO) {
+        db.readableDatabase.query(TABLE_SYNC_OUTBOX, arrayOf("COUNT(*)"), null, null, null, null, null).use { cursor ->
+            if (cursor.moveToFirst()) cursor.getInt(0) else 0
+        }
+    }
+
     /** All pending entries, parent entity types first, then oldest first within a type. */
     suspend fun peekAll(): List<OutboxEntry> = withContext(Dispatchers.IO) {
         val entries = mutableListOf<OutboxEntry>()
