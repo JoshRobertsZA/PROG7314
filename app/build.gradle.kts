@@ -260,6 +260,11 @@ dependencies {
     testImplementation(libs.junit)
     // calls `testImplementation` with arguments `(libs.kotlinx.coroutines.test)`
     testImplementation(libs.kotlinx.coroutines.test)
+    // Android's own org.json classes are stub jars on the unit-test
+    // classpath (every method throws "not mocked") - a real implementation
+    // here shadows those stubs so OutboxCoalescingTest's JSONObject calls
+    // actually work. Test-only; never ships in the app.
+    testImplementation(libs.json)
     // calls `androidTestImplementation` with arguments `(libs.androidx.espresso.core)`
     androidTestImplementation(libs.androidx.espresso.core)
     // calls `androidTestImplementation` with arguments `(libs.androidx.junit)`
