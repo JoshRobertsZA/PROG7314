@@ -108,6 +108,19 @@ class OutboxRepository(context: Context) {
         db.writableDatabase.delete(TABLE_SYNC_OUTBOX, "$COL_OUTBOX_ID = ?", arrayOf(entryId))
     }
 
+    // Used by pull/merge (ItineraryRepository, TripRepository): an entity
+    // with an unsent local change must never be overwritten or deleted by
+    // incoming cloud data, since the cloud doesn't know about that change
+    // yet - the local change is, by definition, the more recent one.
+    suspend fun pendingEntityIds(entityType: OutboxEntityType): Set<String> = withContext(Dispatchers.IO) {
+        val ids = mutableSetOf<String>()
+        db.readableDatabase.query(
+            TABLE_SYNC_OUTBOX, arrayOf(COL_OUTBOX_ENTITY_ID),
+            "$COL_OUTBOX_ENTITY_TYPE = ?", arrayOf(entityType.name), null, null, null,
+        ).use { cursor -> while (cursor.moveToNext()) ids += cursor.getString(0) }
+        ids
+    }
+
     suspend fun markFailed(entryId: String, error: String) = withContext(Dispatchers.IO) {
         val wdb = db.writableDatabase
         wdb.beginTransaction()

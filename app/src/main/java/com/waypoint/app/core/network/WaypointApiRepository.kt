@@ -67,6 +67,50 @@ object WaypointApiRepository {
     // closes the multi-line argument list started above
     )
 
+    data class DayPayload(val id: String, val tripId: String, val date: String)
+
+    data class FlightPayload(
+        val id: String,
+        val dayId: String,
+        val flightNumber: String?,
+        val pdfUri: String,
+        val departureTime: String?,
+        val docName: String?,
+        val createdAtMs: Long,
+    )
+
+    data class LodgingPayload(
+        val id: String,
+        val tripId: String,
+        val fromDate: String?,
+        val toDate: String?,
+        val pdfUri: String,
+        val docName: String?,
+        val createdAtMs: Long,
+    )
+
+    data class CarPayload(
+        val id: String,
+        val tripId: String,
+        val fromDate: String?,
+        val toDate: String?,
+        val pdfUri: String,
+        val docName: String?,
+        val createdAtMs: Long,
+    )
+
+    data class PlacePayload(
+        val id: String,
+        val dayId: String,
+        val name: String,
+        val category: String?,
+        val lat: Double?,
+        val lng: Double?,
+        val note: String?,
+        val photoUrl: String?,
+        val createdAtMs: Long,
+    )
+
 
     // declares private function `authBuilder` taking 1 parameter (`idToken`), returning `Request.Builder`; its body is the expression ``
     private fun authBuilder(idToken: String): Request.Builder =
@@ -268,9 +312,124 @@ object WaypointApiRepository {
     }
 
 
-    // --- Itinerary: days ---
-    // Write-only for now (create/update/delete): pulling and merging
-    // itinerary data from the cloud is PR 2b's job, not this commit's.
+    // --- Itinerary: pull (added here in PR 2b; PR 2a was write-only) ---
+
+    suspend fun getDaysForTrip(idToken: String, tripId: String): List<DayPayload>? = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/days/$tripId").get().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            if (!resp.isSuccessful) { Log.w(TAG, "GET /itinerary/days/$tripId HTTP ${resp.code}"); return@withContext null }
+            val arr = JSONArray(resp.body?.string() ?: return@withContext null)
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                DayPayload(id = o.getString("id"), tripId = o.getString("tripId"), date = o.getString("date"))
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "getDaysForTrip failed: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun getFlightsForDay(idToken: String, dayId: String): List<FlightPayload>? = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/flights/$dayId").get().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            if (!resp.isSuccessful) { Log.w(TAG, "GET /itinerary/flights/$dayId HTTP ${resp.code}"); return@withContext null }
+            val arr = JSONArray(resp.body?.string() ?: return@withContext null)
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                FlightPayload(
+                    id = o.getString("id"),
+                    dayId = o.getString("dayId"),
+                    flightNumber = o.optString("flightNumber").takeIf { it.isNotBlank() && it != "null" },
+                    pdfUri = o.optString("pdfUri"),
+                    departureTime = o.optString("departureTime").takeIf { it.isNotBlank() && it != "null" },
+                    docName = o.optString("docName").takeIf { it.isNotBlank() && it != "null" },
+                    createdAtMs = o.optLong("createdAtMs"),
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "getFlightsForDay failed: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun getLodgingForTrip(idToken: String, tripId: String): List<LodgingPayload>? = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/lodging/$tripId").get().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            if (!resp.isSuccessful) { Log.w(TAG, "GET /itinerary/lodging/$tripId HTTP ${resp.code}"); return@withContext null }
+            val arr = JSONArray(resp.body?.string() ?: return@withContext null)
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                LodgingPayload(
+                    id = o.getString("id"),
+                    tripId = o.getString("tripId"),
+                    fromDate = o.optString("fromDate").takeIf { it.isNotBlank() && it != "null" },
+                    toDate = o.optString("toDate").takeIf { it.isNotBlank() && it != "null" },
+                    pdfUri = o.optString("pdfUri"),
+                    docName = o.optString("docName").takeIf { it.isNotBlank() && it != "null" },
+                    createdAtMs = o.optLong("createdAtMs"),
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "getLodgingForTrip failed: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun getCarsForTrip(idToken: String, tripId: String): List<CarPayload>? = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/cars/$tripId").get().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            if (!resp.isSuccessful) { Log.w(TAG, "GET /itinerary/cars/$tripId HTTP ${resp.code}"); return@withContext null }
+            val arr = JSONArray(resp.body?.string() ?: return@withContext null)
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                CarPayload(
+                    id = o.getString("id"),
+                    tripId = o.getString("tripId"),
+                    fromDate = o.optString("fromDate").takeIf { it.isNotBlank() && it != "null" },
+                    toDate = o.optString("toDate").takeIf { it.isNotBlank() && it != "null" },
+                    pdfUri = o.optString("pdfUri"),
+                    docName = o.optString("docName").takeIf { it.isNotBlank() && it != "null" },
+                    createdAtMs = o.optLong("createdAtMs"),
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "getCarsForTrip failed: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun getPlacesForDay(idToken: String, dayId: String): List<PlacePayload>? = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/itinerary/places/$dayId").get().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            if (!resp.isSuccessful) { Log.w(TAG, "GET /itinerary/places/$dayId HTTP ${resp.code}"); return@withContext null }
+            val arr = JSONArray(resp.body?.string() ?: return@withContext null)
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                PlacePayload(
+                    id = o.getString("id"),
+                    dayId = o.getString("dayId"),
+                    name = o.getString("name"),
+                    category = o.optString("category").takeIf { it.isNotBlank() && it != "null" },
+                    lat = if (o.has("lat") && !o.isNull("lat")) o.getDouble("lat") else null,
+                    lng = if (o.has("lng") && !o.isNull("lng")) o.getDouble("lng") else null,
+                    note = o.optString("note").takeIf { it.isNotBlank() && it != "null" },
+                    photoUrl = o.optString("photoUrl").takeIf { it.isNotBlank() && it != "null" },
+                    createdAtMs = o.optLong("createdAtMs"),
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "getPlacesForDay failed: ${e.message}")
+            null
+        }
+    }
+
+
+    // --- Itinerary: days (create/update/delete) ---
 
     suspend fun createDay(idToken: String, day: ItineraryDayEntity): Boolean = withContext(Dispatchers.IO) {
         try {
