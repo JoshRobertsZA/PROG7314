@@ -64,6 +64,8 @@ object WaypointApiRepository {
         val destPhotoUrl: String?,
         // continues the statement started above: `val accountId: String,`
         val accountId: String,
+        val createdAtMs: Long,
+        val updatedAtMs: Long,
     // closes the multi-line argument list started above
     )
 
@@ -160,6 +162,8 @@ object WaypointApiRepository {
                     destPhotoUrl = o.optString("destPhotoUrl").takeIf { it.isNotBlank() && it != "null" },
                     // continues the statement started above: `accountId = o.getString("accountId"),`
                     accountId    = o.getString("accountId"),
+                    createdAtMs  = o.optLong("createdAtMs"),
+                    updatedAtMs  = o.optLong("updatedAtMs"),
                 // closes the multi-line argument list started above
                 )
             // closes the block
