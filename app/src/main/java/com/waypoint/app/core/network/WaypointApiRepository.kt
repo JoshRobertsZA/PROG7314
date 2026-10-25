@@ -516,5 +516,41 @@ object WaypointApiRepository {
             false
         }
     }
+
+
+    // HTTP status of a sendOutboxPayload() call, or -1 for a network-level
+    // failure (no response at all - timeout, DNS, connection refused...).
+    // SyncWorker classifies this to decide retry vs give up: 2xx succeeds,
+    // 4xx is a permanent failure (retrying a bad request forever
+    // accomplishes nothing), 5xx/-1 is retryable.
+    data class SendResult(val httpStatus: Int, val successful: Boolean)
+
+    // Sends a pre-built JSON body straight through, unlike the typed
+    // create*/update*/delete* functions above. The sync worker drains
+    // OutboxRepository, whose entries already carry a payload shaped to
+    // match each endpoint exactly (built in TripRepository /
+    // ItineraryRepository at enqueue time - see the coalescing rules in
+    // OutboxRepository), so there's no full typed entity to reconstruct it
+    // from, and a partial UPDATE payload (e.g. just { "flightNumber": ... })
+    // wouldn't fit updateFlight(entity: FlightEntity)'s all-fields shape
+    // anyway.
+    suspend fun sendOutboxPayload(idToken: String, method: String, path: String, bodyJson: String?): SendResult =
+        withContext(Dispatchers.IO) {
+            try {
+                val builder = authBuilder(idToken).url("$BASE_URL$path")
+                when (method) {
+                    "POST" -> builder.post((bodyJson ?: "{}").toRequestBody(JSON_TYPE))
+                    "PUT" -> builder.put((bodyJson ?: "{}").toRequestBody(JSON_TYPE))
+                    "DELETE" -> builder.delete()
+                    else -> error("Unsupported method for sendOutboxPayload: $method")
+                }
+                val resp = HttpClient.instance.newCall(builder.build()).execute()
+                if (!resp.isSuccessful) Log.w(TAG, "$method $path HTTP ${resp.code}")
+                SendResult(resp.code, resp.isSuccessful)
+            } catch (e: Exception) {
+                Log.w(TAG, "$method $path failed: ${e.message}")
+                SendResult(-1, false)
+            }
+        }
 // closes the object `WaypointApiRepository`
 }
