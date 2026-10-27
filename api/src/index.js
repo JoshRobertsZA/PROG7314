@@ -16,6 +16,7 @@ const itineraryRouter = require('./routes/itinerary');
 // declares const `counterRouter`, initialised with the result of calling `require(…)`
 const counterRouter = require('./routes/counter');
 const configRouter = require('./routes/config');
+const cacheRouter = require('./routes/cache');
 
 // declares const `app`, initialised with the result of calling `express(…)`
 const app = express();
@@ -59,6 +60,7 @@ app.use('/itinerary', itineraryRouter);
 // calls `use` on `app` with arguments `('/counter', counterRouter)`
 app.use('/counter', counterRouter);
 app.use('/config', configRouter);
+app.use('/cache', cacheRouter);
 
 // calls `use` on `app` with arguments `((req, res) => res.status(404).json({ error: …)`
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
