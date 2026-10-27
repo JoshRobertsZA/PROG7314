@@ -235,6 +235,8 @@ const openapiSpec = {
     { name: 'Itinerary — Places', description: 'Places of interest planned for a day' },
     // continues the statement started above: `{ name: 'Counter', description: 'Atomic named counters' },`
     { name: 'Counter', description: 'Atomic named counters' },
+    { name: 'Config', description: 'Server-held API keys and the Firebase web client id' },
+    { name: 'Cache', description: 'Shared weather/currency/places lookup cache' },
   // closes the multi-line list / array started above
   ],
   // continues the statement started above: `components: {`
@@ -720,6 +722,50 @@ const openapiSpec = {
         },
       // closes the block
       },
+
+      // continues the statement started above: `Keys: {`
+      Keys: {
+        // expression: `type: 'object',`
+        type: 'object',
+        // continues the statement started above: `description:`
+        description:
+          'Always includes every key, falling back to an empty string if that env var is unset server-side.',
+        // continues the statement started above: `properties: {`
+        properties: {
+          LOCATIONIQ_API_KEY: { type: 'string' },
+          EXCHANGERATE_API_KEY: { type: 'string' },
+          COUNTERAPI_API_KEY: { type: 'string' },
+          COUNTERAPI_WORKSPACE: { type: 'string' },
+          COUNTERAPI_PLACES_SLUG: { type: 'string' },
+          OPENWEATHER_API_KEY: { type: 'string' },
+          AIRLABS_API_KEY: { type: 'string' },
+        // closes the block
+        },
+      // closes the block
+      },
+
+      // continues the statement started above: `WebClientId: {`
+      WebClientId: {
+        // expression: `type: 'object',`
+        type: 'object',
+        // continues the statement started above: `properties: {`
+        properties: {
+          FIREBASE_WEB_CLIENT_ID: { type: 'string' },
+        // closes the block
+        },
+      // closes the block
+      },
+
+      // continues the statement started above: `CacheEntry: {`
+      CacheEntry: {
+        // expression: `type: 'object',`
+        type: 'object',
+        // continues the statement started above: `description: 'Caller-defined shape - whatever was last PUT …`
+        description: 'Caller-defined shape - whatever was last PUT to this path, stored and returned verbatim.',
+        // continues the statement started above: `additionalProperties: true,`
+        additionalProperties: true,
+      // closes the block
+      },
     // closes the block
     },
   // closes the block
@@ -1187,6 +1233,119 @@ const openapiSpec = {
           401: err('Missing, invalid or expired Firebase ID token'),
           // continues the statement started above: `500: err('Unexpected server error'),`
           500: err('Unexpected server error'),
+        // closes the block
+        },
+      // closes the block
+      },
+    // closes the block
+    },
+
+    // continues the statement started above: `'/config/keys': {`
+    '/config/keys': {
+      // opens a block after `get:`
+      get: {
+        // expression: `tags: ['Config'],`
+        tags: ['Config'],
+        // continues the statement started above: `summary: 'Read the third-party API keys',`
+        summary: 'Read the third-party API keys',
+        // continues the statement started above: `description:`
+        description:
+          'These live as Cloud Run environment variables / Secret Manager, never in the ' +
+          "app's own BuildConfig. The app caches the response locally so it still works " +
+          'offline after the first successful fetch.',
+        // continues the statement started above: `responses: {`
+        responses: {
+          // expression: `200: jsonRes('The current keys', 'Keys'),`
+          200: jsonRes('The current keys', 'Keys'),
+          // continues the statement started above: `401: err('Missing, invalid or expired Firebase ID token'),`
+          401: err('Missing, invalid or expired Firebase ID token'),
+          // continues the statement started above: `500: err('Unexpected server error'),`
+          500: err('Unexpected server error'),
+        // closes the block
+        },
+      // closes the block
+      },
+    // closes the block
+    },
+
+    // continues the statement started above: `'/config/web-client-id': {`
+    '/config/web-client-id': {
+      // opens a block after `get:`
+      get: {
+        // expression: `tags: ['Config'],`
+        tags: ['Config'],
+        // continues the statement started above: `summary: 'Read the Firebase OAuth web client id',`
+        summary: 'Read the Firebase OAuth web client id',
+        // continues the statement started above: `description:`
+        description:
+          "Deliberately unauthenticated and separate from `GET /config/keys` - the app " +
+          'needs this value before a user has signed in, to start the Google Sign-In ' +
+          "flow in the first place, and it isn't actually a secret per Google's own " +
+          'OAuth documentation.',
+        // continues the statement started above: `security: [],`
+        security: [],
+        // continues the statement started above: `responses: {`
+        responses: {
+          // expression: `200: jsonRes('The current web client id', 'WebClientId'),`
+          200: jsonRes('The current web client id', 'WebClientId'),
+          // continues the statement started above: `500: err('Unexpected server error'),`
+          500: err('Unexpected server error'),
+        // closes the block
+        },
+      // closes the block
+      },
+    // closes the block
+    },
+
+    // continues the statement started above: `'/cache/{path}': {`
+    '/cache/{path}': {
+      // opens a block after `get:`
+      get: {
+        // expression: `tags: ['Cache'],`
+        tags: ['Cache'],
+        // continues the statement started above: `summary: 'Read a cached lookup',`
+        summary: 'Read a cached lookup',
+        // continues the statement started above: `description:`
+        description:
+          'Shared across every user - any authenticated caller can read any path. ' +
+          '`path` must match `^(weather|currency|places)_[a-zA-Z0-9_]{1,64}$`.',
+        // continues the statement started above: `parameters: [pathParam('path', 'Cache key, e.g. `weather_ca…`
+        parameters: [pathParam('path', 'Cache key, e.g. `weather_cape_town` or `currency_USD_ZAR`')],
+        // continues the statement started above: `responses: {`
+        responses: {
+          // expression: `200: jsonRes('The cached entry', 'CacheEntry'),`
+          200: jsonRes('The cached entry', 'CacheEntry'),
+          // continues the statement started above: `400: err('path does not match the allowed pattern'),`
+          400: err('path does not match the allowed pattern'),
+          404: err('Not cached yet'),
+          // continues the statement started above: `...authErrors,`
+          ...authErrors,
+        // closes the block
+        },
+      // closes the block
+      },
+      // opens a block after `put:`
+      put: {
+        // expression: `tags: ['Cache'],`
+        tags: ['Cache'],
+        // continues the statement started above: `summary: 'Write a cached lookup',`
+        summary: 'Write a cached lookup',
+        // continues the statement started above: `description:`
+        description:
+          'Shared across every user - any authenticated caller can overwrite any path. ' +
+          'Stores the request body verbatim, with no field whitelist.',
+        // continues the statement started above: `parameters: [pathParam('path', 'Cache key, e.g. `weather_ca…`
+        parameters: [pathParam('path', 'Cache key, e.g. `weather_cape_town` or `currency_USD_ZAR`')],
+        // continues the statement started above: `requestBody: jsonBody('CacheEntry'),`
+        requestBody: jsonBody('CacheEntry'),
+        // continues the statement started above: `responses: {`
+        responses: {
+          // expression: `200: jsonRes('The stored entry', 'CacheEntry'),`
+          200: jsonRes('The stored entry', 'CacheEntry'),
+          // continues the statement started above: `400: err('path does not match the allowed pattern'),`
+          400: err('path does not match the allowed pattern'),
+          // continues the statement started above: `...authErrors,`
+          ...authErrors,
         // closes the block
         },
       // closes the block
