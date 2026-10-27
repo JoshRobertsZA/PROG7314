@@ -13,6 +13,8 @@ import com.waypoint.app.core.network.HttpClient
 import com.waypoint.app.core.notifications.NotificationChannels
 // imports `com.waypoint.app.core.notifications.TripReminderScheduler` for use in this file
 import com.waypoint.app.core.notifications.TripReminderScheduler
+// imports `com.waypoint.app.core.secrets.RemoteSecrets` for use in this file
+import com.waypoint.app.core.secrets.RemoteSecrets
 
 // declares class `WaypointApp`, inheriting from `Application(), ImageLoaderFactory` and opens its body
 class WaypointApp : Application(), ImageLoaderFactory {
@@ -26,6 +28,8 @@ class WaypointApp : Application(), ImageLoaderFactory {
     override fun onCreate() {
         // calls `onCreate` on `super` with arguments `()`
         super.onCreate()
+        // calls `init` on `RemoteSecrets` with arguments `(this)`
+        RemoteSecrets.init(this)
         // calls `ensureCreated` on `NotificationChannels` with arguments `(this)`
         NotificationChannels.ensureCreated(this)
         // calls `ensureScheduled` on `TripReminderScheduler` with arguments `(this)`

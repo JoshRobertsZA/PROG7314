@@ -25,8 +25,8 @@ object GoogleSignInHelper {
     suspend fun requestIdToken(context: Context, filterByAuthorizedAccounts: Boolean): String {
         // declares read-only property `credentialManager`, initialised with the result of calling `CredentialManager.create(…)`
         val credentialManager = CredentialManager.create(context)
-        // declares read-only property `webClientId`, initialised with the result of calling `RemoteSecrets.get(…)`
-        val webClientId = RemoteSecrets.get("FIREBASE_WEB_CLIENT_ID", BuildConfig.FIREBASE_WEB_CLIENT_ID)
+        // declares read-only property `webClientId`, initialised with the result of calling `RemoteSecrets.ensureWebClientIdLoaded(…)`, falling back to the local BuildConfig copy if that fetch and the local cache both come up empty
+        val webClientId = RemoteSecrets.ensureWebClientIdLoaded().ifBlank { BuildConfig.FIREBASE_WEB_CLIENT_ID }
 
         // declares read-only property `googleIdOption`, initialised with the result of calling `GetGoogleIdOption.Builder(…)`
         val googleIdOption = GetGoogleIdOption.Builder()
