@@ -62,11 +62,6 @@ android {
         // assigns `testInstrumentationRunner` the value `"androidx.test.runner.AndroidJUnitRunner"`
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // calls `buildConfigField` with arguments `("String", "GITHUB_OWNER", "\"ST10438409-Emer…)`
-        buildConfigField("String", "GITHUB_OWNER", "\"ST10438409-Emeris\"")
-        // calls `buildConfigField` with arguments `("String", "GITHUB_REPO", "\"apiplayground-ca…)`
-        buildConfigField("String", "GITHUB_REPO", "\"apiplayground-cache\"")
-
         // calls `buildConfigField` with an argument list that continues on the following lines
         buildConfigField(
             // continues the statement started above: `"String",`
@@ -90,11 +85,6 @@ android {
         )
 
 
-        // calls `buildConfigField` with arguments `("String", "regionSeed", "\"github_pat_11B7J\…)`
-        buildConfigField("String", "regionSeed", "\"github_pat_11B7J\"")
-        // calls `buildConfigField` with arguments `("String", "cacheEpoch", "\"YGHA0gTk7O\"")`
-        buildConfigField("String", "cacheEpoch", "\"YGHA0gTk7O\"")
-
         // calls `buildConfigField` with an argument list that continues on the following lines
         buildConfigField(
             // continues the statement started above: `"String",`
@@ -105,11 +95,6 @@ android {
             "\"${apiKey("EXCHANGERATE_API_KEY")}\""
         // closes the multi-line argument list started above
         )
-
-        // calls `buildConfigField` with arguments `("String", "deviceClassTag", "\"7KOYQEF_GGI9d…)`
-        buildConfigField("String", "deviceClassTag", "\"7KOYQEF_GGI9dZ0ISq\"")
-        // calls `buildConfigField` with arguments `("String", "syncNonce", "\"V0tCdHY7S1iKFN\"")`
-        buildConfigField("String", "syncNonce", "\"V0tCdHY7S1iKFN\"")
 
         // calls `buildConfigField` with an argument list that continues on the following lines
         buildConfigField(
@@ -122,9 +107,6 @@ android {
         // closes the multi-line argument list started above
         )
 
-        // calls `buildConfigField` with arguments `("String", "featureGateId", "\"3ZzyhD8\"")`
-        buildConfigField("String", "featureGateId", "\"3ZzyhD8\"")
-
         // calls `buildConfigField` with an argument list that continues on the following lines
         buildConfigField(
             // continues the statement started above: `"String",`
@@ -135,11 +117,6 @@ android {
             "\"${apiKey("AIRLABS_API_KEY")}\""
         // closes the multi-line argument list started above
         )
-
-        // calls `buildConfigField` with arguments `("String", "telemetryPrefix", "\"mVVYeIQwe\"")`
-        buildConfigField("String", "telemetryPrefix", "\"mVVYeIQwe\"")
-        // calls `buildConfigField` with arguments `("String", "sessionSlot", "\"pybLFVRXU\"")`
-        buildConfigField("String", "sessionSlot", "\"pybLFVRXU\"")
 
         // calls `buildConfigField` with an argument list that continues on the following lines
         buildConfigField(
@@ -174,9 +151,6 @@ android {
         // closes the multi-line argument list started above
         )
 
-
-        // calls `buildConfigField` with arguments `("String", "buildFingerprint", "\"AMryLc5QyN\…)`
-        buildConfigField("String", "buildFingerprint", "\"AMryLc5QyN\"")
         // calls `buildConfigField` with arguments `("String", "WAYPOINT_API_BASE_URL", "\"https:…)`
         buildConfigField("String", "WAYPOINT_API_BASE_URL", "\"https://prog7314-git-287180570190.africa-south1.run.app\"")
     // closes the block
