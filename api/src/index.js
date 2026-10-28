@@ -17,6 +17,7 @@ const itineraryRouter = require('./routes/itinerary');
 const counterRouter = require('./routes/counter');
 const configRouter = require('./routes/config');
 const cacheRouter = require('./routes/cache');
+const devicesRouter = require('./routes/devices');
 
 // declares const `app`, initialised with the result of calling `express(…)`
 const app = express();
@@ -61,6 +62,7 @@ app.use('/itinerary', itineraryRouter);
 app.use('/counter', counterRouter);
 app.use('/config', configRouter);
 app.use('/cache', cacheRouter);
+app.use('/devices', devicesRouter);
 
 // calls `use` on `app` with arguments `((req, res) => res.status(404).json({ error: …)`
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
