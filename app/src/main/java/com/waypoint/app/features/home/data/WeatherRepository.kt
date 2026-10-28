@@ -303,12 +303,8 @@ object WeatherRepository {
             put("fetchedAtMs", data.fetchedAtMs)
         // closes the lambda assigned to `json`
         }
-        // calls `writeJson` on `GitHubCacheRepository` with an argument list that continues on the following lines
-        GitHubCacheRepository.writeJson(
-            // continues the statement started above: `path, json, "chore(cache): update weather for ${data.displa…`
-            path, json, "chore(cache): update weather for ${data.displayName}",
-        // closes the multi-line argument list started above
-        )
+        // calls `writeJson` on `GitHubCacheRepository` with arguments `(path, json)`
+        GitHubCacheRepository.writeJson(path, json)
     // closes the function `writeToCache`
     }
 // closes the object `WeatherRepository`

@@ -78,7 +78,7 @@ Waypoint lets travellers plan and manage trips from a single app. Users can buil
 | Async | Kotlin Coroutines |
 | Build | Gradle (Kotlin DSL) |
 
-API keys are fetched at runtime from a private GitHub repository via `core/secrets/RemoteSecrets.kt` and held in memory only; they are never stored on disk.
+Third-party API keys are fetched at runtime from the Waypoint REST API (`GET /config/keys`, authenticated with a Firebase ID token) via `core/secrets/RemoteSecrets.kt`, and cached locally so the app still works offline after the first successful fetch. The Firebase web client ID — not itself a secret — is served separately and unauthenticated from `GET /config/web-client-id`, since it's needed before a user has signed in to start Google Sign-In. See [`api/.env.example`](api/.env.example) for where the server-side values live.
 
 ---
 
@@ -91,10 +91,9 @@ API keys are fetched at runtime from a private GitHub repository via `core/secre
 | [ExchangeRate-API](https://www.exchangerate-api.com/) | Live currency exchange rates for the in-app converter |
 | [LocationIQ](https://locationiq.com/) | Reverse geocoding and nearby points-of-interest search |
 | [Wikipedia REST API](https://en.wikipedia.org/api/rest_v1/) | City and place summaries displayed on destination cards |
-| [GitHub Contents API](https://docs.github.com/en/rest/repos/contents) | Secure remote fetch of API keys at runtime |
 | [CounterAPI](https://counterapi.dev/) | Anonymous usage counter for place search events |
 | [Firebase Cloud Messaging](https://firebase.google.com/docs/cloud-messaging) | Push notifications for trip reminders |
-| [Waypoint REST API](https://prog7314-git-287180570190.africa-south1.run.app) | Custom Cloud Run API for trip CRUD and cloud sync |
+| [Waypoint REST API](https://prog7314-git-287180570190.africa-south1.run.app) | Custom Cloud Run API for trip CRUD, cloud sync, secure remote fetch of API keys, and the shared weather/currency/places cache |
 
 ---
 
@@ -251,7 +250,7 @@ The video walks through: signing in, creating a trip, adding itinerary days and 
 3. Open the project in Android Studio Hedgehog or later
 4. Run on a physical device (API 26+) or an emulator
 
-> API keys are fetched at runtime from a private GitHub repository via the GitHub Contents API and held in memory only. No local key file is required.
+> Third-party API keys and the Firebase web client ID are fetched at runtime from the Waypoint REST API and cached locally — no local key file is required. See `apikey.properties.example` if you want to override a key with your own personal quota instead of the shared team cache.
 
 ---
 ## AI Usage

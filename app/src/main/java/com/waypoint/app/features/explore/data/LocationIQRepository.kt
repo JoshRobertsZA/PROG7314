@@ -45,8 +45,8 @@ object LocationIQRepository {
         // continues the statement started above: `city.trim().lowercase().replace(Regex("[^a-z0-9]+"), "_")`
         city.trim().lowercase().replace(Regex("[^a-z0-9]+"), "_")
 
-    // declares function `placesPath` taking 1 parameter (`citySlug`); its body is the expression `"cache/places_${citySlug}.json"`
-    fun placesPath(citySlug: String) = "cache/places_${citySlug}.json"
+    // declares function `placesPath` taking 1 parameter (`citySlug`); its body is the expression `"places_${citySlug}"`
+    fun placesPath(citySlug: String) = "places_${citySlug}"
 
 
     // declares suspend function `getPlaces` taking 1 parameter (`city`), returning `PlacesCache?` and opens its body
@@ -290,12 +290,8 @@ object LocationIQRepository {
             put("places",         placesArray)
         // closes the lambda assigned to `json`
         }
-        // calls `writeJson` on `GitHubCacheRepository` with an argument list that continues on the following lines
-        GitHubCacheRepository.writeJson(
-            // continues the statement started above: `path, json, "chore(cache): update places for ${data.city}",`
-            path, json, "chore(cache): update places for ${data.city}",
-        // closes the multi-line argument list started above
-        )
+        // calls `writeJson` on `GitHubCacheRepository` with arguments `(path, json)`
+        GitHubCacheRepository.writeJson(path, json)
     // closes the function `writeToCache`
     }
 
