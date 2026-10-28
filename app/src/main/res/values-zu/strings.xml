@@ -173,6 +173,10 @@
     <string name="notification_welcome_title">Siyakwamukela futhi!</string>
     <string name="notification_welcome_title_named">Siyakwamukela futhi, %1$s!</string>
     <string name="notification_welcome_body">Izinhambo zakho zilungile noma nini lapho usulungile.</string>
+    <string name="notification_trip_created_title">Uhambo olusha lwengeziwe</string>
+    <string name="notification_trip_created_body">Uhambo lwengezwe ku-akhawunti yakho. Thepha ukuze ulibone.</string>
+    <string name="notification_test_title">Isaziso sokuhlola</string>
+    <string name="notification_test_body">Uma ungakubona lokhu, izaziso ziyasebenza.</string>
     <!-- Flight departure time (Edit Itinerary) -->
     <string name="edit_itinerary_flight_set_time">Setha isikhathi sokuhamba</string>
     <string name="edit_itinerary_flight_departs">Iyahamba %1$s</string>
