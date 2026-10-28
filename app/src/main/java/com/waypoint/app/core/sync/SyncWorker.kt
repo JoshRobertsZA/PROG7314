@@ -6,6 +6,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.waypoint.app.core.auth.AuthRepository
 import com.waypoint.app.core.network.WaypointApiRepository
+import com.waypoint.app.core.notifications.PushTokenManager
 
 // Drains the local sync outbox: sends each pending entry to the API in the
 // order OutboxRepository.peekAll() returns (parents before children, then
@@ -33,6 +34,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
                 methodFor(entry.operation),
                 pathFor(entry),
                 entry.payloadJson,
+                PushTokenManager.currentToken,
             )
             when {
                 result.successful -> outbox.ack(entry.id)

@@ -31,6 +31,9 @@ class WaypointMessagingService : FirebaseMessagingService() {
         Log.i(TAG, "FCM token refreshed: $token")
         // calls `onTokenRefreshed` on `PushTokenManager` with arguments `(token)`
         PushTokenManager.onTokenRefreshed(token)
+        // If the user is already signed in, tell the server about the new
+        // token right away rather than waiting for the next login.
+        DeviceRegistrar.registerIfSignedIn()
     // closes the function `onNewToken`
     }
 

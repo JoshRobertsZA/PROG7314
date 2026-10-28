@@ -681,6 +681,47 @@ object WaypointApiRepository {
     }
 
 
+    // --- Push notifications (PR 4) ---
+
+    suspend fun registerDevice(idToken: String, token: String, locale: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val json = JSONObject().apply {
+                put("token", token)
+                put("locale", locale)
+            }.toString().toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/devices").post(json).build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "POST /devices HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "registerDevice failed: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun unregisterDevice(idToken: String, token: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/devices/$token").delete().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "DELETE /devices/$token HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "unregisterDevice failed: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun sendTestNotification(idToken: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val body = "{}".toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/notify/test").post(body).build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "POST /notify/test HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "sendTestNotification failed: ${e.message}")
+            false
+        }
+    }
+
+
     // HTTP status of a sendOutboxPayload() call, or -1 for a network-level
     // failure (no response at all - timeout, DNS, connection refused...).
     // SyncWorker classifies this to decide retry vs give up: 2xx succeeds,
@@ -697,10 +738,15 @@ object WaypointApiRepository {
     // from, and a partial UPDATE payload (e.g. just { "flightNumber": ... })
     // wouldn't fit updateFlight(entity: FlightEntity)'s all-fields shape
     // anyway.
-    suspend fun sendOutboxPayload(idToken: String, method: String, path: String, bodyJson: String?): SendResult =
+    // deviceToken, when present, is sent as X-Device-Token so the server can
+    // skip notifying the device that made the change (see POST /trips) -
+    // optional because most outbox entries aren't trip creation and the
+    // server ignores the header everywhere else.
+    suspend fun sendOutboxPayload(idToken: String, method: String, path: String, bodyJson: String?, deviceToken: String? = null): SendResult =
         withContext(Dispatchers.IO) {
             try {
                 val builder = authBuilder(idToken).url("$BASE_URL$path")
+                if (deviceToken != null) builder.header("X-Device-Token", deviceToken)
                 when (method) {
                     "POST" -> builder.post((bodyJson ?: "{}").toRequestBody(JSON_TYPE))
                     "PUT" -> builder.put((bodyJson ?: "{}").toRequestBody(JSON_TYPE))

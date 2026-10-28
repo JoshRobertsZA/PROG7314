@@ -23,7 +23,10 @@ import com.waypoint.app.BuildConfig
 import com.waypoint.app.core.db.AccountEntity
 // imports `com.waypoint.app.core.db.SessionManager` for use in this file
 import com.waypoint.app.core.db.SessionManager
+import com.waypoint.app.core.network.WaypointApiRepository
 // imports `com.waypoint.app.core.notifications.WelcomeNotifier` for use in this file
+import com.waypoint.app.core.locale.AppLanguage
+import com.waypoint.app.core.notifications.PushTokenManager
 import com.waypoint.app.core.notifications.WelcomeNotifier
 // imports `com.waypoint.app.core.secrets.RemoteSecrets` for use in this file
 import com.waypoint.app.core.secrets.RemoteSecrets
@@ -235,7 +238,15 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             // `if` statement: executes `Log.d(SWAGGER_TAG, token)` when `BuildConfig.DEBUG && token != null` is true
             if (BuildConfig.DEBUG && token != null) Log.d(SWAGGER_TAG, token)
             // `if` statement: executes `tripRepository.pullAndMergeTrips(token, user…` when `token != null` is true
-            if (token != null) tripRepository.pullAndMergeTrips(token, user.uid)
+            if (token != null) {
+                tripRepository.pullAndMergeTrips(token, user.uid)
+                // Register this device for push now, reusing the ID token
+                // already fetched above rather than asking for another one.
+                val fcmToken = PushTokenManager.currentToken ?: PushTokenManager.fetchToken()
+                if (fcmToken != null) {
+                    WaypointApiRepository.registerDevice(token, fcmToken, AppLanguage.current().localeTag)
+                }
+            }
             // Drains anything queued from a previous session (app killed
             // before it synced) and lets WorkManager's own network
             // constraint hold it until connectivity is actually available.
