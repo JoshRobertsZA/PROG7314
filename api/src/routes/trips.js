@@ -7,6 +7,7 @@ const { db } = require('../firebase');
 // declares const `{ requireAuth }`, initialised with the result of calling `require(…)`
 const { requireAuth } = require('../middleware/auth');
 const { isValidId, isValidName, isValidDateString, isValidDateOrder } = require('../validation');
+const { sendToUser } = require('../push');
 
 // declares const `COLLECTION`, initialised to the string literal 'trips'
 const COLLECTION = 'trips';
@@ -136,6 +137,15 @@ router.post('/', requireAuth, async (req, res) => {
     }
 
     res.status(201).json({ id, ...tripData });
+
+    // Fire-and-forget: a push failure must never fail trip creation itself,
+    // and the client already has its response. The optional X-Device-Token
+    // header is this device's own FCM token (if it has one registered), so
+    // it doesn't get notified about a trip it just created itself - only
+    // the user's other devices do.
+    const deviceToken = req.headers['x-device-token'];
+    sendToUser(req.user.uid, { type: 'trip_created', tripId: id }, { excludeToken: deviceToken })
+      .catch(err => console.error('push on trip create failed:', err.message));
   } catch (err) {
     console.error('POST /trips error:', err);
     res.status(500).json({ error: err.message });
