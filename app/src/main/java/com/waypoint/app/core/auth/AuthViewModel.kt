@@ -258,6 +258,20 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     // declares function `signOut` taking no parameters and opens its body
     fun signOut() {
+        // Captured before AuthRepository.signOut() clears the current user -
+        // a FirebaseUser instance can still hand back its (cached, not
+        // force-refreshed) ID token afterwards, but AuthRepository.getIdToken()
+        // goes through auth.currentUser, which would already be null by then.
+        val userBeforeSignOut = AuthRepository.currentUser
+        val deviceToken = PushTokenManager.currentToken
+        if (userBeforeSignOut != null && deviceToken != null) {
+            // Fire-and-forget: logout must not wait on a network call, and
+            // the UI has already navigated away by the time this completes.
+            viewModelScope.launch(Dispatchers.IO) {
+                val idToken = runCatching { userBeforeSignOut.getIdToken(false).await()?.token }.getOrNull()
+                if (idToken != null) WaypointApiRepository.unregisterDevice(idToken, deviceToken)
+            }
+        }
         // calls `signOut` on `AuthRepository` with arguments `()`
         AuthRepository.signOut()
         // calls `signOut` on `SessionManager` with arguments `()`
