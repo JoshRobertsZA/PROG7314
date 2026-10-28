@@ -18,6 +18,7 @@ const counterRouter = require('./routes/counter');
 const configRouter = require('./routes/config');
 const cacheRouter = require('./routes/cache');
 const devicesRouter = require('./routes/devices');
+const notifyRouter = require('./routes/notify');
 
 // declares const `app`, initialised with the result of calling `express(…)`
 const app = express();
@@ -63,6 +64,7 @@ app.use('/counter', counterRouter);
 app.use('/config', configRouter);
 app.use('/cache', cacheRouter);
 app.use('/devices', devicesRouter);
+app.use('/notify', notifyRouter);
 
 // calls `use` on `app` with arguments `((req, res) => res.status(404).json({ error: …)`
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
