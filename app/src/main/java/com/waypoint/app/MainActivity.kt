@@ -204,7 +204,10 @@ class MainActivity : AppCompatActivity() {
             // opens a block after `WaypointTheme`
             WaypointTheme {
                 // calls `WaypointNavHost` with arguments `()`
-                WaypointNavHost(pendingTripId = pendingTripId)
+                WaypointNavHost(
+                    pendingTripId = pendingTripId,
+                    onRequestNotificationPermission = ::requestNotificationPermissionIfNeeded,
+                )
             // closes the block
             }
         // closes the block
@@ -220,6 +223,7 @@ class MainActivity : AppCompatActivity() {
 private fun WaypointNavHost(
     navController: NavHostController = rememberNavController(),
     pendingTripId: MutableState<String?> = remember { mutableStateOf(null) },
+    onRequestNotificationPermission: () -> Unit = {},
 ) {
     // declares read-only property `isOnline`, delegated to `rememberIsOnline()`
     val isOnline by rememberIsOnline()
@@ -588,6 +592,8 @@ private fun WaypointNavHost(
         composable(Routes.Settings) {
             // calls `SettingsScreen` with an argument list that continues on the following lines
             SettingsScreen(
+                // continues the statement started above: `onRequestNotificationPermission = onRequestNotificationPerm…`
+                onRequestNotificationPermission = onRequestNotificationPermission,
                 // continues the statement started above: `onLogoutClick = {`
                 onLogoutClick = {
                     // calls `signOut` on `authViewModel` with arguments `()`

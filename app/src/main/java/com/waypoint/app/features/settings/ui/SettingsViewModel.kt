@@ -8,7 +8,9 @@ import androidx.lifecycle.AndroidViewModel
 // imports `androidx.lifecycle.viewModelScope` for use in this file
 import androidx.lifecycle.viewModelScope
 // imports `com.waypoint.app.core.db.SessionManager` for use in this file
+import com.waypoint.app.core.auth.AuthRepository
 import com.waypoint.app.core.db.SessionManager
+import com.waypoint.app.core.network.WaypointApiRepository
 // imports `com.waypoint.app.features.newtrip.data.TripRepository` for use in this file
 import com.waypoint.app.features.newtrip.data.TripRepository
 import com.waypoint.app.core.sync.OutboxRepository
@@ -73,6 +75,20 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
         // closes the block
         }
     // closes the function `loadTripCounts`
+    }
+
+    // Lets the settings screen's "send test notification" button prove push
+    // actually works end to end, rather than just trusting the local
+    // toggle and permission state.
+    fun sendTestNotification() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(testNotificationState = TestNotificationState.SENDING) }
+            val idToken = AuthRepository.getIdToken()
+            val ok = idToken != null && WaypointApiRepository.sendTestNotification(idToken)
+            _uiState.update {
+                it.copy(testNotificationState = if (ok) TestNotificationState.SENT else TestNotificationState.FAILED)
+            }
+        }
     }
 // closes the class `SettingsViewModel`
 }

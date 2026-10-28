@@ -177,6 +177,11 @@
     <string name="notification_trip_created_body">Uhambo lwengezwe ku-akhawunti yakho. Thepha ukuze ulibone.</string>
     <string name="notification_test_title">Isaziso sokuhlola</string>
     <string name="notification_test_body">Uma ungakubona lokhu, izaziso ziyasebenza.</string>
+    <string name="profile_test_notification_title">Thumela isaziso sokuhlola</string>
+    <string name="profile_test_notification_subtitle">Hlola ukuthi izaziso ziyafika kule divayisi</string>
+    <string name="profile_test_notification_sending">Kuyathunyelwa…</string>
+    <string name="profile_test_notification_sent">Kuthunyelwe</string>
+    <string name="profile_test_notification_failed">Kuhlulekile, zama futhi</string>
     <!-- Flight departure time (Edit Itinerary) -->
     <string name="edit_itinerary_flight_set_time">Setha isikhathi sokuhamba</string>
     <string name="edit_itinerary_flight_departs">Iyahamba %1$s</string>
