@@ -237,6 +237,8 @@ const openapiSpec = {
     { name: 'Counter', description: 'Atomic named counters' },
     { name: 'Config', description: 'Server-held API keys and the Firebase web client id' },
     { name: 'Cache', description: 'Shared weather/currency/places lookup cache' },
+    { name: 'Devices', description: 'FCM push tokens registered per user' },
+    { name: 'Notify', description: 'Push notification test endpoint' },
   // closes the multi-line list / array started above
   ],
   // continues the statement started above: `components: {`
@@ -766,6 +768,27 @@ const openapiSpec = {
         additionalProperties: true,
       // closes the block
       },
+
+      Device: {
+        type: 'object',
+        required: ['token'],
+        properties: {
+          token: { type: 'string', description: 'FCM registration token; also the document id' },
+          locale: { type: 'string', example: 'en', description: 'App language tag (en/zu/xh), sent so a future server-built message can be localised' },
+          accountId: { type: 'string', readOnly: true },
+          updatedAtMs: { type: 'integer', readOnly: true },
+        },
+      },
+
+      NotifyResult: {
+        type: 'object',
+        description: 'Outcome of a send to every device registered under a user.',
+        properties: {
+          successCount: { type: 'integer' },
+          failureCount: { type: 'integer' },
+          pruned: { type: 'integer', description: 'Devices removed because FCM reported their token unregistered' },
+        },
+      },
     // closes the block
     },
   // closes the block
@@ -816,7 +839,19 @@ const openapiSpec = {
         // continues the statement started above: `description:`
         description:
           // expression: `'The owner is taken from the verified token, so `accountId` in t…`
-          'The owner is taken from the verified token, so `accountId` in the body is ignored.',
+          'The owner is taken from the verified token, so `accountId` in the body is ignored. ' +
+          'On success, sends a push (see Notify) to the user\'s other registered devices - ' +
+          'pass the optional `X-Device-Token` header with this device\'s own FCM token to ' +
+          "exclude it from that push.",
+        parameters: [
+          {
+            name: 'X-Device-Token',
+            in: 'header',
+            required: false,
+            schema: { type: 'string' },
+            description: "This device's own FCM token, if registered, so the trip_created push skips it.",
+          },
+        ],
         // continues the statement started above: `requestBody: jsonBody('TripCreate'),`
         requestBody: jsonBody('TripCreate'),
         // continues the statement started above: `responses: {`
@@ -1351,6 +1386,46 @@ const openapiSpec = {
       // closes the block
       },
     // closes the block
+    },
+
+    '/devices': {
+      post: {
+        tags: ['Devices'],
+        summary: 'Register this device for push',
+        description:
+          'Upserts by token (the document id), so re-registering the same token - a ' +
+          'refresh, or a re-login on the same device - overwrites rather than duplicating.',
+        requestBody: jsonBody('Device'),
+        responses: {
+          200: jsonRes('Registered', 'Device'),
+          400: err('token is required, or locale failed validation'),
+          ...authErrors,
+        },
+      },
+    },
+
+    '/devices/{token}': {
+      delete: {
+        tags: ['Devices'],
+        summary: 'Unregister a device',
+        description: 'A no-op (200) if the token is already gone. 403 if it belongs to a different user.',
+        parameters: [pathParam('token', 'The FCM token to remove')],
+        responses: {
+          200: jsonRes('Deleted (or already gone)', 'Deleted'),
+          ...authErrors,
+        },
+      },
+    },
+
+    '/notify/test': {
+      post: {
+        tags: ['Notify'],
+        summary: 'Send a test push to every device the caller has registered',
+        responses: {
+          200: jsonRes('Send outcome', 'NotifyResult'),
+          ...authErrors,
+        },
+      },
     },
   // closes the block
   },
