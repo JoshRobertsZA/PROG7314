@@ -78,8 +78,6 @@
     <string name="edit_itinerary_header_lodging">Indawo yokulala</string>
     <string name="edit_itinerary_header_car">Ukuqashisa imoto</string>
     <string name="edit_itinerary_header_food">Amarestaurant namakhefi</string>
-    <string name="edit_itinerary_header_attractions">Izindawo zokuvakasha</string>
-    <string name="edit_itinerary_header_entertainment">Ukuzijabulisa</string>
     <string name="edit_itinerary_upload_chip">+ Layisha</string>
     <string name="edit_itinerary_add_chip">+ Engeza</string>
     <string name="edit_itinerary_replace_flight_doc_cd">Shintsha idokhumenti yendiza</string>
@@ -90,8 +88,6 @@
     <string name="edit_itinerary_remove_car_cd">Susa ukuqashisa imoto</string>
     <string name="edit_itinerary_edit_place_cd">Hlela indawo</string>
     <string name="edit_itinerary_remove_place_cd">Susa indawo</string>
-    <string name="edit_itinerary_add_entertainment_placeholder">+ Engeza okokuzijabulisa kulezi zinsuku</string>
-
     <string name="all_trips_back_cd">Emuva</string>
     <string name="all_trips_title">Zonke izinhambo</string>
     <string name="all_trips_search_hint">Sesha izinhambo ngegama noma usuku</string>
@@ -113,8 +109,6 @@
     <string name="explore_filter_all">Konke</string>
     <string name="explore_filter_restaurants">Amarestaurant</string>
     <string name="explore_filter_cafes">Amakhefi</string>
-    <string name="explore_filter_attractions">Izindawo zokuvakasha</string>
-    <string name="explore_filter_entertainment">Ukuzijabulisa</string>
     <string name="explore_filter_hotels">Amahhotela</string>
     <string name="explore_attribution">nge-LocationIQ</string>
 

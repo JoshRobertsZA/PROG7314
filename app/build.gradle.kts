@@ -43,7 +43,7 @@ android {
     compileSdk {
         // assigns `version` the value `release(37)`
         version = release(37)
-    // closes the block
+        // closes the block
     }
 
     // opens a block after `defaultConfig`
@@ -70,7 +70,7 @@ android {
             "OPENWEATHER_API_KEY",
             // continues the statement started above: `"\"${apiKey("OPENWEATHER_API_KEY")}\""`
             "\"${apiKey("OPENWEATHER_API_KEY")}\""
-        // closes the multi-line argument list started above
+            // closes the multi-line argument list started above
         )
 
         // calls `buildConfigField` with an argument list that continues on the following lines
@@ -81,7 +81,7 @@ android {
             "FIREBASE_WEB_CLIENT_ID",
             // continues the statement started above: `"\"${apiKey("FIREBASE_WEB_CLIENT_ID")}\""`
             "\"${apiKey("FIREBASE_WEB_CLIENT_ID")}\""
-        // closes the multi-line argument list started above
+            // closes the multi-line argument list started above
         )
 
 
@@ -93,7 +93,7 @@ android {
             "EXCHANGERATE_API_KEY",
             // continues the statement started above: `"\"${apiKey("EXCHANGERATE_API_KEY")}\""`
             "\"${apiKey("EXCHANGERATE_API_KEY")}\""
-        // closes the multi-line argument list started above
+            // closes the multi-line argument list started above
         )
 
         // calls `buildConfigField` with an argument list that continues on the following lines
@@ -104,7 +104,7 @@ android {
             "LOCATIONIQ_API_KEY",
             // continues the statement started above: `"\"${apiKey("LOCATIONIQ_API_KEY")}\""`
             "\"${apiKey("LOCATIONIQ_API_KEY")}\""
-        // closes the multi-line argument list started above
+            // closes the multi-line argument list started above
         )
 
         // calls `buildConfigField` with an argument list that continues on the following lines
@@ -115,7 +115,7 @@ android {
             "AIRLABS_API_KEY",
             // continues the statement started above: `"\"${apiKey("AIRLABS_API_KEY")}\""`
             "\"${apiKey("AIRLABS_API_KEY")}\""
-        // closes the multi-line argument list started above
+            // closes the multi-line argument list started above
         )
 
         // calls `buildConfigField` with an argument list that continues on the following lines
@@ -126,7 +126,7 @@ android {
             "COUNTERAPI_API_KEY",
             // continues the statement started above: `"\"${apiKey("COUNTERAPI_API_KEY")}\""`
             "\"${apiKey("COUNTERAPI_API_KEY")}\""
-        // closes the multi-line argument list started above
+            // closes the multi-line argument list started above
         )
 
         // calls `buildConfigField` with an argument list that continues on the following lines
@@ -137,7 +137,7 @@ android {
             "COUNTERAPI_WORKSPACE",
             // continues the statement started above: `"\"${apiKey("COUNTERAPI_WORKSPACE")}\""`
             "\"${apiKey("COUNTERAPI_WORKSPACE")}\""
-        // closes the multi-line argument list started above
+            // closes the multi-line argument list started above
         )
 
         // calls `buildConfigField` with an argument list that continues on the following lines
@@ -148,12 +148,16 @@ android {
             "COUNTERAPI_PLACES_SLUG",
             // continues the statement started above: `"\"${apiKey("COUNTERAPI_PLACES_SLUG")}\""`
             "\"${apiKey("COUNTERAPI_PLACES_SLUG")}\""
-        // closes the multi-line argument list started above
+            // closes the multi-line argument list started above
         )
 
         // calls `buildConfigField` with arguments `("String", "WAYPOINT_API_BASE_URL", "\"https:…)`
-        buildConfigField("String", "WAYPOINT_API_BASE_URL", "\"https://prog7314-git-287180570190.africa-south1.run.app\"")
-    // closes the block
+        buildConfigField(
+            "String",
+            "WAYPOINT_API_BASE_URL",
+            "\"https://prog7314-git-287180570190.africa-south1.run.app\""
+        )
+        // closes the block
     }
 
     // opens a block after `buildTypes`
@@ -164,11 +168,11 @@ android {
             optimization {
                 // assigns `enable` the value `false`
                 enable = false
-            // closes the block
+                // closes the block
             }
-        // closes the block
+            // closes the block
         }
-    // closes the block
+        // closes the block
     }
     // opens a block after `compileOptions`
     compileOptions {
@@ -176,7 +180,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         // assigns `targetCompatibility` the value `JavaVersion.VERSION_11`
         targetCompatibility = JavaVersion.VERSION_11
-    // closes the block
+        // closes the block
     }
     // opens a block after `buildFeatures`
     buildFeatures {
@@ -184,102 +188,100 @@ android {
         compose = true
         // assigns `buildConfig` the value `true`
         buildConfig = true
-    // closes the block
+        // closes the block
     }
 
 // opens a block after `lint`
-lint {
-        // adds to `disable` the value `"MissingTranslation"`
-        disable += "MissingTranslation"
+// MissingTranslation is no longer disabled, so lint flags any English string with no zu or xh version
+    lint {
         // assigns `abortOnError` the value `false`
         abortOnError = false
-    // closes the block
+        // closes the block
     }
-// closes the block
-}
 
 // opens a block after `dependencies`
-dependencies {
-    // calls `implementation` with arguments `(libs.androidx.activity.ktx)`
-    implementation(libs.androidx.activity.ktx)
-    // calls `implementation` with arguments `(libs.androidx.appcompat)`
-    implementation(libs.androidx.appcompat)
-    // calls `implementation` with arguments `(libs.androidx.constraintlayout)`
-    implementation(libs.androidx.constraintlayout)
-    // calls `implementation` with arguments `(libs.androidx.core.ktx)`
-    implementation(libs.androidx.core.ktx)
-    // calls `implementation` with arguments `(libs.material)`
-    implementation(libs.material)
+    dependencies {
+        // calls `implementation` with arguments `(libs.androidx.activity.ktx)`
+        implementation(libs.androidx.activity.ktx)
+        // calls `implementation` with arguments `(libs.androidx.appcompat)`
+        implementation(libs.androidx.appcompat)
+        // calls `implementation` with arguments `(libs.androidx.constraintlayout)`
+        implementation(libs.androidx.constraintlayout)
+        // calls `implementation` with arguments `(libs.androidx.core.ktx)`
+        implementation(libs.androidx.core.ktx)
+        // calls `implementation` with arguments `(libs.material)`
+        implementation(libs.material)
 
-    // calls `implementation` with arguments `(platform(libs.androidx.compose.bom))`
-    implementation(platform(libs.androidx.compose.bom))
-    // calls `implementation` with arguments `(libs.androidx.activity.compose)`
-    implementation(libs.androidx.activity.compose)
-    // calls `implementation` with arguments `(libs.androidx.compose.ui)`
-    implementation(libs.androidx.compose.ui)
-    // calls `implementation` with arguments `(libs.androidx.compose.ui.graphics)`
-    implementation(libs.androidx.compose.ui.graphics)
-    // calls `implementation` with arguments `(libs.androidx.compose.ui.tooling.preview)`
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    // calls `implementation` with arguments `(libs.androidx.compose.material3)`
-    implementation(libs.androidx.compose.material3)
-    // calls `implementation` with arguments `(libs.androidx.compose.foundation)`
-    implementation(libs.androidx.compose.foundation)
-    // calls `implementation` with arguments `(libs.androidx.navigation.compose)`
-    implementation(libs.androidx.navigation.compose)
-    // calls `debugImplementation` with arguments `(libs.androidx.compose.ui.tooling)`
-    debugImplementation(libs.androidx.compose.ui.tooling)
+        // calls `implementation` with arguments `(platform(libs.androidx.compose.bom))`
+        implementation(platform(libs.androidx.compose.bom))
+        // calls `implementation` with arguments `(libs.androidx.activity.compose)`
+        implementation(libs.androidx.activity.compose)
+        // calls `implementation` with arguments `(libs.androidx.compose.ui)`
+        implementation(libs.androidx.compose.ui)
+        // calls `implementation` with arguments `(libs.androidx.compose.ui.graphics)`
+        implementation(libs.androidx.compose.ui.graphics)
+        // calls `implementation` with arguments `(libs.androidx.compose.ui.tooling.preview)`
+        implementation(libs.androidx.compose.ui.tooling.preview)
+        // calls `implementation` with arguments `(libs.androidx.compose.material3)`
+        implementation(libs.androidx.compose.material3)
+        // calls `implementation` with arguments `(libs.androidx.compose.foundation)`
+        implementation(libs.androidx.compose.foundation)
+        // calls `implementation` with arguments `(libs.androidx.navigation.compose)`
+        implementation(libs.androidx.navigation.compose)
+        // calls `debugImplementation` with arguments `(libs.androidx.compose.ui.tooling)`
+        debugImplementation(libs.androidx.compose.ui.tooling)
 
-    // calls `testImplementation` with arguments `(libs.junit)`
-    testImplementation(libs.junit)
-    // calls `testImplementation` with arguments `(libs.kotlinx.coroutines.test)`
-    testImplementation(libs.kotlinx.coroutines.test)
-    // Android's own org.json classes are stub jars on the unit-test
-    // classpath (every method throws "not mocked") - a real implementation
-    // here shadows those stubs so OutboxCoalescingTest's JSONObject calls
-    // actually work. Test-only; never ships in the app.
-    testImplementation(libs.json)
-    // calls `androidTestImplementation` with arguments `(libs.androidx.espresso.core)`
-    androidTestImplementation(libs.androidx.espresso.core)
-    // calls `androidTestImplementation` with arguments `(libs.androidx.junit)`
-    androidTestImplementation(libs.androidx.junit)
+        // calls `testImplementation` with arguments `(libs.junit)`
+        testImplementation(libs.junit)
+        // calls `testImplementation` with arguments `(libs.kotlinx.coroutines.test)`
+        testImplementation(libs.kotlinx.coroutines.test)
+        // Android's own org.json classes are stub jars on the unit-test
+        // classpath (every method throws "not mocked") - a real implementation
+        // here shadows those stubs so OutboxCoalescingTest's JSONObject calls
+        // actually work. Test-only; never ships in the app.
+        testImplementation(libs.json)
+        // calls `androidTestImplementation` with arguments `(libs.androidx.espresso.core)`
+        androidTestImplementation(libs.androidx.espresso.core)
+        // calls `androidTestImplementation` with arguments `(libs.androidx.junit)`
+        androidTestImplementation(libs.androidx.junit)
 
-    // calls `implementation` with arguments `(libs.androidx.lifecycle.runtime.ktx)`
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    // calls `implementation` with arguments `(libs.androidx.lifecycle.viewmodel.compose)`
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    // calls `implementation` with arguments `(libs.play.services.location)`
-    implementation(libs.play.services.location)
-    // calls `implementation` with arguments `(libs.retrofit.core)`
-    implementation(libs.retrofit.core)
-    // calls `implementation` with arguments `(libs.retrofit.converter.scalars)`
-    implementation(libs.retrofit.converter.scalars)
-    // calls `implementation` with arguments `(libs.okhttp)`
-    implementation(libs.okhttp)
-    // calls `implementation` with arguments `(libs.kotlinx.coroutines.android)`
-    implementation(libs.kotlinx.coroutines.android)
-    // calls `implementation` with arguments `(libs.kotlinx.coroutines.play.services)`
-    implementation(libs.kotlinx.coroutines.play.services)
+        // calls `implementation` with arguments `(libs.androidx.lifecycle.runtime.ktx)`
+        implementation(libs.androidx.lifecycle.runtime.ktx)
+        // calls `implementation` with arguments `(libs.androidx.lifecycle.viewmodel.compose)`
+        implementation(libs.androidx.lifecycle.viewmodel.compose)
+        // calls `implementation` with arguments `(libs.play.services.location)`
+        implementation(libs.play.services.location)
+        // calls `implementation` with arguments `(libs.retrofit.core)`
+        implementation(libs.retrofit.core)
+        // calls `implementation` with arguments `(libs.retrofit.converter.scalars)`
+        implementation(libs.retrofit.converter.scalars)
+        // calls `implementation` with arguments `(libs.okhttp)`
+        implementation(libs.okhttp)
+        // calls `implementation` with arguments `(libs.kotlinx.coroutines.android)`
+        implementation(libs.kotlinx.coroutines.android)
+        // calls `implementation` with arguments `(libs.kotlinx.coroutines.play.services)`
+        implementation(libs.kotlinx.coroutines.play.services)
 
-    // calls `implementation` with arguments `(platform(libs.firebase.bom))`
-    implementation(platform(libs.firebase.bom))
-    // calls `implementation` with arguments `(libs.firebase.auth)`
-    implementation(libs.firebase.auth)
-    // calls `implementation` with arguments `(libs.firebase.messaging)`
-    implementation(libs.firebase.messaging)
-    // calls `implementation` with arguments `(libs.androidx.work.runtime.ktx)`
-    implementation(libs.androidx.work.runtime.ktx)
-    // calls `implementation` with arguments `(libs.androidx.credentials)`
-    implementation(libs.androidx.credentials)
-    // calls `implementation` with arguments `(libs.androidx.credentials.play.services.auth)`
-    implementation(libs.androidx.credentials.play.services.auth)
-    // calls `implementation` with arguments `(libs.googleid)`
-    implementation(libs.googleid)
-    // calls `implementation` with arguments `(libs.androidx.biometric)`
-    implementation(libs.androidx.biometric)
-    // calls `implementation` with arguments `(libs.androidx.core.splashscreen)`
-    implementation(libs.androidx.core.splashscreen)
-    // calls `implementation` with arguments `(libs.coil.compose)`
-    implementation(libs.coil.compose)
+        // calls `implementation` with arguments `(platform(libs.firebase.bom))`
+        implementation(platform(libs.firebase.bom))
+        // calls `implementation` with arguments `(libs.firebase.auth)`
+        implementation(libs.firebase.auth)
+        // calls `implementation` with arguments `(libs.firebase.messaging)`
+        implementation(libs.firebase.messaging)
+        // calls `implementation` with arguments `(libs.androidx.work.runtime.ktx)`
+        implementation(libs.androidx.work.runtime.ktx)
+        // calls `implementation` with arguments `(libs.androidx.credentials)`
+        implementation(libs.androidx.credentials)
+        // calls `implementation` with arguments `(libs.androidx.credentials.play.services.auth)`
+        implementation(libs.androidx.credentials.play.services.auth)
+        // calls `implementation` with arguments `(libs.googleid)`
+        implementation(libs.googleid)
+        // calls `implementation` with arguments `(libs.androidx.biometric)`
+        implementation(libs.androidx.biometric)
+        // calls `implementation` with arguments `(libs.androidx.core.splashscreen)`
+        implementation(libs.androidx.core.splashscreen)
+        // calls `implementation` with arguments `(libs.coil.compose)`
+        implementation(libs.coil.compose)
 // closes the block
+    }
 }

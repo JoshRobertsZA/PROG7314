@@ -77,8 +77,6 @@
     <string name="edit_itinerary_header_lodging">Indawo yokulala</string>
     <string name="edit_itinerary_header_car">Ukuqeshisa imoto</string>
     <string name="edit_itinerary_header_food">Iindawo zokutya namakhefi</string>
-    <string name="edit_itinerary_header_attractions">Iindawo zokutyelela</string>
-    <string name="edit_itinerary_header_entertainment">Ukonwaba</string>
     <string name="edit_itinerary_upload_chip">+ Layisha</string>
     <string name="edit_itinerary_add_chip">+ Yongeza</string>
     <string name="edit_itinerary_replace_flight_doc_cd">Tshintsha uxwebhu lwenqwelomoya</string>
@@ -89,8 +87,6 @@
     <string name="edit_itinerary_remove_car_cd">Susa ukuqeshisa imoto</string>
     <string name="edit_itinerary_edit_place_cd">Hlela indawo</string>
     <string name="edit_itinerary_remove_place_cd">Susa indawo</string>
-    <string name="edit_itinerary_add_entertainment_placeholder">+ Yongeza okokonwabisa kule mihla</string>
-
     <string name="all_trips_back_cd">Emva</string>
     <string name="all_trips_title">Zonke iindlela</string>
     <string name="all_trips_search_hint">Khangela iindlela ngegama okanye umhla</string>
@@ -112,8 +108,6 @@
     <string name="explore_filter_all">Konke</string>
     <string name="explore_filter_restaurants">Iindawo zokutya</string>
     <string name="explore_filter_cafes">Amakhefi</string>
-    <string name="explore_filter_attractions">Iindawo zokutyelela</string>
-    <string name="explore_filter_entertainment">Ukonwaba</string>
     <string name="explore_filter_hotels">Iihotele</string>
     <string name="explore_attribution">nge-LocationIQ</string>
 
