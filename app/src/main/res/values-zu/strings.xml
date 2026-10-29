@@ -280,4 +280,15 @@
     <string name="view_itinerary_no_car">Akukho kuqasha kwemoto okulayishiwe</string>
     <string name="view_itinerary_no_places">Azikho izindawo ezengeziwe</string>
     <string name="view_itinerary_open_pdf_cd">Vula i-PDF</string>
+    <!-- Biometric login: profile toggle and lock screen -->
+    <string name="profile_biometric_unavailable_no_hardware">Akusekelwa kule divayisi</string>
+    <string name="profile_biometric_unavailable_none_enrolled">Awekho ama-biometric asethiwe kule divayisi</string>
+    <string name="profile_biometric_enable_title">Vula ukungena nge-biometric</string>
+    <string name="profile_biometric_enable_subtitle">Qinisekisa ukuthi nguwe ukuze uvule lokhu</string>
+    <string name="biometric_lock_title">Vula i-Waypoint</string>
+    <string name="biometric_lock_subtitle">Qinisekisa ukuthi nguwe ukuze uqhubeke</string>
+    <string name="biometric_lock_prompt_title">Vula i-Waypoint</string>
+    <string name="biometric_lock_prompt_subtitle">Sebenzisa ubuso bakho noma isigxivizo somunwe ukuze uqhubeke</string>
+    <string name="biometric_lock_unlock_button">Vula</string>
+    <string name="biometric_lock_cancel">Khansela</string>
 </resources>
