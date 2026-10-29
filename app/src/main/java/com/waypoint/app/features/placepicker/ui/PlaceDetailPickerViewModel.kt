@@ -90,11 +90,11 @@ class PlaceDetailPickerViewModel(
             // expression: `trip?.destLat != null && trip.destLng != null ->`
             trip?.destLat != null && trip.destLng != null ->
                 // continues the statement started above: `LocationIQRepository.getPlacesByCoords(trip.destLat, trip.d…`
-                LocationIQRepository.getPlacesByCoords(trip.destLat, trip.destLng)
+                LocationIQRepository.getPlacesByCoords(getApplication(), trip.destLat, trip.destLng)
             // expression: `trip?.destination != null ->`
             trip?.destination != null ->
                 // continues the statement started above: `LocationIQRepository.getPlaces(trip.destination)`
-                LocationIQRepository.getPlaces(trip.destination)
+                LocationIQRepository.getPlaces(getApplication(), trip.destination)
             // `else` branch of the `when`: evaluates `null`
             else -> null
         // closes the lambda assigned to `cache`

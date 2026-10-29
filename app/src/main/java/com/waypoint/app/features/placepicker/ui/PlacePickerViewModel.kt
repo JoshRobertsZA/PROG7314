@@ -88,7 +88,7 @@ class PlacePickerViewModel(
                 // calls `d` on `Log` with arguments `(TAG, "Loading places by coords for trip $tri…)`
                 Log.d(TAG, "Loading places by coords for trip $tripId")
                 // calls `getPlacesByCoords` on `LocationIQRepository` with arguments `(trip.destLat, trip.destLng)`
-                LocationIQRepository.getPlacesByCoords(trip.destLat, trip.destLng)
+                LocationIQRepository.getPlacesByCoords(getApplication(), trip.destLat, trip.destLng)
             // closes the lambda body
             }
             // `else` branch of the `when`: opens a block
@@ -96,7 +96,7 @@ class PlacePickerViewModel(
                 // calls `d` on `Log` with arguments `(TAG, "Loading places by city name '${trip.de…)`
                 Log.d(TAG, "Loading places by city name '${trip.destination}' for trip $tripId")
                 // calls `getPlaces` on `LocationIQRepository` with arguments `(trip.destination!!)`
-                LocationIQRepository.getPlaces(trip.destination!!)
+                LocationIQRepository.getPlaces(getApplication(), trip.destination!!)
             // closes the when else-branch
             }
         // closes the lambda assigned to `cache`
