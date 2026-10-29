@@ -5,6 +5,8 @@ package com.waypoint.app
 import android.Manifest
 // imports `android.app.Activity` for use in this file
 import android.app.Activity
+// imports `android.content.Intent` for use in this file
+import android.content.Intent
 // imports `android.os.Build` for use in this file
 import android.os.Build
 // imports `android.os.Bundle` for use in this file
@@ -37,6 +39,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 // imports `androidx.compose.runtime.getValue` for use in this file
 import androidx.compose.runtime.getValue
+// imports `androidx.compose.runtime.MutableState` for use in this file
+import androidx.compose.runtime.MutableState
 // imports `androidx.compose.runtime.mutableStateOf` for use in this file
 import androidx.compose.runtime.mutableStateOf
 // imports `androidx.compose.runtime.remember` for use in this file
@@ -151,6 +155,26 @@ class MainActivity : AppCompatActivity() {
         // closes the block
         }
 
+    // Set from a push's "tripId" data extra (see PushNotifier.show, which
+    // puts the whole data payload into the launch intent's extras) - read
+    // once on cold start and again on every onNewIntent, so a tap works
+    // whether the app was dead or already running.
+    private val pendingTripId = mutableStateOf<String?>(null)
+
+    // declares function `requestNotificationPermissionIfNeeded` taking no parameters and opens its body
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !PushNotifier.hasPermission(this)) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    // declares override function `onNewIntent` taking 1 parameter (`intent`) and opens its body
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        pendingTripId.value = intent.getStringExtra("tripId")
+    }
+
     // declares override function `onCreate` taking 1 parameter (`savedInstanceState`) and opens its body
     override fun onCreate(savedInstanceState: Bundle?) {
         // declares read-only property `splashScreen`, initialised with the result of calling `installSplashScreen(…)`
@@ -163,23 +187,27 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         // `if` statement: the block below runs when `Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !PushNotifie…` is true
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !PushNotifier.hasPermission(this)) {
-            // calls `launch` on `notificationPermission` with arguments `(Manifest.permission.POST_NOTIFICATIONS)`
-            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-        // closes the if block
-        }
+        requestNotificationPermissionIfNeeded()
         // expression: `lifecycleScope.launch { PushTokenManager.fetchToken() }`
         lifecycleScope.launch { PushTokenManager.fetchToken() }
 
         // expression: `lifecycleScope.launch { RemoteSecrets.ensureLoaded() }`
         lifecycleScope.launch { RemoteSecrets.ensureLoaded() }
 
+        // Cold start from a tapped push: the extra is already on the intent
+        // that created this Activity. A warm-start tap instead goes through
+        // onNewIntent above.
+        pendingTripId.value = intent?.getStringExtra("tripId")
+
         // opens a block after `setContent`
         setContent {
             // opens a block after `WaypointTheme`
             WaypointTheme {
                 // calls `WaypointNavHost` with arguments `()`
-                WaypointNavHost()
+                WaypointNavHost(
+                    pendingTripId = pendingTripId,
+                    onRequestNotificationPermission = ::requestNotificationPermissionIfNeeded,
+                )
             // closes the block
             }
         // closes the block
@@ -192,7 +220,11 @@ class MainActivity : AppCompatActivity() {
 // annotation `@Composable` applied to the declaration that follows
 @Composable
 // declares private function `WaypointNavHost` taking 1 parameter (`navController`) and opens its body
-private fun WaypointNavHost(navController: NavHostController = rememberNavController()) {
+private fun WaypointNavHost(
+    navController: NavHostController = rememberNavController(),
+    pendingTripId: MutableState<String?> = remember { mutableStateOf(null) },
+    onRequestNotificationPermission: () -> Unit = {},
+) {
     // declares read-only property `isOnline`, delegated to `rememberIsOnline()`
     val isOnline by rememberIsOnline()
     // declares mutable property `offlineDialogDismissed`, delegated to `remember { mutableStateOf(false) }`
@@ -286,6 +318,19 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         // closes the if block
         }
     // closes the lambda passed to `LaunchedEffect`
+    }
+
+    // Opens the trip a push notification was tapped for, once there's
+    // somewhere to navigate from (splash has handed off to Home/Welcome)
+    // and someone is actually signed in to view it. Runs again whenever
+    // pendingTripId changes, which covers both a cold start (set before
+    // first composition) and a warm-start tap via onNewIntent.
+    LaunchedEffect(hasLeftSplash, pendingTripId.value) {
+        val tripId = pendingTripId.value
+        if (hasLeftSplash && AuthRepository.isSignedIn && tripId != null) {
+            navController.navigate(Routes.tripCalendar(tripId))
+            pendingTripId.value = null
+        }
     }
 
     // declares read-only property `lifecycleOwner`, initialised to `LocalLifecycleOwner.current`
@@ -547,6 +592,8 @@ private fun WaypointNavHost(navController: NavHostController = rememberNavContro
         composable(Routes.Settings) {
             // calls `SettingsScreen` with an argument list that continues on the following lines
             SettingsScreen(
+                // continues the statement started above: `onRequestNotificationPermission = onRequestNotificationPerm…`
+                onRequestNotificationPermission = onRequestNotificationPermission,
                 // continues the statement started above: `onLogoutClick = {`
                 onLogoutClick = {
                     // calls `signOut` on `authViewModel` with arguments `()`

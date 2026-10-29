@@ -298,6 +298,15 @@
     <string name="notification_welcome_title">Welcome back!</string>
     <string name="notification_welcome_title_named">Welcome back, %1$s!</string>
     <string name="notification_welcome_body">Your trips are ready whenever you are.</string>
+    <string name="notification_trip_created_title">New trip added</string>
+    <string name="notification_trip_created_body">A trip was added to your account. Tap to view it.</string>
+    <string name="notification_test_title">Test notification</string>
+    <string name="notification_test_body">If you can see this, push notifications are working.</string>
+    <string name="profile_test_notification_title">Send test notification</string>
+    <string name="profile_test_notification_subtitle">Check that push notifications reach this device</string>
+    <string name="profile_test_notification_sending">Sending…</string>
+    <string name="profile_test_notification_sent">Sent</string>
+    <string name="profile_test_notification_failed">Failed, try again</string>
     <!-- Flight departure time (Edit Itinerary) -->
     <string name="edit_itinerary_flight_set_time">Set departure time</string>
     <string name="edit_itinerary_flight_departs">Departs %1$s</string>

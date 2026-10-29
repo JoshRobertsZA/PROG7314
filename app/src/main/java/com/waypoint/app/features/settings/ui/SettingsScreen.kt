@@ -3,6 +3,8 @@ package com.waypoint.app.features.settings.ui
 
 // imports `androidx.appcompat.app.AppCompatDelegate` for use in this file
 import androidx.appcompat.app.AppCompatDelegate
+// imports `android.os.Build` for use in this file
+import android.os.Build
 // imports `coil.compose.AsyncImage` for use in this file
 import coil.compose.AsyncImage
 // imports `androidx.compose.foundation.background` for use in this file
@@ -111,6 +113,7 @@ import com.waypoint.app.core.common.TabHeader
 import com.waypoint.app.core.db.SessionManager
 // imports `com.waypoint.app.core.notifications.NotificationPreferences` for use in this file
 import com.waypoint.app.core.notifications.NotificationPreferences
+import com.waypoint.app.core.notifications.PushNotifier
 // imports `com.waypoint.app.core.locale.AppLanguage` for use in this file
 import com.waypoint.app.core.locale.AppLanguage
 // imports `com.waypoint.app.core.theme.RadiusButton` for use in this file
@@ -142,6 +145,7 @@ fun SettingsScreen(
     onLogoutClick: () -> Unit = {},
     // continues the statement started above: `onNotificationsClick: () -> Unit = {},`
     onNotificationsClick: () -> Unit = {},
+    onRequestNotificationPermission: () -> Unit = {},
     // continues the statement started above: `viewModel: SettingsViewModel = viewModel(),`
     viewModel: SettingsViewModel = viewModel(),
 // ends the argument list started above and opens the block that follows
@@ -325,10 +329,41 @@ fun SettingsScreen(
                         notificationsEnabled = it
                         // calls `setEnabled` on `NotificationPreferences` with arguments `(context, it)`
                         NotificationPreferences.setEnabled(context, it)
+                        // Turning the preference on is meaningless if the OS
+                        // permission was never granted (or was revoked) -
+                        // without this, the toggle could show "on" while
+                        // PushNotifier.show() silently does nothing.
+                        if (it && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !PushNotifier.hasPermission(context)) {
+                            onRequestNotificationPermission()
+                        }
                     // closes the block
                     },
                 // closes the multi-line argument list started above
                 )
+            // closes the block
+            }
+
+            // declares read-only property `testNotificationState`, read from the view model's uiState
+            val testNotificationStatusText = when (uiState.testNotificationState) {
+                TestNotificationState.SENDING -> stringResource(R.string.profile_test_notification_sending)
+                TestNotificationState.SENT -> stringResource(R.string.profile_test_notification_sent)
+                TestNotificationState.FAILED -> stringResource(R.string.profile_test_notification_failed)
+                TestNotificationState.IDLE -> ""
+            }
+            // calls `PreferenceRow` with an argument list that continues on the following lines
+            PreferenceRow(
+                // continues the statement started above: `title = stringResource(R.string.profile_test_notification_t…`
+                title = stringResource(R.string.profile_test_notification_title),
+                // continues the statement started above: `subtitle = stringResource(R.string.profile_test_notificatio…`
+                subtitle = stringResource(R.string.profile_test_notification_subtitle),
+                // continues the statement started above: `onClick = { viewModel.sendTestNotification() },`
+                onClick = { viewModel.sendTestNotification() },
+                // continues the statement started above: `modifier = Modifier.padding(top = 12.dp),`
+                modifier = Modifier.padding(top = 12.dp),
+            // ends the argument list started above and opens the block that follows
+            ) {
+                // calls `ChevronValue` with arguments `(value = testNotificationStatusText)`
+                ChevronValue(value = testNotificationStatusText)
             // closes the block
             }
 
