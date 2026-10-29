@@ -14,11 +14,35 @@
       },
       "oauth_client": [
         {
+          "client_id": "287180570190-2htvgntmfs95aft47kuc4314q8d7igd4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.waypoint.app",
+            "certificate_hash": "0b20ffde7f4643a71c68ad8e4e1b4da5be316b6a"
+          }
+        },
+        {
+          "client_id": "287180570190-b3tt4m2lguhbdigp5auqv0nunuejsuup.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.waypoint.app",
+            "certificate_hash": "ff2abfa8574c530a9dc38d7596141321be7093ff"
+          }
+        },
+        {
           "client_id": "287180570190-qh6n4g28dsu6mi7jthgldvvbn70063f1.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.waypoint.app",
             "certificate_hash": "7a33aa3146ad790a1eecac33507aad7db24687d5"
+          }
+        },
+        {
+          "client_id": "287180570190-sorh9v2vm3hklaq7blohnhb2imlgqko4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.waypoint.app",
+            "certificate_hash": "6bd2990d552bdf9d9355bf8c3669ab4d5bb8b102"
           }
         },
         {
