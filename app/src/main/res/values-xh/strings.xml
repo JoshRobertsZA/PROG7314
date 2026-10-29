@@ -290,4 +290,20 @@
     <string name="biometric_lock_prompt_subtitle">Sebenzisa ubuso bakho okanye umnwe wakho ukuze uqhubeke</string>
     <string name="biometric_lock_unlock_button">Vula</string>
     <string name="biometric_lock_cancel">Rhoxisa</string>
+
+    <!-- Weekday labels for the trip calendar and new trip calendar -->
+    <string name="calendar_wd_sun">Caw</string>
+    <string name="calendar_wd_mon">Mvu</string>
+    <string name="calendar_wd_tue">Bin</string>
+    <string name="calendar_wd_wed">Tha</string>
+    <string name="calendar_wd_thu">Sin</string>
+    <string name="calendar_wd_fri">Hla</string>
+    <string name="calendar_wd_sat">Mgq</string>
+    <string name="new_trip_wd_sun">Caw</string>
+    <string name="new_trip_wd_mon">Mvu</string>
+    <string name="new_trip_wd_tue">Bin</string>
+    <string name="new_trip_wd_wed">Tha</string>
+    <string name="new_trip_wd_thu">Sin</string>
+    <string name="new_trip_wd_fri">Hla</string>
+    <string name="new_trip_wd_sat">Mgq</string>
 </resources>

@@ -41,13 +41,16 @@
     <string name="calendar_edit_trip_glyph" translatable="false">✎</string>
     <string name="calendar_prev_month_glyph" translatable="false">‹</string>
     <string name="calendar_next_month_glyph" translatable="false">›</string>
-    <string name="calendar_wd_sun" translatable="false">S</string>
-    <string name="calendar_wd_mon" translatable="false">M</string>
-    <string name="calendar_wd_tue" translatable="false">T</string>
-    <string name="calendar_wd_wed" translatable="false">W</string>
-    <string name="calendar_wd_thu" translatable="false">T</string>
-    <string name="calendar_wd_fri" translatable="false">F</string>
-    <string name="calendar_wd_sat" translatable="false">S</string>
+
+    <!-- Weekday labels are translatable so zu and xh can use their own abbreviations -->
+    <string name="calendar_wd_sun">S</string>
+    <string name="calendar_wd_mon">M</string>
+    <string name="calendar_wd_tue">"false">T</string>
+    <string name="calendar_wd_wed">W</string>
+    <string name="calendar_wd_thu">"false">T</string>
+    <string name="calendar_wd_fri">F</string>
+    <string name="calendar_wd_sat">S</string>
+
     <string name="calendar_view_itinerary">View itinerary</string>
     <string name="view_itinerary_title">View itinerary</string>
     <string name="view_itinerary_back_glyph" translatable="false">&#8592;</string>
@@ -169,13 +172,16 @@
     <string name="new_trip_dates_subtitle">Only today and future dates can be selected</string>
     <string name="new_trip_prev_month_glyph" translatable="false">‹</string>
     <string name="new_trip_next_month_glyph" translatable="false">›</string>
-    <string name="new_trip_wd_sun" translatable="false">S</string>
-    <string name="new_trip_wd_mon" translatable="false">M</string>
-    <string name="new_trip_wd_tue" translatable="false">T</string>
-    <string name="new_trip_wd_wed" translatable="false">W</string>
-    <string name="new_trip_wd_thu" translatable="false">T</string>
-    <string name="new_trip_wd_fri" translatable="false">F</string>
-    <string name="new_trip_wd_sat" translatable="false">S</string>
+
+    <!-- Weekday labels are translatable so zu and xh can use their own abbreviations -->
+    <string name="new_trip_wd_sun">S</string>
+    <string name="new_trip_wd_mon">M</string>
+    <string name="new_trip_wd_tue">T</string>
+    <string name="new_trip_wd_wed">W</string>
+    <string name="new_trip_wd_thu">T</string>
+    <string name="new_trip_wd_fri">F</string>
+    <string name="new_trip_wd_sat">S</string>
+
     <string name="new_trip_save_button">Save trip</string>
     <string name="new_trip_footer_hint">You’ll land on the edit itinerary screen next — your trip will only have a name and dates until you add flights, stays, and places.</string>
 
