@@ -384,4 +384,26 @@
         <item quantity="one">night</item>
         <item quantity="other">nights</item>
     </plurals>
+
+    <!-- Flight status modal, logout dialog, currency modal, explore and place picker -->
+    <string name="common_close">Close</string>
+    <string name="flight_status_loading">Fetching flight status…</string>
+    <string name="flight_status_error_title">Error</string>
+    <string name="flight_status_in_flight">In Flight</string>
+    <string name="flight_status_landed">Landed</string>
+    <string name="flight_status_scheduled">Scheduled</string>
+    <string name="flight_status_cancelled">Cancelled</string>
+    <string name="flight_status_departure">Departure</string>
+    <string name="flight_status_arrival">Arrival</string>
+    <string name="flight_status_terminal">Terminal %1$s</string>
+    <string name="flight_status_gate">Gate %1$s</string>
+    <string name="flight_status_delayed">Delayed %1$d min</string>
+    <string name="flight_status_duration">Duration: %1$dh %2$dm</string>
+    <string name="settings_logout_dialog_title">Log out of Waypoint?</string>
+    <string name="settings_logout_dialog_body">Are you sure you want to log out? You can sign back in anytime to access your trips and saved itineraries.</string>
+    <string name="currency_modal_amount">Amount</string>
+    <string name="currency_modal_convert_to">Convert To</string>
+    <string name="currency_modal_market_rate">Market Rate</string>
+    <string name="explore_results_near">Results near %1$s</string>
+    <string name="place_picker_empty">No %1$s found near your destination.</string>
 </resources>

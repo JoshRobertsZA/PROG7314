@@ -165,8 +165,8 @@ fun NotificationsScreen(
 
             // calls `Text` with an argument list that continues on the following lines
             Text(
-                // continues the statement started above: `text = stringResource(R.string.notifications_title),`
-                text = stringResource(R.string.notifications_title),
+                // Uses the existing notifications string instead of hardcoded English
+                text = stringResource(R.string.notifications_clear_all),
                 // continues the statement started above: `color = WaypointTextPrimary,`
                 color = WaypointTextPrimary,
                 // continues the statement started above: `fontSize = 19.sp,`
@@ -378,8 +378,8 @@ internal fun NotificationsEmptyState(modifier: Modifier = Modifier) {
     ) {
         // calls `Text` with an argument list that continues on the following lines
         Text(
-            // continues the statement started above: `text = "No Notifications Yet",`
-            text = "No Notifications Yet",
+            // Empty state title from strings.xml
+            text = stringResource(R.string.notifications_empty_title),
             // continues the statement started above: `color = WaypointTextPrimary,`
             color = WaypointTextPrimary,
             // continues the statement started above: `fontSize = 19.sp,`
@@ -393,8 +393,8 @@ internal fun NotificationsEmptyState(modifier: Modifier = Modifier) {
 
         // calls `Text` with an argument list that continues on the following lines
         Text(
-            // continues the statement started above: `text = "We'll notify you here about upcoming trip departure…`
-            text = "We'll notify you here about upcoming trip departures, live flight updates, and destination weather reminders.",
+            // Empty state subtitle from strings.xml
+            text = stringResource(R.string.notifications_empty_subtitle),
             // continues the statement started above: `color = WaypointTextMuted,`
             color = WaypointTextMuted,
             // continues the statement started above: `fontSize = 13.sp,`

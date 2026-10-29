@@ -307,4 +307,26 @@
     <string name="new_trip_wd_thu">Sin</string>
     <string name="new_trip_wd_fri">Hla</string>
     <string name="new_trip_wd_sat">Mgq</string>
+
+    <!-- Flight status modal, logout dialog, currency modal, explore and place picker -->
+    <string name="common_close">Vala</string>
+    <string name="flight_status_loading">Kutholwa isimo sendiza…</string>
+    <string name="flight_status_error_title">Iphutha</string>
+    <string name="flight_status_in_flight">Iyandiza</string>
+    <string name="flight_status_landed">Ifikile</string>
+    <string name="flight_status_scheduled">Ihleliwe</string>
+    <string name="flight_status_cancelled">Ikhanseliwe</string>
+    <string name="flight_status_departure">Ukuhamba</string>
+    <string name="flight_status_arrival">Ukufika</string>
+    <string name="flight_status_terminal">I-terminal %1$s</string>
+    <string name="flight_status_gate">Isango %1$s</string>
+    <string name="flight_status_delayed">Ibambezelekile imizuzu engu-%1$d</string>
+    <string name="flight_status_duration">Isikhathi: %1$dh %2$dm</string>
+    <string name="settings_logout_dialog_title">Phuma ku-Waypoint?</string>
+    <string name="settings_logout_dialog_body">Uqinisekile ukuthi ufuna ukuphuma? Ungaphinda ungene noma nini ukuze ufinyelele ohambweni lwakho nezinhlelo ezigciniwe.</string>
+    <string name="currency_modal_amount">Inani</string>
+    <string name="currency_modal_convert_to">Guqula ube</string>
+    <string name="currency_modal_market_rate">Izinga lemakethe</string>
+    <string name="explore_results_near">Imiphumela eseduze ne-%1$s</string>
+    <string name="place_picker_empty">Akukho %1$s okutholakele eduze nendawo oya kuyo.</string>
 </resources>

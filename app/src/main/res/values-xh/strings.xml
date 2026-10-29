@@ -306,4 +306,26 @@
     <string name="new_trip_wd_thu">Sin</string>
     <string name="new_trip_wd_fri">Hla</string>
     <string name="new_trip_wd_sat">Mgq</string>
+
+    <!-- Flight status modal, logout dialog, currency modal, explore and place picker -->
+    <string name="common_close">Vala</string>
+    <string name="flight_status_loading">Kufunyanwa imeko yenqwelomoya…</string>
+    <string name="flight_status_error_title">Impazamo</string>
+    <string name="flight_status_in_flight">Iyabhabha</string>
+    <string name="flight_status_landed">Ifikile</string>
+    <string name="flight_status_scheduled">Icwangcisiwe</string>
+    <string name="flight_status_cancelled">Irhoxisiwe</string>
+    <string name="flight_status_departure">Ukumka</string>
+    <string name="flight_status_arrival">Ukufika</string>
+    <string name="flight_status_terminal">I-terminal %1$s</string>
+    <string name="flight_status_gate">Isango %1$s</string>
+    <string name="flight_status_delayed">Ilibazisekile imizuzu eyi-%1$d</string>
+    <string name="flight_status_duration">Ixesha: %1$dh %2$dm</string>
+    <string name="settings_logout_dialog_title">Phuma kwi-Waypoint?</string>
+    <string name="settings_logout_dialog_body">Uqinisekile ukuba ufuna ukuphuma? Ungangena kwakhona nanini na ukuze ufikelele kuhambo lwakho nezicwangciso ezigciniweyo.</string>
+    <string name="currency_modal_amount">Isixa</string>
+    <string name="currency_modal_convert_to">Guqula ibe</string>
+    <string name="currency_modal_market_rate">Ireyithi yentengiso</string>
+    <string name="explore_results_near">Iziphumo ezikufutshane ne-%1$s</string>
+    <string name="place_picker_empty">Akukho %1$s ifunyenweyo kufutshane nendawo oya kuyo.</string>
 </resources>

@@ -241,8 +241,8 @@ fun CurrencyExchangeModal(
                 Column(modifier = Modifier.weight(1f)) {
                     // calls `Text` with an argument list that continues on the following lines
                     Text(
-                        // continues the statement started above: `text = "Amount",`
-                        text = "Amount",
+                        // Currency modal label from strings.xml
+                        text = stringResource(R.string.currency_modal_amount),
                         // continues the statement started above: `fontSize = 12.sp,`
                         fontSize = 12.sp,
                         // continues the statement started above: `color = WaypointTextMuted,`
@@ -454,8 +454,8 @@ fun CurrencyExchangeModal(
                 Column(modifier = Modifier.weight(1f)) {
                     // calls `Text` with an argument list that continues on the following lines
                     Text(
-                        // continues the statement started above: `text = "Convert To",`
-                        text = "Convert To",
+                        // Currency modal label from strings.xml
+                        text = stringResource(R.string.currency_modal_convert_to),
                         // continues the statement started above: `fontSize = 12.sp,`
                         fontSize = 12.sp,
                         // continues the statement started above: `color = WaypointTextMuted,`
@@ -547,8 +547,8 @@ fun CurrencyExchangeModal(
             ) {
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
-                    // continues the statement started above: `text = "Market Rate",`
-                    text = "Market Rate",
+                    // Currency modal label from strings.xml
+                    text = stringResource(R.string.currency_modal_market_rate),
                     // continues the statement started above: `fontSize = 13.sp,`
                     fontSize = 13.sp,
                     // continues the statement started above: `color = WaypointTextMuted,`

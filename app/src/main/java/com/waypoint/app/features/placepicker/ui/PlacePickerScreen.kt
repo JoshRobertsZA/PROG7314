@@ -242,8 +242,8 @@ fun PlacePickerScreen(
                     ) {
                         // calls `Text` with an argument list that continues on the following lines
                         Text(
-                            // continues the statement started above: `text = "No ${state.categoryLabel.lowercase()} found near yo…`
-                            text     = "No ${state.categoryLabel.lowercase()} found near your destination.",
+                            // Category name is passed into the translated empty-state message
+                            text     = stringResource(R.string.place_picker_empty, state.categoryLabel.lowercase()),
                             // continues the statement started above: `color = WaypointTextMuted,`
                             color    = WaypointTextMuted,
                             // continues the statement started above: `fontSize = 13.sp,`

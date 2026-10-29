@@ -397,8 +397,8 @@ fun ExploreScreen(
             ) {
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
-                    // continues the statement started above: `text = "Results near ${state.locationLabel}",`
-                    text = "Results near ${state.locationLabel}",
+                    // Location name is passed into the translated "Results near" string
+                    text = stringResource(R.string.explore_results_near, state.locationLabel),
                     // continues the statement started above: `color = WaypointTextPrimary,`
                     color = WaypointTextPrimary,
                     // continues the statement started above: `fontSize = 13.sp,`
