@@ -57,6 +57,7 @@ class WaypointDbHelper private constructor(context: Context) :
         // calls `execSQL` on `db` with arguments `(CREATE_REMINDER_LOG)`
         db.execSQL(CREATE_REMINDER_LOG)
         applyV9Migration(db)
+        applyV10Migration(db)
     // closes the function `onCreate`
     }
 
@@ -135,6 +136,9 @@ class WaypointDbHelper private constructor(context: Context) :
         if (oldVersion < 9) {
             applyV9Migration(db)
         }
+        if (oldVersion < 10) {
+            applyV10Migration(db)
+        }
     // closes the function `onUpgrade`
     }
 
@@ -161,12 +165,18 @@ class WaypointDbHelper private constructor(context: Context) :
         db.execSQL("ALTER TABLE $TABLE_ITIN_PLACES ADD COLUMN $COL_IPLACE_DELETED INTEGER NOT NULL DEFAULT 0")
     }
 
+    // A brand-new table, so unlike applyV9Migration this never needs an
+    // ALTER TABLE - it's safe to run unconditionally from onCreate too.
+    private fun applyV10Migration(db: SQLiteDatabase) {
+        db.execSQL(CREATE_PLACES_CACHE)
+    }
+
     // declares the companion object holding members shared by all instances of the enclosing class
     companion object {
         // declares private const read-only property `DB_NAME`, initialised to the string literal "waypoint.db"
         private const val DB_NAME    = "waypoint.db"
         // declares private const read-only property `DB_VERSION`, initialised to the number 9
-        private const val DB_VERSION = 9
+        private const val DB_VERSION = 10
 
         // declares const read-only property `TABLE_ACCOUNTS`, initialised to the string literal "accounts"
         const val TABLE_ACCOUNTS       = "accounts"
@@ -333,6 +343,16 @@ class WaypointDbHelper private constructor(context: Context) :
         const val COL_OUTBOX_CREATED         = "created_at_ms"
         const val COL_OUTBOX_ATTEMPTS        = "attempts"
         const val COL_OUTBOX_LAST_ERROR      = "last_error"
+
+        // Per-user, per-query cache of nearby-places results (PR 12). Unlike
+        // weather/currency, a places result is tied to one user's exact GPS
+        // fix or search term, so it is keyed by account on top of the same
+        // city/coord slug LocationIQRepository already uses for the shared
+        // cache (see cache_key below and LocationIQRepository.placesPath).
+        const val TABLE_PLACES_CACHE       = "places_cache"
+        const val COL_PCACHE_ACCOUNT_ID    = "account_id"
+        const val COL_PCACHE_KEY           = "cache_key"
+        const val COL_PCACHE_JSON          = "places_json"
 
 
         // declares private read-only property `CREATE_ACCOUNTS`, initialised to a multi-line raw string (its lines follow)
@@ -512,6 +532,15 @@ class WaypointDbHelper private constructor(context: Context) :
         // coalescing) without scanning the whole table.
         private const val CREATE_SYNC_OUTBOX_ENTITY_IDX =
             "CREATE INDEX idx_sync_outbox_entity ON $TABLE_SYNC_OUTBOX($COL_OUTBOX_ENTITY_TYPE, $COL_OUTBOX_ENTITY_ID)"
+
+        private val CREATE_PLACES_CACHE = """
+            CREATE TABLE $TABLE_PLACES_CACHE (
+                $COL_PCACHE_ACCOUNT_ID TEXT NOT NULL,
+                $COL_PCACHE_KEY        TEXT NOT NULL,
+                $COL_PCACHE_JSON       TEXT NOT NULL,
+                PRIMARY KEY ($COL_PCACHE_ACCOUNT_ID, $COL_PCACHE_KEY)
+            )
+        """.trimIndent()
 
         // declares private mutable property `instance` of type `WaypointDbHelper?`, initialised to null
         @Volatile private var instance: WaypointDbHelper? = null
