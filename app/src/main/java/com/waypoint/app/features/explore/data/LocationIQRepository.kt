@@ -11,10 +11,16 @@ import com.waypoint.app.core.cache.ExplorePlace
 import com.waypoint.app.core.cache.GitHubCacheRepository
 // imports `com.waypoint.app.core.cache.PlacesCache` for use in this file
 import com.waypoint.app.core.cache.PlacesCache
+import com.waypoint.app.core.cache.PlacesCacheLocalRepository
+import com.waypoint.app.core.cache.PlacesCacheSerializer
+// imports `com.waypoint.app.core.db.SessionManager` for use in this file
+import com.waypoint.app.core.db.SessionManager
 // imports `com.waypoint.app.core.network.HttpClient` for use in this file
 import com.waypoint.app.core.network.HttpClient
 // imports `com.waypoint.app.core.secrets.RemoteSecrets` for use in this file
 import com.waypoint.app.core.secrets.RemoteSecrets
+// imports `android.content.Context` for use in this file
+import android.content.Context
 // imports `kotlinx.coroutines.Dispatchers` for use in this file
 import kotlinx.coroutines.Dispatchers
 // imports `kotlinx.coroutines.withContext` for use in this file
@@ -31,6 +37,22 @@ import java.net.URLEncoder
 import java.time.LocalDate
 // imports `java.time.ZoneOffset` for use in this file
 import java.time.ZoneOffset
+
+// Top-level, not a member of LocationIQRepository - same reason as
+// OutboxRepository's coalesce(): pure decision logic with no Android
+// dependency, so it can run in this project's plain-JVM unit tests (no
+// Robolectric) even though the functions that call it need a real Context.
+// Encodes the local -> shared -> live priority order PR 12 commits 2 and 3
+// ask for: a cache entry only wins over a live fetch while it is both
+// present and not stale/empty.
+internal fun isUsablePlacesCache(cache: PlacesCache?): Boolean =
+    cache != null && !cache.isStale() && cache.places.isNotEmpty()
+
+// Last resort when neither cache was usable and the live fetch also failed:
+// prefer whatever is in the account's own local cache (even stale) over the
+// shared cache, since it's the one closer to what this user last saw.
+internal fun chooseStalePlacesFallback(local: PlacesCache?, shared: PlacesCache?): PlacesCache? =
+    local ?: shared
 
 // declares object `LocationIQRepository` and opens its body
 object LocationIQRepository {
@@ -49,97 +71,82 @@ object LocationIQRepository {
     fun placesPath(citySlug: String) = "places_${citySlug}"
 
 
-    // declares suspend function `getPlaces` taking 1 parameter (`city`), returning `PlacesCache?` and opens its body
-    suspend fun getPlaces(city: String): PlacesCache? {
-        // declares read-only property `slug`, initialised with the result of calling `citySlug(…)`
+    // Local (per-user, per-query) cache first, then the cross-user shared
+    // cache, then a live LocationIQ fetch (PR 12 commits 2-4). A fresh fetch
+    // is only ever written back to the local cache: one user's exact GPS fix
+    // or search term is a poor fit for the cache every user shares through
+    // the API (unlike weather/currency), so the app no longer writes places
+    // results there at all - it only still reads it, as a fallback.
+    suspend fun getPlaces(context: Context, city: String): PlacesCache? {
         val slug = citySlug(city)
-        // declares read-only property `path`, initialised with the result of calling `placesPath(…)`
         val path = placesPath(slug)
+        val accountId = SessionManager.accountId
 
-        // declares read-only property `cached`, initialised with the result of calling `readFromCache(…)`
-        val cached = readFromCache(path)
-        // `if` statement: the block below runs when `cached != null && !cached.isStale() && cached.places.isNotEmpty()` is true
-        if (cached != null && !cached.isStale() && cached.places.isNotEmpty()) {
-            // calls `d` on `Log` with arguments `(TAG, "Cache hit: $city (${cached.places.size…)`
-            Log.d(TAG, "Cache hit: $city (${cached.places.size} places)")
-            // returns `cached` from the current function
-            return cached
-        // closes the if block
+        val local = readFromLocalCache(context, accountId, path)
+        if (isUsablePlacesCache(local)) {
+            Log.d(TAG, "Local cache hit: $city (${local!!.places.size} places)")
+            return local
         }
 
-        // declares read-only property `fresh`, initialised with the result of calling `fetchFromApi(…)`
+        val shared = readFromSharedCache(path)
+        if (isUsablePlacesCache(shared)) {
+            Log.d(TAG, "Shared cache hit: $city (${shared!!.places.size} places)")
+            writeToLocalCache(context, accountId, path, shared)
+            return shared
+        }
+
         val fresh = fetchFromApi(city, slug)
-        // `if` statement: the block below runs when `fresh != null` is true
         if (fresh != null) {
-            // calls `writeToCache` with arguments `(path, fresh)`
-            writeToCache(path, fresh)
-            // calls `incrementCounter` with arguments `()`
+            writeToLocalCache(context, accountId, path, fresh)
             incrementCounter()
-            // returns `fresh` from the current function
             return fresh
-        // closes the if block
         }
 
-        // `if` statement: the block below runs when `cached != null` is true
-        if (cached != null) {
-            // calls `d` on `Log` with arguments `(TAG, "Returning stale cache for $city after …)`
+        val stale = chooseStalePlacesFallback(local, shared)
+        if (stale != null) {
             Log.d(TAG, "Returning stale cache for $city after API failure")
-        // closes the if block
         }
-        // returns `cached` from the current function
-        return cached
-    // closes the function `getPlaces`
+        return stale
     }
 
-    // declares suspend function `getPlacesByCoords` taking 2 parameters (`lat`, `lon`), returning `PlacesCache?` and opens its body
-    suspend fun getPlacesByCoords(lat: Double, lon: Double): PlacesCache? {
-        // declares read-only property `slug`, initialised with the result of calling `coordSlug(…)`
+    // Same local -> shared -> live order as getPlaces, keyed by coordinates
+    // instead of a city name.
+    suspend fun getPlacesByCoords(context: Context, lat: Double, lon: Double): PlacesCache? {
         val slug = coordSlug(lat, lon)
-        // declares read-only property `path`, initialised with the result of calling `placesPath(…)`
         val path = placesPath(slug)
+        val accountId = SessionManager.accountId
 
-        // declares read-only property `cached`, initialised with the result of calling `readFromCache(…)`
-        val cached = readFromCache(path)
-        // `if` statement: the block below runs when `cached != null && !cached.isStale() && cached.places.isNotEmpty()` is true
-        if (cached != null && !cached.isStale() && cached.places.isNotEmpty()) {
-            // calls `d` on `Log` with arguments `(TAG, "Cache hit: $slug (${cached.places.size…)`
-            Log.d(TAG, "Cache hit: $slug (${cached.places.size} places)")
-            // returns `cached` from the current function
-            return cached
-        // closes the if block
+        val local = readFromLocalCache(context, accountId, path)
+        if (isUsablePlacesCache(local)) {
+            Log.d(TAG, "Local cache hit: $slug (${local!!.places.size} places)")
+            return local
         }
 
-        // declares read-only property `key`, initialised with the result of calling `RemoteSecrets.get(…)`
+        val shared = readFromSharedCache(path)
+        if (isUsablePlacesCache(shared)) {
+            Log.d(TAG, "Shared cache hit: $slug (${shared!!.places.size} places)")
+            writeToLocalCache(context, accountId, path, shared)
+            return shared
+        }
+
+        val stale = chooseStalePlacesFallback(local, shared)
+
         val key = RemoteSecrets.get("LOCATIONIQ_API_KEY", BuildConfig.LOCATIONIQ_API_KEY)
-        // `if` statement: executes `return null` when `key.isBlank()` is true
-        if (key.isBlank()) return null
+        if (key.isBlank()) return stale
 
-        // declares read-only property `places`, initialised with the result of calling `withContext(…)`
         val places = withContext(Dispatchers.IO) { fetchNearby(lat, lon, key) }
-        // `if` statement: the block below runs when `places != null` is true
         if (places != null) {
-            // declares read-only property `fresh`, initialised with the result of calling `PlacesCache(…)`
             val fresh = PlacesCache(
-                // continues the statement started above: `city = slug,`
                 city           = slug,
-                // continues the statement started above: `fetchedDateUtc = java.time.LocalDate.now(java.time.ZoneOffs…`
                 fetchedDateUtc = java.time.LocalDate.now(java.time.ZoneOffset.UTC).toString(),
-                // continues the statement started above: `places = places,`
                 places         = places,
-            // closes the multi-line argument list started above
             )
-            // calls `writeToCache` with arguments `(path, fresh)`
-            writeToCache(path, fresh)
-            // calls `incrementCounter` with arguments `()`
+            writeToLocalCache(context, accountId, path, fresh)
             incrementCounter()
-            // returns `fresh` from the current function
             return fresh
-        // closes the if block
         }
 
-        // returns `cached` from the current function
-        return cached
-    // closes the function `getPlacesByCoords`
+        return stale
     }
 
     // declares suspend function `reverseGeocode` taking 3 parameters (`lat`, `lon`, `key`), returning `String?`; its body is the expression ``
@@ -195,105 +202,23 @@ object LocationIQRepository {
         "%.2f_%.2f".format(lat, lon).replace('-', 'n').replace('.', 'd')
 
 
-    // declares private suspend function `readFromCache` taking 1 parameter (`path`), returning `PlacesCache?` and opens its body
-    private suspend fun readFromCache(path: String): PlacesCache? {
-        // declares read-only property `json`, initialised with the result of calling `GitHubCacheRepository.readJson(…)`
+    // Read-only: nothing in this file writes to the shared cache any more
+    // (PR 12 commit 4). GitHubCacheRepository.readJson already returns null
+    // on a network/HTTP failure, which is what lets getPlaces/getPlacesByCoords
+    // fall through to a live LocationIQ fetch when the shared cache is
+    // unreachable (PR 12 commit 3).
+    private suspend fun readFromSharedCache(path: String): PlacesCache? {
         val json = GitHubCacheRepository.readJson(path) ?: return null
-        // returns `try {` from the current function
-        return try {
-            // declares read-only property `placesArray`, initialised with the result of calling `json.getJSONArray(…)`
-            val placesArray = json.getJSONArray("places")
-            // declares read-only property `places`, initialised to a lambda / arrow function
-            val places = (0 until placesArray.length()).map { i ->
-                // continues the statement started above: `val p = placesArray.getJSONObject(i)`
-                val p = placesArray.getJSONObject(i)
-                // calls `ExplorePlace` with an argument list that continues on the following lines
-                ExplorePlace(
-                    // continues the statement started above: `id = p.getString("id"),`
-                    id             = p.getString("id"),
-                    // continues the statement started above: `name = p.getString("name"),`
-                    name           = p.getString("name"),
-                    // continues the statement started above: `type = p.getString("type"),`
-                    type           = p.getString("type"),
-                    // continues the statement started above: `category = p.getString("category"),`
-                    category       = p.getString("category"),
-                    // continues the statement started above: `lat = p.getDouble("lat"),`
-                    lat            = p.getDouble("lat"),
-                    // continues the statement started above: `lon = p.getDouble("lon"),`
-                    lon            = p.getDouble("lon"),
-                    // continues the statement started above: `displayAddress = p.getString("displayAddress"),`
-                    displayAddress = p.getString("displayAddress"),
-                    // continues the statement started above: `distanceMetres = p.getInt("distanceMetres"),`
-                    distanceMetres = p.getInt("distanceMetres"),
-                // closes the multi-line argument list started above
-                )
-            // closes the block
-            }
-            // calls `PlacesCache` with an argument list that continues on the following lines
-            PlacesCache(
-                // continues the statement started above: `city = json.getString("city"),`
-                city            = json.getString("city"),
-                // continues the statement started above: `fetchedDateUtc = json.getString("fetchedDateUtc"),`
-                fetchedDateUtc  = json.getString("fetchedDateUtc"),
-                // continues the statement started above: `places = places,`
-                places          = places,
-            // closes the multi-line argument list started above
-            )
-        // `catch` block: handles a thrown `Exception` bound to `e`
-        } catch (e: Exception) {
-            // calls `w` on `Log` with arguments `(TAG, "Cache parse error for $path: ${e.messa…)`
-            Log.w(TAG, "Cache parse error for $path: ${e.message}")
-            // expression: `null`
-            null
-        // closes the catch block
+        return PlacesCacheSerializer.fromJson(json).also {
+            if (it == null) Log.w(TAG, "Cache parse error for $path")
         }
-    // closes the function `readFromCache`
     }
 
-    // declares private suspend function `writeToCache` taking 2 parameters (`path`, `data`) and opens its body
-    private suspend fun writeToCache(path: String, data: PlacesCache) {
-        // declares read-only property `placesArray`, initialised with the result of calling `JSONArray(…)` and opens a lambda / block
-        val placesArray = JSONArray().apply {
-            // expression: `data.places.forEach { p ->`
-            data.places.forEach { p ->
-                // continues the statement started above: `put(JSONObject().apply {`
-                put(JSONObject().apply {
-                    // calls `put` with arguments `("id", p.id)`
-                    put("id",             p.id)
-                    // calls `put` with arguments `("name", p.name)`
-                    put("name",           p.name)
-                    // calls `put` with arguments `("type", p.type)`
-                    put("type",           p.type)
-                    // calls `put` with arguments `("category", p.category)`
-                    put("category",       p.category)
-                    // calls `put` with arguments `("lat", p.lat)`
-                    put("lat",            p.lat)
-                    // calls `put` with arguments `("lon", p.lon)`
-                    put("lon",            p.lon)
-                    // calls `put` with arguments `("displayAddress", p.displayAddress)`
-                    put("displayAddress", p.displayAddress)
-                    // calls `put` with arguments `("distanceMetres", p.distanceMetres)`
-                    put("distanceMetres", p.distanceMetres)
-                // closes the block
-                })
-            // closes the block
-            }
-        // closes the lambda assigned to `placesArray`
-        }
-        // declares read-only property `json`, initialised with the result of calling `JSONObject(…)` and opens a lambda / block
-        val json = JSONObject().apply {
-            // calls `put` with arguments `("city", data.city)`
-            put("city",           data.city)
-            // calls `put` with arguments `("fetchedDateUtc", data.fetchedDateUtc)`
-            put("fetchedDateUtc", data.fetchedDateUtc)
-            // calls `put` with arguments `("places", placesArray)`
-            put("places",         placesArray)
-        // closes the lambda assigned to `json`
-        }
-        // calls `writeJson` on `GitHubCacheRepository` with arguments `(path, json)`
-        GitHubCacheRepository.writeJson(path, json)
-    // closes the function `writeToCache`
-    }
+    private suspend fun readFromLocalCache(context: Context, accountId: String, path: String): PlacesCache? =
+        withContext(Dispatchers.IO) { PlacesCacheLocalRepository(context).get(accountId, path) }
+
+    private suspend fun writeToLocalCache(context: Context, accountId: String, path: String, data: PlacesCache) =
+        withContext(Dispatchers.IO) { PlacesCacheLocalRepository(context).put(accountId, path, data) }
 
 
     // declares private suspend function `fetchFromApi` taking 2 parameters (`city`, `slug`), returning `PlacesCache?`; its body is the expression ``

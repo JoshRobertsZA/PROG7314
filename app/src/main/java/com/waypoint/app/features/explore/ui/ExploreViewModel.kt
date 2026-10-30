@@ -111,7 +111,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             // expression: `_uiState.update { it.copy(placesState = PlacesState.Loading, loc…`
             _uiState.update { it.copy(placesState = PlacesState.Loading, locationLabel = city, visiblePlaces = emptyList()) }
             // declares read-only property `result`, initialised with the result of calling `LocationIQRepository.getPlaces(…)`
-            val result = LocationIQRepository.getPlaces(city)
+            val result = LocationIQRepository.getPlaces(getApplication(), city)
             // expression: `_uiState.update { state ->`
             _uiState.update { state ->
                 // continues the statement started above: `if (result != null) {`
@@ -257,7 +257,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             _uiState.update { it.copy(locationLabel = label) }
 
             // declares read-only property `result`, initialised with the result of calling `LocationIQRepository.getPlacesByCoords(…)`
-            val result = LocationIQRepository.getPlacesByCoords(lat, lon)
+            val result = LocationIQRepository.getPlacesByCoords(ctx, lat, lon)
             // expression: `_uiState.update { state ->`
             _uiState.update { state ->
                 // continues the statement started above: `if (result != null) {`

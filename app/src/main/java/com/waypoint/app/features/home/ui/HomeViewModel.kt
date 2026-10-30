@@ -216,7 +216,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         // expression: `_uiState.update { it.copy(nearbyPlaces = NearbyState.Loading) }`
         _uiState.update { it.copy(nearbyPlaces = NearbyState.Loading) }
         // declares read-only property `result`, initialised with the result of calling `LocationIQRepository.getPlacesByCoords(…)`
-        val result = LocationIQRepository.getPlacesByCoords(lat, lon)
+        val result = LocationIQRepository.getPlacesByCoords(getApplication(), lat, lon)
         // opens a block after `_uiState.update`
         _uiState.update {
             // calls `copy` on `it` with an argument list that continues on the following lines
