@@ -243,6 +243,7 @@ private fun WaypointNavHost(
     val authViewModel: AuthViewModel = viewModel()
     // declares read-only property `authUiState`, delegated to `authViewModel.uiState.collectAsState()`
     val authUiState by authViewModel.uiState.collectAsState()
+    val emailAuthUiState by authViewModel.emailAuthUiState.collectAsState()
     // declares read-only property `context`, initialised to `LocalContext.current`
     val context = LocalContext.current
 
@@ -442,12 +443,19 @@ private fun WaypointNavHost(
         // closes the lambda passed to `composable`
         }
         composable(Routes.EmailAuth) {
-            // AuthRepository has no email/password methods yet (PR 8 commit 3) and
-            // input validation lands in commit 4, so submit is a no-op for now -
-            // the screen itself is the full scope of this commit.
+            // Password reset (EmailAuthSubmission.Reset) is handled as a no-op
+            // inside AuthViewModel.submitEmailAuth until PR 8 commit 5.
             EmailAuthScreen(
                 onBackClick = { navController.popBackStack() },
-                onSubmit = { _: EmailAuthSubmission -> },
+                onSubmit = { submission: EmailAuthSubmission ->
+                    authViewModel.submitEmailAuth(submission) {
+                        navController.navigate(Routes.Home) {
+                            popUpTo(Routes.Welcome) { inclusive = true }
+                        }
+                    }
+                },
+                isLoading = emailAuthUiState.isLoading,
+                errorMessage = emailAuthUiState.errorMessage,
             )
         }
         // calls `composable` with arguments `(Routes.Home)` and opens a trailing lambda / block
