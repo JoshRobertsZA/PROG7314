@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 // imports `com.google.firebase.auth.OAuthProvider` for use in this file
 import com.google.firebase.auth.OAuthProvider
+import com.google.firebase.auth.UserProfileChangeRequest
 // imports `kotlinx.coroutines.tasks.await` for use in this file
 import kotlinx.coroutines.tasks.await
 
@@ -50,6 +51,24 @@ object AuthRepository {
         // returns `result.user ?: error("Firebase sign-in succeeded but returned no user…` from the current function
         return result.user ?: error("Firebase sign-in succeeded but returned no user")
     // closes the function `signInWithGitHub`
+    }
+
+    // Firebase has no separate "sign up" credential type - creating the
+    // account and signing in are the same call. The display name is set as
+    // a second step because createUserWithEmailAndPassword doesn't accept one.
+    suspend fun signUpWithEmail(email: String, password: String, displayName: String): FirebaseUser {
+        val result = auth.createUserWithEmailAndPassword(email, password).await()
+        val user = result.user ?: error("Firebase sign-up succeeded but returned no user")
+        if (displayName.isNotBlank()) {
+            val profileUpdate = UserProfileChangeRequest.Builder().setDisplayName(displayName).build()
+            user.updateProfile(profileUpdate).await()
+        }
+        return user
+    }
+
+    suspend fun signInWithEmail(email: String, password: String): FirebaseUser {
+        val result = auth.signInWithEmailAndPassword(email, password).await()
+        return result.user ?: error("Firebase sign-in succeeded but returned no user")
     }
 
     // declares suspend function `recoverPendingGitHubSignIn` taking no parameters, returning `FirebaseUser?`; its body is the expression ``
