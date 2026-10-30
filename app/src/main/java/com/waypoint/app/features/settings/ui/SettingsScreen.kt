@@ -645,8 +645,8 @@ private fun LogoutConfirmationModal(
                 ) {
                     // calls `Text` with an argument list that continues on the following lines
                     Text(
-                        // continues the statement started above: `text = "Log out of Waypoint?",`
-                        text = "Log out of Waypoint?",
+                        // Logout dialog title from strings.xml so it follows the selected language
+                        text = stringResource(R.string.settings_logout_dialog_title),
                         // continues the statement started above: `color = WaypointTextPrimary,`
                         color = WaypointTextPrimary,
                         // continues the statement started above: `fontSize = 19.sp,`
@@ -660,8 +660,8 @@ private fun LogoutConfirmationModal(
 
                     // calls `Text` with an argument list that continues on the following lines
                     Text(
-                        // continues the statement started above: `text = "Are you sure you want to log out? You can sign back…`
-                        text = "Are you sure you want to log out? You can sign back in anytime to access your trips and saved itineraries.",
+                        // Logout dialog body from strings.xml
+                        text = stringResource(R.string.settings_logout_dialog_body),
                         // continues the statement started above: `color = WaypointTextMuted,`
                         color = WaypointTextMuted,
                         // continues the statement started above: `fontSize = 13.sp,`
@@ -739,8 +739,8 @@ private fun LogoutConfirmationModal(
                     ) {
                         // calls `Text` with an argument list that continues on the following lines
                         Text(
-                            // continues the statement started above: `text = "Cancel",`
-                            text = "Cancel",
+                            // Reuses the shared Cancel string
+                            text = stringResource(R.string.common_cancel),
                             // continues the statement started above: `color = WaypointTextPrimary,`
                             color = WaypointTextPrimary,
                             // continues the statement started above: `fontSize = 15.sp,`

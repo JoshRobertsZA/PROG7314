@@ -1116,177 +1116,103 @@ private fun ViewPlaceDetailOverlay(
 }
 
 
-// annotation `@Composable` applied to the declaration that follows
+
+// Shows the live flight status for a flight in the itinerary.
+// All visible text comes from strings.xml so the modal follows the selected language.
 @Composable
-// expression: `private fun FlightStatusModal(`
 private fun FlightStatusModal(
-    // continues the statement started above: `status: FlightStatusState,`
     status: FlightStatusState,
-    // continues the statement started above: `onDismiss: () -> Unit,`
     onDismiss: () -> Unit,
-// ends the argument list started above and opens the block that follows
 ) {
-    // declares read-only property `title`, initialised with the result of calling `when(…)` and opens a lambda / block
+    // Title changes with the lookup state: loading message, flight number, or error
     val title = when (status) {
-        // lambda `is FlightStatusState.Loading -> "Fetching flight status…"`
-        is FlightStatusState.Loading -> "Fetching flight status…"
-        // lambda `is FlightStatusState.Success -> status.result.flightIata`
+        is FlightStatusState.Loading -> stringResource(R.string.flight_status_loading)
         is FlightStatusState.Success -> status.result.flightIata
-        // lambda `is FlightStatusState.Error -> "Error"`
-        is FlightStatusState.Error   -> "Error"
-        // `else` branch of the `when`: evaluates `""`
+        is FlightStatusState.Error   -> stringResource(R.string.flight_status_error_title)
         else                         -> ""
-    // closes the lambda assigned to `title`
     }
-    // calls `AlertDialog` with an argument list that continues on the following lines
     AlertDialog(
-        // continues the statement started above: `onDismissRequest = onDismiss,`
         onDismissRequest   = onDismiss,
-        // continues the statement started above: `containerColor = WaypointCard,`
         containerColor     = WaypointCard,
-        // continues the statement started above: `title = { Text(title, color = WaypointTextPrimary, fontWeig…`
         title              = { Text(title, color = WaypointTextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp) },
-        // continues the statement started above: `text = {`
         text               = {
-            // `when` expression on the value of `status`: the first matching branch below runs
             when (status) {
-                // `when` branch `is FlightStatusState.Loading`: opens a block
+                // Spinner while AirLabs is being called
                 is FlightStatusState.Loading -> {
-                    // calls `Box` with arguments `(modifier = Modifier.fillMaxWidth(), contentA…)` and opens a trailing lambda / block
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        // calls `CircularProgressIndicator` with arguments `(color = WaypointTerracotta, modifier = Modif…)`
                         CircularProgressIndicator(color = WaypointTerracotta, modifier = Modifier.size(36.dp))
-                    // closes the lambda passed to `Box`
                     }
-                // closes the when branch
                 }
-                // `when` branch `is FlightStatusState.Error`: opens a block
+                // Error message comes from the repository
                 is FlightStatusState.Error -> {
-                    // calls `Text` with arguments `(status.message, color = WaypointTextMuted, f…)`
                     Text(status.message, color = WaypointTextMuted, fontSize = 13.sp)
-                // closes the when branch
                 }
-                // `when` branch `is FlightStatusState.Success`: opens a block
                 is FlightStatusState.Success -> {
-                    // declares read-only property `r`, initialised to `status.result`
                     val r = status.result
-                    // calls `Column` with arguments `(modifier = Modifier.fillMaxWidth())` and opens a trailing lambda / block
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        // calls `val` with arguments `(badgeColor, badgeLabel)` and opens a trailing lambda / block
+                        // Map the API status to a badge colour and a translated label
+                        // Unknown statuses fall back to the raw API value
                         val (badgeColor, badgeLabel) = when (r.status.lowercase()) {
-                            // lambda `"active" -> Pair(WaypointTerracotta, "In …`
-                            "active"    -> Pair(WaypointTerracotta,     "In Flight")
-                            // lambda `"landed" -> Pair(WaypointPlaceAccent1, "L…`
-                            "landed"    -> Pair(WaypointPlaceAccent1,   "Landed")
-                            // lambda `"scheduled" -> Pair(WaypointPlaceAccent2, "S…`
-                            "scheduled" -> Pair(WaypointPlaceAccent2,   "Scheduled")
-                            // lambda `"cancelled" -> Pair(WaypointTextMuted, "Canc…`
-                            "cancelled" -> Pair(WaypointTextMuted,      "Cancelled")
-                            // `else` branch of the `when`: evaluates `Pair(WaypointTextMuted, r.status.replaceFirstChar { it.uppercaseChar(…`
+                            "active"    -> Pair(WaypointTerracotta,     stringResource(R.string.flight_status_in_flight))
+                            "landed"    -> Pair(WaypointPlaceAccent1,   stringResource(R.string.flight_status_landed))
+                            "scheduled" -> Pair(WaypointPlaceAccent2,   stringResource(R.string.flight_status_scheduled))
+                            "cancelled" -> Pair(WaypointTextMuted,      stringResource(R.string.flight_status_cancelled))
                             else        -> Pair(WaypointTextMuted,      r.status.replaceFirstChar { it.uppercaseChar() })
-                        // closes the lambda passed to `val`
                         }
-                        // calls `Box` with an argument list that continues on the following lines
                         Box(
-                            // continues the statement started above: `modifier = Modifier`
                             modifier         = Modifier
-                                // continues the statement started above: `.background(badgeColor.copy(alpha = 0.15f), androidx.compos…`
                                 .background(badgeColor.copy(alpha = 0.15f), androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
-                                // continues the statement started above: `.padding(horizontal = 12.dp, vertical = 4.dp),`
                                 .padding(horizontal = 12.dp, vertical = 4.dp),
-                        // ends the argument list started above and opens the block that follows
                         ) {
-                            // calls `Text` with arguments `(badgeLabel, color = badgeColor, fontSize = 1…)`
                             Text(badgeLabel, color = badgeColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                        // closes the block
                         }
-                        // calls `Spacer` with arguments `(Modifier.height(12.dp))`
                         Spacer(Modifier.height(12.dp))
-                        // calls `HorizontalDivider` with arguments `(color = WaypointTextMuted.copy(alpha = 0.15f))`
                         HorizontalDivider(color = WaypointTextMuted.copy(alpha = 0.15f))
-                        // calls `Spacer` with arguments `(Modifier.height(12.dp))`
                         Spacer(Modifier.height(12.dp))
-                        // `if` statement: the block below runs when `r.depIata.isNotBlank()` is true
+                        // Departure row, with terminal and gate only shown when the API returns them
                         if (r.depIata.isNotBlank()) {
-                            // calls `Row` with arguments `(modifier = Modifier.fillMaxWidth(), horizont…)` and opens a trailing lambda / block
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                // calls `Text` with arguments `("Departure", color = WaypointTextMuted, font…)`
-                                Text("Departure", color = WaypointTextMuted, fontSize = 11.sp)
-                                // calls `Column` with arguments `(horizontalAlignment = Alignment.End)` and opens a trailing lambda / block
+                                Text(stringResource(R.string.flight_status_departure), color = WaypointTextMuted, fontSize = 11.sp)
                                 Column(horizontalAlignment = Alignment.End) {
-                                    // calls `Text` with arguments `(r.depIata, color = WaypointTextPrimary, font…)`
                                     Text(r.depIata, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                                    // `if` statement: executes `Text(r.depTime, color = WaypointTextMuted, f…` when `r.depTime.isNotBlank()` is true
                                     if (r.depTime.isNotBlank()) Text(r.depTime, color = WaypointTextMuted, fontSize = 11.sp)
-                                    // `if` statement: executes `Text("Terminal ${r.depTerminal}", color = Wa…` when `r.depTerminal.isNotBlank()` is true
-                                    if (r.depTerminal.isNotBlank()) Text("Terminal ${r.depTerminal}", color = WaypointTextMuted, fontSize = 10.sp)
-                                    // `if` statement: executes `Text("Gate ${r.depGate}", color = WaypointTe…` when `r.depGate.isNotBlank()` is true
-                                    if (r.depGate.isNotBlank())     Text("Gate ${r.depGate}", color = WaypointTextMuted, fontSize = 10.sp)
-                                // closes the lambda passed to `Column`
+                                    if (r.depTerminal.isNotBlank()) Text(stringResource(R.string.flight_status_terminal, r.depTerminal), color = WaypointTextMuted, fontSize = 10.sp)
+                                    if (r.depGate.isNotBlank())     Text(stringResource(R.string.flight_status_gate, r.depGate), color = WaypointTextMuted, fontSize = 10.sp)
                                 }
-                            // closes the lambda passed to `Row`
                             }
-                            // calls `Spacer` with arguments `(Modifier.height(8.dp))`
                             Spacer(Modifier.height(8.dp))
-                        // closes the if block
                         }
-                        // `if` statement: the block below runs when `r.arrIata.isNotBlank()` is true
+                        // Arrival row
                         if (r.arrIata.isNotBlank()) {
-                            // calls `Row` with arguments `(modifier = Modifier.fillMaxWidth(), horizont…)` and opens a trailing lambda / block
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                // calls `Text` with arguments `("Arrival", color = WaypointTextMuted, fontSi…)`
-                                Text("Arrival", color = WaypointTextMuted, fontSize = 11.sp)
-                                // calls `Column` with arguments `(horizontalAlignment = Alignment.End)` and opens a trailing lambda / block
+                                Text(stringResource(R.string.flight_status_arrival), color = WaypointTextMuted, fontSize = 11.sp)
                                 Column(horizontalAlignment = Alignment.End) {
-                                    // calls `Text` with arguments `(r.arrIata, color = WaypointTextPrimary, font…)`
                                     Text(r.arrIata, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                                    // `if` statement: executes `Text(r.arrTime, color = WaypointTextMuted, f…` when `r.arrTime.isNotBlank()` is true
                                     if (r.arrTime.isNotBlank()) Text(r.arrTime, color = WaypointTextMuted, fontSize = 11.sp)
-                                // closes the lambda passed to `Column`
                                 }
-                            // closes the lambda passed to `Row`
                             }
-                            // calls `Spacer` with arguments `(Modifier.height(8.dp))`
                             Spacer(Modifier.height(8.dp))
-                        // closes the if block
                         }
-                        // `if` statement: the block below runs when `r.depDelayedMin > 0` is true
+                        // Delay warning, only when the flight is actually delayed
                         if (r.depDelayedMin > 0) {
-                            // calls `Text` with arguments `("Delayed ${r.depDelayedMin} min", color = Wa…)`
-                            Text("Delayed ${r.depDelayedMin} min", color = WaypointTerracotta, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                            // calls `Spacer` with arguments `(Modifier.height(4.dp))`
+                            Text(stringResource(R.string.flight_status_delayed, r.depDelayedMin), color = WaypointTerracotta, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(4.dp))
-                        // closes the if block
                         }
-                        // `if` statement: the block below runs when `r.durationMin > 0` is true
+                        // Duration split into hours and minutes
                         if (r.durationMin > 0) {
-                            // calls `Text` with arguments `("Duration: ${r.durationMin / 60}h ${r.durati…)`
-                            Text("Duration: ${r.durationMin / 60}h ${r.durationMin % 60}m", color = WaypointTextMuted, fontSize = 11.sp)
-                        // closes the if block
+                            Text(stringResource(R.string.flight_status_duration, r.durationMin / 60, r.durationMin % 60), color = WaypointTextMuted, fontSize = 11.sp)
                         }
-                    // closes the lambda passed to `Column`
                     }
-                // closes the when branch
                 }
-                // `else` branch of the `when`: opens a block
                 else -> {}
-            // closes the when block
             }
-        // closes the block
         },
-        // continues the statement started above: `confirmButton = {`
         confirmButton = {
-            // calls `TextButton` with arguments `(onClick = onDismiss)` and opens a trailing lambda / block
             TextButton(onClick = onDismiss) {
-                // calls `Text` with arguments `("Close", color = WaypointTerracotta, fontWei…)`
-                Text("Close", color = WaypointTerracotta, fontWeight = FontWeight.Bold)
-            // closes the lambda passed to `TextButton`
+                Text(stringResource(R.string.common_close), color = WaypointTerracotta, fontWeight = FontWeight.Bold)
             }
-        // closes the block
         },
-    // closes the multi-line argument list started above
     )
-// closes the block
 }
 
 

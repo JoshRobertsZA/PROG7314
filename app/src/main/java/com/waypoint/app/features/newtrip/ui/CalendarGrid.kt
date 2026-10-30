@@ -65,6 +65,10 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 // imports `java.util.Locale` for use in this file
 import java.util.Locale
+// imports: 'androidx.compose.ui.res.stringResource' Needed to read the weekday labels from strings.xml
+import androidx.compose.ui.res.stringResource
+// imports: 'androidx.compose.ui.res.stringResource' Needed to read the weekday labels from strings.xml
+import com.waypoint.app.R
 
 // annotation `@Composable` applied to the declaration that follows
 @Composable
@@ -196,12 +200,14 @@ fun CalendarGrid(
                 .padding(top = 12.dp),
         // ends the argument list started above and opens the block that follows
         ) {
-            // calls `listOf` with arguments `("S", "M", "T", "W", "T", "F", "S")`, then chains `.forEach { label ->`
-            listOf("S", "M", "T", "W", "T", "F", "S").forEach { label ->
-                // continues the statement started above: `Text(`
+            // Weekday labels come from strings.xml so they follow the selected language
+            // Order is Sunday first to match startOffset (dayOfWeek % 7)
+            listOf(
+                R.string.new_trip_wd_sun, R.string.new_trip_wd_mon, R.string.new_trip_wd_tue,
+                R.string.new_trip_wd_wed, R.string.new_trip_wd_thu, R.string.new_trip_wd_fri, R.string.new_trip_wd_sat,
+            ).forEach { res ->
                 Text(
-                    // continues the statement started above: `text = label,`
-                    text = label,
+                    text = stringResource(res),
                     // continues the statement started above: `color = WaypointTextMuted,`
                     color = WaypointTextMuted,
                     // continues the statement started above: `fontSize = 11.sp,`
