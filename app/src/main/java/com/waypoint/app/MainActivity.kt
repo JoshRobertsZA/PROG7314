@@ -443,8 +443,6 @@ private fun WaypointNavHost(
         // closes the lambda passed to `composable`
         }
         composable(Routes.EmailAuth) {
-            // Password reset (EmailAuthSubmission.Reset) is handled as a no-op
-            // inside AuthViewModel.submitEmailAuth until PR 8 commit 5.
             EmailAuthScreen(
                 onBackClick = { navController.popBackStack() },
                 onSubmit = { submission: EmailAuthSubmission ->
@@ -456,6 +454,7 @@ private fun WaypointNavHost(
                 },
                 isLoading = emailAuthUiState.isLoading,
                 errorMessage = emailAuthUiState.errorMessage,
+                resetEmailSent = emailAuthUiState.resetEmailSent,
             )
         }
         // calls `composable` with arguments `(Routes.Home)` and opens a trailing lambda / block

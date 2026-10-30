@@ -71,6 +71,10 @@ object AuthRepository {
         return result.user ?: error("Firebase sign-in succeeded but returned no user")
     }
 
+    suspend fun sendPasswordResetEmail(email: String) {
+        auth.sendPasswordResetEmail(email).await()
+    }
+
     // declares suspend function `recoverPendingGitHubSignIn` taking no parameters, returning `FirebaseUser?`; its body is the expression ``
     suspend fun recoverPendingGitHubSignIn(): FirebaseUser? =
         // continues the statement started above: `auth.pendingAuthResult?.await()?.user`

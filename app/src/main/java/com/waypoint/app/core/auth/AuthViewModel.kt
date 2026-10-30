@@ -80,6 +80,7 @@ data class AuthUiState(
 data class EmailAuthUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
+    val resetEmailSent: Boolean = false,
 )
 
 // declares class `AuthViewModel` with a primary constructor taking 1 parameter (`application`), inheriting from `AndroidViewModel(application)` and opens its body
@@ -200,7 +201,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         when (submission) {
             is EmailAuthSubmission.SignUp -> signUpWithEmail(submission, onSuccess)
             is EmailAuthSubmission.SignIn -> signInWithEmail(submission, onSuccess)
-            is EmailAuthSubmission.Reset -> Unit // added in PR 8 commit 5
+            is EmailAuthSubmission.Reset -> sendPasswordReset(submission)
         }
     }
 
@@ -241,6 +242,24 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 onSuccess()
             } catch (e: Exception) {
                 Log.w(TAG, "Email sign-in failed", e)
+                _emailAuthUiState.update { it.copy(isLoading = false, errorMessage = getApplication<Application>().getString(mapEmailAuthError(e))) }
+            }
+        }
+    }
+
+    private fun sendPasswordReset(submission: EmailAuthSubmission.Reset) {
+        val validationError = EmailAuthValidator.validateReset(submission.email)
+        if (validationError != null) {
+            _emailAuthUiState.update { it.copy(errorMessage = getApplication<Application>().getString(validationError)) }
+            return
+        }
+        viewModelScope.launch {
+            _emailAuthUiState.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                AuthRepository.sendPasswordResetEmail(submission.email.trim())
+                _emailAuthUiState.update { it.copy(isLoading = false, resetEmailSent = true) }
+            } catch (e: Exception) {
+                Log.w(TAG, "Password reset email failed", e)
                 _emailAuthUiState.update { it.copy(isLoading = false, errorMessage = getApplication<Application>().getString(mapEmailAuthError(e))) }
             }
         }
