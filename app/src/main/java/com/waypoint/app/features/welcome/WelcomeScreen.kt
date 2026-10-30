@@ -75,6 +75,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 // imports `androidx.compose.material3.Text` for use in this file
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 // imports `androidx.compose.runtime.Composable` for use in this file
 import androidx.compose.runtime.Composable
 // imports `androidx.compose.runtime.LaunchedEffect` for use in this file
@@ -237,6 +238,9 @@ fun WelcomeScreen(
     modifier: Modifier = Modifier,
     // continues the statement started above: `onGitHubContinueClick: (() -> Unit)? = null,`
     onGitHubContinueClick: (() -> Unit)? = null,
+    // PR 8: lets WelcomeScreen offer email sign-up/sign-in alongside the
+    // existing OAuth providers without every call site having to supply it.
+    onEmailContinueClick: (() -> Unit)? = null,
     // continues the statement started above: `isLoading: Boolean = false,`
     isLoading: Boolean = false,
     // continues the statement started above: `loadingProvider: AuthProvider? = null,`
@@ -463,6 +467,7 @@ fun WelcomeScreen(
                     onGoogleContinueClick = onGoogleContinueClick,
                     // continues the statement started above: `onGitHubContinueClick = onGitHubContinueClick,`
                     onGitHubContinueClick = onGitHubContinueClick,
+                    onEmailContinueClick = onEmailContinueClick,
                     // continues the statement started above: `isLoading = isLoading,`
                     isLoading = isLoading,
                     // continues the statement started above: `loadingProvider = loadingProvider,`
@@ -627,6 +632,7 @@ private fun FrostedGlassContainerCard(
     onGoogleContinueClick: () -> Unit,
     // continues the statement started above: `onGitHubContinueClick: (() -> Unit)?,`
     onGitHubContinueClick: (() -> Unit)?,
+    onEmailContinueClick: (() -> Unit)?,
     // continues the statement started above: `isLoading: Boolean,`
     isLoading: Boolean,
     // continues the statement started above: `loadingProvider: AuthProvider?,`
@@ -797,6 +803,21 @@ private fun FrostedGlassContainerCard(
                 // closes the block
                 }
             // closes the if block
+            }
+
+            if (onEmailContinueClick != null) {
+                TextButton(
+                    onClick = onEmailContinueClick,
+                    enabled = !isLoading,
+                    modifier = Modifier.padding(top = 10.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.auth_welcome_email_cta),
+                        color = White,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
             }
 
             // `if` statement: the block below runs when `errorMessage != null` is true

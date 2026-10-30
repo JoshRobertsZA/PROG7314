@@ -140,6 +140,8 @@ import com.waypoint.app.features.tripcalendar.ui.TripCalendarScreen
 import com.waypoint.app.features.viewitinerary.ui.ViewItineraryScreen
 // imports `com.waypoint.app.features.welcome.WelcomeScreen` for use in this file
 import com.waypoint.app.features.welcome.WelcomeScreen
+import com.waypoint.app.features.auth.ui.EmailAuthScreen
+import com.waypoint.app.features.auth.ui.EmailAuthSubmission
 // imports `kotlinx.coroutines.launch` for use in this file
 import kotlinx.coroutines.launch
 
@@ -428,6 +430,7 @@ private fun WaypointNavHost(
                     }
                 // closes the block
                 },
+                onEmailContinueClick = { navController.navigate(Routes.EmailAuth) },
                 // continues the statement started above: `isLoading = authUiState.isLoading,`
                 isLoading = authUiState.isLoading,
                 // continues the statement started above: `loadingProvider = authUiState.loadingProvider,`
@@ -437,6 +440,15 @@ private fun WaypointNavHost(
             // closes the multi-line argument list started above
             )
         // closes the lambda passed to `composable`
+        }
+        composable(Routes.EmailAuth) {
+            // AuthRepository has no email/password methods yet (PR 8 commit 3) and
+            // input validation lands in commit 4, so submit is a no-op for now -
+            // the screen itself is the full scope of this commit.
+            EmailAuthScreen(
+                onBackClick = { navController.popBackStack() },
+                onSubmit = { _: EmailAuthSubmission -> },
+            )
         }
         // calls `composable` with arguments `(Routes.Home)` and opens a trailing lambda / block
         composable(Routes.Home) {
