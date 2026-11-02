@@ -35,7 +35,9 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 // imports `com.waypoint.app.features.edititinerary.data.ItineraryRepository` for use in this file
 import com.waypoint.app.features.edititinerary.data.ItineraryRepository
-// expression: `class TripCalendarViewModel(`
+// imports `com.waypoint.app.core.common.TripValidation` for use in this file
+import com.waypoint.app.core.common.TripValidation
+
 class TripCalendarViewModel(
     // continues the statement started above: `app: Application,`
     app: Application,
@@ -180,9 +182,8 @@ class TripCalendarViewModel(
 
     // declares function `onNameInputChanged` taking 1 parameter (`value`) and opens its body
     fun onNameInputChanged(value: String) {
-        // expression: `_uiState.update { it.copy(nameInput = value) }`
-        _uiState.update { it.copy(nameInput = value) }
-    // closes the function `onNameInputChanged`
+        // Same max length as when the trip is created
+        _uiState.update { it.copy(nameInput = value.take(TripValidation.TRIP_NAME_MAX)) }
     }
 
     // declares function `onDismissNameDialog` taking no parameters and opens its body
@@ -197,7 +198,9 @@ class TripCalendarViewModel(
         // declares read-only property `state`, initialised to `_uiState.value`
         val state = _uiState.value
         // declares read-only property `newName`, initialised with the result of calling `state.nameInput.trim(…)`
-        val newName = state.nameInput.trim().ifBlank { return }
+        val newName = state.nameInput.trim()
+        // Don't save a blank or too-long name
+        if (!TripValidation.isTripNameValid(newName)) return
         // expression: `_uiState.update { it.copy(showNameDialog = false, tripName = new…`
         _uiState.update { it.copy(showNameDialog = false, tripName = newName) }
         // opens a block after `viewModelScope.launch`

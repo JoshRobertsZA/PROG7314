@@ -38,5 +38,7 @@ data class PlaceDetailPickerUiState(
     val isAdding     : Boolean = false,
     // continues the statement started above: `val isAdded : Boolean = false,`
     val isAdded      : Boolean = false,
+    // True when the place is missing from the cache, so the screen shows an error
+    val notFound     : Boolean = false,
 // closes the multi-line argument list started above
 )

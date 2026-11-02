@@ -5,6 +5,8 @@ package com.waypoint.app.features.newtrip.ui
 import java.time.LocalDate
 // imports `java.time.YearMonth` for use in this file
 import java.time.YearMonth
+// imports `com.waypoint.app.core.common.TripValidation` for use in this file
+import com.waypoint.app.core.common.TripValidation
 
 // expression: `data class NewTripUiState(`
 data class NewTripUiState(
@@ -34,10 +36,12 @@ data class NewTripUiState(
     val isSaving: Boolean = false,
 // ends the argument list started above and opens the block that follows
 ) {
-    // declares read-only property `canSave` of type `Boolean`
+
+    // Trip can only be saved with a valid name, dates in the right order and a destination
     val canSave: Boolean
-        // custom getter: returns `tripName.isNotBlank() && startDate != null && endDate != null && dest…`
-        get() = tripName.isNotBlank() && startDate != null && endDate != null && destinationName.isNotBlank()
+        get() = TripValidation.isTripNameValid(tripName) &&
+                TripValidation.isDateOrderValid(startDate, endDate) &&
+                destinationName.isNotBlank()
 
     // declares read-only property `selectedDayCount` of type `Int`
     val selectedDayCount: Int

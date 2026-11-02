@@ -35,6 +35,9 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 // imports `java.time.YearMonth` for use in this file
 import java.time.YearMonth
+// imports `com.waypoint.app.core.common.TripValidation` for use in this file
+import com.waypoint.app.core.common.TripValidation
+
 
 // declares class `NewTripViewModel` with a primary constructor taking 1 parameter (`application`), inheriting from `AndroidViewModel(application)` and opens its body
 class NewTripViewModel(application: Application) : AndroidViewModel(application) {
@@ -55,9 +58,8 @@ class NewTripViewModel(application: Application) : AndroidViewModel(application)
 
     // declares function `onTripNameChanged` taking 1 parameter (`name`) and opens its body
     fun onTripNameChanged(name: String) {
-        // expression: `_uiState.update { it.copy(tripName = name) }`
-        _uiState.update { it.copy(tripName = name) }
-    // closes the function `onTripNameChanged`
+        // Cap the name at the max length so it can't go over the limit
+        _uiState.update { it.copy(tripName = name.take(TripValidation.TRIP_NAME_MAX)) }
     }
 
 

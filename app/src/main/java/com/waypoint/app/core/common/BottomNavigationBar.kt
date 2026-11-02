@@ -55,6 +55,8 @@ import com.waypoint.app.core.theme.WaypointNavActivePill
 import com.waypoint.app.core.theme.WaypointTerracotta
 // imports `com.waypoint.app.core.theme.WaypointTextMuted` for use in this file
 import com.waypoint.app.core.theme.WaypointTextMuted
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.Role
 
 // declares enum class `NavTab` with a primary constructor taking 3 parameters (`route`, `labelRes`, `iconRes`) and opens its body
 enum class NavTab(val route: String, val labelRes: Int, val iconRes: Int) {
@@ -118,8 +120,8 @@ private fun BottomNavItem(tab: NavTab, active: Boolean, onClick: () -> Unit, mod
     Column(
         // continues the statement started above: `modifier = modifier`
         modifier = modifier
-            // continues the statement started above: `.clickable(onClick = onClick)`
-            .clickable(onClick = onClick)
+            // Tells TalkBack this is a tab and whether it's selected
+            .selectable(selected = active, onClick = onClick, role = Role.Tab)
             // continues the statement started above: `.background(`
             .background(
                 // continues the statement started above: `color = if (active) WaypointNavActivePill else Color.Transp…`

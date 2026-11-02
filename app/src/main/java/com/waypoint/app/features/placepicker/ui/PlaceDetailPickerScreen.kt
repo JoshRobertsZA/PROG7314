@@ -99,6 +99,9 @@ import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
 // imports `com.waypoint.app.core.theme.White` for use in this file
 import com.waypoint.app.core.theme.White
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.text.style.TextAlign
+import com.waypoint.app.core.common.AppButtonFilled
 
 // annotation `@Composable` applied to the declaration that follows
 @Composable
@@ -132,6 +135,12 @@ fun PlaceDetailPickerScreen(
         // `if` statement: executes `onPlaceAdded()` when `state.isAdded` is true
         if (state.isAdded) onPlaceAdded()
     // closes the lambda passed to `LaunchedEffect`
+    }
+
+    // Show an error instead of a never-ending loading screen when the place isn't found
+    if (state.notFound) {
+        PlaceNotFoundState(onBackClick = onBackClick, modifier = modifier)
+        return
     }
 
     // calls `Box` with arguments `(modifier = modifier.fillMaxSize().background…)` and opens a trailing lambda / block
@@ -325,7 +334,8 @@ fun PlaceDetailPickerScreen(
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
                     // continues the statement started above: `text = extract ?: "No Wikipedia article found for this plac…`
-                    text     = extract ?: "No Wikipedia article found for this place.",
+                    // Translated fallback when Wikipedia has no article
+                    text     = extract ?: stringResource(R.string.place_detail_picker_no_wiki),
                     // continues the statement started above: `color = WaypointTextMuted,`
                     color    = WaypointTextMuted,
                     // continues the statement started above: `fontSize = 12.sp,`
@@ -477,6 +487,8 @@ fun PlaceDetailPickerScreen(
         CircleIconButton(
             // continues the statement started above: `onClick = onBackClick,`
             onClick     = onBackClick,
+            // Read out by TalkBack
+            contentDescription = stringResource(R.string.common_back),
             // continues the statement started above: `fillColor = White.copy(alpha = 0.9f),`
             fillColor   = White.copy(alpha = 0.9f),
             // continues the statement started above: `borderColor = null,`
@@ -532,4 +544,27 @@ private fun InfoCard(value: String, label: String, modifier: Modifier = Modifier
     // closes the block
     }
 // closes the function `InfoCard`
+}
+
+// Error state shown when the selected place can't be found in the cache.
+@Composable
+private fun PlaceNotFoundState(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize().background(WaypointCream).padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.place_detail_picker_not_found),
+            color = WaypointTextMuted,
+            fontSize = 13.sp,
+            textAlign = TextAlign.Center,
+        )
+        // Lets the user leave the screen instead of being stuck
+        AppButtonFilled(
+            text = stringResource(R.string.common_go_back),
+            onClick = onBackClick,
+            modifier = Modifier.padding(top = 16.dp),
+        )
+    }
 }

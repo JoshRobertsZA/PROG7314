@@ -72,6 +72,23 @@
     <string name="calendar_edit_dates_pick_end">Now tap the end date, then save</string>
     <string name="common_cancel">Cancel</string>
 
+    <!-- Accessibility -->
+    <string name="common_back">Back</string>
+
+    <!-- Empty and error states -->
+    <string name="home_places_empty">No places found nearby.</string>
+    <string name="place_detail_picker_not_found">We couldn\'t load this place. It may no longer be available.</string>
+    <string name="place_detail_picker_no_wiki">No Wikipedia article found for this place.</string>
+    <string name="common_go_back">Go back</string>
+
+    <!-- Validation messages -->
+    <string name="edit_itinerary_flight_number_invalid">Use a format like BA 2490</string>
+    <string name="new_trip_name_counter" translatable="false">%1$d/%2$d</string>
+
+    <!-- Place detail fallbacks when no place data is passed in -->
+    <string name="place_detail_unknown_name">Place details</string>
+    <string name="place_detail_no_description">No description available for this place yet.</string>
+
     <!-- Home screen (Figma node 47:30, "03 Waypoint — Home").
          Reuses login_brand_name / login_tagline for the header, since the
          brand name and tagline are shared across screens.

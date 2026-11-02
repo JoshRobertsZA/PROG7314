@@ -147,6 +147,8 @@ import com.waypoint.app.core.theme.WaypointTripBadgeText
 import androidx.compose.material3.Icon
 // imports `androidx.compose.ui.res.painterResource` for use in this file
 import androidx.compose.ui.res.painterResource
+// imports `com.waypoint.app.core.common.TripValidation` for use in this file
+import com.waypoint.app.core.common.TripValidation
 
 // annotation `@Composable` applied to the declaration that follows
 @Composable
@@ -261,6 +263,8 @@ fun EditItineraryScreen(
             CircleIconButton(
                 // continues the statement started above: `onClick = onBackClick,`
                 onClick = onBackClick,
+                // Read out by TalkBack
+                contentDescription = stringResource(R.string.edit_itinerary_back_cd),
                 // continues the statement started above: `modifier = Modifier.align(Alignment.CenterStart),`
                 modifier = Modifier.align(Alignment.CenterStart),
                 // continues the statement started above: `size = 40.dp,`
@@ -798,6 +802,15 @@ private fun FlightCard(
                     },
                 // closes the multi-line argument list started above
                 )
+                // Hint when the flight number isn't a valid format (blank is allowed)
+                if (flight.flightNumber.isNotBlank() && !TripValidation.isFlightNumberValid(flight.flightNumber)) {
+                    Text(
+                        text = stringResource(R.string.edit_itinerary_flight_number_invalid),
+                        color = WaypointTerracotta,
+                        fontSize = 9.sp,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
                     // continues the statement started above: `text = flight.docName ?: pdfFileName(flight.pdfUri),`

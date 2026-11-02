@@ -74,10 +74,16 @@ import com.waypoint.app.core.theme.WaypointTextPrimary
 // imports `com.waypoint.app.core.theme.White` for use in this file
 import com.waypoint.app.core.theme.White
 
-// annotation `@Composable` applied to the declaration that follows
+
+// Place detail screen, takes the place info as parameters instead of hardcoded sample data.
 @Composable
-// declares function `PlaceDetailScreen` taking 1 parameter (`onBackClick`) and opens its body
-fun PlaceDetailScreen(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
+fun PlaceDetailScreen(
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    placeName: String? = null,
+    subtitle: String? = null,
+    description: String? = null,
+) {
     // calls `Box` with arguments `(modifier = modifier.fillMaxSize().background…)` and opens a trailing lambda / block
     Box(modifier = modifier.fillMaxSize().background(WaypointCream)) {
         // calls `Image` with an argument list that continues on the following lines
@@ -115,28 +121,16 @@ fun PlaceDetailScreen(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
                 .padding(start = 22.dp, top = 24.dp, end = 22.dp, bottom = 28.dp),
         // ends the argument list started above and opens the block that follows
         ) {
-            // calls `Text` with arguments `("Table Mountain", color = WaypointTextPrimar…)`
-            Text("Table Mountain", color = WaypointTextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-            // calls `Text` with an argument list that continues on the following lines
-            Text(
-                // continues the statement started above: `text = "Landmark · 2.1 km away",`
-                text = "Landmark · 2.1 km away",
-                // continues the statement started above: `color = WaypointTextMuted,`
-                color = WaypointTextMuted,
-                // continues the statement started above: `fontSize = 11.sp,`
-                fontSize = 11.sp,
-                // continues the statement started above: `modifier = Modifier.padding(top = 4.dp),`
-                modifier = Modifier.padding(top = 4.dp),
-            // closes the multi-line argument list started above
-            )
-
-            // calls `Row` with arguments `(modifier = Modifier.fillMaxWidth().padding(t…)` and opens a trailing lambda / block
-            Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-                // calls `InfoCard` with arguments `(value = "16°C · Windy", label = "At this loc…)`
-                InfoCard(value = "16°C · Windy", label = "At this location", modifier = Modifier.weight(1f))
-                // calls `InfoCard` with arguments `(value = "Open now", label = "08:00 – 18:00",…)`
-                InfoCard(value = "Open now", label = "08:00 – 18:00", modifier = Modifier.weight(1f).padding(start = 8.dp))
-            // closes the lambda passed to `Row`
+            // Falls back to a generic title when no place name is passed in
+            Text(placeName ?: stringResource(R.string.place_detail_unknown_name), color = WaypointTextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            // Subtitle (type and distance) only shows when it's provided
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    color = WaypointTextMuted,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
             }
 
             // calls `Row` with an argument list that continues on the following lines
@@ -175,8 +169,8 @@ fun PlaceDetailScreen(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
             }
             // calls `Text` with an argument list that continues on the following lines
             Text(
-                // continues the statement started above: `text = "Table Mountain is a flat-topped mountain forming a …`
-                text = "Table Mountain is a flat-topped mountain forming a prominent landmark overlooking the city of Cape Town. It is a significant tourist attraction, with a rotating aerial cableway carrying visitors to the summit.",
+                // Shows the place description, or a fallback when there isn't one
+                text = description ?: stringResource(R.string.place_detail_no_description),
                 // continues the statement started above: `color = WaypointTextMuted,`
                 color = WaypointTextMuted,
                 // continues the statement started above: `fontSize = 12.sp,`
@@ -298,6 +292,8 @@ fun PlaceDetailScreen(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
         CircleIconButton(
             // continues the statement started above: `onClick = onBackClick,`
             onClick = onBackClick,
+            // Read out by TalkBack
+            contentDescription = stringResource(R.string.place_detail_back_cd),
             // continues the statement started above: `fillColor = White.copy(alpha = 0.9f),`
             fillColor = White.copy(alpha = 0.9f),
             // continues the statement started above: `borderColor = null,`
@@ -329,27 +325,4 @@ fun PlaceDetailScreen(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
     // closes the lambda passed to `Box`
     }
 // closes the function `PlaceDetailScreen`
-}
-
-// annotation `@Composable` applied to the declaration that follows
-@Composable
-// declares private function `InfoCard` taking 3 parameters (`value`, `label`, `modifier`) and opens its body
-private fun InfoCard(value: String, label: String, modifier: Modifier = Modifier) {
-    // calls `Column` with an argument list that continues on the following lines
-    Column(
-        // continues the statement started above: `modifier = modifier`
-        modifier = modifier
-            // continues the statement started above: `.background(WaypointCard, RoundedCornerShape(RadiusButton))`
-            .background(WaypointCard, RoundedCornerShape(RadiusButton))
-            // continues the statement started above: `.padding(horizontal = 14.dp, vertical = 12.dp),`
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-    // ends the argument list started above and opens the block that follows
-    ) {
-        // calls `Text` with arguments `(value, color = WaypointTextPrimary, fontSize…)`
-        Text(value, color = WaypointTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-        // calls `Text` with arguments `(label, color = WaypointTextMuted, fontSize =…)`
-        Text(label, color = WaypointTextMuted, fontSize = 10.sp, modifier = Modifier.padding(top = 4.dp))
-    // closes the block
-    }
-// closes the function `InfoCard`
 }

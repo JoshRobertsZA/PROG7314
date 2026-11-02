@@ -52,6 +52,22 @@
     <string name="calendar_edit_dates_pick_end">Manje thepha usuku lokuphela, bese ulondoloza</string>
     <string name="common_cancel">Khansela</string>
 
+    <!-- Accessibility -->
+    <string name="common_back">Emuva</string>
+
+    <!-- Empty and error states -->
+    <string name="home_places_empty">Azikho izindawo ezitholakele eduze.</string>
+    <string name="place_detail_picker_not_found">Asikwazanga ukulayisha le ndawo. Kungenzeka ukuthi ayisatholakali.</string>
+    <string name="place_detail_picker_no_wiki">Akukho sihloko se-Wikipedia esitholakele sale ndawo.</string>
+    <string name="common_go_back">Buyela emuva</string>
+
+    <!-- Validation messages -->
+    <string name="edit_itinerary_flight_number_invalid">Sebenzisa ifomethi efana ne-BA 2490</string>
+
+    <!-- Place detail fallbacks when no place data is passed in -->
+    <string name="place_detail_unknown_name">Imininingwane yendawo</string>
+    <string name="place_detail_no_description">Ayikho incazelo yale ndawo okwamanje.</string>
+
     <string name="home_settings_cd">Izilungiselelo</string>
     <string name="home_upcoming_trip_label">UHAMBO OLUZAYO</string>
     <string name="home_view_all_trips">Buka zonke izinhambo</string>

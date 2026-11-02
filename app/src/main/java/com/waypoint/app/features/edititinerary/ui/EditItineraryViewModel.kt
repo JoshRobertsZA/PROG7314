@@ -31,6 +31,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 // imports `java.time.LocalDate` for use in this file
 import java.time.LocalDate
+// imports `com.waypoint.app.core.common.TripValidation` for use in this file
+import com.waypoint.app.core.common.TripValidation
 
 // expression: `class EditItineraryViewModel(`
 class EditItineraryViewModel(
@@ -387,13 +389,14 @@ class EditItineraryViewModel(
         // closes the block
         }
         // expression: `viewModelScope.launch { repo.updateFlightNumber(flightId, number…`
-        viewModelScope.launch { repo.updateFlightNumber(flightId, number) }
-        // statement: `depTimeLookupJobs[flightId]?.cancel()`
+        // Only save once the number is empty or valid, so half-typed values aren't stored
+        if (number.isBlank() || TripValidation.isFlightNumberValid(number)) {
+            viewModelScope.launch { repo.updateFlightNumber(flightId, number.trim()) }
+        }
         depTimeLookupJobs[flightId]?.cancel()
-        // declares read-only property `iata`, initialised with the result of calling `number.replace(…)`
-        val iata = number.replace(" ", "").uppercase()
-        // `if` statement: the block below runs when `iata.length >= 4` is true
-        if (iata.length >= 4) {
+        val iata = TripValidation.normaliseFlightNumber(number)
+        // Only look up the departure time for a valid flight number
+        if (TripValidation.isFlightNumberValid(iata)) {
             // assigns `depTimeLookupJobs[flightId]` the value `viewModelScope.launch {`
             depTimeLookupJobs[flightId] = viewModelScope.launch {
                 // calls `delay` with arguments `(1_500)`

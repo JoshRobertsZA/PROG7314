@@ -246,6 +246,8 @@ fun ViewItineraryScreen(
             CircleIconButton(
                 // continues the statement started above: `onClick = onBackClick,`
                 onClick  = onBackClick,
+                // Read out by TalkBack
+                contentDescription = stringResource(R.string.view_itinerary_back_cd),
                 // continues the statement started above: `modifier = Modifier.align(Alignment.CenterStart),`
                 modifier = Modifier.align(Alignment.CenterStart),
                 // continues the statement started above: `size = 40.dp,`
@@ -932,12 +934,14 @@ private fun ViewPlaceDetailOverlay(
                 CircleIconButton(
                     // continues the statement started above: `onClick = onBack,`
                     onClick  = onBack,
+                    // Read out by TalkBack
+                    contentDescription = stringResource(R.string.view_itinerary_back_cd),
                     // continues the statement started above: `modifier = Modifier.align(Alignment.TopStart).padding(16.dp…`
                     modifier = Modifier.align(Alignment.TopStart).padding(16.dp),
                 // ends the argument list started above and opens the block that follows
                 ) {
-                    // calls `Text` with arguments `(text = "←", color = WaypointTerracotta, font…)`
-                    Text(text = "←", color = WaypointTerracotta, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    // Arrow glyph from strings.xml instead of hardcoded
+                    Text(text = stringResource(R.string.view_itinerary_back_glyph), color = WaypointTerracotta, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 // closes the block
                 }
             // closes the block

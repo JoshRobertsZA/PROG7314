@@ -510,6 +510,8 @@ fun TripCalendarScreen(
             CircleIconButton(
                 // continues the statement started above: `onClick = onBackClick,`
                 onClick = onBackClick,
+                // Read out by TalkBack
+                contentDescription = stringResource(R.string.calendar_back_cd),
                 // continues the statement started above: `modifier = Modifier.align(Alignment.CenterStart),`
                 modifier = Modifier.align(Alignment.CenterStart),
                 // continues the statement started above: `size = 40.dp,`
