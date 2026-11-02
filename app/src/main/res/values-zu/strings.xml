@@ -52,6 +52,10 @@
     <string name="calendar_edit_dates_pick_end">Manje thepha usuku lokuphela, bese ulondoloza</string>
     <string name="common_cancel">Khansela</string>
 
+    <!-- Place detail fallbacks when no place data is passed in -->
+    <string name="place_detail_unknown_name">Imininingwane yendawo</string>
+    <string name="place_detail_no_description">Ayikho incazelo yale ndawo okwamanje.</string>
+
     <string name="home_settings_cd">Izilungiselelo</string>
     <string name="home_upcoming_trip_label">UHAMBO OLUZAYO</string>
     <string name="home_view_all_trips">Buka zonke izinhambo</string>

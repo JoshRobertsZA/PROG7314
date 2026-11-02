@@ -68,6 +68,9 @@
     <string name="calendar_edit_dates_pick_start">Tap the new start date</string>
     <string name="calendar_edit_dates_pick_end">Now tap the end date, then save</string>
     <string name="common_cancel">Cancel</string>
+    <!-- Place detail fallbacks when no place data is passed in -->
+    <string name="place_detail_unknown_name">Place details</string>
+    <string name="place_detail_no_description">No description available for this place yet.</string>
 
     <!-- Home screen (Figma node 47:30, "03 Waypoint — Home").
          Reuses login_brand_name / login_tagline for the header, since the

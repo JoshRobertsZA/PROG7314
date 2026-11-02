@@ -51,6 +51,10 @@
     <string name="calendar_edit_dates_pick_end">Ngoku cofa umhla wokuphela, uze ugcine</string>
     <string name="common_cancel">Rhoxisa</string>
 
+    <!-- Place detail fallbacks when no place data is passed in -->
+    <string name="place_detail_unknown_name">Iinkcukacha zendawo</string>
+    <string name="place_detail_no_description">Akukho nkcazelo yale ndawo okwangoku.</string>
+
     <string name="home_settings_cd">Iisethingi</string>
     <string name="home_upcoming_trip_label">UHAMBO OLUZAYO</string>
     <string name="home_view_all_trips">Jonga zonke iindlela</string>
