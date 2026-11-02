@@ -82,9 +82,6 @@ fun MainScreen(
         verticalArrangement = Arrangement.Center,
     // ends the argument list started above and opens the block that follows
     ) {
-        // calls `Text` with arguments `("Hello World!")`
-        Text("Hello World!")
-
         // calls `AppButtonFilled` with arguments `(text = "Go to Trip Calendar", onClick = onGo…)`
         AppButtonFilled(text = "Go to Trip Calendar", onClick = onGoToTripCalendarClick, modifier = Modifier.padding(top = 16.dp))
 
