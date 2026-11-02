@@ -69,6 +69,9 @@
     <string name="calendar_edit_dates_pick_end">Now tap the end date, then save</string>
     <string name="common_cancel">Cancel</string>
 
+    <!-- Accessibility -->
+    <string name="common_back">Back</string>
+
     <!-- Empty and error states -->
     <string name="home_places_empty">No places found nearby.</string>
     <string name="place_detail_picker_not_found">We couldn\'t load this place. It may no longer be available.</string>

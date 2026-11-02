@@ -51,6 +51,9 @@
     <string name="calendar_edit_dates_pick_end">Ngoku cofa umhla wokuphela, uze ugcine</string>
     <string name="common_cancel">Rhoxisa</string>
 
+    <!-- Accessibility -->
+    <string name="common_back">Emva</string>
+
     <!-- Empty and error states -->
     <string name="home_places_empty">Akukho ndawo zifunyenweyo kufutshane.</string>
     <string name="place_detail_picker_not_found">Asikwazanga ukulayisha le ndawo. Isenokuba ayisafumaneki.</string>

@@ -292,6 +292,8 @@ fun PlaceDetailScreen(
         CircleIconButton(
             // continues the statement started above: `onClick = onBackClick,`
             onClick = onBackClick,
+            // Read out by TalkBack
+            contentDescription = stringResource(R.string.place_detail_back_cd),
             // continues the statement started above: `fillColor = White.copy(alpha = 0.9f),`
             fillColor = White.copy(alpha = 0.9f),
             // continues the statement started above: `borderColor = null,`

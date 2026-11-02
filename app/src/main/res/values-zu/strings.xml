@@ -52,6 +52,9 @@
     <string name="calendar_edit_dates_pick_end">Manje thepha usuku lokuphela, bese ulondoloza</string>
     <string name="common_cancel">Khansela</string>
 
+    <!-- Accessibility -->
+    <string name="common_back">Emuva</string>
+
     <!-- Empty and error states -->
     <string name="home_places_empty">Azikho izindawo ezitholakele eduze.</string>
     <string name="place_detail_picker_not_found">Asikwazanga ukulayisha le ndawo. Kungenzeka ukuthi ayisatholakali.</string>

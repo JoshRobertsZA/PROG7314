@@ -233,6 +233,8 @@ fun NewTripScreen(
                 CircleIconButton(
                     // continues the statement started above: `onClick = onCloseClick,`
                     onClick = onCloseClick,
+                    // Read out by TalkBack
+                    contentDescription = stringResource(R.string.new_trip_close_cd),
                     // continues the statement started above: `modifier = Modifier.align(Alignment.CenterEnd),`
                     modifier = Modifier.align(Alignment.CenterEnd),
                 // ends the argument list started above and opens the block that follows

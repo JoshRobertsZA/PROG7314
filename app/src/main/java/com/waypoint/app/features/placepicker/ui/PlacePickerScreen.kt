@@ -134,6 +134,8 @@ fun PlacePickerScreen(
             CircleIconButton(
                 // continues the statement started above: `onClick = onBackClick,`
                 onClick  = onBackClick,
+                // Read out by TalkBack
+                contentDescription = stringResource(R.string.common_back),
                 // continues the statement started above: `modifier = Modifier.align(Alignment.CenterStart),`
                 modifier = Modifier.align(Alignment.CenterStart),
             // ends the argument list started above and opens the block that follows
