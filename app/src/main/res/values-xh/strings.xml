@@ -51,6 +51,12 @@
     <string name="calendar_edit_dates_pick_end">Ngoku cofa umhla wokuphela, uze ugcine</string>
     <string name="common_cancel">Rhoxisa</string>
 
+    <!-- Empty and error states -->
+    <string name="home_places_empty">Akukho ndawo zifunyenweyo kufutshane.</string>
+    <string name="place_detail_picker_not_found">Asikwazanga ukulayisha le ndawo. Isenokuba ayisafumaneki.</string>
+    <string name="place_detail_picker_no_wiki">Akukho nqaku le-Wikipedia lifunyenweyo le ndawo.</string>
+    <string name="common_go_back">Buyela umva</string>
+
     <!-- Validation messages -->
     <string name="edit_itinerary_flight_number_invalid">Sebenzisa ifomathi efana ne-BA 2490</string>
 

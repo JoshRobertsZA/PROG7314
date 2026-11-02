@@ -52,6 +52,12 @@
     <string name="calendar_edit_dates_pick_end">Manje thepha usuku lokuphela, bese ulondoloza</string>
     <string name="common_cancel">Khansela</string>
 
+    <!-- Empty and error states -->
+    <string name="home_places_empty">Azikho izindawo ezitholakele eduze.</string>
+    <string name="place_detail_picker_not_found">Asikwazanga ukulayisha le ndawo. Kungenzeka ukuthi ayisatholakali.</string>
+    <string name="place_detail_picker_no_wiki">Akukho sihloko se-Wikipedia esitholakele sale ndawo.</string>
+    <string name="common_go_back">Buyela emuva</string>
+
     <!-- Validation messages -->
     <string name="edit_itinerary_flight_number_invalid">Sebenzisa ifomethi efana ne-BA 2490</string>
 

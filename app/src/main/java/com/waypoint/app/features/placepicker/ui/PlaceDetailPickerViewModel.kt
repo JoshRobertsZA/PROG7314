@@ -106,6 +106,8 @@ class PlaceDetailPickerViewModel(
         if (place == null) {
             // calls `w` on `Log` with arguments `(TAG, "Place $placeId not found in cache for …)`
             Log.w(TAG, "Place $placeId not found in cache for trip $tripId")
+            // Stop the loading states and flag the error for the screen
+            _uiState.update { it.copy(notFound = true, isLoadingWiki = false, isLoadingWeather = false) }
             // returns from the current function with no value
             return
         // closes the if block

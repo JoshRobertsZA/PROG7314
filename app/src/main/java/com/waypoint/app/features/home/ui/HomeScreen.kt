@@ -825,7 +825,17 @@ fun HomeScreen(
                 when (val ns = state.nearbyPlaces) {
                     // `when` branch `is NearbyState.Success`: opens a block
                     is NearbyState.Success -> {
-                        // expression: `ns.places.forEachIndexed { index, place ->`
+                        // Empty state when the lookup worked but found no places
+                        if (ns.places.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.home_places_empty),
+                                color = WaypointTextMuted,
+                                fontSize = 12.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 14.dp),
+                            )
+                        }
                         ns.places.forEachIndexed { index, place ->
                             // continues the statement started above: `val accent = nearbyAccents[index % nearbyAccents.size]`
                             val accent = nearbyAccents[index % nearbyAccents.size]
