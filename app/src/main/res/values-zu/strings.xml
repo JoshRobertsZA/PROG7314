@@ -52,6 +52,9 @@
     <string name="calendar_edit_dates_pick_end">Manje thepha usuku lokuphela, bese ulondoloza</string>
     <string name="common_cancel">Khansela</string>
 
+    <!-- Validation messages -->
+    <string name="edit_itinerary_flight_number_invalid">Sebenzisa ifomethi efana ne-BA 2490</string>
+
     <!-- Place detail fallbacks when no place data is passed in -->
     <string name="place_detail_unknown_name">Imininingwane yendawo</string>
     <string name="place_detail_no_description">Ayikho incazelo yale ndawo okwamanje.</string>

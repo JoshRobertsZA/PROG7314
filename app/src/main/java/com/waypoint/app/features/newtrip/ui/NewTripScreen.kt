@@ -101,6 +101,9 @@ import com.waypoint.app.core.theme.White
 import java.time.format.DateTimeFormatter
 // imports `java.util.Locale` for use in this file
 import java.util.Locale
+// imports `com.waypoint.app.core.common.TripValidation` for use in this file
+import com.waypoint.app.core.common.TripValidation
+
 
 // declares private read-only property `SUMMARY_FMT`, initialised with the result of calling `DateTimeFormatter.ofPattern(…)`
 private val SUMMARY_FMT = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
@@ -306,6 +309,13 @@ fun NewTripScreen(
                     // continues the statement started above: `modifier = Modifier.fillMaxWidth(),`
                     modifier = Modifier.fillMaxWidth(),
                 // closes the multi-line argument list started above
+                )
+                // Character counter so the user can see the name limit
+                Text(
+                    text = stringResource(R.string.new_trip_name_counter, uiState.tripName.length, TripValidation.TRIP_NAME_MAX),
+                    color = WaypointTextMuted,
+                    fontSize = 10.sp,
+                    modifier = Modifier.padding(top = 4.dp),
                 )
             // closes the block
             }
