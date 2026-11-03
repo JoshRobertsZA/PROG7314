@@ -304,6 +304,10 @@
     <string name="profile_edit_error_name_too_long">Name is too long</string>
     <string name="profile_edit_save_error">Couldn\'t save your changes. Please try again</string>
 
+    <!-- Delete account (PR 9), see ProfileViewModel -->
+    <string name="profile_delete_error">Couldn\'t delete your account. Please try again</string>
+    <string name="profile_delete_reauth_required">Please sign in again, then retry</string>
+
     <!-- Biometric app-unlock overlay, shown when Settings' "Biometric
          login" is enabled and the app resumes from the background. -->
     <string name="biometric_lock_title">Unlock Waypoint</string>

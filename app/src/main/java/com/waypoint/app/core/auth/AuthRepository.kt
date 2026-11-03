@@ -5,6 +5,7 @@ package com.waypoint.app.core.auth
 import android.app.Activity
 // imports `com.google.firebase.auth.FirebaseAuth` for use in this file
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.EmailAuthProvider
 // imports `com.google.firebase.auth.FirebaseUser` for use in this file
 import com.google.firebase.auth.FirebaseUser
 // imports `com.google.firebase.auth.GoogleAuthProvider` for use in this file
@@ -79,6 +80,31 @@ object AuthRepository {
         val user = auth.currentUser ?: error("No signed-in user to update")
         val profileUpdate = UserProfileChangeRequest.Builder().setDisplayName(name).build()
         user.updateProfile(profileUpdate).await()
+    }
+
+    // The providerId list on a user who deleted all but one provider still
+    // reports that provider plus "firebase" (the identity itself), so this
+    // is only ever "password" / "google.com" / "github.com" from the real
+    // sign-in methods, never empty for a signed-in user.
+    val currentSignInProviderIds: List<String>
+        get() = auth.currentUser?.providerData?.map { it.providerId } ?: emptyList()
+
+    suspend fun reauthenticateWithEmail(password: String) {
+        val user = auth.currentUser ?: error("No signed-in user to reauthenticate")
+        val email = user.email ?: error("No email on the current user")
+        val credential = EmailAuthProvider.getCredential(email, password)
+        user.reauthenticate(credential).await()
+    }
+
+    suspend fun reauthenticateWithGoogleIdToken(idToken: String) {
+        val user = auth.currentUser ?: error("No signed-in user to reauthenticate")
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        user.reauthenticate(credential).await()
+    }
+
+    suspend fun deleteCurrentUser() {
+        val user = auth.currentUser ?: error("No signed-in user to delete")
+        user.delete().await()
     }
 
     // declares suspend function `recoverPendingGitHubSignIn` taking no parameters, returning `FirebaseUser?`; its body is the expression ``

@@ -160,6 +160,8 @@
     <string name="profile_edit_error_name_required">Faka igama lakho</string>
     <string name="profile_edit_error_name_too_long">Igama lide kakhulu</string>
     <string name="profile_edit_save_error">Ayikwazanga ukulondoloza izinguquko zakho. Sicela uzame futhi</string>
+    <string name="profile_delete_error">Ayikwazanga ukusula i-akhawunti yakho. Sicela uzame futhi</string>
+    <string name="profile_delete_reauth_required">Sicela ungene kabusha, bese uzama futhi</string>
 
     <string name="language_modal_title">Shintsha ulimi</string>
 
