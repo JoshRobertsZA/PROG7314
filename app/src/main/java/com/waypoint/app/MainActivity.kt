@@ -142,6 +142,8 @@ import com.waypoint.app.features.viewitinerary.ui.ViewItineraryScreen
 import com.waypoint.app.features.welcome.WelcomeScreen
 import com.waypoint.app.features.auth.ui.EmailAuthScreen
 import com.waypoint.app.features.auth.ui.EmailAuthSubmission
+import com.waypoint.app.features.profile.ui.EditProfileScreen
+import com.waypoint.app.core.db.SessionManager
 // imports `kotlinx.coroutines.launch` for use in this file
 import kotlinx.coroutines.launch
 
@@ -625,9 +627,18 @@ private fun WaypointNavHost(
                     }
                 // closes the block
                 },
+                onEditProfileClick = { navController.navigate(Routes.EditProfile) },
             // closes the multi-line argument list started above
             )
         // closes the lambda passed to `composable`
+        }
+        composable(Routes.EditProfile) {
+            EditProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onSave = { navController.popBackStack() },
+                initialDisplayName = SessionManager.displayName,
+                photoUrl = SessionManager.photoUrl,
+            )
         }
         // calls `composable` with arguments `(Routes.PlaceDetail)` and opens a trailing lambda / block
         composable(Routes.PlaceDetail) {

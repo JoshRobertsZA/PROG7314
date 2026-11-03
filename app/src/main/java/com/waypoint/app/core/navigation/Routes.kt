@@ -10,6 +10,7 @@ object Routes {
     // declares const read-only property `Welcome`, initialised to the string literal "welcome"
     const val Welcome = "welcome"
     const val EmailAuth = "email_auth"
+    const val EditProfile = "edit_profile"
     // declares const read-only property `Home`, initialised to the string literal "home"
     const val Home = "home"
     // declares const read-only property `NewTrip`, initialised to the string literal "new_trip"

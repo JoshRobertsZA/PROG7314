@@ -146,6 +146,7 @@ fun SettingsScreen(
     // continues the statement started above: `onNotificationsClick: () -> Unit = {},`
     onNotificationsClick: () -> Unit = {},
     onRequestNotificationPermission: () -> Unit = {},
+    onEditProfileClick: () -> Unit = {},
     // continues the statement started above: `viewModel: SettingsViewModel = viewModel(),`
     viewModel: SettingsViewModel = viewModel(),
 // ends the argument list started above and opens the block that follows
@@ -247,6 +248,19 @@ fun SettingsScreen(
                 modifier = Modifier.padding(top = 4.dp).fillMaxWidth(),
             // closes the multi-line argument list started above
             )
+
+            PreferenceRow(
+                title = stringResource(R.string.profile_edit_row_title),
+                subtitle = stringResource(R.string.profile_edit_row_subtitle),
+                onClick = onEditProfileClick,
+                modifier = Modifier.padding(top = 16.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.profile_chevron_glyph),
+                    color = WaypointTextMuted,
+                    fontSize = 16.sp,
+                )
+            }
 
             // calls `Row` with arguments `(modifier = Modifier.fillMaxWidth().padding(t…)` and opens a trailing lambda / block
             Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {

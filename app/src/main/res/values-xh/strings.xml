@@ -151,6 +151,12 @@
     <string name="profile_biometric_subtitle">Ukungena nge-Face ID okanye izikhonkwane zeminwe</string>
     <string name="profile_logout">Phuma</string>
 
+    <!-- Edit profile screen (PR 9); drafted, needs isiXhosa native-speaker review -->
+    <string name="profile_edit_row_title">Hlela iprofayile</string>
+    <string name="profile_edit_row_subtitle">Hlaziya igama lakho</string>
+    <string name="profile_edit_screen_title">Hlela Iprofayile</string>
+    <string name="profile_edit_save_cta">Gcina</string>
+
     <string name="language_modal_title">Tshintsha ulwimi</string>
 
     <string name="offline_dialog_title">Akukho luqhagamshelwano lwe-intanethi</string>

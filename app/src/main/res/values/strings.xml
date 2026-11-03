@@ -295,6 +295,12 @@
     <string name="profile_chevron_glyph" translatable="false">›</string>
     <string name="profile_logout">Log out</string>
 
+    <!-- Edit profile screen (PR 9), see EditProfileScreen -->
+    <string name="profile_edit_row_title">Edit profile</string>
+    <string name="profile_edit_row_subtitle">Update your name</string>
+    <string name="profile_edit_screen_title">Edit Profile</string>
+    <string name="profile_edit_save_cta">Save</string>
+
     <!-- Biometric app-unlock overlay, shown when Settings' "Biometric
          login" is enabled and the app resumes from the background. -->
     <string name="biometric_lock_title">Unlock Waypoint</string>
