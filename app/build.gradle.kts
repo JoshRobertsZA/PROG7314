@@ -67,8 +67,8 @@ android {
         targetSdk = 36
         // assigns `versionCode` the value `1`
         versionCode = 1
-        // assigns `versionName` the value `"1.0"`
-        versionName = "1.0"
+        // assigns `versionName` the value `"1.0.0"`
+        versionName = "1.0.0"
 
         // assigns `testInstrumentationRunner` the value `"androidx.test.runner.AndroidJUnitRunner"`
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
