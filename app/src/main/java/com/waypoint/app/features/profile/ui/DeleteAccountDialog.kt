@@ -69,13 +69,20 @@ fun DeleteAccountDialog(
                     )
                 } else {
                     if (requiresPassword) {
+                        Text(
+                            text = stringResource(R.string.profile_delete_password_label),
+                            color = WaypointTextMuted,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(top = 12.dp),
+                        )
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
-                            placeholder = { Text(stringResource(R.string.auth_password_hint)) },
+                            placeholder = { Text(stringResource(R.string.auth_password_label)) },
                             singleLine = true,
                             visualTransformation = PasswordVisualTransformation(),
-                            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
                         )
                     }
 
