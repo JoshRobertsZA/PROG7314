@@ -1417,6 +1417,21 @@ const openapiSpec = {
       },
     },
 
+    '/account': {
+      delete: {
+        tags: ['Account'],
+        summary: "Delete the caller's account data",
+        description:
+          "Cascades through every trip the caller owns (and that trip's itinerary children) and " +
+          'every device token registered to the caller. Does not delete the Firebase Auth user ' +
+          'itself - the client deletes that separately, after this succeeds.',
+        responses: {
+          200: jsonRes('Deleted', 'Deleted'),
+          ...authErrors,
+        },
+      },
+    },
+
     '/notify/test': {
       post: {
         tags: ['Notify'],

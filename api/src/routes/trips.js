@@ -250,3 +250,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
 
 // assigns `module.exports` the value `router`
 module.exports = router;
+// Reused by routes/account.js, which cascades the same way across every
+// trip the caller owns instead of just one.
+module.exports.deleteDocsInBatches = deleteDocsInBatches;
+module.exports.deleteByQuery = deleteByQuery;
