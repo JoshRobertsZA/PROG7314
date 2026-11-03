@@ -1,6 +1,9 @@
 // declares that this file belongs to the package `com.waypoint.app.features.settings.ui`
 package com.waypoint.app.features.settings.ui
 
+// imports `com.waypoint.app.core.network.UsageSnapshot` for use in this file
+import com.waypoint.app.core.network.UsageSnapshot
+
 // Outcome of tapping "send test notification" - drives what the row's
 // trailing text shows. Idle before/after a result has been shown for a
 // while isn't distinguished from NeverSent; both just show nothing.
@@ -16,5 +19,7 @@ data class SettingsUiState(
     val totalTrips: Int = 0,
     val pendingChangeCount: Int = 0,
     val testNotificationState: TestNotificationState = TestNotificationState.IDLE,
+    // usage of each guarded API; stays empty when CounterAPI is not configured or cannot be read
+    val apiUsage: List<UsageSnapshot> = emptyList(),
 // closes the multi-line argument list started above
 )

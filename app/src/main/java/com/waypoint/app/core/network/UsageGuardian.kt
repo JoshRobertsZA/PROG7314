@@ -39,8 +39,16 @@ data class UsageSnapshot(
     val dailyCount: Int,
     // continues the statement started above: `val monthlyCount: Int,`
     val monthlyCount: Int,
-// closes the multi-line argument list started above
-)
+// ends the argument list and opens the body that holds the computed values
+) {
+    // declares read-only property `limit`, the limit that applies to this API: the daily one when it has one, otherwise the monthly one
+    val limit: Int get() = api.dailyLimit ?: api.monthlyLimit ?: 0
+    // declares read-only property `used`, the count that is measured against `limit`
+    val used: Int get() = if (api.dailyLimit != null) dailyCount else monthlyCount
+    // declares read-only property `fraction`, how much of the limit is used, from 0 to 1
+    val fraction: Float get() = if (limit == 0) 0f else (used.toFloat() / limit).coerceIn(0f, 1f)
+// closes the body of `UsageSnapshot`
+}
 
 // declares object `UsageGuardian` and opens its body
 object UsageGuardian {

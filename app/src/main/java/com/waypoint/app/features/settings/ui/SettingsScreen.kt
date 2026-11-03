@@ -50,6 +50,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 // imports `androidx.compose.foundation.verticalScroll` for use in this file
 import androidx.compose.foundation.verticalScroll
 // imports `androidx.compose.material3.Text` for use in this file
+// imports `androidx.compose.material3.LinearProgressIndicator` for use in this file
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 // imports `androidx.compose.runtime.Composable` for use in this file
 import androidx.compose.runtime.Composable
@@ -117,6 +119,10 @@ import com.waypoint.app.core.notifications.PushNotifier
 // imports `com.waypoint.app.core.locale.AppLanguage` for use in this file
 import com.waypoint.app.core.locale.AppLanguage
 // imports `com.waypoint.app.core.theme.RadiusButton` for use in this file
+// imports `com.waypoint.app.core.network.GuardedApi` for use in this file
+import com.waypoint.app.core.network.GuardedApi
+// imports `com.waypoint.app.core.network.UsageSnapshot` for use in this file
+import com.waypoint.app.core.network.UsageSnapshot
 import com.waypoint.app.core.theme.RadiusButton
 // imports `com.waypoint.app.core.theme.RadiusRow` for use in this file
 import com.waypoint.app.core.theme.RadiusRow
@@ -134,6 +140,8 @@ import com.waypoint.app.core.theme.WaypointTerracotta
 import com.waypoint.app.core.theme.WaypointTextMuted
 // imports `com.waypoint.app.core.theme.WaypointTextPrimary` for use in this file
 import com.waypoint.app.core.theme.WaypointTextPrimary
+// imports `com.waypoint.app.core.theme.WaypointTripBadgeText` for use in this file
+import com.waypoint.app.core.theme.WaypointTripBadgeText
 
 // annotation `@Composable` applied to the declaration that follows
 @Composable
@@ -153,7 +161,7 @@ fun SettingsScreen(
     // declares read-only property `uiState`, delegated to `viewModel.uiState.collectAsState()`
     val uiState by viewModel.uiState.collectAsState()
     // calls `LaunchedEffect` with arguments `(Unit)`
-    LaunchedEffect(Unit) { viewModel.loadTripCounts() }
+    LaunchedEffect(Unit) { viewModel.loadTripCounts(); viewModel.loadApiUsage() }
 
     // declares mutable property `selectedLanguage`, delegated to `remember { mutableStateOf(AppLanguage.c…`
     var selectedLanguage by remember { mutableStateOf(AppLanguage.current()) }
@@ -288,6 +296,22 @@ fun SettingsScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 8.dp).fillMaxWidth(),
                 )
+            }
+
+            // `if` statement: the section only shows when usage could be read, so it stays hidden when CounterAPI is not configured
+            if (uiState.apiUsage.isNotEmpty()) {
+                // calls `Text` with an argument list that continues on the following lines
+                Text(
+                    text = "API budget",
+                    color = WaypointTextPrimary,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(top = 20.dp),
+                // closes the multi-line argument list started above
+                )
+                // draws one meter per guarded API
+                uiState.apiUsage.forEach { snapshot -> ApiBudgetMeter(snapshot) }
+            // closes the if block
             }
 
             // calls `Text` with an argument list that continues on the following lines
@@ -920,4 +944,36 @@ private fun ChevronValue(value: String, modifier: Modifier = Modifier) {
     // closes the lambda passed to `Row`
     }
 // closes the function `ChevronValue`
+}
+// annotation `@Composable` applied to the declaration that follows
+@Composable
+// declares private function `ApiBudgetMeter` taking one parameter (`snapshot`); shows a label, a progress bar and "used / limit" for one API
+private fun ApiBudgetMeter(snapshot: UsageSnapshot) {
+    // declares read-only property `label`, the display name of the API
+    val label = if (snapshot.api == GuardedApi.LOCATIONIQ) "LocationIQ places" else "AirLabs flights"
+    // declares read-only property `period`, whether the limit is per day or per month
+    val period = if (snapshot.api.dailyLimit != null) "today" else "this month"
+    // declares read-only property `barColor`, terracotta once the budget is 90% used and a calmer colour before that
+    val barColor = if (snapshot.fraction >= 0.9f) WaypointTerracotta else WaypointTripBadgeText
+    // opens a vertical stack for the meter
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
+        // row holding the label on the left and the numbers on the right
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            // the API name
+            Text(label, color = WaypointTextPrimary, fontSize = 13.sp)
+            // the numbers, for example "1,204 / 5,000 today"
+            Text("${snapshot.used} / ${snapshot.limit} $period", color = WaypointTextMuted, fontSize = 12.sp)
+        // closes the row
+        }
+        // the progress bar showing how much of the limit is used
+        LinearProgressIndicator(
+            progress = { snapshot.fraction },
+            color = barColor,
+            trackColor = WaypointBorderSoft,
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+        // closes the multi-line argument list started above
+        )
+    // closes the column
+    }
+// closes the function `ApiBudgetMeter`
 }
