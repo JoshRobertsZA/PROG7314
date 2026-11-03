@@ -184,7 +184,7 @@ fun NotificationsScreen(
             if (uiState.items.isNotEmpty()) {
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
-                    // continues the statement started above: `text = "Clear All",`
+                    // continues the statement started above: `text = stringResource(R.string.notifications_clear_all),`
                     text = "Clear All",
                     // continues the statement started above: `color = WaypointTerracotta,`
                     color = WaypointTerracotta,

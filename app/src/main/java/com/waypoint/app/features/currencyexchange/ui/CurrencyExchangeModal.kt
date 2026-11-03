@@ -259,10 +259,10 @@ fun CurrencyExchangeModal(
                     BasicTextField(
                         // continues the statement started above: `value = amountText,`
                         value = amountText,
-                        // continues the statement started above: `onValueChange = { amountText = it.filter { c -> c.isDigit() || c == '.' } },`
-                        onValueChange = { amountText = it.filter { c -> c.isDigit() || c == '.' } },
-                        // continues the statement started above: `keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),`
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        // continues the statement started above: `onValueChange = { amountText = sanitizeAmountInput(it) },`
+                        onValueChange = { amountText = sanitizeAmountInput(it) },
+                        // continues the statement started above: `keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),`
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         // continues the statement started above: `singleLine = true,`
                         singleLine = true,
                         // continues the statement started above: `textStyle = TextStyle(`
