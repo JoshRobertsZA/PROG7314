@@ -203,8 +203,8 @@ android {
             }
             // opens a block after `optimization`
             optimization {
-                // assigns `enable` the value `false`
-                enable = false
+                // assigns `enable` the value `true`; turns on R8 code shrinking and obfuscation and resource shrinking for the release build, with the extra keep rules in src/main/keepRules/waypoint.keep
+                enable = true
                 // closes the block
             }
             // closes the block

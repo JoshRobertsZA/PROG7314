@@ -1,0 +1,21 @@
+# R8 keep rules for the Waypoint release build.
+# The default Android rules are added automatically by the optimization block
+# in app/build.gradle.kts, and most libraries (Firebase, OkHttp, Retrofit,
+# Coil, WorkManager, Credentials) ship their own rules. The rules below only
+# cover what this app does by name.
+
+# Keep file names and line numbers so crash stack traces from the release
+# build can be read.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+# WorkManager creates workers from their class name, so the names and the
+# (Context, WorkerParameters) constructors must survive.
+-keep class com.waypoint.app.core.notifications.TripReminderWorker { <init>(...); }
+-keep class com.waypoint.app.core.sync.SyncWorker { <init>(...); }
+
+# The push service is started by Android through the manifest.
+-keep class com.waypoint.app.core.notifications.WaypointMessagingService
+
+# The BuildConfig fields are read by name in a few places.
+-keep class com.waypoint.app.BuildConfig { *; }
