@@ -10,7 +10,7 @@
 # Optional env: TRACKED_JOBS (comma-separated job display names)
 set -euo pipefail
 
-TRACKED_JOBS="${TRACKED_JOBS:-Lint,Unit Tests,Assemble Debug APK}"
+TRACKED_JOBS="${TRACKED_JOBS:-Lint,Unit Tests,Assemble Debug APK,API Tests,Assemble Release APK}"
 IFS=',' read -r -a TRACKED <<< "$TRACKED_JOBS"
 TOTAL=${#TRACKED[@]}
 
