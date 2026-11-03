@@ -33,6 +33,7 @@ specification is at
   - [REST API - Google Cloud Run](#rest-api---google-cloud-run)
 - [Cloud Data Verification](#cloud-data-verification)
 - [Screenshots](#screenshots)
+- [Play Store Preparation](#play-store-preparation)
 - [Demo Video](#demo-video)
 - [Running the Project Locally](#running-the-project-locally)
 - [AI Usage](#ai-usage)
@@ -243,6 +244,18 @@ The app follows the phone's dark mode setting.
 | Home (currency converter) | Itinerary (flight status) | Profile |
 |---|---|---|
 | ![Home in dark mode](assets/dark/home.png) | ![Itinerary in dark mode](assets/dark/itinerary.png) | ![Profile in dark mode](assets/dark/profile.png) |
+
+---
+
+## Play Store Preparation
+
+The release build is minified with R8, signed with a private upload keystore (kept out of git, see `keystore.properties.example`) and versioned `1.0.0`. Store text, the privacy policy and the Data safety answers are in [`docs/store`](docs/store).
+
+| Signing key | Release variant | Build successful | Signed APK file |
+|---|---|---|---|
+| ![Signing key](assets/release/05-signing-apk.png) | ![Release variant](assets/release/06-release-variant-apk.png) | ![Build successful](assets/release/07-apk-built.png) | ![APK file](assets/release/08-apk-file.png) |
+
+The signed Android App Bundle build is documented in [`assets/release`](assets/release) (images 01 to 04). Store graphics are in [`assets/store`](assets/store).
 
 ---
 
