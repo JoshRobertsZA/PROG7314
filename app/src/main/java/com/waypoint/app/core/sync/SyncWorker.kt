@@ -8,6 +8,11 @@ import com.waypoint.app.core.auth.AuthRepository
 import com.waypoint.app.core.network.WaypointApiRepository
 import com.waypoint.app.core.notifications.PushTokenManager
 
+// A 4xx means the server rejected the change and retrying will not help, except for an
+// expired token (401), a timeout (408) and rate limiting (429), which can succeed later.
+internal fun isPermanentFailure(httpStatus: Int): Boolean =
+    httpStatus in 400..499 && httpStatus != 401 && httpStatus != 408 && httpStatus != 429
+
 // Drains the local sync outbox: sends each pending entry to the API in the
 // order OutboxRepository.peekAll() returns (parents before children, then
 // oldest first), acking on success. WorkManager's own NetworkType.CONNECTED
@@ -38,7 +43,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
             )
             when {
                 result.successful -> outbox.ack(entry.id)
-                result.httpStatus in 400..499 -> {
+                isPermanentFailure(result.httpStatus) -> {
                     // A 4xx means the request itself is wrong (bad id,
                     // validation failure, ownership conflict...) - retrying
                     // the exact same payload will never succeed, so this
