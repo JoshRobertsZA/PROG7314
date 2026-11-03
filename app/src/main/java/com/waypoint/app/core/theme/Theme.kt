@@ -71,16 +71,14 @@ fun WaypointTheme(darkTheme: Boolean = ThemePreferences.override ?: isSystemInDa
         typography = WaypointTypography,
     // opens the content block of `MaterialTheme`
     ) {
-        // `if` statement: in dark mode text with no colour set uses the cream text colour instead of black; light mode is unchanged
-        if (darkTheme) {
-            // provides the cream colour as the default content colour for everything below
-            CompositionLocalProvider(LocalContentColor provides WaypointTextPrimary, content = content)
-        // `else` branch: light mode keeps its existing behaviour
-        } else {
-            // draws the content as it was
-            content()
-        // closes the else block
-        }
+        // provides the default text colour with the same structure in both modes, so switching theme redraws the screens instead of rebuilding them: cream in dark mode, unchanged in light mode
+        CompositionLocalProvider(
+            // continues the statement started above: the colour used by text that sets none
+            LocalContentColor provides if (darkTheme) WaypointTextPrimary else LocalContentColor.current,
+            // continues the statement started above: the app content
+            content = content,
+        // closes the multi-line argument list started above
+        )
     // closes the content block
     }
 // closes the function `WaypointTheme`
