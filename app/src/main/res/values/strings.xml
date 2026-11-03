@@ -479,4 +479,10 @@
     <string name="currency_modal_market_rate">Market Rate</string>
     <string name="explore_results_near">Results near %1$s</string>
     <string name="place_picker_empty">No %1$s found near your destination.</string>
+    <string name="api_budget_header">API budget</string>
+    <string name="api_budget_locationiq">LocationIQ places</string>
+    <string name="api_budget_airlabs">AirLabs flights</string>
+    <string name="api_budget_today">today</string>
+    <string name="api_budget_this_month">this month</string>
+    <string name="flight_status_limit_reached">Flight status limit reached for this month, try again later</string>
 </resources>

@@ -66,6 +66,17 @@ object AirLabsRepository {
         // `if` statement: executes `return@withContext null` when `iata.isBlank()` is true
         if (iata.isBlank()) return@withContext null
 
+        // `if` statement: the block below runs when the guardian says the AirLabs monthly budget is used up
+        if (!UsageGuardian.isAllowed(GuardedApi.AIRLABS)) {
+            // calls `w` on `Log` with arguments `(TAG, "AirLabs budget used up -- skipping call for $iata")`
+            Log.w(TAG, "AirLabs budget used up -- skipping call for $iata")
+            // expression: `return@withContext null`
+            return@withContext null
+        // closes the if block
+        }
+        // calls `recordUse` on `UsageGuardian` with arguments `(GuardedApi.AIRLABS)`, counting this request before it is sent
+        UsageGuardian.recordUse(GuardedApi.AIRLABS)
+
         // `try` block: exceptions thrown inside are handled by the `catch` below
         try {
             // declares read-only property `url`, initialised to the string literal "https://airlabs.co/api/v9/schedules?fl…
@@ -136,6 +147,17 @@ object AirLabsRepository {
         val iata = flightNumber.replace(" ", "").uppercase()
         // `if` statement: executes `return@withContext null` when `iata.isBlank()` is true
         if (iata.isBlank()) return@withContext null
+
+        // `if` statement: the block below runs when the guardian says the AirLabs monthly budget is used up
+        if (!UsageGuardian.isAllowed(GuardedApi.AIRLABS)) {
+            // calls `w` on `Log` with arguments `(TAG, "AirLabs budget used up -- skipping call for $iata")`
+            Log.w(TAG, "AirLabs budget used up -- skipping call for $iata")
+            // expression: `return@withContext null`
+            return@withContext null
+        // closes the if block
+        }
+        // calls `recordUse` on `UsageGuardian` with arguments `(GuardedApi.AIRLABS)`, counting this request before it is sent
+        UsageGuardian.recordUse(GuardedApi.AIRLABS)
 
         // `try` block: exceptions thrown inside are handled by the `catch` below
         try {

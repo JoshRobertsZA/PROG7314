@@ -390,4 +390,10 @@
     <string name="currency_modal_market_rate">Izinga lemakethe</string>
     <string name="explore_results_near">Imiphumela eseduze ne-%1$s</string>
     <string name="place_picker_empty">Akukho %1$s okutholakele eduze nendawo oya kuyo.</string>
+    <string name="api_budget_header">Isabelo se-API</string>
+    <string name="api_budget_locationiq">Izindawo ze-LocationIQ</string>
+    <string name="api_budget_airlabs">Izindiza ze-AirLabs</string>
+    <string name="api_budget_today">namuhla</string>
+    <string name="api_budget_this_month">kule nyanga</string>
+    <string name="flight_status_limit_reached">Umkhawulo wesimo sendiza ufikiwe kule nyanga, zama futhi kamuva</string>
 </resources>

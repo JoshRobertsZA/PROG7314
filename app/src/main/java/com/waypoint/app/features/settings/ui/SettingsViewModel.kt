@@ -9,6 +9,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 // imports `com.waypoint.app.core.db.SessionManager` for use in this file
 import com.waypoint.app.core.db.SessionManager
+// imports `com.waypoint.app.core.network.GuardedApi` for use in this file
+import com.waypoint.app.core.network.GuardedApi
+// imports `com.waypoint.app.core.network.UsageGuardian` for use in this file
+import com.waypoint.app.core.network.UsageGuardian
+// imports `com.waypoint.app.core.secrets.RemoteSecrets` for use in this file
+import com.waypoint.app.core.secrets.RemoteSecrets
 // imports `com.waypoint.app.features.newtrip.data.TripRepository` for use in this file
 import com.waypoint.app.features.newtrip.data.TripRepository
 import com.waypoint.app.core.sync.OutboxRepository
@@ -39,6 +45,8 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     init {
         // calls `loadTripCounts` with arguments `()`
         loadTripCounts()
+        // calls `loadApiUsage` with arguments `()`
+        loadApiUsage()
     // closes the init block
     }
 
@@ -75,5 +83,19 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     // closes the function `loadTripCounts`
     }
 
+    // declares function `loadApiUsage` taking no parameters; reads how much of each guarded API's quota is used for the profile meters
+    fun loadApiUsage() {
+        // launches a coroutine in the view model's scope
+        viewModelScope.launch {
+            // makes sure the CounterAPI key has been fetched
+            RemoteSecrets.ensureLoaded()
+            // declares read-only property `snapshots`, the usage of every guarded API that could be read
+            val snapshots = GuardedApi.values().mapNotNull { UsageGuardian.readCounts(it) }
+            // stores the snapshots in the UI state
+            _uiState.update { it.copy(apiUsage = snapshots) }
+        // closes the coroutine block
+        }
+    // closes the function `loadApiUsage`
+    }
 // closes the class `SettingsViewModel`
 }
