@@ -183,10 +183,59 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         run: bash .github/scripts/notify-job.sh
 
+  release-build:
+    name: Assemble Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # keystore.properties is not in the repo, so this builds an unsigned
+      # release APK. It still runs R8, which is what catches stripped classes.
+      - name: Assemble unsigned release APK
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-unsigned
+          path: app/build/outputs/apk/release/*.apk
+          retention-days: 7
+
+      - name: Upload R8 mapping file
+        uses: actions/upload-artifact@v4
+        with:
+          name: r8-mapping
+          path: app/build/outputs/mapping/release/mapping.txt
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Notify job complete
+        if: always()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_NAME: Assemble Release APK
+          JOB_STATUS: ${{ job.status }}
+        run: bash .github/scripts/notify-job.sh
+
   notify:
     name: Notify Discord
     runs-on: ubuntu-latest
-    needs: [lint, test, build, api-test]
+    needs: [lint, test, build, api-test, release-build]
     if: always()
 
     steps:
@@ -197,10 +246,11 @@ jobs:
           TEST_STATUS: ${{ needs.test.result }}
           BUILD_STATUS: ${{ needs.build.result }}
           API_TEST_STATUS: ${{ needs.api-test.result }}
+          RELEASE_STATUS: ${{ needs.release-build.result }}
           BRANCH: ${{ github.ref_name }}
           ACTOR: ${{ github.actor }}
         run: |
-          if [ "$LINT_STATUS" = "success" ] && [ "$TEST_STATUS" = "success" ] && [ "$BUILD_STATUS" = "success" ] && [ "$API_TEST_STATUS" = "success" ]; then
+          if [ "$LINT_STATUS" = "success" ] && [ "$TEST_STATUS" = "success" ] && [ "$BUILD_STATUS" = "success" ] && [ "$API_TEST_STATUS" = "success" ] && [ "$RELEASE_STATUS" = "success" ]; then
             COLOR=3066993
             EMOJI="✅"
             OVERALL="success"
@@ -223,8 +273,8 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{
               \"embeds\": [{
-                \"title\": \"$EMOJI $REF_LABEL · Android CI $OVERALL (4/4)\",
-                \"description\": \"**Branch:** $BRANCH\\n**Triggered by:** $ACTOR\\n\\n$(status_emoji "$LINT_STATUS") Lint\\n$(status_emoji "$TEST_STATUS") Unit Tests\\n$(status_emoji "$BUILD_STATUS") Build\\n$(status_emoji "$API_TEST_STATUS") API Tests\\n\\n[View run]($RUN_URL)\",
+                \"title\": \"$EMOJI $REF_LABEL · Android CI $OVERALL (5/5)\",
+                \"description\": \"**Branch:** $BRANCH\\n**Triggered by:** $ACTOR\\n\\n$(status_emoji "$LINT_STATUS") Lint\\n$(status_emoji "$TEST_STATUS") Unit Tests\\n$(status_emoji "$BUILD_STATUS") Build\\n$(status_emoji "$API_TEST_STATUS") API Tests\\n$(status_emoji "$RELEASE_STATUS") Release Build\\n\\n[View run]($RUN_URL)\",
                 \"color\": $COLOR
               }]
             }"
