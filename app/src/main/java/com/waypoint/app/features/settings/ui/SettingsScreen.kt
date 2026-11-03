@@ -302,7 +302,7 @@ fun SettingsScreen(
             if (uiState.apiUsage.isNotEmpty()) {
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
-                    text = "API budget",
+                    text = stringResource(R.string.api_budget_header),
                     color = WaypointTextPrimary,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -950,9 +950,9 @@ private fun ChevronValue(value: String, modifier: Modifier = Modifier) {
 // declares private function `ApiBudgetMeter` taking one parameter (`snapshot`); shows a label, a progress bar and "used / limit" for one API
 private fun ApiBudgetMeter(snapshot: UsageSnapshot) {
     // declares read-only property `label`, the display name of the API
-    val label = if (snapshot.api == GuardedApi.LOCATIONIQ) "LocationIQ places" else "AirLabs flights"
+    val label = stringResource(if (snapshot.api == GuardedApi.LOCATIONIQ) R.string.api_budget_locationiq else R.string.api_budget_airlabs)
     // declares read-only property `period`, whether the limit is per day or per month
-    val period = if (snapshot.api.dailyLimit != null) "today" else "this month"
+    val period = stringResource(if (snapshot.api.dailyLimit != null) R.string.api_budget_today else R.string.api_budget_this_month)
     // declares read-only property `barColor`, terracotta once the budget is 90% used and a calmer colour before that
     val barColor = if (snapshot.fraction >= 0.9f) WaypointTerracotta else WaypointTripBadgeText
     // opens a vertical stack for the meter

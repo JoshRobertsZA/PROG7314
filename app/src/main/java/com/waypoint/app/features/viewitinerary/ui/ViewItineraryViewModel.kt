@@ -10,6 +10,7 @@ import androidx.lifecycle.SavedStateHandle
 // imports `androidx.lifecycle.viewModelScope` for use in this file
 import androidx.lifecycle.viewModelScope
 // imports `com.waypoint.app.features.edititinerary.data.ItineraryRepository` for use in this file
+import com.waypoint.app.R
 import com.waypoint.app.features.edititinerary.data.ItineraryRepository
 // imports `kotlinx.coroutines.flow.MutableStateFlow` for use in this file
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -215,8 +216,8 @@ class ViewItineraryViewModel(
                         it.copy(
                             // continues the statement started above: `flightStatus = if (lastKnown != null) FlightStatusState.Success(lastKnown)`
                             flightStatus = if (lastKnown != null) FlightStatusState.Success(lastKnown)
-                                           // continues the statement started above: `else FlightStatusState.Error("Flight status limit reached for this month, try again later"),`
-                                           else FlightStatusState.Error("Flight status limit reached for this month, try again later"),
+                                           // continues the statement started above: `else FlightStatusState.Error(getApplication<Application>().getString(R.string.flight_status_limit_reached)),`
+                                           else FlightStatusState.Error(getApplication<Application>().getString(R.string.flight_status_limit_reached)),
                         // closes the multi-line argument list started above
                         )
                     // closes the block

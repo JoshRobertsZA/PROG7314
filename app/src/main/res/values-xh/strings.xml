@@ -338,4 +338,10 @@
     <string name="currency_modal_market_rate">Ireyithi yentengiso</string>
     <string name="explore_results_near">Iziphumo ezikufutshane ne-%1$s</string>
     <string name="place_picker_empty">Akukho %1$s ifunyenweyo kufutshane nendawo oya kuyo.</string>
+    <string name="api_budget_header">Ibhajethi ye-API</string>
+    <string name="api_budget_locationiq">Iindawo ze-LocationIQ</string>
+    <string name="api_budget_airlabs">Iinqwelo-moya ze-AirLabs</string>
+    <string name="api_budget_today">namhlanje</string>
+    <string name="api_budget_this_month">kule nyanga</string>
+    <string name="flight_status_limit_reached">Umda wemeko yenqwelo-moya ufikelelwe kule nyanga, zama kwakhona kamva</string>
 </resources>
