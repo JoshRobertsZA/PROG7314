@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "287180570190-efuh6s3hrh0tfrje0olal3ubehjdnlqd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.waypoint.app",
+            "certificate_hash": "29f118a6bf8b259f192037983392bc872936cd2d"
+          }
+        },
+        {
           "client_id": "287180570190-qh6n4g28dsu6mi7jthgldvvbn70063f1.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

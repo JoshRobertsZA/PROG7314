@@ -28,6 +28,7 @@ local.properties
 
 # API keys / secrets - never commit these
 apikey.properties
+keystore.properties
 secrets.properties
 /secrets/
 
@@ -47,3 +48,4 @@ secrets.properties
 
 # Windows
 Thumbs.db
+Key Store Password.txt
