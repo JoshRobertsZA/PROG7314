@@ -2,6 +2,10 @@
 package com.waypoint.app.core.network
 
 // imports `android.util.Log` for use in this file
+// imports `android.content.Context` for use in this file
+import android.content.Context
+// imports `android.content.SharedPreferences` for use in this file
+import android.content.SharedPreferences
 import android.util.Log
 // imports `com.waypoint.app.BuildConfig` for use in this file
 import com.waypoint.app.BuildConfig
@@ -106,15 +110,45 @@ object UsageGuardian {
     // closes the function `currentSnapshot`
     }
 
-    // declares function `dailyCounterName` taking 2 parameters (`api`, `date`), returning `String`; one counter per API per UTC day, for example `wp-airlabs-d-20261103`
-    fun dailyCounterName(api: GuardedApi, date: LocalDate = LocalDate.now(ZoneOffset.UTC)): String =
-        // continues the statement started above: `"wp-${api.slug}-d-${date.format(DateTimeFormatter.BASIC_ISO_DATE)}"`
-        "wp-${api.slug}-d-${date.format(DateTimeFormatter.BASIC_ISO_DATE)}"
+    // declares private property `prefs` holding the phone's saved window baselines; null until `init` has run
+    private var prefs: SharedPreferences? = null
 
-    // declares function `monthlyCounterName` taking 2 parameters (`api`, `date`), returning `String`; one counter per API per UTC month, for example `wp-airlabs-m-202611`
-    fun monthlyCounterName(api: GuardedApi, date: LocalDate = LocalDate.now(ZoneOffset.UTC)): String =
-        // continues the statement started above: `"wp-${api.slug}-m-%04d%02d".format(date.year, date.monthValue)`
-        "wp-${api.slug}-m-%04d%02d".format(date.year, date.monthValue)
+    // declares function `init` taking one parameter (`context`); called once from the Application so the guardian can remember where each day or month started
+    fun init(context: Context) {
+        // opens the private preferences file the baselines are saved in
+        prefs = context.applicationContext.getSharedPreferences("usage_guardian_prefs", Context.MODE_PRIVATE)
+    // closes the function `init`
+    }
+
+    // declares function `counterName` taking one parameter (`api`), returning `String`; one fixed counter per API that is created once in the CounterAPI dashboard, for example `wp-airlabs`
+    fun counterName(api: GuardedApi): String = "wp-${api.slug}"
+
+    // declares function `windowKey` taking 2 parameters (`api`, `date`), returning `String`; names the current window, the UTC day for an API with a daily limit and the UTC month otherwise
+    fun windowKey(api: GuardedApi, date: LocalDate = LocalDate.now(ZoneOffset.UTC)): String =
+        // continues the statement started above: the day as `20261103` or the month as `202611`
+        if (api.dailyLimit != null) date.format(DateTimeFormatter.BASIC_ISO_DATE) else "%04d%02d".format(date.year, date.monthValue)
+
+    // declares function `windowedUsage` taking 2 parameters (`total`, `baseline`), returning `Int`; how much was used since the window started, never below 0
+    fun windowedUsage(total: Int, baseline: Int): Int = (total - baseline).coerceAtLeast(0)
+
+    // declares private function `usedInWindow` taking 2 parameters (`api`, `total`), returning `Int`; compares the counter's running total with the total this phone saw when the current day or month began
+    private fun usedInWindow(api: GuardedApi, total: Int): Int {
+        // declares read-only property `store`, returning 0 from the function when `init` has not run
+        val store = prefs ?: return 0
+        // declares read-only property `key`, the saved baseline for this API and this window
+        val key = "baseline_${api.slug}_${windowKey(api)}"
+        // `if` statement: the block below runs the first time this window is seen, so today's total becomes the starting point
+        if (!store.contains(key)) {
+            // saves the total as the baseline for this window
+            store.edit().putInt(key, total).apply()
+            // returns 0 because nothing has been counted in this window yet
+            return 0
+        // closes the if block
+        }
+        // returns the usage since the baseline
+        return windowedUsage(total, store.getInt(key, total))
+    // closes the function `usedInWindow`
+    }
 
     // declares function `parseCount` taking 1 parameter (`body`), returning `Int?`; reads the counter value from a CounterAPI response, trying the field names it may use, and returns null when none is found
     fun parseCount(body: String): Int? {
@@ -154,10 +188,14 @@ object UsageGuardian {
         // closes the if block
         }
 
-        // declares read-only property `daily`, read only when the API has a daily limit, returning null from the function when the read fails
-        val daily = if (api.dailyLimit != null) getCount(workspace, token, dailyCounterName(api)) ?: return null else 0
-        // declares read-only property `monthly`, read only when the API has a monthly limit, returning null from the function when the read fails
-        val monthly = if (api.monthlyLimit != null) getCount(workspace, token, monthlyCounterName(api)) ?: return null else 0
+        // declares read-only property `total`, the running total of the API's counter, returning null from the function when the read fails
+        val total = getCount(workspace, token, counterName(api)) ?: return null
+        // declares read-only property `used`, how much of that total was used in the current day or month
+        val used = usedInWindow(api, total)
+        // declares read-only property `daily`, the usage when the API has a daily limit
+        val daily = if (api.dailyLimit != null) used else 0
+        // declares read-only property `monthly`, the usage when the API has a monthly limit
+        val monthly = if (api.monthlyLimit != null) used else 0
         // returns a `UsageSnapshot` with the daily and monthly counts from the current function
         return UsageSnapshot(api, daily, monthly)
     // closes the function `readCounts`
@@ -189,16 +227,14 @@ object UsageGuardian {
 
         // `repeat` loop: runs the block below `count` times, one CounterAPI increment per request made to the guarded API
         repeat(count) {
-            // `if` statement: executes the daily increment when the API has a daily limit
-            if (api.dailyLimit != null) increment(workspace, token, dailyCounterName(api))
-            // `if` statement: executes the monthly increment when the API has a monthly limit
-            if (api.monthlyLimit != null) increment(workspace, token, monthlyCounterName(api))
+            // calls `increment` on the API's single running counter
+            increment(workspace, token, counterName(api))
         // closes the repeat block
         }
     // closes the function `recordUse`
     }
 
-    // declares private suspend function `getCount` taking 3 parameters (`workspace`, `token`, `name`), returning `Int?`; a counter that does not exist yet (HTTP 404) counts as 0 and any other failure returns null
+    // declares private suspend function `getCount` taking 3 parameters (`workspace`, `token`, `name`), returning `Int?`; returns the counter's running total, or null when the counter is missing (HTTP 404) or the read fails
     private suspend fun getCount(workspace: String, token: String, name: String): Int? = withContext(Dispatchers.IO) {
         // `try` block: exceptions thrown inside are handled by the `catch` below
         try {
@@ -212,8 +248,14 @@ object UsageGuardian {
                 .get().build()
             // calls `use` on the response so it is always closed, and opens a lambda / block
             HttpClient.instance.newCall(req).execute().use { resp ->
-                // `if` statement: executes `return@use 0` when `resp.code == 404` is true
-                if (resp.code == 404) return@use 0
+                // `if` statement: the block below runs when the counter does not exist, which means it has to be created in the CounterAPI dashboard
+                if (resp.code == 404) {
+                    // logs how to fix it
+                    Log.w(TAG, "CounterAPI counter $name not found, create it in the dashboard")
+                    // returns null so the guardian fails open
+                    return@use null
+                // closes the if block
+                }
                 // `if` statement: the block below runs when `!resp.isSuccessful` is true
                 if (!resp.isSuccessful) {
                     // calls `w` on `Log` with arguments `(TAG, "CounterAPI read HTTP ${resp.code} for $name")`

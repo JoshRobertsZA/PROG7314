@@ -71,16 +71,32 @@ class UsageGuardianTest {
 
     // marks the next function as a unit test
     @Test
-    // counter names carry the API, the period and a UTC date stamp so a new day or month starts a fresh counter
-    fun counterNames_roll_overPerDayAndMonth() {
-        // a fixed date used for all the name checks
+    // each API has one fixed counter, and the window key rolls over per day for LocationIQ and per month for AirLabs
+    fun counterNamesAreFixed_andWindowsRollOver() {
+        // a fixed date used for all the checks
         val date = LocalDate.of(2026, 3, 7)
-        // daily name uses the full date
-        assertEquals("wp-locationiq-d-20260307", UsageGuardian.dailyCounterName(GuardedApi.LOCATIONIQ, date))
-        // monthly name uses year and zero padded month
-        assertEquals("wp-airlabs-m-202603", UsageGuardian.monthlyCounterName(GuardedApi.AIRLABS, date))
-        // the next day gets a different daily name
-        assertFalse(UsageGuardian.dailyCounterName(GuardedApi.LOCATIONIQ, date) == UsageGuardian.dailyCounterName(GuardedApi.LOCATIONIQ, date.plusDays(1)))
+        // the counters are the fixed names created in the dashboard
+        assertEquals("wp-locationiq", UsageGuardian.counterName(GuardedApi.LOCATIONIQ))
+        // same for AirLabs
+        assertEquals("wp-airlabs", UsageGuardian.counterName(GuardedApi.AIRLABS))
+        // LocationIQ's window is the day
+        assertEquals("20260307", UsageGuardian.windowKey(GuardedApi.LOCATIONIQ, date))
+        // AirLabs' window is the month
+        assertEquals("202603", UsageGuardian.windowKey(GuardedApi.AIRLABS, date))
+        // the next day is a new LocationIQ window
+        assertFalse(UsageGuardian.windowKey(GuardedApi.LOCATIONIQ, date) == UsageGuardian.windowKey(GuardedApi.LOCATIONIQ, date.plusDays(1)))
+        // the next day is still the same AirLabs window
+        assertEquals(UsageGuardian.windowKey(GuardedApi.AIRLABS, date), UsageGuardian.windowKey(GuardedApi.AIRLABS, date.plusDays(1)))
+    }
+
+    // marks the next function as a unit test
+    @Test
+    // usage in a window is the running total minus the total at the start of the window, and never negative
+    fun windowedUsage_isTotalMinusBaseline() {
+        // 1,250 now against a baseline of 1,000 means 250 used
+        assertEquals(250, UsageGuardian.windowedUsage(1_250, 1_000))
+        // a counter that was reset below the baseline counts as 0
+        assertEquals(0, UsageGuardian.windowedUsage(10, 1_000))
     }
 
     // marks the next function as a unit test
