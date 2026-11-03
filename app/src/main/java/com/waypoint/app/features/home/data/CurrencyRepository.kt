@@ -28,24 +28,31 @@ object CurrencyRepository {
     // declares private const read-only property `TAG`, initialised to the string literal "CurrencyRepo"
     private const val TAG = "CurrencyRepo"
 
-    // declares suspend function `getRate` taking 1 parameter (`fromCode`), returning `CurrencyCache?` and opens its body
-    suspend fun getRate(fromCode: String): CurrencyCache? {
+    // declares suspend function `getRate` taking 2 parameters (`fromCode`, `toCode`), returning `CurrencyCache?` and opens its body
+    suspend fun getRate(fromCode: String, toCode: String = "ZAR"): CurrencyCache? {
+        // `if` statement: the block below runs when `fromCode == toCode` is true
+        if (fromCode == toCode) {
+            // returns a rate of 1.0 without calling the API, because converting a currency to itself needs no lookup
+            return CurrencyCache(fromCode, toCode, 1.0, System.currentTimeMillis())
+        // closes the if block
+        }
+
         // declares read-only property `path`, initialised with the result of calling `GitHubCacheRepository.currencyPath(…)`
-        val path = GitHubCacheRepository.currencyPath(fromCode)
+        val path = GitHubCacheRepository.currencyPath(fromCode, toCode)
 
         // declares read-only property `cached`, initialised with the result of calling `readFromCache(…)`
         val cached = readFromCache(path)
         // `if` statement: the block below runs when `cached != null && !cached.isStale()` is true
         if (cached != null && !cached.isStale()) {
-            // calls `d` on `Log` with arguments `(TAG, "Cache hit: $fromCode/ZAR")`
-            Log.d(TAG, "Cache hit: $fromCode/ZAR")
+            // calls `d` on `Log` with arguments `(TAG, "Cache hit: $fromCode/$toCode")`
+            Log.d(TAG, "Cache hit: $fromCode/$toCode")
             // returns `cached` from the current function
             return cached
         // closes the if block
         }
 
         // declares read-only property `fresh`, initialised with the result of calling `fetchFromApi(…)`
-        val fresh = fetchFromApi(fromCode)
+        val fresh = fetchFromApi(fromCode, toCode)
         // `if` statement: the block below runs when `fresh != null` is true
         if (fresh != null) {
             // calls `writeToCache` with arguments `(path, fresh)`
@@ -56,7 +63,7 @@ object CurrencyRepository {
         }
 
         // `if` statement: executes `Log.d(TAG, "Returning stale cache for $fromC…` when `cached != null` is true
-        if (cached != null) Log.d(TAG, "Returning stale cache for $fromCode/ZAR after API failure")
+        if (cached != null) Log.d(TAG, "Returning stale cache for $fromCode/$toCode after API failure")
         // returns `cached` from the current function
         return cached
     // closes the function `getRate`
@@ -72,6 +79,8 @@ object CurrencyRepository {
             CurrencyCache(
                 // continues the statement started above: `fromCode = json.getString("fromCode"),`
                 fromCode    = json.getString("fromCode"),
+                // continues the statement started above: `toCode = json.optString("toCode", "ZAR"),`
+                toCode      = json.optString("toCode", "ZAR"),
                 // continues the statement started above: `rate = json.getDouble("rate"),`
                 rate        = json.getDouble("rate"),
                 // continues the statement started above: `fetchedAtMs = json.getLong("fetchedAtMs"),`
@@ -89,8 +98,8 @@ object CurrencyRepository {
     // closes the function `readFromCache`
     }
 
-    // declares private suspend function `fetchFromApi` taking 1 parameter (`fromCode`), returning `CurrencyCache?`; its body is the expression `withContext(Dispatchers.IO) {`
-    private suspend fun fetchFromApi(fromCode: String): CurrencyCache? = withContext(Dispatchers.IO) {
+    // declares private suspend function `fetchFromApi` taking 2 parameters (`fromCode`, `toCode`), returning `CurrencyCache?`; its body is the expression `withContext(Dispatchers.IO) {`
+    private suspend fun fetchFromApi(fromCode: String, toCode: String): CurrencyCache? = withContext(Dispatchers.IO) {
         // declares read-only property `key`, initialised with the result of calling `RemoteSecrets.get(…)`
         val key = RemoteSecrets.get("EXCHANGERATE_API_KEY", BuildConfig.EXCHANGERATE_API_KEY)
         // `if` statement: executes `{ Log.w(TAG, "No ExchangeRate key"); return@…` when `key.isBlank()` is true
@@ -99,7 +108,7 @@ object CurrencyRepository {
         // `try` block: exceptions thrown inside are handled by the `catch` below
         try {
             // declares read-only property `url`, initialised to the string literal "https://v6.exchangerate-api.com/v6/$ke…
-            val url = "https://v6.exchangerate-api.com/v6/$key/pair/$fromCode/ZAR"
+            val url = "https://v6.exchangerate-api.com/v6/$key/pair/$fromCode/$toCode"
             // declares read-only property `req`, initialised with the result of calling `Request.Builder(…)`
             val req = Request.Builder()
                 // chained call `.url` on the previous result with arguments `(url)`
@@ -113,7 +122,7 @@ object CurrencyRepository {
             // `if` statement: the block below runs when `!resp.isSuccessful` is true
             if (!resp.isSuccessful) {
                 // calls `w` on `Log` with arguments `(TAG, "ExchangeRate-API HTTP ${resp.code} for…)`
-                Log.w(TAG, "ExchangeRate-API HTTP ${resp.code} for $fromCode")
+                Log.w(TAG, "ExchangeRate-API HTTP ${resp.code} for $fromCode/$toCode")
                 // expression: `return@withContext null`
                 return@withContext null
             // closes the if block
@@ -132,6 +141,8 @@ object CurrencyRepository {
             CurrencyCache(
                 // continues the statement started above: `fromCode = fromCode,`
                 fromCode    = fromCode,
+                // continues the statement started above: `toCode = toCode,`
+                toCode      = toCode,
                 // continues the statement started above: `rate = body.getDouble("conversion_rate"),`
                 rate        = body.getDouble("conversion_rate"),
                 // continues the statement started above: `fetchedAtMs = System.currentTimeMillis(),`
@@ -141,7 +152,7 @@ object CurrencyRepository {
         // `catch` block: handles a thrown `Exception` bound to `e`
         } catch (e: Exception) {
             // calls `w` on `Log` with arguments `(TAG, "API fetch error for $fromCode: ${e.mes…)`
-            Log.w(TAG, "API fetch error for $fromCode: ${e.message}")
+            Log.w(TAG, "API fetch error for $fromCode/$toCode: ${e.message}")
             // expression: `null`
             null
         // closes the catch block
@@ -155,6 +166,8 @@ object CurrencyRepository {
         val json = JSONObject().apply {
             // calls `put` with arguments `("fromCode", data.fromCode)`
             put("fromCode",    data.fromCode)
+            // calls `put` with arguments `("toCode", data.toCode)`
+            put("toCode",      data.toCode)
             // calls `put` with arguments `("rate", data.rate)`
             put("rate",        data.rate)
             // calls `put` with arguments `("fetchedAtMs", data.fetchedAtMs)`

@@ -24,6 +24,8 @@ data class HomeUiState(
     val selectedCity: String = "Cape Town",
     // continues the statement started above: `val selectedFromCurrency: String = "USD",`
     val selectedFromCurrency: String = "USD",
+    // continues the statement started above: `val selectedToCurrency: String = "ZAR",`
+    val selectedToCurrency: String = "ZAR",
     // continues the statement started above: `val nearbyPlaces: NearbyState = NearbyState.Idle,`
     val nearbyPlaces: NearbyState = NearbyState.Idle,
     // continues the statement started above: `val upcomingTrip: TripRow? = null,`

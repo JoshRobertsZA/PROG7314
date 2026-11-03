@@ -36,6 +36,8 @@ data class WeatherCache(
 data class CurrencyCache(
     // continues the statement started above: `val fromCode: String,`
     val fromCode: String,
+    // continues the statement started above: `val toCode: String = "ZAR",`
+    val toCode: String = "ZAR",
     // continues the statement started above: `val rate: Double,`
     val rate: Double,
     // continues the statement started above: `val fetchedAtMs: Long,`

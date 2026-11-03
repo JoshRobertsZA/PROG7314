@@ -54,6 +54,10 @@ private const val KEY_CURRENCY = "selected_currency"
 private const val DEFAULT_CITY = "Cape Town"
 // declares private const read-only property `DEFAULT_CURR`, initialised to the string literal "USD"
 private const val DEFAULT_CURR = "USD"
+// declares private const read-only property `KEY_CURRENCY_TO`, initialised to the string literal "selected_currency_to"
+private const val KEY_CURRENCY_TO = "selected_currency_to"
+// declares private const read-only property `DEFAULT_CURR_TO`, initialised to the string literal "ZAR"
+private const val DEFAULT_CURR_TO = "ZAR"
 
 // declares class `HomeViewModel` with a primary constructor taking 1 parameter (`application`), inheriting from `AndroidViewModel(application)` and opens its body
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
@@ -69,6 +73,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             selectedCity         = prefs.getString(KEY_CITY,     DEFAULT_CITY) ?: DEFAULT_CITY,
             // continues the statement started above: `selectedFromCurrency = prefs.getString(KEY_CURRENCY, DEFAUL…`
             selectedFromCurrency = prefs.getString(KEY_CURRENCY, DEFAULT_CURR) ?: DEFAULT_CURR,
+            // continues the statement started above: `selectedToCurrency = prefs.getString(KEY_CURRENCY_TO, DEFAULT_CURR_TO) ?: DEFAULT_CURR_TO,`
+            selectedToCurrency   = prefs.getString(KEY_CURRENCY_TO, DEFAULT_CURR_TO) ?: DEFAULT_CURR_TO,
         // closes the multi-line argument list started above
         ),
     // closes the multi-line argument list started above
@@ -89,8 +95,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             val s = _uiState.value
             // calls `loadWeather` with arguments `(s.selectedCity)`
             loadWeather(s.selectedCity)
-            // calls `loadCurrency` with arguments `(s.selectedFromCurrency)`
-            loadCurrency(s.selectedFromCurrency)
+            // calls `loadCurrency` with arguments `(s.selectedFromCurrency, s.selectedToCurrency)`
+            loadCurrency(s.selectedFromCurrency, s.selectedToCurrency)
             // calls `loadFeaturedTrip` with arguments `()`
             loadFeaturedTrip()
         // closes the block
@@ -118,15 +124,59 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         prefs.edit().putString(KEY_CURRENCY, code).apply()
         // expression: `_uiState.update { it.copy(selectedFromCurrency = code) }`
         _uiState.update { it.copy(selectedFromCurrency = code) }
-        // expression: `viewModelScope.launch { loadCurrency(code) }`
-        viewModelScope.launch { loadCurrency(code) }
+        // expression: `viewModelScope.launch { loadCurrency(code, _uiState.value.selectedToCurrency) }`
+        viewModelScope.launch { loadCurrency(code, _uiState.value.selectedToCurrency) }
     // closes the function `selectFromCurrency`
+    }
+
+    // declares function `selectToCurrency` taking 1 parameter (`code`) and opens its body
+    fun selectToCurrency(code: String) {
+        // calls `edit` on `prefs` with arguments `()`, then chains `.putString(KEY_CURRENCY_TO, code)`, `.apply()`
+        prefs.edit().putString(KEY_CURRENCY_TO, code).apply()
+        // expression: `_uiState.update { it.copy(selectedToCurrency = code) }`
+        _uiState.update { it.copy(selectedToCurrency = code) }
+        // expression: `viewModelScope.launch { loadCurrency(_uiState.value.selectedFromCurrency, code) }`
+        viewModelScope.launch { loadCurrency(_uiState.value.selectedFromCurrency, code) }
+    // closes the function `selectToCurrency`
+    }
+
+    // declares function `swapCurrencies` taking no parameters and opens its body
+    fun swapCurrencies() {
+        // declares read-only property `s`, initialised to `_uiState.value`
+        val s = _uiState.value
+        // calls `edit` on `prefs` with arguments `()`, then chains `.putString(...)` for both saved currencies and `.apply()`
+        prefs.edit()
+            // continues the statement started above: `.putString(KEY_CURRENCY, s.selectedToCurrency)`
+            .putString(KEY_CURRENCY, s.selectedToCurrency)
+            // continues the statement started above: `.putString(KEY_CURRENCY_TO, s.selectedFromCurrency)`
+            .putString(KEY_CURRENCY_TO, s.selectedFromCurrency)
+            // continues the statement started above: `.apply()`
+            .apply()
+        // opens a block after `_uiState.update`
+        _uiState.update {
+            // calls `copy` on `it` with an argument list that continues on the following lines
+            it.copy(
+                // continues the statement started above: `selectedFromCurrency = s.selectedToCurrency,`
+                selectedFromCurrency = s.selectedToCurrency,
+                // continues the statement started above: `selectedToCurrency = s.selectedFromCurrency,`
+                selectedToCurrency = s.selectedFromCurrency,
+            // closes the multi-line argument list started above
+            )
+        // closes the block
+        }
+        // expression: `viewModelScope.launch { loadCurrency(s.selectedToCurrency, s.selectedFromCurrency) }`
+        viewModelScope.launch { loadCurrency(s.selectedToCurrency, s.selectedFromCurrency) }
+    // closes the function `swapCurrencies`
     }
 
     // declares function `refreshWeather` taking no parameters; its body is the expression `viewModelScope.launch { loadWeather(_uiState…`
     fun refreshWeather()  = viewModelScope.launch { loadWeather(_uiState.value.selectedCity) }
-    // declares function `refreshCurrency` taking no parameters; its body is the expression `viewModelScope.launch { loadCurrency(_uiStat…`
-    fun refreshCurrency() = viewModelScope.launch { loadCurrency(_uiState.value.selectedFromCurrency) }
+    // declares function `refreshCurrency` taking no parameters; its body is the expression `viewModelScope.launch {`
+    fun refreshCurrency() = viewModelScope.launch {
+        // calls `loadCurrency` with arguments `(_uiState.value.selectedFromCurrency, _uiState.value.selectedToCurrency)`
+        loadCurrency(_uiState.value.selectedFromCurrency, _uiState.value.selectedToCurrency)
+    // closes the block
+    }
 
     // declares suspend function `refresh` taking no parameters; its body is the expression `coroutineScope {`
     suspend fun refresh() = coroutineScope {
@@ -134,8 +184,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         val s = _uiState.value
         // expression: `launch { loadWeather(s.selectedCity) }`
         launch { loadWeather(s.selectedCity) }
-        // expression: `launch { loadCurrency(s.selectedFromCurrency) }`
-        launch { loadCurrency(s.selectedFromCurrency) }
+        // expression: `launch { loadCurrency(s.selectedFromCurrency, s.selectedToCurrency) }`
+        launch { loadCurrency(s.selectedFromCurrency, s.selectedToCurrency) }
         // lambda `s.location?.let { loc -> launch { loadNearbyPlaces(loc…`
         s.location?.let { loc -> launch { loadNearbyPlaces(loc.lat, loc.lng) } }
     // closes the block
@@ -163,12 +213,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     // closes the function `loadWeather`
     }
 
-    // declares private suspend function `loadCurrency` taking 1 parameter (`fromCode`) and opens its body
-    private suspend fun loadCurrency(fromCode: String) {
+    // declares private suspend function `loadCurrency` taking 2 parameters (`fromCode`, `toCode`) and opens its body
+    private suspend fun loadCurrency(fromCode: String, toCode: String) {
         // expression: `_uiState.update { it.copy(currency = CurrencyState.Loading) }`
         _uiState.update { it.copy(currency = CurrencyState.Loading) }
         // declares read-only property `result`, initialised with the result of calling `CurrencyRepository.getRate(…)`
-        val result = CurrencyRepository.getRate(fromCode)
+        val result = CurrencyRepository.getRate(fromCode, toCode)
         // opens a block after `_uiState.update`
         _uiState.update {
             // calls `copy` on `it` with an argument list that continues on the following lines
