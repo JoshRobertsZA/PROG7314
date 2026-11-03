@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -64,12 +65,16 @@ fun EmailAuthScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    Box(
+    Column(
         modifier = modifier
             .fillMaxSize()
             .background(WaypointCream)
             .windowInsetsPadding(WindowInsets.systemBars),
     ) {
+        // A sibling of the scrollable form below, not stacked under it in a
+        // Box - a scrollable Column covering the same region as the header
+        // would sit on top in z-order and could swallow taps meant for the
+        // back button underneath it.
         Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 2.dp)) {
             Text(
                 text = stringResource(titleFor(mode)),
@@ -90,8 +95,10 @@ fun EmailAuthScreen(
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .weight(1f)
+                .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
+                .imePadding()
                 .padding(horizontal = 20.dp, vertical = 24.dp),
         ) {
             if (mode == EmailAuthMode.SIGN_UP) {
