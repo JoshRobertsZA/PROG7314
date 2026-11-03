@@ -244,9 +244,6 @@ The app follows the phone's dark mode setting.
 |---|---|---|
 | ![Home in dark mode](assets/dark/home.png) | ![Itinerary in dark mode](assets/dark/itinerary.png) | ![Profile in dark mode](assets/dark/profile.png) |
 
----|---|---|---|
-| ![Home in dark mode](assets/dark/home.png) | ![All trips in dark mode](assets/dark/all-trips.png) | ![Itinerary in dark mode](assets/dark/itinerary.png) | ![Profile in dark mode](assets/dark/profile.png) |
-
 ---
 
 ## Demo Video
