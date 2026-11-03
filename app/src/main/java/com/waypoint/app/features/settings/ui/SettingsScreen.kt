@@ -309,8 +309,20 @@ fun SettingsScreen(
                     modifier = Modifier.padding(top = 20.dp),
                 // closes the multi-line argument list started above
                 )
-                // draws one meter per guarded API
-                uiState.apiUsage.forEach { snapshot -> ApiBudgetMeter(snapshot) }
+                // opens one white card that holds all the meters, matching the preference rows
+                Column(
+                    // continues the statement started above: the card is full width with a gap below the heading
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .background(WaypointCard, RoundedCornerShape(RadiusRow))
+                        .padding(start = 27.dp, top = 4.dp, end = 18.dp, bottom = 14.dp),
+                // closes the multi-line argument list started above
+                ) {
+                    // draws one meter per guarded API
+                    uiState.apiUsage.forEach { snapshot -> ApiBudgetMeter(snapshot) }
+                // closes the card
+                }
             // closes the if block
             }
 
