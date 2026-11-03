@@ -228,8 +228,8 @@ fun PlaceDetailScreen(
                         .align(Alignment.BottomStart)
                         // continues the statement started above: `.padding(12.dp)`
                         .padding(12.dp)
-                        // continues the statement started above: `.background(White.copy(alpha = 0.95f), RoundedCornerShape(R…`
-                        .background(White.copy(alpha = 0.95f), RoundedCornerShape(RadiusRow))
+                        // continues the statement started above: `.background(WaypointCard.copy(alpha = 0.95f), RoundedCornerShape(R…`
+                        .background(WaypointCard.copy(alpha = 0.95f), RoundedCornerShape(RadiusRow))
                         // continues the statement started above: `.clickable(onClick = {})`
                         .clickable(onClick = {})
                         // continues the statement started above: `.padding(horizontal = 16.dp, vertical = 8.dp),`
@@ -294,8 +294,8 @@ fun PlaceDetailScreen(
             onClick = onBackClick,
             // Read out by TalkBack
             contentDescription = stringResource(R.string.place_detail_back_cd),
-            // continues the statement started above: `fillColor = White.copy(alpha = 0.9f),`
-            fillColor = White.copy(alpha = 0.9f),
+            // continues the statement started above: `fillColor = WaypointCard.copy(alpha = 0.9f),`
+            fillColor = WaypointCard.copy(alpha = 0.9f),
             // continues the statement started above: `borderColor = null,`
             borderColor = null,
             // continues the statement started above: `modifier = Modifier`

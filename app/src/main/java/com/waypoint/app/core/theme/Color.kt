@@ -43,8 +43,8 @@ val WaypointDecoText = Color(0xFFFFEBDE)
 val WaypointCard: Color get() = if (WaypointPalette.dark) Color(0xFF2A211B) else Color(0xFFFCF8F0)
 // declares read-only property `WaypointBorderSoft`; a light colour in light mode and a dark one in dark mode
 val WaypointBorderSoft: Color get() = if (WaypointPalette.dark) Color(0xFF4A3B2F) else Color(0xFFD9CCB5)
-// declares read-only property `WaypointTripBadgeText`, initialised with the result of calling `Color(…)`
-val WaypointTripBadgeText = Color(0xFFA9522E)
+// declares read-only property `WaypointTripBadgeText`; the dark terracotta used on cards in light mode and a lighter peach in dark mode so it stays readable
+val WaypointTripBadgeText: Color get() = if (WaypointPalette.dark) Color(0xFFE8A07A) else Color(0xFFA9522E)
 // declares read-only property `WaypointPlaceAccent1`, initialised with the result of calling `Color(…)`
 val WaypointPlaceAccent1 = Color(0xFFF1BD8A)
 // declares read-only property `WaypointPlaceAccent2`, initialised with the result of calling `Color(…)`

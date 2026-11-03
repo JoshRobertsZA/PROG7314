@@ -387,8 +387,8 @@ fun PlaceDetailPickerScreen(
                     modifier = Modifier
                         // continues the statement started above: `.padding(12.dp)`
                         .padding(12.dp)
-                        // continues the statement started above: `.background(White.copy(alpha = 0.95f), RoundedCornerShape(R…`
-                        .background(White.copy(alpha = 0.95f), RoundedCornerShape(RadiusRow))
+                        // continues the statement started above: `.background(WaypointCard.copy(alpha = 0.95f), RoundedCornerShape(R…`
+                        .background(WaypointCard.copy(alpha = 0.95f), RoundedCornerShape(RadiusRow))
                         // continues the statement started above: `.clickable {`
                         .clickable {
                             // `if` statement: the block below runs when `state.lat != 0.0 || state.lon != 0.0` is true
@@ -489,8 +489,8 @@ fun PlaceDetailPickerScreen(
             onClick     = onBackClick,
             // Read out by TalkBack
             contentDescription = stringResource(R.string.common_back),
-            // continues the statement started above: `fillColor = White.copy(alpha = 0.9f),`
-            fillColor   = White.copy(alpha = 0.9f),
+            // continues the statement started above: `fillColor = WaypointCard.copy(alpha = 0.9f),`
+            fillColor   = WaypointCard.copy(alpha = 0.9f),
             // continues the statement started above: `borderColor = null,`
             borderColor = null,
             // continues the statement started above: `modifier = Modifier`

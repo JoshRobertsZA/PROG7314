@@ -6,6 +6,8 @@ package com.waypoint.app.core.theme
 // imports `androidx.compose.foundation.isSystemInDarkTheme` for use in this file
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
+// imports `androidx.compose.material3.LocalContentColor` for use in this file
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 // imports `androidx.compose.material3.darkColorScheme` for use in this file
 import androidx.compose.material3.darkColorScheme
@@ -13,6 +15,8 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 // imports `androidx.compose.runtime.Composable` for use in this file
 import androidx.compose.runtime.Composable
+// imports `androidx.compose.runtime.CompositionLocalProvider` for use in this file
+import androidx.compose.runtime.CompositionLocalProvider
 // imports `androidx.compose.runtime.remember` for use in this file
 import androidx.compose.runtime.remember
 
@@ -65,9 +69,19 @@ fun WaypointTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composab
         colorScheme = colorScheme,
         // continues the statement started above: `typography = WaypointTypography,`
         typography = WaypointTypography,
-        // continues the statement started above: `content = content,`
-        content = content,
-    // closes the multi-line argument list started above
-    )
+    // opens the content block of `MaterialTheme`
+    ) {
+        // `if` statement: in dark mode text with no colour set uses the cream text colour instead of black; light mode is unchanged
+        if (darkTheme) {
+            // provides the cream colour as the default content colour for everything below
+            CompositionLocalProvider(LocalContentColor provides WaypointTextPrimary, content = content)
+        // `else` branch: light mode keeps its existing behaviour
+        } else {
+            // draws the content as it was
+            content()
+        // closes the else block
+        }
+    // closes the content block
+    }
 // closes the function `WaypointTheme`
 }
