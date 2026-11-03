@@ -27,7 +27,7 @@ object GitHubCacheRepository {
     // params matched against the server's weather|currency|places allowlist
     // (api/src/routes/cache.js), not GitHub repo file paths.
     fun weatherPath(citySlug: String) = "weather_${citySlug}"
-    fun currencyPath(fromCode: String, toCode: String = "ZAR") = "currency_${fromCode}_${toCode}"
+    fun currencyRatesPath(baseCode: String) = "currency_${baseCode}"
 
     suspend fun readJson(path: String): JSONObject? = withContext(Dispatchers.IO) {
         try {

@@ -59,6 +59,34 @@ data class CurrencyCache(
 // closes the block
 }
 
+// declares data class `CurrencyRatesCache` with a primary constructor taking 3 parameters (`baseCode`, `rates`, `fetchedAtMs`) and opens its body
+data class CurrencyRatesCache(
+    // continues the statement started above: `val baseCode: String,`
+    val baseCode: String,
+    // continues the statement started above: `val rates: Map<String, Double>,`
+    val rates: Map<String, Double>,
+    // continues the statement started above: `val fetchedAtMs: Long,`
+    val fetchedAtMs: Long,
+// ends the argument list started above and opens the block that follows
+) {
+    // declares function `isStale` taking no parameters, returning `Boolean` and opens its body
+    fun isStale(): Boolean {
+        // declares read-only property `now`, initialised with the result of calling `Calendar.getInstance(…)`
+        val now = Calendar.getInstance()
+        // declares read-only property `fetched`, initialised with the result of calling `Calendar.getInstance(…)`
+        val fetched = Calendar.getInstance().apply { timeInMillis = fetchedAtMs }
+        // returns `now.get(Calendar.YEAR) != fetched.get(Calendar.YEAR) ||` from the current function
+        return now.get(Calendar.YEAR) != fetched.get(Calendar.YEAR) ||
+               // continues the statement started above: `now.get(Calendar.DAY_OF_YEAR) != fetched.get(Calendar.DAY_OF_YEAR)`
+               now.get(Calendar.DAY_OF_YEAR) != fetched.get(Calendar.DAY_OF_YEAR)
+    // closes the function `isStale`
+    }
+
+    // declares function `rateFor` taking 1 parameter (`code`), returning `Double?`; its body is the expression `if (code == baseCode) 1.0 else rates[code]`
+    fun rateFor(code: String): Double? = if (code == baseCode) 1.0 else rates[code]
+// closes the block
+}
+
 // expression: `data class DeviceLocation(`
 data class DeviceLocation(
     // continues the statement started above: `val lat: Double,`
