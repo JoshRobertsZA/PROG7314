@@ -122,6 +122,46 @@
     <!-- Shared Firebase Google Sign-In state (Welcome/Login/Register), see AuthViewModel -->
     <string name="auth_signing_in">Signing in…</string>
 
+    <!-- Email sign-up / sign-in screen (PR 8), see AuthRepository/AuthViewModel -->
+    <string name="auth_welcome_email_cta">Continue with email</string>
+    <string name="auth_email_signup_title">Create your account</string>
+    <string name="auth_email_signin_title">Welcome back</string>
+    <string name="auth_display_name_label">Full name</string>
+    <string name="auth_display_name_hint">Your name</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_email_hint">you@example.com</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_password_hint">At least 8 characters</string>
+    <string name="auth_confirm_password_label">Confirm password</string>
+    <string name="auth_signup_cta">Sign up</string>
+    <string name="auth_signin_cta">Sign in</string>
+    <string name="auth_creating_account">Creating account…</string>
+    <string name="auth_switch_to_signin">Already have an account? Sign in</string>
+    <string name="auth_switch_to_signup">Don\'t have an account? Sign up</string>
+    <string name="auth_forgot_password_cta">Forgot password?</string>
+    <string name="auth_back_cd">Back</string>
+
+    <!-- Email sign-up/sign-in validation and Firebase error messages (PR 8) -->
+    <string name="auth_error_display_name_required">Enter your name</string>
+    <string name="auth_error_email_required">Email is required</string>
+    <string name="auth_error_invalid_email">Enter a valid email address</string>
+    <string name="auth_error_password_required">Password is required</string>
+    <string name="auth_error_password_too_short">Password must be at least 8 characters</string>
+    <string name="auth_error_passwords_dont_match">Passwords don\'t match</string>
+    <string name="auth_error_email_in_use">An account with this email already exists</string>
+    <string name="auth_error_account_exists_different_credential">This email is already registered with Google. Sign in with Google instead.</string>
+    <string name="auth_error_user_not_found">No account found with this email</string>
+    <string name="auth_error_wrong_password">Incorrect password</string>
+    <string name="auth_error_network">Check your connection and try again</string>
+    <string name="auth_error_generic">Something went wrong. Please try again</string>
+
+    <!-- Password reset (PR 8), see AuthRepository -->
+    <string name="auth_reset_title">Reset your password</string>
+    <string name="auth_reset_instructions">Enter your email and we\'ll send you a link to reset your password.</string>
+    <string name="auth_reset_cta">Send reset link</string>
+    <string name="auth_reset_sending">Sending…</string>
+    <string name="auth_reset_sent">Check your email for a link to reset your password.</string>
+
     <!-- Edit itinerary screen (Figma node 59:2, "06 Waypoint — Edit Itinerary").
          Trip name/dates, per-day weather, and every booking/place row's
          content are intentionally left inline in activity_edit_itinerary.xml,

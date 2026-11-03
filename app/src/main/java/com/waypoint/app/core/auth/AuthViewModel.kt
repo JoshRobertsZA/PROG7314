@@ -19,6 +19,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 // imports `com.waypoint.app.BuildConfig` for use in this file
 import com.waypoint.app.BuildConfig
+import com.waypoint.app.R
 // imports `com.waypoint.app.core.db.AccountEntity` for use in this file
 import com.waypoint.app.core.db.AccountEntity
 // imports `com.waypoint.app.core.db.SessionManager` for use in this file
@@ -35,8 +36,14 @@ import com.waypoint.app.core.sync.SyncScheduler
 import com.waypoint.app.features.newtrip.data.TripRepository
 // imports `com.google.firebase.auth.FirebaseAuthWebException` for use in this file
 import com.google.firebase.auth.FirebaseAuthWebException
+import com.google.firebase.FirebaseNetworkException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 // imports `com.google.firebase.auth.FirebaseUser` for use in this file
 import com.google.firebase.auth.FirebaseUser
+import com.waypoint.app.features.auth.ui.EmailAuthSubmission
 // imports `kotlinx.coroutines.Dispatchers` for use in this file
 import kotlinx.coroutines.Dispatchers
 // imports `kotlinx.coroutines.flow.MutableStateFlow` for use in this file
@@ -70,6 +77,12 @@ data class AuthUiState(
 // closes the multi-line argument list started above
 )
 
+data class EmailAuthUiState(
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+    val resetEmailSent: Boolean = false,
+)
+
 // declares class `AuthViewModel` with a primary constructor taking 1 parameter (`application`), inheriting from `AndroidViewModel(application)` and opens its body
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -80,6 +93,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(AuthUiState())
     // declares read-only property `uiState` of type `StateFlow<AuthUiState>`, initialised with the result of calling `_uiState.asStateFlow(…)`
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+
+    private val _emailAuthUiState = MutableStateFlow(EmailAuthUiState())
+    val emailAuthUiState: StateFlow<EmailAuthUiState> = _emailAuthUiState.asStateFlow()
 
     // declares suspend function `restoreSessionIfSignedIn` taking no parameters and opens its body
     suspend fun restoreSessionIfSignedIn() {
@@ -178,6 +194,90 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         // closes the block
         }
     // closes the function `signInWithGitHub`
+    }
+
+    fun submitEmailAuth(submission: EmailAuthSubmission, onSuccess: () -> Unit) {
+        if (_emailAuthUiState.value.isLoading) return
+        when (submission) {
+            is EmailAuthSubmission.SignUp -> signUpWithEmail(submission, onSuccess)
+            is EmailAuthSubmission.SignIn -> signInWithEmail(submission, onSuccess)
+            is EmailAuthSubmission.Reset -> sendPasswordReset(submission)
+        }
+    }
+
+    private fun signUpWithEmail(submission: EmailAuthSubmission.SignUp, onSuccess: () -> Unit) {
+        val validationError = EmailAuthValidator.validateSignUp(
+            submission.displayName, submission.email, submission.password, submission.confirmPassword,
+        )
+        if (validationError != null) {
+            _emailAuthUiState.update { it.copy(errorMessage = getApplication<Application>().getString(validationError)) }
+            return
+        }
+        viewModelScope.launch {
+            _emailAuthUiState.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                val user = AuthRepository.signUpWithEmail(submission.email.trim(), submission.password, submission.displayName.trim())
+                applySignedInUser(user)
+                _emailAuthUiState.update { EmailAuthUiState() }
+                onSuccess()
+            } catch (e: Exception) {
+                Log.w(TAG, "Email sign-up failed", e)
+                _emailAuthUiState.update { it.copy(isLoading = false, errorMessage = getApplication<Application>().getString(mapEmailAuthError(e))) }
+            }
+        }
+    }
+
+    private fun signInWithEmail(submission: EmailAuthSubmission.SignIn, onSuccess: () -> Unit) {
+        val validationError = EmailAuthValidator.validateSignIn(submission.email, submission.password)
+        if (validationError != null) {
+            _emailAuthUiState.update { it.copy(errorMessage = getApplication<Application>().getString(validationError)) }
+            return
+        }
+        viewModelScope.launch {
+            _emailAuthUiState.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                val user = AuthRepository.signInWithEmail(submission.email.trim(), submission.password)
+                applySignedInUser(user)
+                _emailAuthUiState.update { EmailAuthUiState() }
+                onSuccess()
+            } catch (e: Exception) {
+                Log.w(TAG, "Email sign-in failed", e)
+                _emailAuthUiState.update { it.copy(isLoading = false, errorMessage = getApplication<Application>().getString(mapEmailAuthError(e))) }
+            }
+        }
+    }
+
+    private fun sendPasswordReset(submission: EmailAuthSubmission.Reset) {
+        val validationError = EmailAuthValidator.validateReset(submission.email)
+        if (validationError != null) {
+            _emailAuthUiState.update { it.copy(errorMessage = getApplication<Application>().getString(validationError)) }
+            return
+        }
+        viewModelScope.launch {
+            _emailAuthUiState.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                AuthRepository.sendPasswordResetEmail(submission.email.trim())
+                _emailAuthUiState.update { it.copy(isLoading = false, resetEmailSent = true) }
+            } catch (e: Exception) {
+                Log.w(TAG, "Password reset email failed", e)
+                _emailAuthUiState.update { it.copy(isLoading = false, errorMessage = getApplication<Application>().getString(mapEmailAuthError(e))) }
+            }
+        }
+    }
+
+    // FirebaseAuthWeakPasswordException is a subtype of
+    // FirebaseAuthInvalidCredentialsException, so it has to be checked first.
+    // No branch distinguishes "wrong password" from "malformed email" on
+    // sign-in - both throw FirebaseAuthInvalidCredentialsException - so that
+    // case falls back to the wrong-password message, which is the more
+    // common cause and was already validated client-side for format.
+    private fun mapEmailAuthError(e: Exception): Int = when (e) {
+        is FirebaseAuthWeakPasswordException -> R.string.auth_error_password_too_short
+        is FirebaseAuthUserCollisionException -> R.string.auth_error_email_in_use
+        is FirebaseAuthInvalidUserException -> R.string.auth_error_user_not_found
+        is FirebaseAuthInvalidCredentialsException -> R.string.auth_error_wrong_password
+        is FirebaseNetworkException -> R.string.auth_error_network
+        else -> R.string.auth_error_generic
     }
 
     // declares private suspend function `fetchGoogleIdToken` taking 1 parameter (`context`), returning `String`; its body is the expression ``

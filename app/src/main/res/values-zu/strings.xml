@@ -270,6 +270,43 @@
     </plurals>
     <!-- Previously untranslated keys -->
     <string name="auth_signing_in">Iyangena…</string>
+
+    <!-- Email sign-up / sign-in screen (PR 8); drafted, needs isiZulu native-speaker review -->
+    <string name="auth_welcome_email_cta">Qhubeka nge-imeyili</string>
+    <string name="auth_email_signup_title">Dala i-akhawunti yakho</string>
+    <string name="auth_email_signin_title">Siyakwamukela futhi</string>
+    <string name="auth_display_name_label">Igama eligcwele</string>
+    <string name="auth_display_name_hint">Igama lakho</string>
+    <string name="auth_email_label">I-imeyili</string>
+    <string name="auth_email_hint">wena@example.com</string>
+    <string name="auth_password_label">Iphasiwedi</string>
+    <string name="auth_password_hint">Okungenani izinhlamvu eziyi-8</string>
+    <string name="auth_confirm_password_label">Qinisekisa iphasiwedi</string>
+    <string name="auth_signup_cta">Bhalisa</string>
+    <string name="auth_signin_cta">Ngena</string>
+    <string name="auth_creating_account">Idala i-akhawunti…</string>
+    <string name="auth_switch_to_signin">Usunayo i-akhawunti? Ngena</string>
+    <string name="auth_switch_to_signup">Awunayo i-akhawunti? Bhalisa</string>
+    <string name="auth_forgot_password_cta">Ukhohlwe iphasiwedi?</string>
+    <string name="auth_back_cd">Emuva</string>
+    <string name="auth_error_display_name_required">Faka igama lakho</string>
+    <string name="auth_error_email_required">I-imeyili iyadingeka</string>
+    <string name="auth_error_invalid_email">Faka ikheli le-imeyili elisebenzayo</string>
+    <string name="auth_error_password_required">Iphasiwedi iyadingeka</string>
+    <string name="auth_error_password_too_short">Iphasiwedi kumele ibe okungenani izinhlamvu eziyi-8</string>
+    <string name="auth_error_passwords_dont_match">Amaphasiwedi awafani</string>
+    <string name="auth_error_email_in_use">Kukhona i-akhawunti esele isebenzisa le-imeyili</string>
+    <string name="auth_error_account_exists_different_credential">Le-imeyili isiyabhaliswa nge-Google. Ngena usebenzisa i-Google esikhundleni.</string>
+    <string name="auth_error_user_not_found">Ayikho i-akhawunti etholakele nge-imeyili</string>
+    <string name="auth_error_wrong_password">Iphasiwedi engalungile</string>
+    <string name="auth_error_network">Hlola uxhumano lwakho bese uzama futhi</string>
+    <string name="auth_error_generic">Kukhona okungahambanga kahle. Sicela uzame futhi</string>
+    <string name="auth_reset_title">Setha kabusha iphasiwedi yakho</string>
+    <string name="auth_reset_instructions">Faka i-imeyili yakho bese sikuthumelela isixhumanisi sokusetha kabusha iphasiwedi yakho.</string>
+    <string name="auth_reset_cta">Thumela isixhumanisi sokusetha kabusha</string>
+    <string name="auth_reset_sending">Iyathumela…</string>
+    <string name="auth_reset_sent">Hlola i-imeyili yakho isixhumanisi sokusetha kabusha iphasiwedi yakho.</string>
+
     <string name="edit_itinerary_flight_number_hint">Inombolo yendiza (isb. SA 123)</string>
     <string name="edit_itinerary_header_cinemas">Amasinema</string>
     <string name="edit_itinerary_header_hotels">Amahhotela</string>
