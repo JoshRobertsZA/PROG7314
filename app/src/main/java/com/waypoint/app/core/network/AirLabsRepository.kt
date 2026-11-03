@@ -13,6 +13,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 // imports `okhttp3.Request` for use in this file
 import okhttp3.Request
+// imports `org.json.JSONArray` for use in this file
+import org.json.JSONArray
 // imports `org.json.JSONObject` for use in this file
 import org.json.JSONObject
 
@@ -24,8 +26,36 @@ object AirLabsRepository {
     // declares const read-only property `AIRLABS_MISS`, initialised to the string literal "AIRLABS_MISS"
     const val AIRLABS_MISS = "AIRLABS_MISS"
 
-    // declares suspend function `lookupDepartureTime` taking 1 parameter (`flightNumber`), returning `String?`; its body is the expression `withContext(Dispatchers.IO) {`
-    suspend fun lookupDepartureTime(flightNumber: String): String? = withContext(Dispatchers.IO) {
+    // declares function `cacheKey` taking 2 parameters (`flightNumber`, `date`), returning `String`; the same flight on different days gets different keys, so a cached status is never shown for the wrong day
+    fun cacheKey(flightNumber: String, date: String?): String {
+        // declares read-only property `iata`, initialised with the result of calling `flightNumber.replace(…)`
+        val iata = flightNumber.replace(" ", "").uppercase()
+        // returns the bare flight number when there is no date, otherwise the flight number and the date joined by a pipe
+        return if (date.isNullOrBlank()) iata else "$iata|${date.trim()}"
+    // closes the function `cacheKey`
+    }
+
+    // declares function `pickScheduleEntry` taking 2 parameters (`list`, `date`), returning `JSONObject?`; with no date it returns the first entry, with a `yyyy-MM-dd` date it returns the entry whose `dep_time` starts with that date, or null when none match
+    fun pickScheduleEntry(list: JSONArray, date: String?): JSONObject? {
+        // `if` statement: executes `return null` when `list.length() == 0` is true
+        if (list.length() == 0) return null
+        // `if` statement: executes `return list.getJSONObject(0)` when `date.isNullOrBlank()` is true, keeping the old behaviour for callers without a date
+        if (date.isNullOrBlank()) return list.getJSONObject(0)
+        // `for` loop: `i` takes each value in `0 until list.length()` in turn
+        for (i in 0 until list.length()) {
+            // declares read-only property `entry`, initialised with the result of calling `list.getJSONObject(…)`
+            val entry = list.getJSONObject(i)
+            // `if` statement: executes `return entry` when `entry.optString("dep_time", "").startsWith(date.trim())` is true
+            if (entry.optString("dep_time", "").startsWith(date.trim())) return entry
+        // closes the for loop
+        }
+        // returns `null` from the current function because no entry matched the date
+        return null
+    // closes the function `pickScheduleEntry`
+    }
+
+    // declares suspend function `lookupDepartureTime` taking 2 parameters (`flightNumber`, `date`), returning `String?`; its body is the expression `withContext(Dispatchers.IO) {`
+    suspend fun lookupDepartureTime(flightNumber: String, date: String? = null): String? = withContext(Dispatchers.IO) {
         // declares read-only property `key`, initialised with the result of calling `RemoteSecrets.get(…)`
         val key = RemoteSecrets.get("AIRLABS_API_KEY", BuildConfig.AIRLABS_API_KEY)
         // `if` statement: executes `{ Log.w(TAG, "No AirLabs key"); return@withC…` when `key.isBlank()` is true
@@ -54,8 +84,10 @@ object AirLabsRepository {
             // `if` statement: executes `return@withContext null` when `list.length() == 0` is true
             if (list.length() == 0) return@withContext null
 
-            // declares read-only property `depTime`, initialised with the result of calling `list.getJSONObject(…)`
-            val depTime = list.getJSONObject(0).optString("dep_time", "")
+            // declares read-only property `entry`, the entry for the requested date, falling back to the first entry because a flight's time of day repeats across days
+            val entry = pickScheduleEntry(list, date) ?: list.getJSONObject(0)
+            // declares read-only property `depTime`, initialised with the result of calling `entry.optString(…)`
+            val depTime = entry.optString("dep_time", "")
             // calls `substringAfter` on `depTime` with arguments `(' ', "")`, then chains `.takeIf { it.matches(Regex("\\…`
             depTime.substringAfter(' ', "").takeIf { it.matches(Regex("\\d{2}:\\d{2}")) }
         // `catch` block: handles a thrown `Exception` bound to `e`
@@ -93,8 +125,8 @@ object AirLabsRepository {
     // closes the multi-line argument list started above
     )
 
-    // declares suspend function `fetchFlightStatus` taking 1 parameter (`flightNumber`), returning `FlightStatusResult?`; its body is the expression `withContext(Dispatchers.IO) {`
-    suspend fun fetchFlightStatus(flightNumber: String): FlightStatusResult? = withContext(Dispatchers.IO) {
+    // declares suspend function `fetchFlightStatus` taking 2 parameters (`flightNumber`, `date`), returning `FlightStatusResult?`; its body is the expression `withContext(Dispatchers.IO) {`
+    suspend fun fetchFlightStatus(flightNumber: String, date: String? = null): FlightStatusResult? = withContext(Dispatchers.IO) {
         // declares read-only property `key`, initialised with the result of calling `RemoteSecrets.get(…)`
         val key = RemoteSecrets.get("AIRLABS_API_KEY", BuildConfig.AIRLABS_API_KEY)
         // `if` statement: executes `{ Log.w(TAG, "No AirLabs key"); return@withC…` when `key.isBlank()` is true
@@ -123,8 +155,8 @@ object AirLabsRepository {
             // `if` statement: executes `return@withContext null` when `list.length() == 0` is true
             if (list.length() == 0) return@withContext null
 
-            // declares read-only property `flight`, initialised with the result of calling `list.getJSONObject(…)`
-            val flight = list.getJSONObject(0)
+            // declares read-only property `flight`, the entry for the requested date, returning null from the function when a date was given and no entry matches
+            val flight = pickScheduleEntry(list, date) ?: return@withContext null
             // calls `FlightStatusResult` with an argument list that continues on the following lines
             FlightStatusResult(
                 // continues the statement started above: `flightIata = flight.optString("flight_iata", iata),`

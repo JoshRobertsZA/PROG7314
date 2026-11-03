@@ -308,16 +308,16 @@ fun NewTripScreen(
                     textStyle = TextStyle(color = WaypointTextPrimary, fontSize = 13.sp),
                     // continues the statement started above: `singleLine = true,`
                     singleLine = true,
-                    // continues the statement started above: `modifier = Modifier.fillMaxWidth(),`
-                    modifier = Modifier.fillMaxWidth(),
+                    // continues the statement started above: `modifier = Modifier.fillMaxWidth().padding(end = 48.dp),` the end padding keeps typed text clear of the counter
+                    modifier = Modifier.fillMaxWidth().padding(end = 48.dp),
                 // closes the multi-line argument list started above
                 )
-                // Character counter so the user can see the name limit
+                // Character counter so the user can see the name limit, pinned to the right edge so it does not overlap the typed text
                 Text(
                     text = stringResource(R.string.new_trip_name_counter, uiState.tripName.length, TripValidation.TRIP_NAME_MAX),
                     color = WaypointTextMuted,
                     fontSize = 10.sp,
-                    modifier = Modifier.padding(top = 4.dp),
+                    modifier = Modifier.align(Alignment.CenterEnd),
                 )
             // closes the block
             }

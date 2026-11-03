@@ -395,6 +395,8 @@ class EditItineraryViewModel(
         }
         depTimeLookupJobs[flightId]?.cancel()
         val iata = TripValidation.normaliseFlightNumber(number)
+        // declares read-only property `flightDate`, the active itinerary day's date as `yyyy-MM-dd`, captured now so a day switch during the delay does not change it
+        val flightDate = _uiState.value.days.getOrNull(_uiState.value.activeDayIndex)?.date?.toString()
         // Only look up the departure time for a valid flight number
         if (TripValidation.isFlightNumberValid(iata)) {
             // assigns `depTimeLookupJobs[flightId]` the value `viewModelScope.launch {`
@@ -402,7 +404,7 @@ class EditItineraryViewModel(
                 // calls `delay` with arguments `(1_500)`
                 delay(1_500)
                 // declares read-only property `time`, initialised with the result of calling `AirLabsRepository.lookupDepartureTime(…)`
-                val time = AirLabsRepository.lookupDepartureTime(iata)
+                val time = AirLabsRepository.lookupDepartureTime(iata, flightDate)
                 // `if` statement: the block below runs when `time != null` is true
                 if (time != null) {
                     // calls `updateFlightDepartureTime` on `repo` with arguments `(flightId, time)`
