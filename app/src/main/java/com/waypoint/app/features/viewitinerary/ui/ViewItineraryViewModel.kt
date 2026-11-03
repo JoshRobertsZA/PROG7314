@@ -163,8 +163,12 @@ class ViewItineraryViewModel(
         viewModelScope.launch {
             // declares read-only property `iata`, initialised with the result of calling `flightNumber.replace(…)`
             val iata = flightNumber.replace(" ", "").uppercase()
-            // declares read-only property `cached`, initialised to `flightStatusCache[iata]`
-            val cached = flightStatusCache[iata]
+            // declares read-only property `date`, the active itinerary day's date as `yyyy-MM-dd`, or null when no day is selected
+            val date = _uiState.value.days.getOrNull(_uiState.value.activeDayIndex)?.date?.toString()
+            // declares read-only property `cacheKey`, initialised with the result of calling `AirLabsRepository.cacheKey(…)`
+            val cacheKey = AirLabsRepository.cacheKey(iata, date)
+            // declares read-only property `cached`, initialised to `flightStatusCache[cacheKey]`
+            val cached = flightStatusCache[cacheKey]
             // `if` statement: the block below runs when `cached != null && (System.currentTimeMillis() - cached.first) < CACHE…` is true
             if (cached != null && (System.currentTimeMillis() - cached.first) < CACHE_TTL_MS) {
                 // calls `d` on `Log` with arguments `(TAG, "Flight status cache hit for $iata")`
@@ -177,14 +181,12 @@ class ViewItineraryViewModel(
             }
             // expression: `_uiState.update { it.copy(flightStatus = FlightStatusState.Loadi…`
             _uiState.update { it.copy(flightStatus = FlightStatusState.Loading) }
-            // declares read-only property `date`, the active itinerary day's date as `yyyy-MM-dd`, or null when no day is selected
-            val date = _uiState.value.days.getOrNull(_uiState.value.activeDayIndex)?.date?.toString()
             // declares read-only property `result`, initialised with the result of calling `AirLabsRepository.fetchFlightStatus(…)`
             val result = AirLabsRepository.fetchFlightStatus(iata, date)
             // `if` statement: the block below runs when `result != null` is true
             if (result != null) {
-                // assigns `flightStatusCache[iata]` the value `Pair(System.currentTimeMillis(), result)`
-                flightStatusCache[iata] = Pair(System.currentTimeMillis(), result)
+                // assigns `flightStatusCache[cacheKey]` the value `Pair(System.currentTimeMillis(), result)`
+                flightStatusCache[cacheKey] = Pair(System.currentTimeMillis(), result)
                 // expression: `_uiState.update { it.copy(flightStatus = FlightStatusState.Succe…`
                 _uiState.update { it.copy(flightStatus = FlightStatusState.Success(result)) }
                 // declares read-only property `dayId`, initialised with the result of calling `_uiState.value.days.getOrNull(…)`
@@ -199,8 +201,8 @@ class ViewItineraryViewModel(
             } else {
                 // declares read-only property `missResult`, initialised with the result of calling `AirLabsRepository.FlightStatusResult(…)`
                 val missResult = AirLabsRepository.FlightStatusResult(iata, "not_found", "", "", "", "", "", "", 0, 0)
-                // assigns `flightStatusCache[iata]` the value `Pair(System.currentTimeMillis() - CACHE_TTL_MS + …`
-                flightStatusCache[iata] = Pair(System.currentTimeMillis() - CACHE_TTL_MS + 2 * 60 * 1_000L, missResult)
+                // assigns `flightStatusCache[cacheKey]` the value `Pair(System.currentTimeMillis() - CACHE_TTL_MS + …`
+                flightStatusCache[cacheKey] = Pair(System.currentTimeMillis() - CACHE_TTL_MS + 2 * 60 * 1_000L, missResult)
                 // expression: `_uiState.update { it.copy(flightStatus = FlightStatusState.Error…`
                 _uiState.update { it.copy(flightStatus = FlightStatusState.Error("No flight found for $iata")) }
             // closes the else branch
@@ -223,8 +225,10 @@ class ViewItineraryViewModel(
         repo.getFlightsForDays(listOf(dayId)).map { f ->
             // continues the statement started above: `val iata = f.flightNumber?.replace(" ", "")?.uppercase()`
             val iata = f.flightNumber?.replace(" ", "")?.uppercase()
+            // declares read-only property `dayDate`, the date of the day being loaded as `yyyy-MM-dd`, or null when that day is not in the state yet
+            val dayDate = _uiState.value.days.firstOrNull { it.dayId == dayId }?.date?.toString()
             // declares read-only property `cached`, initialised with the result of calling `if(…)`
-            val cached = if (iata != null) flightStatusCache[iata] else null
+            val cached = if (iata != null) flightStatusCache[AirLabsRepository.cacheKey(iata, dayDate)] else null
             // declares read-only property `isAirborne`, initialised to `cached != null && cached.second.status.lower…`
             val isAirborne = cached != null && cached.second.status.lowercase() in listOf("active", "landed")
             // calls `ViewFlightItem` with an argument list that continues on the following lines

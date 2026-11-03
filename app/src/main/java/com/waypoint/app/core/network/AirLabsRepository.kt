@@ -26,6 +26,15 @@ object AirLabsRepository {
     // declares const read-only property `AIRLABS_MISS`, initialised to the string literal "AIRLABS_MISS"
     const val AIRLABS_MISS = "AIRLABS_MISS"
 
+    // declares function `cacheKey` taking 2 parameters (`flightNumber`, `date`), returning `String`; the same flight on different days gets different keys, so a cached status is never shown for the wrong day
+    fun cacheKey(flightNumber: String, date: String?): String {
+        // declares read-only property `iata`, initialised with the result of calling `flightNumber.replace(…)`
+        val iata = flightNumber.replace(" ", "").uppercase()
+        // returns the bare flight number when there is no date, otherwise the flight number and the date joined by a pipe
+        return if (date.isNullOrBlank()) iata else "$iata|${date.trim()}"
+    // closes the function `cacheKey`
+    }
+
     // declares function `pickScheduleEntry` taking 2 parameters (`list`, `date`), returning `JSONObject?`; with no date it returns the first entry, with a `yyyy-MM-dd` date it returns the entry whose `dep_time` starts with that date, or null when none match
     fun pickScheduleEntry(list: JSONArray, date: String?): JSONObject? {
         // `if` statement: executes `return null` when `list.length() == 0` is true
