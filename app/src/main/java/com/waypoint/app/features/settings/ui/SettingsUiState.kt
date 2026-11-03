@@ -4,11 +4,6 @@ package com.waypoint.app.features.settings.ui
 // imports `com.waypoint.app.core.network.UsageSnapshot` for use in this file
 import com.waypoint.app.core.network.UsageSnapshot
 
-// Outcome of tapping "send test notification" - drives what the row's
-// trailing text shows. Idle before/after a result has been shown for a
-// while isn't distinguished from NeverSent; both just show nothing.
-enum class TestNotificationState { IDLE, SENDING, SENT, FAILED }
-
 // expression: `data class SettingsUiState(`
 data class SettingsUiState(
     // continues the statement started above: `val isLoading: Boolean = true,`
@@ -18,7 +13,6 @@ data class SettingsUiState(
     // continues the statement started above: `val totalTrips: Int = 0,`
     val totalTrips: Int = 0,
     val pendingChangeCount: Int = 0,
-    val testNotificationState: TestNotificationState = TestNotificationState.IDLE,
     // usage of each guarded API; stays empty when CounterAPI is not configured or cannot be read
     val apiUsage: List<UsageSnapshot> = emptyList(),
 // closes the multi-line argument list started above

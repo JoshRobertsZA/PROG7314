@@ -151,6 +151,25 @@
     <string name="profile_biometric_subtitle">Ukungena nge-Face ID okanye izikhonkwane zeminwe</string>
     <string name="profile_logout">Phuma</string>
 
+    <!-- Edit profile screen (PR 9); drafted, needs isiXhosa native-speaker review -->
+    <string name="profile_edit_row_title">Hlela iprofayile</string>
+    <string name="profile_edit_row_subtitle">Hlaziya igama lakho</string>
+    <string name="profile_edit_screen_title">Hlela Iprofayile</string>
+    <string name="profile_edit_save_cta">Gcina</string>
+    <string name="profile_edit_error_name_required">Faka igama lakho</string>
+    <string name="profile_edit_error_name_too_long">Igama lide kakhulu</string>
+    <string name="profile_edit_save_error">Ayikwazanga ukugcina utshintsho lwakho. Nceda uzame kwakhona</string>
+    <string name="profile_delete_error">Ayikwazanga ukucima i-akhawunti yakho. Nceda uzame kwakhona</string>
+    <string name="profile_delete_reauth_required">Nceda ungene kwakhona, uze uzame kwakhona</string>
+    <string name="profile_delete_row_title">Cima i-akhawunti</string>
+    <string name="profile_delete_row_subtitle">Susa ngokupheleleyo i-akhawunti yakho nedata</string>
+    <string name="profile_delete_dialog_title">Cima i-akhawunti?</string>
+    <string name="profile_delete_dialog_warning">Oku kucima ngokupheleleyo uhambo lwakho nedata ye-akhawunti. Oku akunakuguqulwa.</string>
+    <string name="profile_delete_confirm_cta">Cima i-akhawunti</string>
+    <string name="profile_delete_confirm_google_cta">Qinisekisa nge-Google</string>
+    <string name="profile_delete_cancel_cta">Rhoxisa</string>
+    <string name="profile_delete_password_label">Faka iphasiwedi yakho ukuqinisekisa</string>
+
     <string name="language_modal_title">Tshintsha ulwimi</string>
 
     <string name="offline_dialog_title">Akukho luqhagamshelwano lwe-intanethi</string>
@@ -186,11 +205,6 @@
     <string name="notification_trip_created_body">Uhambo longezwe kwi-akhawunti yakho. Cofa ukuze ulubone.</string>
     <string name="notification_test_title">Isaziso sovavanyo</string>
     <string name="notification_test_body">Ukuba uyakubona oku, izaziso ziyasebenza.</string>
-    <string name="profile_test_notification_title">Thumela isaziso sovavanyo</string>
-    <string name="profile_test_notification_subtitle">Jonga ukuba izaziso ziyafika kule divayisi</string>
-    <string name="profile_test_notification_sending">Iyathunyelwa…</string>
-    <string name="profile_test_notification_sent">Ithunyelwe</string>
-    <string name="profile_test_notification_failed">Ayiphumelelanga, zama kwakhona</string>
     <!-- Flight departure time (Edit Itinerary) -->
     <string name="edit_itinerary_flight_set_time">Seta ixesha lokuhamba</string>
     <string name="edit_itinerary_flight_departs">Iyahamba %1$s</string>

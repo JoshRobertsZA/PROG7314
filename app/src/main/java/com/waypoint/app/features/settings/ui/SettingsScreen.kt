@@ -154,6 +154,7 @@ fun SettingsScreen(
     // continues the statement started above: `onNotificationsClick: () -> Unit = {},`
     onNotificationsClick: () -> Unit = {},
     onRequestNotificationPermission: () -> Unit = {},
+    onEditProfileClick: () -> Unit = {},
     // continues the statement started above: `viewModel: SettingsViewModel = viewModel(),`
     viewModel: SettingsViewModel = viewModel(),
 // ends the argument list started above and opens the block that follows
@@ -255,6 +256,19 @@ fun SettingsScreen(
                 modifier = Modifier.padding(top = 4.dp).fillMaxWidth(),
             // closes the multi-line argument list started above
             )
+
+            PreferenceRow(
+                title = stringResource(R.string.profile_edit_row_title),
+                subtitle = stringResource(R.string.profile_edit_row_subtitle),
+                onClick = onEditProfileClick,
+                modifier = Modifier.padding(top = 16.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.profile_chevron_glyph),
+                    color = WaypointTextMuted,
+                    fontSize = 16.sp,
+                )
+            }
 
             // calls `Row` with arguments `(modifier = Modifier.fillMaxWidth().padding(t…)` and opens a trailing lambda / block
             Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
@@ -376,30 +390,6 @@ fun SettingsScreen(
                     },
                 // closes the multi-line argument list started above
                 )
-            // closes the block
-            }
-
-            // declares read-only property `testNotificationState`, read from the view model's uiState
-            val testNotificationStatusText = when (uiState.testNotificationState) {
-                TestNotificationState.SENDING -> stringResource(R.string.profile_test_notification_sending)
-                TestNotificationState.SENT -> stringResource(R.string.profile_test_notification_sent)
-                TestNotificationState.FAILED -> stringResource(R.string.profile_test_notification_failed)
-                TestNotificationState.IDLE -> ""
-            }
-            // calls `PreferenceRow` with an argument list that continues on the following lines
-            PreferenceRow(
-                // continues the statement started above: `title = stringResource(R.string.profile_test_notification_t…`
-                title = stringResource(R.string.profile_test_notification_title),
-                // continues the statement started above: `subtitle = stringResource(R.string.profile_test_notificatio…`
-                subtitle = stringResource(R.string.profile_test_notification_subtitle),
-                // continues the statement started above: `onClick = { viewModel.sendTestNotification() },`
-                onClick = { viewModel.sendTestNotification() },
-                // continues the statement started above: `modifier = Modifier.padding(top = 12.dp),`
-                modifier = Modifier.padding(top = 12.dp),
-            // ends the argument list started above and opens the block that follows
-            ) {
-                // calls `ChevronValue` with arguments `(value = testNotificationStatusText)`
-                ChevronValue(value = testNotificationStatusText)
             // closes the block
             }
 

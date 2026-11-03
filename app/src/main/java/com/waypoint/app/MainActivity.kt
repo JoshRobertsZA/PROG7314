@@ -142,6 +142,10 @@ import com.waypoint.app.features.viewitinerary.ui.ViewItineraryScreen
 import com.waypoint.app.features.welcome.WelcomeScreen
 import com.waypoint.app.features.auth.ui.EmailAuthScreen
 import com.waypoint.app.features.auth.ui.EmailAuthSubmission
+import com.waypoint.app.features.profile.ui.DeleteAccountDialog
+import com.waypoint.app.features.profile.ui.EditProfileScreen
+import com.waypoint.app.features.profile.ui.ProfileViewModel
+import com.waypoint.app.core.db.SessionManager
 // imports `kotlinx.coroutines.launch` for use in this file
 import kotlinx.coroutines.launch
 
@@ -467,6 +471,7 @@ private fun WaypointNavHost(
                 onTripClick    = { tripId -> navController.navigate(Routes.tripCalendar(tripId)) },
                 // continues the statement started above: `onNotificationsClick = { navController.navigate(Routes.Noti…`
                 onNotificationsClick = { navController.navigate(Routes.Notifications) },
+                onEditProfileClick = { navController.navigate(Routes.EditProfile) },
                 // continues the statement started above: `onLogoutClick = {`
                 onLogoutClick = {
                     // calls `signOut` on `authViewModel` with arguments `()`
@@ -625,9 +630,47 @@ private fun WaypointNavHost(
                     }
                 // closes the block
                 },
+                onEditProfileClick = { navController.navigate(Routes.EditProfile) },
             // closes the multi-line argument list started above
             )
         // closes the lambda passed to `composable`
+        }
+        composable(Routes.EditProfile) {
+            val profileViewModel: ProfileViewModel = viewModel()
+            val profileUiState by profileViewModel.uiState.collectAsState()
+            val deleteAccountUiState by profileViewModel.deleteAccountUiState.collectAsState()
+            var showDeleteDialog by remember { mutableStateOf(false) }
+
+            EditProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onSave = { name -> profileViewModel.saveDisplayName(name) { navController.popBackStack() } },
+                initialDisplayName = SessionManager.displayName,
+                photoUrl = SessionManager.photoUrl,
+                isSaving = profileUiState.isSaving,
+                errorMessage = profileUiState.errorMessage,
+                onDeleteAccountClick = { showDeleteDialog = true },
+            )
+
+            if (showDeleteDialog) {
+                val requiresPassword = AuthRepository.currentSignInProviderIds.contains("password")
+                DeleteAccountDialog(
+                    onDismiss = { showDeleteDialog = false },
+                    onConfirmWithPassword = { password ->
+                        profileViewModel.deleteAccountWithPassword(password) {
+                            navController.navigate(Routes.Welcome) { popUpTo(0) { inclusive = true } }
+                        }
+                    },
+                    onConfirmWithGoogle = {
+                        profileViewModel.deleteAccountWithGoogle(context) {
+                            navController.navigate(Routes.Welcome) { popUpTo(0) { inclusive = true } }
+                        }
+                    },
+                    canDelete = profileViewModel.canDeleteAccount(),
+                    requiresPassword = requiresPassword,
+                    isDeleting = deleteAccountUiState.isDeleting,
+                    errorMessage = deleteAccountUiState.errorMessage,
+                )
+            }
         }
         // calls `composable` with arguments `(Routes.PlaceDetail)` and opens a trailing lambda / block
         composable(Routes.PlaceDetail) {

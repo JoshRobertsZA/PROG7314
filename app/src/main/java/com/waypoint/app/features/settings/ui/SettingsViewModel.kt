@@ -8,13 +8,11 @@ import androidx.lifecycle.AndroidViewModel
 // imports `androidx.lifecycle.viewModelScope` for use in this file
 import androidx.lifecycle.viewModelScope
 // imports `com.waypoint.app.core.db.SessionManager` for use in this file
-import com.waypoint.app.core.auth.AuthRepository
 import com.waypoint.app.core.db.SessionManager
 // imports `com.waypoint.app.core.network.GuardedApi` for use in this file
 import com.waypoint.app.core.network.GuardedApi
 // imports `com.waypoint.app.core.network.UsageGuardian` for use in this file
 import com.waypoint.app.core.network.UsageGuardian
-import com.waypoint.app.core.network.WaypointApiRepository
 // imports `com.waypoint.app.core.secrets.RemoteSecrets` for use in this file
 import com.waypoint.app.core.secrets.RemoteSecrets
 // imports `com.waypoint.app.features.newtrip.data.TripRepository` for use in this file
@@ -85,8 +83,6 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     // closes the function `loadTripCounts`
     }
 
-    // Lets the settings screen's "send test notification" button prove push
-    // actually works end to end, rather than just trusting the local
     // declares function `loadApiUsage` taking no parameters; reads how much of each guarded API's quota is used for the profile meters
     fun loadApiUsage() {
         // launches a coroutine in the view model's scope
@@ -100,18 +96,6 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
         // closes the coroutine block
         }
     // closes the function `loadApiUsage`
-    }
-
-    // toggle and permission state.
-    fun sendTestNotification() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(testNotificationState = TestNotificationState.SENDING) }
-            val idToken = AuthRepository.getIdToken()
-            val ok = idToken != null && WaypointApiRepository.sendTestNotification(idToken)
-            _uiState.update {
-                it.copy(testNotificationState = if (ok) TestNotificationState.SENT else TestNotificationState.FAILED)
-            }
-        }
     }
 // closes the class `SettingsViewModel`
 }

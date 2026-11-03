@@ -709,6 +709,17 @@ object WaypointApiRepository {
         }
     }
 
+    suspend fun deleteAccount(idToken: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val req = authBuilder(idToken).url("$BASE_URL/account").delete().build()
+            val resp = HttpClient.instance.newCall(req).execute()
+            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "DELETE /account HTTP ${resp.code}") }
+        } catch (e: Exception) {
+            Log.w(TAG, "deleteAccount failed: ${e.message}")
+            false
+        }
+    }
+
     suspend fun sendTestNotification(idToken: String): Boolean = withContext(Dispatchers.IO) {
         try {
             val body = "{}".toRequestBody(JSON_TYPE)
