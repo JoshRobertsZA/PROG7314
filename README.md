@@ -230,6 +230,12 @@ below were populated by calling the documented endpoints directly.
 
 *(Screenshots captured on a physical Android device)*
 
+### Feature screens
+
+| Flight status | Currency converter |
+|---|---|
+| ![Flight status](assets/store/phone/05-flight-status.png) | ![Currency converter](assets/store/phone/06-currency.png) |
+
 ### Dark mode
 
 The app follows the phone's dark mode setting.
