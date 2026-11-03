@@ -398,4 +398,12 @@
     <string name="flight_status_limit_reached">Umkhawulo wesimo sendiza ufikiwe kule nyanga, zama futhi kamuva</string>
     <string name="profile_dark_mode_title">Imodi emnyama</string>
     <string name="profile_dark_mode_subtitle">Sebenzisa itimu emnyama</string>
+
+    <string name="biometric_error_lockout">Imizamo eminingi kakhulu. Zama futhi ngemva kwemizuzwana engu-30.</string>
+    <string name="biometric_error_lockout_permanent">I-biometrics ivaliwe. Sebenzisa i-PIN, iphethini noma iphasiwedi yefoni yakho ukuze uvule.</string>
+    <string name="biometric_error_cancelled">Ukuvula kukhanselwe. Thinta u-Vula ukuze uzame futhi.</string>
+    <string name="biometric_error_no_hardware">I-biometrics ayitholakali kule divayisi.</string>
+    <string name="biometric_error_none_enrolled">Akukho ukuvala isikrini okusethiwe. Setha okukodwa kuzilungiselelo zefoni yakho.</string>
+    <string name="biometric_error_generic">Ayikwazanga ukuvula. Sicela uzame futhi.</string>
+
 </resources>

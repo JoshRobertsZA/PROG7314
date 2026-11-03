@@ -104,7 +104,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 // imports `com.waypoint.app.R` for use in this file
 import com.waypoint.app.R
 // imports `com.waypoint.app.core.auth.BiometricAuthenticator` for use in this file
+import android.widget.Toast
 import com.waypoint.app.core.auth.BiometricAuthenticator
+import com.waypoint.app.core.auth.biometricFailureMessage
+import com.waypoint.app.core.auth.classifyBiometricError
 // imports `com.waypoint.app.core.auth.BiometricAvailability` for use in this file
 import com.waypoint.app.core.auth.BiometricAvailability
 // imports `com.waypoint.app.core.auth.BiometricLockPreferences` for use in this file
@@ -453,8 +456,6 @@ fun SettingsScreen(
             val enableTitle = stringResource(R.string.profile_biometric_enable_title)
             // declares read-only property `enableSubtitle`, initialised with the result of calling `stringResource(…)`
             val enableSubtitle = stringResource(R.string.profile_biometric_enable_subtitle)
-            // declares read-only property `cancelText`, initialised with the result of calling `stringResource(…)`
-            val cancelText = stringResource(R.string.biometric_lock_cancel)
             // calls `PreferenceRow` with an argument list that continues on the following lines
             PreferenceRow(
                 // continues the statement started above: `title = stringResource(R.string.profile_biometric_title),`
@@ -491,8 +492,6 @@ fun SettingsScreen(
                             title = enableTitle,
                             // continues the statement started above: `subtitle = enableSubtitle,`
                             subtitle = enableSubtitle,
-                            // continues the statement started above: `negativeButtonText = cancelText,`
-                            negativeButtonText = cancelText,
                             // continues the statement started above: `onSuccess = {`
                             onSuccess = {
                                 // assigns `biometricEnabled` the value `true`
@@ -501,8 +500,14 @@ fun SettingsScreen(
                                 BiometricLockPreferences.setEnabled(context, true)
                             // closes the block
                             },
-                            // continues the statement started above: `onError = { _, _ -> },`
-                            onError = { _, _ ->  },
+                            onError = { code, _ ->
+                                // tells the user why the prompt failed
+                                Toast.makeText(
+                                    context,
+                                    context.getString(biometricFailureMessage(classifyBiometricError(code))),
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            },
                         // closes the multi-line argument list started above
                         )
                     // closes the block
