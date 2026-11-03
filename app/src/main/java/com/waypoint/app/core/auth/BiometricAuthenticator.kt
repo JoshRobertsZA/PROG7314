@@ -7,6 +7,8 @@ import android.content.Context
 import androidx.biometric.BiometricManager
 // imports `androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK` for use in this file
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
+// imports `androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL` for use in this file
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 // imports `androidx.biometric.BiometricPrompt` for use in this file
 import androidx.biometric.BiometricPrompt
 // imports `androidx.core.content.ContextCompat` for use in this file
@@ -30,12 +32,15 @@ enum class BiometricAvailability {
 // declares object `BiometricAuthenticator` and opens its body
 object BiometricAuthenticator {
 
+    // a fingerprint or face scan, or the phone's PIN, pattern or password when the scan is not available
+    private const val ALLOWED_AUTHENTICATORS = BIOMETRIC_WEAK or DEVICE_CREDENTIAL
+
     // declares function `availability` taking 1 parameter (`context`), returning `BiometricAvailability` and opens its body
     fun availability(context: Context): BiometricAvailability {
         // declares read-only property `manager`, initialised with the result of calling `BiometricManager.from(…)`
         val manager = BiometricManager.from(context)
-        // returns `when (manager.canAuthenticate(BIOMETRIC_WEAK)) {` from the current function
-        return when (manager.canAuthenticate(BIOMETRIC_WEAK)) {
+        // returns `when (manager.canAuthenticate(ALLOWED_AUTHENTICATORS)) {` from the current function
+        return when (manager.canAuthenticate(ALLOWED_AUTHENTICATORS)) {
             // lambda `BiometricManager.BIOMETRIC_SU… -> BiometricAvailability.AVAILAB…`
             BiometricManager.BIOMETRIC_SUCCESS -> BiometricAvailability.AVAILABLE
             // expression: `BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE,`
@@ -59,8 +64,6 @@ object BiometricAuthenticator {
         title: String,
         // continues the statement started above: `subtitle: String,`
         subtitle: String,
-        // continues the statement started above: `negativeButtonText: String,`
-        negativeButtonText: String,
         // continues the statement started above: `onSuccess: () -> Unit,`
         onSuccess: () -> Unit,
         // continues the statement started above: `onError: (errorCode: Int, message: CharSequence) -> Unit,`
@@ -95,9 +98,8 @@ object BiometricAuthenticator {
             // chained call `.setSubtitle` on the previous result with arguments `(subtitle)`
             .setSubtitle(subtitle)
             // chained call `.setAllowedAuthenticators` on the previous result with arguments `(BIOMETRIC_WEAK)`
-            .setAllowedAuthenticators(BIOMETRIC_WEAK)
-            // chained call `.setNegativeButtonText` on the previous result with arguments `(negativeButtonText)`
-            .setNegativeButtonText(negativeButtonText)
+            .setAllowedAuthenticators(ALLOWED_AUTHENTICATORS)
+            // no negative button: Android does not allow one together with the device credential fallback
             // chained call `.build` on the previous result
             .build()
 

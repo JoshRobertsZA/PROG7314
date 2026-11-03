@@ -813,8 +813,6 @@ private fun WaypointNavHost(
         val promptTitle = stringResource(R.string.biometric_lock_prompt_title)
         // declares read-only property `promptSubtitle`, initialised with the result of calling `stringResource(…)`
         val promptSubtitle = stringResource(R.string.biometric_lock_prompt_subtitle)
-        // declares read-only property `cancelText`, initialised with the result of calling `stringResource(…)`
-        val cancelText = stringResource(R.string.biometric_lock_cancel)
         // calls `BiometricLockOverlay` with an argument list that continues on the following lines
         BiometricLockOverlay(
             // continues the statement started above: `onUnlockClick = {`
@@ -827,8 +825,6 @@ private fun WaypointNavHost(
                     title = promptTitle,
                     // continues the statement started above: `subtitle = promptSubtitle,`
                     subtitle = promptSubtitle,
-                    // continues the statement started above: `negativeButtonText = cancelText,`
-                    negativeButtonText = cancelText,
                     // continues the statement started above: `onSuccess = { biometricLockActive = false },`
                     onSuccess = { biometricLockActive = false },
                     // continues the statement started above: `onError = { _, _ -> },`

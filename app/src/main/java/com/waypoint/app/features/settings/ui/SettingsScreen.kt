@@ -453,8 +453,6 @@ fun SettingsScreen(
             val enableTitle = stringResource(R.string.profile_biometric_enable_title)
             // declares read-only property `enableSubtitle`, initialised with the result of calling `stringResource(…)`
             val enableSubtitle = stringResource(R.string.profile_biometric_enable_subtitle)
-            // declares read-only property `cancelText`, initialised with the result of calling `stringResource(…)`
-            val cancelText = stringResource(R.string.biometric_lock_cancel)
             // calls `PreferenceRow` with an argument list that continues on the following lines
             PreferenceRow(
                 // continues the statement started above: `title = stringResource(R.string.profile_biometric_title),`
@@ -491,8 +489,6 @@ fun SettingsScreen(
                             title = enableTitle,
                             // continues the statement started above: `subtitle = enableSubtitle,`
                             subtitle = enableSubtitle,
-                            // continues the statement started above: `negativeButtonText = cancelText,`
-                            negativeButtonText = cancelText,
                             // continues the statement started above: `onSuccess = {`
                             onSuccess = {
                                 // assigns `biometricEnabled` the value `true`
