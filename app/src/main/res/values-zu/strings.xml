@@ -396,4 +396,6 @@
     <string name="api_budget_today">namuhla</string>
     <string name="api_budget_this_month">kule nyanga</string>
     <string name="flight_status_limit_reached">Umkhawulo wesimo sendiza ufikiwe kule nyanga, zama futhi kamuva</string>
+    <string name="profile_dark_mode_title">Imodi emnyama</string>
+    <string name="profile_dark_mode_subtitle">Sebenzisa itimu emnyama</string>
 </resources>

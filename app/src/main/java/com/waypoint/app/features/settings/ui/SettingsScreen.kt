@@ -124,6 +124,10 @@ import com.waypoint.app.core.network.GuardedApi
 // imports `com.waypoint.app.core.network.UsageSnapshot` for use in this file
 import com.waypoint.app.core.network.UsageSnapshot
 import com.waypoint.app.core.theme.RadiusButton
+// imports `com.waypoint.app.core.theme.ThemePreferences` for use in this file
+import com.waypoint.app.core.theme.ThemePreferences
+// imports `androidx.compose.foundation.isSystemInDarkTheme` for use in this file
+import androidx.compose.foundation.isSystemInDarkTheme
 // imports `com.waypoint.app.core.theme.RadiusRow` for use in this file
 import com.waypoint.app.core.theme.RadiusRow
 // imports `com.waypoint.app.core.theme.WaypointBorderSoft` for use in this file
@@ -388,6 +392,27 @@ fun SettingsScreen(
                         }
                     // closes the block
                     },
+                // closes the multi-line argument list started above
+                )
+            // closes the block
+            }
+
+            // declares read-only property `darkModeOn`, whether the dark theme is showing right now, from the user's choice or the phone's setting
+            val darkModeOn = ThemePreferences.override ?: isSystemInDarkTheme()
+            // calls `PreferenceRow` with an argument list that continues on the following lines
+            PreferenceRow(
+                // continues the statement started above: `title = stringResource(R.string.profile_dark_mode_title),`
+                title = stringResource(R.string.profile_dark_mode_title),
+                // continues the statement started above: `subtitle = stringResource(R.string.profile_dark_mode_subtitle),`
+                subtitle = stringResource(R.string.profile_dark_mode_subtitle),
+                // continues the statement started above: `modifier = Modifier.padding(top = 12.dp),`
+                modifier = Modifier.padding(top = 12.dp),
+            // ends the argument list started above and opens the block that follows
+            ) {
+                // calls `PreferenceToggle` which saves the choice and switches the theme straight away
+                PreferenceToggle(
+                    checked = darkModeOn,
+                    onCheckedChange = { ThemePreferences.setDark(context, it) },
                 // closes the multi-line argument list started above
                 )
             // closes the block

@@ -395,4 +395,6 @@
     <string name="api_budget_today">namhlanje</string>
     <string name="api_budget_this_month">kule nyanga</string>
     <string name="flight_status_limit_reached">Umda wemeko yenqwelo-moya ufikelelwe kule nyanga, zama kwakhona kamva</string>
+    <string name="profile_dark_mode_title">Imowudi emnyama</string>
+    <string name="profile_dark_mode_subtitle">Sebenzisa umxholo omnyama</string>
 </resources>

@@ -57,8 +57,8 @@ private fun waypointColorScheme(dark: Boolean): ColorScheme =
 
 // annotation `@Composable` applied to the declaration that follows
 @Composable
-// declares function `WaypointTheme` taking 2 parameters (`darkTheme`, `content`); `darkTheme` picks the dark palette and follows the phone's dark mode setting by default
-fun WaypointTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+// declares function `WaypointTheme` taking 2 parameters (`darkTheme`, `content`); `darkTheme` picks the dark palette and uses the user's choice from Settings, or the phone's dark mode setting until they choose
+fun WaypointTheme(darkTheme: Boolean = ThemePreferences.override ?: isSystemInDarkTheme(), content: @Composable () -> Unit) {
     // `if` statement: switches the shared palette before any child reads a colour, only when it actually changed
     if (WaypointPalette.dark != darkTheme) WaypointPalette.dark = darkTheme
     // declares read-only property `colorScheme`, rebuilt only when the mode changes
