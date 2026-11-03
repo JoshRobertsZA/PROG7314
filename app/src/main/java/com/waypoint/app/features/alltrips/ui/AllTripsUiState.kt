@@ -76,20 +76,36 @@ data class TripRow(
     val status: TripStatus,
     // continues the statement started above: `val badge: TripBadge,`
     val badge: TripBadge,
-    // continues the statement started above: `val badgeColor: Color,`
-    val badgeColor: Color,
-    // continues the statement started above: `val badgeTextColor: Color,`
-    val badgeTextColor: Color,
-    // continues the statement started above: `val titleColor: Color,`
-    val titleColor: Color,
     // continues the statement started above: `val thumbColor: Color,`
     val thumbColor: Color,
     // continues the statement started above: `val thumbAlpha: Float,`
     val thumbAlpha: Float,
     // continues the statement started above: `val photoUrl: String? = null,`
     val photoUrl: String? = null,
-// closes the multi-line argument list started above
-)
+// ends the argument list and opens the body that holds the theme colours
+) {
+    // declares read-only property `badgeColor`; computed from `status` each time it is read so it follows light and dark mode
+    val badgeColor: Color get() = when (status) {
+        // lambda `TripStatus.UPCOMING -> WaypointTerracotta`
+        TripStatus.UPCOMING  -> WaypointTerracotta
+        // lambda `TripStatus.ONGOING -> WaypointTripRange`
+        TripStatus.ONGOING   -> WaypointTripRange
+        // lambda `TripStatus.COMPLETED -> WaypointBorderSoft`
+        TripStatus.COMPLETED -> WaypointBorderSoft
+    // closes the block
+    }
+    // declares read-only property `badgeTextColor`; computed from `status` each time it is read
+    val badgeTextColor: Color get() = when (status) {
+        // lambda `TripStatus.COMPLETED -> WaypointTextPrimary`
+        TripStatus.COMPLETED -> WaypointTextPrimary
+        // `else` branch of the `when`: evaluates `White`
+        else                 -> White
+    // closes the block
+    }
+    // declares read-only property `titleColor`; computed from `status` each time it is read
+    val titleColor: Color get() = if (status == TripStatus.COMPLETED) WaypointTextMuted else WaypointTextPrimary
+// closes the body of `TripRow`
+}
 
 // expression: `data class AllTripsUiState(`
 data class AllTripsUiState(
@@ -219,26 +235,6 @@ fun TripEntity.toRow(index: Int, today: LocalDate = LocalDate.now()): TripRow {
         status        = status,
         // continues the statement started above: `badge = badge,`
         badge         = badge,
-        // continues the statement started above: `badgeColor = when (status) {`
-        badgeColor    = when (status) {
-            // lambda `TripStatus.UPCOMING -> WaypointTerracotta`
-            TripStatus.UPCOMING  -> WaypointTerracotta
-            // lambda `TripStatus.ONGOING -> WaypointTripRange`
-            TripStatus.ONGOING   -> WaypointTripRange
-            // lambda `TripStatus.COMPLETED -> WaypointBorderSoft`
-            TripStatus.COMPLETED -> WaypointBorderSoft
-        // closes the block
-        },
-        // continues the statement started above: `badgeTextColor = when (status) {`
-        badgeTextColor = when (status) {
-            // lambda `TripStatus.COMPLETED -> WaypointTextPrimary`
-            TripStatus.COMPLETED -> WaypointTextPrimary
-            // `else` branch of the `when`: evaluates `White`
-            else                 -> White
-        // closes the block
-        },
-        // continues the statement started above: `titleColor = if (status == TripStatus.COMPLETED) WaypointTe…`
-        titleColor    = if (status == TripStatus.COMPLETED) WaypointTextMuted else WaypointTextPrimary,
         // continues the statement started above: `thumbColor = THUMB_COLORS[index % THUMB_COLORS.size],`
         thumbColor    = THUMB_COLORS[index % THUMB_COLORS.size],
         // continues the statement started above: `thumbAlpha = if (status == TripStatus.COMPLETED) 0.55f else…`
