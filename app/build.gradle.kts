@@ -32,6 +32,17 @@ if (apikeyPropertiesFile.exists()) {
 // closes the if block
 }
 
+// declares read-only property `keystorePropertiesFile`, the local file that holds the release signing details; it is never committed
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+// declares read-only property `keystoreProperties`, initialised with the result of calling `Properties(…)`
+val keystoreProperties = Properties()
+// `if` statement: the block below runs when `keystorePropertiesFile.exists()` is true, so builds without the file (CI, teammates) still work
+if (keystorePropertiesFile.exists()) {
+    // calls `load` on `keystoreProperties` with arguments `(FileInputStream(keystorePropertiesFile))`
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+// closes the if block
+}
+
 // declares function `apiKey` taking 1 parameter (`name`), returning `String`; its body is the expression `apikeyProperties.getProperty(name, "")`
 fun apiKey(name: String): String = apikeyProperties.getProperty(name, "")
 
@@ -160,10 +171,36 @@ android {
         // closes the block
     }
 
+    // opens a block after `signingConfigs`; the release signing details are read from `keystore.properties` and are only set up when that file exists
+    signingConfigs {
+        // `if` statement: the block below runs when `keystorePropertiesFile.exists()` is true
+        if (keystorePropertiesFile.exists()) {
+            // opens a block after `create("release")`
+            create("release") {
+                // assigns `storeFile` the keystore file named in `keystore.properties`
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                // assigns `storePassword` the keystore password
+                storePassword = keystoreProperties.getProperty("storePassword")
+                // assigns `keyAlias` the name of the signing key inside the keystore
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                // assigns `keyPassword` the password of the signing key
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            // closes the block
+            }
+        // closes the if block
+        }
+    // closes the block
+    }
     // opens a block after `buildTypes`
     buildTypes {
         // opens a block after `release`
         release {
+            // `if` statement: signs the release build with the release key only when the signing details exist; otherwise the release build stays unsigned
+            if (keystorePropertiesFile.exists()) {
+                // assigns `signingConfig` the release signing config
+                signingConfig = signingConfigs.getByName("release")
+            // closes the if block
+            }
             // opens a block after `optimization`
             optimization {
                 // assigns `enable` the value `false`

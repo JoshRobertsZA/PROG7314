@@ -28,6 +28,7 @@ local.properties
 
 # API keys / secrets - never commit these
 apikey.properties
+keystore.properties
 secrets.properties
 /secrets/
 
