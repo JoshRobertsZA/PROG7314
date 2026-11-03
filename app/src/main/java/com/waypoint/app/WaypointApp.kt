@@ -17,6 +17,8 @@ import com.waypoint.app.core.notifications.TripReminderScheduler
 import com.waypoint.app.core.secrets.RemoteSecrets
 // imports `com.waypoint.app.core.network.UsageGuardian` for use in this file
 import com.waypoint.app.core.network.UsageGuardian
+// imports `com.waypoint.app.core.theme.ThemePreferences` for use in this file
+import com.waypoint.app.core.theme.ThemePreferences
 
 // declares class `WaypointApp`, inheriting from `Application(), ImageLoaderFactory` and opens its body
 class WaypointApp : Application(), ImageLoaderFactory {
@@ -34,6 +36,8 @@ class WaypointApp : Application(), ImageLoaderFactory {
         RemoteSecrets.init(this)
         // calls `init` on `UsageGuardian` with arguments `(this)`
         UsageGuardian.init(this)
+        // calls `init` on `ThemePreferences` with arguments `(this)`
+        ThemePreferences.init(this)
         // calls `ensureCreated` on `NotificationChannels` with arguments `(this)`
         NotificationChannels.ensureCreated(this)
         // calls `ensureScheduled` on `TripReminderScheduler` with arguments `(this)`

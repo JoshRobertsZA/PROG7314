@@ -485,4 +485,6 @@
     <string name="api_budget_today">today</string>
     <string name="api_budget_this_month">this month</string>
     <string name="flight_status_limit_reached">Flight status limit reached for this month, try again later</string>
+    <string name="profile_dark_mode_title">Dark mode</string>
+    <string name="profile_dark_mode_subtitle">Use the dark theme</string>
 </resources>

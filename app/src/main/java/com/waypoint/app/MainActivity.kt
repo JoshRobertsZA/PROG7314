@@ -17,6 +17,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 // imports `androidx.activity.enableEdgeToEdge` for use in this file
 import androidx.activity.enableEdgeToEdge
+// imports `androidx.activity.SystemBarStyle` for use in this file
+import androidx.activity.SystemBarStyle
+// imports `androidx.compose.foundation.isSystemInDarkTheme` for use in this file
+import androidx.compose.foundation.isSystemInDarkTheme
+// imports `com.waypoint.app.core.theme.ThemePreferences` for use in this file
+import com.waypoint.app.core.theme.ThemePreferences
 // imports `androidx.appcompat.app.AppCompatActivity` for use in this file
 import androidx.appcompat.app.AppCompatActivity
 // imports `androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen` for use in this file
@@ -207,8 +213,25 @@ class MainActivity : AppCompatActivity() {
 
         // opens a block after `setContent`
         setContent {
+            // declares read-only property `darkTheme`, the user's choice from Settings or the phone's setting until they choose
+            val darkTheme = ThemePreferences.override ?: isSystemInDarkTheme()
+            // runs again whenever `darkTheme` changes so the status and navigation bar icons match the chosen theme
+            DisposableEffect(darkTheme) {
+                // calls `enableEdgeToEdge` with bar styles that treat the app as dark or light depending on `darkTheme`
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT) { darkTheme },
+                    navigationBarStyle = SystemBarStyle.auto(
+                        android.graphics.Color.argb(0xe6, 0xFF, 0xFF, 0xFF),
+                        android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b),
+                    ) { darkTheme },
+                // closes the multi-line argument list started above
+                )
+                // returns an empty clean-up because nothing needs undoing
+                onDispose {}
+            // closes the effect block
+            }
             // opens a block after `WaypointTheme`
-            WaypointTheme {
+            WaypointTheme(darkTheme = darkTheme) {
                 // calls `WaypointNavHost` with arguments `()`
                 WaypointNavHost(
                     pendingTripId = pendingTripId,
