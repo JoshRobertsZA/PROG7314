@@ -263,6 +263,8 @@ fun HomeScreen(
                     onSaveClick = { showCurrencyModal = false },
                     // continues the statement started above: `fromCode = state.selectedFromCurrency,`
                     fromCode = state.selectedFromCurrency,
+                    // continues the statement started above: `toCode = state.selectedToCurrency,`
+                    toCode = state.selectedToCurrency,
                     // continues the statement started above: `rate = if (currencyState is CurrencyState.Success) currency…`
                     rate = if (currencyState is CurrencyState.Success) currencyState.data.rate else null,
                     // continues the statement started above: `isLoading = currencyState is CurrencyState.Loading,`
@@ -273,6 +275,14 @@ fun HomeScreen(
                         homeViewModel.selectFromCurrency(code)
                     // closes the block
                     },
+                    // continues the statement started above: `onToCodeChanged = { code ->`
+                    onToCodeChanged = { code ->
+                        // continues the statement started above: `homeViewModel.selectToCurrency(code)`
+                        homeViewModel.selectToCurrency(code)
+                    // closes the block
+                    },
+                    // continues the statement started above: `onSwapClick = { homeViewModel.swapCurrencies() },`
+                    onSwapClick = { homeViewModel.swapCurrencies() },
                 // closes the multi-line argument list started above
                 )
             // closes the block
