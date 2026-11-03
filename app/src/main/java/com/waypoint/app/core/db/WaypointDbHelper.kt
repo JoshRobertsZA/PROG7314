@@ -171,6 +171,25 @@ class WaypointDbHelper private constructor(context: Context) :
         db.execSQL(CREATE_PLACES_CACHE)
     }
 
+    // Removes everything stored on this device for one account, used after the
+    // account is deleted. Trips take their itinerary rows with them (ON DELETE
+    // CASCADE). The outbox has no account column, so all of it is cleared: it only
+    // ever holds changes made while signed in as the account that was just deleted.
+    fun deleteAccountData(accountId: String) {
+        val wdb = writableDatabase
+        wdb.beginTransaction()
+        try {
+            wdb.delete(TABLE_TRIPS, "$COL_TRIP_ACCOUNT_ID = ?", arrayOf(accountId))
+            wdb.delete(TABLE_NOTIFICATIONS, "$COL_NOTIF_ACCOUNT_ID = ?", arrayOf(accountId))
+            wdb.delete(TABLE_PLACES_CACHE, "$COL_PCACHE_ACCOUNT_ID = ?", arrayOf(accountId))
+            wdb.delete(TABLE_SYNC_OUTBOX, null, null)
+            wdb.delete(TABLE_ACCOUNTS, "$COL_ACC_ID = ?", arrayOf(accountId))
+            wdb.setTransactionSuccessful()
+        } finally {
+            wdb.endTransaction()
+        }
+    }
+
     // declares the companion object holding members shared by all instances of the enclosing class
     companion object {
         // declares private const read-only property `DB_NAME`, initialised to the string literal "waypoint.db"

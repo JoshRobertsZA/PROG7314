@@ -6,6 +6,8 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.waypoint.app.R
+import com.waypoint.app.core.notifications.WelcomeNotifier
+import com.waypoint.app.core.db.WaypointDbHelper
 import com.waypoint.app.core.auth.AuthRepository
 import com.waypoint.app.core.auth.GoogleSignInHelper
 import com.waypoint.app.core.db.AccountEntity
@@ -13,6 +15,8 @@ import com.waypoint.app.core.db.SessionManager
 import com.waypoint.app.core.network.WaypointApiRepository
 import com.waypoint.app.features.newtrip.data.TripRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -116,7 +120,13 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         val idToken = AuthRepository.getIdToken(forceRefresh = true) ?: error("Could not get an auth token")
         if (!WaypointApiRepository.deleteAccount(idToken)) error("Could not delete cloud data")
 
+        val deletedAccountId = SessionManager.accountId
         AuthRepository.deleteCurrentUser()
+        // the privacy policy promises deletion, so the copy on this phone goes too
+        withContext(Dispatchers.IO) {
+            WaypointDbHelper.getInstance(getApplication<Application>()).deleteAccountData(deletedAccountId)
+        }
+        WelcomeNotifier.reset()
         SessionManager.signOut()
         _deleteAccountUiState.update { AccountDeletionUiState() }
         onSuccess()
