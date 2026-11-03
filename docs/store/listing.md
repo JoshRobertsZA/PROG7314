@@ -54,5 +54,5 @@ Waypoint is free and has no ads.
 * Translations available in the app: isiZulu, isiXhosa
 * Contact email: STq0438409@myemeris.edu.za
 * Ads: No ads
-* Content rating: complete the questionnaire in the Play Console (no violence, no user-generated public content)
+* Content rating: Everyone (the IARC 3+ and PEGI 3)
 
