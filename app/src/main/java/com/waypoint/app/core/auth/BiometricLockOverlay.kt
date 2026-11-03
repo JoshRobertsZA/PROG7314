@@ -59,7 +59,11 @@ import com.waypoint.app.core.theme.White
 // annotation `@Composable` applied to the declaration that follows
 @Composable
 // declares function `BiometricLockOverlay` taking 1 parameter (`onUnlockClick`) and opens its body
-fun BiometricLockOverlay(onUnlockClick: () -> Unit, modifier: Modifier = Modifier) {
+fun BiometricLockOverlay(
+    onUnlockClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    message: String? = null,
+) {
     // calls `LaunchedEffect` with arguments `(Unit)`
     LaunchedEffect(Unit) { onUnlockClick() }
 
@@ -138,6 +142,17 @@ fun BiometricLockOverlay(onUnlockClick: () -> Unit, modifier: Modifier = Modifie
                 modifier = Modifier.padding(top = 8.dp),
             // closes the multi-line argument list started above
             )
+
+            // explains why the last unlock attempt failed, when it did
+            if (message != null) {
+                Text(
+                    text = message,
+                    color = WaypointTerracotta,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 16.dp),
+                )
+            }
 
             // calls `Box` with an argument list that continues on the following lines
             Box(

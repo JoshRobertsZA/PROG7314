@@ -487,4 +487,13 @@
     <string name="flight_status_limit_reached">Flight status limit reached for this month, try again later</string>
     <string name="profile_dark_mode_title">Dark mode</string>
     <string name="profile_dark_mode_subtitle">Use the dark theme</string>
+
+    <!-- Messages shown on the unlock screen when biometric unlock fails. -->
+    <string name="biometric_error_lockout">Too many attempts. Try again in 30 seconds.</string>
+    <string name="biometric_error_lockout_permanent">Biometrics are locked. Use your phone\'s PIN, pattern or password to unlock.</string>
+    <string name="biometric_error_cancelled">Unlock cancelled. Tap Unlock to try again.</string>
+    <string name="biometric_error_no_hardware">Biometrics are not available on this device.</string>
+    <string name="biometric_error_none_enrolled">No screen lock is set up. Set one in your phone settings.</string>
+    <string name="biometric_error_generic">Could not unlock. Please try again.</string>
+
 </resources>

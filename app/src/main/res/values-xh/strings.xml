@@ -397,4 +397,12 @@
     <string name="flight_status_limit_reached">Umda wemeko yenqwelo-moya ufikelelwe kule nyanga, zama kwakhona kamva</string>
     <string name="profile_dark_mode_title">Imowudi emnyama</string>
     <string name="profile_dark_mode_subtitle">Sebenzisa umxholo omnyama</string>
+
+    <string name="biometric_error_lockout">Iinzame ezininzi kakhulu. Zama kwakhona emva kwemizuzwana engama-30.</string>
+    <string name="biometric_error_lockout_permanent">I-biometrics ivaliwe. Sebenzisa i-PIN, iphethini okanye iphasiwedi yefowuni yakho ukuze uvule.</string>
+    <string name="biometric_error_cancelled">Ukuvula kurhoxisiwe. Cofa u-Vula ukuze uphinde uzame.</string>
+    <string name="biometric_error_no_hardware">I-biometrics ayifumaneki kesi sixhobo.</string>
+    <string name="biometric_error_none_enrolled">Akukho kuvalwa kwesikrini okuseti. Seta enye kuseto lwefowuni yakho.</string>
+    <string name="biometric_error_generic">Ayikwazanga ukuvula. Nceda uphinde uzame.</string>
+
 </resources>

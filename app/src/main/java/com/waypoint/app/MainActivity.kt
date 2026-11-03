@@ -87,6 +87,9 @@ import com.waypoint.app.core.auth.AuthRepository
 import com.waypoint.app.core.auth.AuthViewModel
 // imports `com.waypoint.app.core.auth.BiometricAuthenticator` for use in this file
 import com.waypoint.app.core.auth.BiometricAuthenticator
+import com.waypoint.app.core.auth.BiometricFailure
+import com.waypoint.app.core.auth.biometricFailureMessage
+import com.waypoint.app.core.auth.classifyBiometricError
 // imports `com.waypoint.app.core.auth.BiometricAvailability` for use in this file
 import com.waypoint.app.core.auth.BiometricAvailability
 // imports `com.waypoint.app.core.auth.BiometricLockOverlay` for use in this file
@@ -287,6 +290,8 @@ private fun WaypointNavHost(
 
     // declares mutable property `biometricLockActive`, delegated to `remember { mutableStateOf(false) }`
     var biometricLockActive by remember { mutableStateOf(false) }
+    // the reason the last unlock attempt failed, shown on the lock screen
+    var biometricMessage by remember { mutableStateOf<String?>(null) }
 
     // declares function `armBiometricLockIfNeeded` taking no parameters and opens its body
     fun armBiometricLockIfNeeded() {
@@ -813,8 +818,10 @@ private fun WaypointNavHost(
         val promptTitle = stringResource(R.string.biometric_lock_prompt_title)
         // declares read-only property `promptSubtitle`, initialised with the result of calling `stringResource(…)`
         val promptSubtitle = stringResource(R.string.biometric_lock_prompt_subtitle)
+        val failureMessages = BiometricFailure.values().associateWith { stringResource(biometricFailureMessage(it)) }
         // calls `BiometricLockOverlay` with an argument list that continues on the following lines
         BiometricLockOverlay(
+            message = biometricMessage,
             // continues the statement started above: `onUnlockClick = {`
             onUnlockClick = {
                 // calls `authenticate` on `BiometricAuthenticator` with an argument list that continues on the following lines
@@ -825,10 +832,13 @@ private fun WaypointNavHost(
                     title = promptTitle,
                     // continues the statement started above: `subtitle = promptSubtitle,`
                     subtitle = promptSubtitle,
-                    // continues the statement started above: `onSuccess = { biometricLockActive = false },`
-                    onSuccess = { biometricLockActive = false },
-                    // continues the statement started above: `onError = { _, _ -> },`
-                    onError = { _, _ ->  },
+                    onSuccess = {
+                        biometricMessage = null
+                        biometricLockActive = false
+                    },
+                    onError = { code, _ ->
+                        biometricMessage = failureMessages[classifyBiometricError(code)]
+                    },
                 // closes the multi-line argument list started above
                 )
             // closes the block
