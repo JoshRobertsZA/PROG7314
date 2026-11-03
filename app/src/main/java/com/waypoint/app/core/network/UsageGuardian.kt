@@ -48,6 +48,56 @@ object UsageGuardian {
     // declares private const read-only property `TAG`, initialised to the string literal "UsageGuardian"
     private const val TAG = "UsageGuardian"
 
+    // declares private const read-only property `SAFETY_FRACTION`, initialised to 0.9; calls are blocked at 90 percent of a limit because CounterAPI reads can lag behind the real usage
+    private const val SAFETY_FRACTION = 0.9
+    // declares private const read-only property `SNAPSHOT_TTL_MS`, initialised to 60_000L; how long a usage read is reused before CounterAPI is asked again
+    private const val SNAPSHOT_TTL_MS = 60_000L
+    // declares private read-only property `snapshots`, holding the last usage read per API and when it was read, so the guardian does not call CounterAPI before every request
+    private val snapshots = java.util.concurrent.ConcurrentHashMap<GuardedApi, Pair<Long, UsageSnapshot>>()
+
+    // declares function `isWithinBudget` taking 2 parameters (`snapshot`, `needed`), returning `Boolean`; true when `needed` more requests still fit under the safe part of every limit the API has
+    fun isWithinBudget(snapshot: UsageSnapshot, needed: Int = 1): Boolean {
+        // declares read-only property `dailyLimit`, initialised to `snapshot.api.dailyLimit`
+        val dailyLimit = snapshot.api.dailyLimit
+        // declares read-only property `monthlyLimit`, initialised to `snapshot.api.monthlyLimit`
+        val monthlyLimit = snapshot.api.monthlyLimit
+        // declares read-only property `dailyOk`, true when there is no daily limit or the daily count plus `needed` stays under the safe limit
+        val dailyOk = dailyLimit == null || snapshot.dailyCount + needed <= (dailyLimit * SAFETY_FRACTION).toInt()
+        // declares read-only property `monthlyOk`, true when there is no monthly limit or the monthly count plus `needed` stays under the safe limit
+        val monthlyOk = monthlyLimit == null || snapshot.monthlyCount + needed <= (monthlyLimit * SAFETY_FRACTION).toInt()
+        // returns `dailyOk && monthlyOk` from the current function
+        return dailyOk && monthlyOk
+    // closes the function `isWithinBudget`
+    }
+
+    // declares suspend function `isAllowed` taking 2 parameters (`api`, `needed`), returning `Boolean`; the check callers make before spending quota, which allows the call when usage cannot be read
+    suspend fun isAllowed(api: GuardedApi, needed: Int = 1): Boolean {
+        // declares read-only property `snapshot`, initialised with the result of calling `currentSnapshot(…)`, returning true from the function when usage cannot be read
+        val snapshot = currentSnapshot(api) ?: return true
+        // declares read-only property `allowed`, initialised with the result of calling `isWithinBudget(…)`
+        val allowed = isWithinBudget(snapshot, needed)
+        // `if` statement: executes `Log.w(...)` when `!allowed` is true
+        if (!allowed) Log.w(TAG, "${api.slug} budget used up: daily=${snapshot.dailyCount}, monthly=${snapshot.monthlyCount}")
+        // returns `allowed` from the current function
+        return allowed
+    // closes the function `isAllowed`
+    }
+
+    // declares private suspend function `currentSnapshot` taking 1 parameter (`api`), returning `UsageSnapshot?`; reuses a read from the last minute, otherwise reads CounterAPI again
+    private suspend fun currentSnapshot(api: GuardedApi): UsageSnapshot? {
+        // declares read-only property `cached`, initialised to `snapshots[api]`
+        val cached = snapshots[api]
+        // `if` statement: executes `return cached.second` when the cached read is still fresh
+        if (cached != null && System.currentTimeMillis() - cached.first < SNAPSHOT_TTL_MS) return cached.second
+        // declares read-only property `fresh`, initialised with the result of calling `readCounts(…)`, returning null from the function when the read fails
+        val fresh = readCounts(api) ?: return null
+        // assigns `snapshots[api]` the value `Pair(System.currentTimeMillis(), fresh)`
+        snapshots[api] = Pair(System.currentTimeMillis(), fresh)
+        // returns `fresh` from the current function
+        return fresh
+    // closes the function `currentSnapshot`
+    }
+
     // declares function `dailyCounterName` taking 2 parameters (`api`, `date`), returning `String`; one counter per API per UTC day, for example `wp-airlabs-d-20261103`
     fun dailyCounterName(api: GuardedApi, date: LocalDate = LocalDate.now(ZoneOffset.UTC)): String =
         // continues the statement started above: `"wp-${api.slug}-d-${date.format(DateTimeFormatter.BASIC_ISO_DATE)}"`
@@ -96,17 +146,32 @@ object UsageGuardian {
         // closes the if block
         }
 
-        // declares read-only property `daily`, initialised with the result of calling `getCount(…)`, returning null from the function when the read fails
-        val daily = getCount(workspace, token, dailyCounterName(api)) ?: return null
-        // declares read-only property `monthly`, initialised with the result of calling `getCount(…)`, returning null from the function when the read fails
-        val monthly = getCount(workspace, token, monthlyCounterName(api)) ?: return null
+        // declares read-only property `daily`, read only when the API has a daily limit, returning null from the function when the read fails
+        val daily = if (api.dailyLimit != null) getCount(workspace, token, dailyCounterName(api)) ?: return null else 0
+        // declares read-only property `monthly`, read only when the API has a monthly limit, returning null from the function when the read fails
+        val monthly = if (api.monthlyLimit != null) getCount(workspace, token, monthlyCounterName(api)) ?: return null else 0
         // returns a `UsageSnapshot` with the daily and monthly counts from the current function
         return UsageSnapshot(api, daily, monthly)
     // closes the function `readCounts`
     }
 
-    // declares suspend function `recordUse` taking 1 parameter (`api`); adds one to both the daily and the monthly counter after a real call to that API
-    suspend fun recordUse(api: GuardedApi) {
+    // declares suspend function `recordUse` taking 2 parameters (`api`, `count`); adds `count` to the counters the API has limits for, after real calls to that API
+    suspend fun recordUse(api: GuardedApi, count: Int = 1) {
+        // declares read-only property `cached`, initialised to `snapshots[api]`
+        val cached = snapshots[api]
+        // `if` statement: the block below runs when a usage read is cached, so decisions in the next minute already include this use
+        if (cached != null) {
+            // assigns `snapshots[api]` the cached read with `count` added to both counts
+            snapshots[api] = Pair(cached.first, cached.second.copy(
+                // continues the statement started above: `dailyCount = cached.second.dailyCount + count,`
+                dailyCount = cached.second.dailyCount + count,
+                // continues the statement started above: `monthlyCount = cached.second.monthlyCount + count,`
+                monthlyCount = cached.second.monthlyCount + count,
+            // closes the multi-line argument list started above
+            ))
+        // closes the if block
+        }
+
         // declares read-only property `token`, initialised with the result of calling `RemoteSecrets.get(…)`
         val token = RemoteSecrets.get("COUNTERAPI_API_KEY", BuildConfig.COUNTERAPI_API_KEY)
         // declares read-only property `workspace`, initialised with the result of calling `RemoteSecrets.get(…)`
@@ -114,10 +179,14 @@ object UsageGuardian {
         // `if` statement: executes `return` when `token.isBlank() || workspace.isBlank()` is true
         if (token.isBlank() || workspace.isBlank()) return
 
-        // calls `increment` with arguments `(workspace, token, dailyCounterName(api))`
-        increment(workspace, token, dailyCounterName(api))
-        // calls `increment` with arguments `(workspace, token, monthlyCounterName(api))`
-        increment(workspace, token, monthlyCounterName(api))
+        // `repeat` loop: runs the block below `count` times, one CounterAPI increment per request made to the guarded API
+        repeat(count) {
+            // `if` statement: executes the daily increment when the API has a daily limit
+            if (api.dailyLimit != null) increment(workspace, token, dailyCounterName(api))
+            // `if` statement: executes the monthly increment when the API has a monthly limit
+            if (api.monthlyLimit != null) increment(workspace, token, monthlyCounterName(api))
+        // closes the repeat block
+        }
     // closes the function `recordUse`
     }
 

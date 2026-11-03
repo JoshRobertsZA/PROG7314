@@ -15,8 +15,12 @@ import com.waypoint.app.core.cache.PlacesCacheLocalRepository
 import com.waypoint.app.core.cache.PlacesCacheSerializer
 // imports `com.waypoint.app.core.db.SessionManager` for use in this file
 import com.waypoint.app.core.db.SessionManager
+// imports `com.waypoint.app.core.network.GuardedApi` for use in this file
+import com.waypoint.app.core.network.GuardedApi
 // imports `com.waypoint.app.core.network.HttpClient` for use in this file
 import com.waypoint.app.core.network.HttpClient
+// imports `com.waypoint.app.core.network.UsageGuardian` for use in this file
+import com.waypoint.app.core.network.UsageGuardian
 // imports `com.waypoint.app.core.secrets.RemoteSecrets` for use in this file
 import com.waypoint.app.core.secrets.RemoteSecrets
 // imports `android.content.Context` for use in this file
@@ -61,6 +65,10 @@ object LocationIQRepository {
     private const val TAG = "LocationIQRepo"
     // declares private const read-only property `NEARBY_RADIUS_METRES`, initialised to the number 15000
     private const val NEARBY_RADIUS_METRES = 15000
+    // declares private const read-only property `NEARBY_REQUESTS`, initialised to the number 6; one LocationIQ request is sent per place category in `fetchNearby`
+    private const val NEARBY_REQUESTS = 6
+    // declares private const read-only property `REFRESH_REQUESTS`, initialised to the number 7; a city refresh is one geocode request plus the nearby requests
+    private const val REFRESH_REQUESTS = NEARBY_REQUESTS + 1
 
     // declares function `citySlug` taking 1 parameter (`city`), returning `String`; its body is the expression ``
     fun citySlug(city: String): String =
@@ -98,7 +106,6 @@ object LocationIQRepository {
         val fresh = fetchFromApi(city, slug)
         if (fresh != null) {
             writeToLocalCache(context, accountId, path, fresh)
-            incrementCounter()
             return fresh
         }
 
@@ -134,6 +141,17 @@ object LocationIQRepository {
         val key = RemoteSecrets.get("LOCATIONIQ_API_KEY", BuildConfig.LOCATIONIQ_API_KEY)
         if (key.isBlank()) return stale
 
+        // `if` statement: the block below runs when the guardian says the LocationIQ daily budget is used up, falling back to the stale cache
+        if (!UsageGuardian.isAllowed(GuardedApi.LOCATIONIQ, NEARBY_REQUESTS)) {
+            // calls `w` on `Log` with arguments `(TAG, "LocationIQ budget used up -- skipping live fetch for $slug")`
+            Log.w(TAG, "LocationIQ budget used up -- skipping live fetch for $slug")
+            // returns `stale` from the current function
+            return stale
+        // closes the if block
+        }
+        // calls `recordUse` on `UsageGuardian` with arguments `(GuardedApi.LOCATIONIQ, NEARBY_REQUESTS)`, counting the nearby requests before they are sent
+        UsageGuardian.recordUse(GuardedApi.LOCATIONIQ, NEARBY_REQUESTS)
+
         val places = withContext(Dispatchers.IO) { fetchNearby(lat, lon, key) }
         if (places != null) {
             val fresh = PlacesCache(
@@ -142,7 +160,6 @@ object LocationIQRepository {
                 places         = places,
             )
             writeToLocalCache(context, accountId, path, fresh)
-            incrementCounter()
             return fresh
         }
 
@@ -159,6 +176,10 @@ object LocationIQRepository {
                 val url = "https://us1.locationiq.com/v1/reverse" +
                           // continues the statement started above: `"?key=$key&lat=$lat&lon=$lon&format=json"`
                           "?key=$key&lat=$lat&lon=$lon&format=json"
+                // `if` statement: executes `return@withContext null` when the guardian says the LocationIQ daily budget is used up
+                if (!UsageGuardian.isAllowed(GuardedApi.LOCATIONIQ)) return@withContext null
+                // calls `recordUse` on `UsageGuardian` with arguments `(GuardedApi.LOCATIONIQ)`, counting the reverse geocode request before it is sent
+                UsageGuardian.recordUse(GuardedApi.LOCATIONIQ)
                 // declares read-only property `req`, initialised with the result of calling `Request.Builder(…)`
                 val req = Request.Builder().url(url).get().build()
                 // calls `Call` on `HttpClient.instance` with arguments `(req)`, then chains `.execute()`, `.use { resp ->`
@@ -236,6 +257,17 @@ object LocationIQRepository {
             // closes the if block
             }
 
+            // `if` statement: the block below runs when the guardian says the LocationIQ daily budget is used up
+            if (!UsageGuardian.isAllowed(GuardedApi.LOCATIONIQ, REFRESH_REQUESTS)) {
+                // calls `w` on `Log` with arguments `(TAG, "LocationIQ budget used up -- skipping live fetch for $city")`
+                Log.w(TAG, "LocationIQ budget used up -- skipping live fetch for $city")
+                // expression: `return@withContext null`
+                return@withContext null
+            // closes the if block
+            }
+            // calls `recordUse` on `UsageGuardian` with arguments `(GuardedApi.LOCATIONIQ, REFRESH_REQUESTS)`, counting the geocode and nearby requests before they are sent
+            UsageGuardian.recordUse(GuardedApi.LOCATIONIQ, REFRESH_REQUESTS)
+
             // declares read-only property `coords`, initialised with the result of calling `geocodeCityWithKey(…)`
             val coords = geocodeCityWithKey(city, key) ?: return@withContext null
             // calls `val` with arguments `(lat, lon)`
@@ -266,6 +298,10 @@ object LocationIQRepository {
         // `if` statement: executes `return null` when `key.isBlank()` is true
         if (key.isBlank()) return null
         // returns `withContext(Dispatchers.IO) { geocodeCityWithKey(city, key) }` from the current function
+        // `if` statement: executes `return null` when the guardian says the LocationIQ daily budget is used up
+        if (!UsageGuardian.isAllowed(GuardedApi.LOCATIONIQ)) return null
+        // calls `recordUse` on `UsageGuardian` with arguments `(GuardedApi.LOCATIONIQ)`, counting the geocode request before it is sent
+        UsageGuardian.recordUse(GuardedApi.LOCATIONIQ)
         return withContext(Dispatchers.IO) { geocodeCityWithKey(city, key) }
     // closes the function `geocodeCity`
     }
@@ -423,52 +459,6 @@ object LocationIQRepository {
         // returns `results.sortedBy { it.distanceMetres }` from the current function
         return results.sortedBy { it.distanceMetres }
     // closes the function `fetchNearby`
-    }
-
-
-    // declares private suspend function `incrementCounter` taking no parameters; its body is the expression `withContext(Dispatchers.IO) {`
-    private suspend fun incrementCounter() = withContext(Dispatchers.IO) {
-        // declares read-only property `token`, initialised with the result of calling `RemoteSecrets.get(…)`
-        val token = RemoteSecrets.get("COUNTERAPI_API_KEY", BuildConfig.COUNTERAPI_API_KEY)
-        // declares read-only property `workspace`, initialised with the result of calling `RemoteSecrets.get(…)`
-        val workspace = RemoteSecrets.get("COUNTERAPI_WORKSPACE", BuildConfig.COUNTERAPI_WORKSPACE)
-        // declares read-only property `counter`, initialised with the result of calling `RemoteSecrets.get(…)`
-        val counter = RemoteSecrets.get("COUNTERAPI_PLACES_SLUG", BuildConfig.COUNTERAPI_PLACES_SLUG)
-
-        // `if` statement: the block below runs when `token.isBlank() || workspace.isBlank() || counter.isBlank()` is true
-        if (token.isBlank() || workspace.isBlank() || counter.isBlank()) {
-            // calls `d` on `Log` with arguments `(TAG, "CounterAPI not configured -- skipping …)`
-            Log.d(TAG, "CounterAPI not configured -- skipping increment")
-            // expression: `return@withContext`
-            return@withContext
-        // closes the if block
-        }
-
-        // `try` block: exceptions thrown inside are handled by the `catch` below
-        try {
-            // declares read-only property `url`, initialised to the string literal "https://api.counterapi.dev/v2/$workspa…
-            val url = "https://api.counterapi.dev/v2/$workspace/$counter/up"
-            // declares read-only property `req`, initialised with the result of calling `Request.Builder(…)`
-            val req = Request.Builder()
-                // chained call `.url` on the previous result with arguments `(url)`
-                .url(url)
-                // chained call `.header` on the previous result with arguments `("Authorization", "Bearer $token")`
-                .header("Authorization", "Bearer $token")
-                // chained call `.get` on the previous result
-                .get()
-                // chained call `.build` on the previous result
-                .build()
-            // declares read-only property `resp`, initialised with the result of calling `HttpClient.instance.newCall(…)`
-            val resp = HttpClient.instance.newCall(req).execute()
-            // lambda `Log.d(TAG, "CounterAPI increm… -> HTTP ${resp.code}")`
-            Log.d(TAG, "CounterAPI increment -> HTTP ${resp.code}")
-        // `catch` block: handles a thrown `Exception` bound to `e`
-        } catch (e: Exception) {
-            // calls `w` on `Log` with arguments `(TAG, "CounterAPI increment failed: ${e.messa…)`
-            Log.w(TAG, "CounterAPI increment failed: ${e.message}")
-        // closes the catch block
-        }
-    // closes the block
     }
 // closes the object `LocationIQRepository`
 }
