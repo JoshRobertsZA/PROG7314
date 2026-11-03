@@ -10,7 +10,7 @@ Use these answers in Play Console > App content > Data safety.
 | Is all data encrypted in transit? | Yes (HTTPS) |
 | Can users request data deletion? | Yes, in app (Profile > Delete account) |
 | Account creation methods | Email and password, Google sign-in |
-| Privacy policy URL | [HOSTED URL, see docs/store/privacy-policy.md] |
+| Privacy policy URL | https://st10438409-emeris.github.io/waypoint-privacy/ |
 
 ## Data types collected
 
@@ -44,5 +44,5 @@ Financial info, health and fitness, messages, audio, files, contacts, calendar, 
 
 ## Open items for the team
 
-- Decide the contact email and hosting URL for the policy (GitHub Pages or a GitHub raw link rendered page).
+- Privacy policy is hosted at https://st10438409-emeris.github.io/waypoint-privacy/ (source repo: https://github.com/ST10438409-Emeris/waypoint-privacy).
 - Confirm the AirLabs monthly limit before store submission.

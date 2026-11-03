@@ -249,7 +249,7 @@ The app follows the phone's dark mode setting.
 
 ## Play Store Preparation
 
-The release build is minified with R8, signed with a private upload keystore (kept out of git, see `keystore.properties.example`) and versioned `1.0.0`. Store text, the privacy policy and the Data safety answers are in [`docs/store`](docs/store).
+The release build is minified with R8, signed with a private upload keystore (kept out of git, see `keystore.properties.example`) and versioned `1.0.0`. Store text, the privacy policy and the Data safety answers are in [`docs/store`](docs/store). The privacy policy is also published at <https://st10438409-emeris.github.io/waypoint-privacy/>.
 
 | Signing key | Release variant | Build successful | Signed APK file |
 |---|---|---|---|
