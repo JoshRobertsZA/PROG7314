@@ -177,8 +177,10 @@ class ViewItineraryViewModel(
             }
             // expression: `_uiState.update { it.copy(flightStatus = FlightStatusState.Loadi…`
             _uiState.update { it.copy(flightStatus = FlightStatusState.Loading) }
+            // declares read-only property `date`, the active itinerary day's date as `yyyy-MM-dd`, or null when no day is selected
+            val date = _uiState.value.days.getOrNull(_uiState.value.activeDayIndex)?.date?.toString()
             // declares read-only property `result`, initialised with the result of calling `AirLabsRepository.fetchFlightStatus(…)`
-            val result = AirLabsRepository.fetchFlightStatus(iata)
+            val result = AirLabsRepository.fetchFlightStatus(iata, date)
             // `if` statement: the block below runs when `result != null` is true
             if (result != null) {
                 // assigns `flightStatusCache[iata]` the value `Pair(System.currentTimeMillis(), result)`
