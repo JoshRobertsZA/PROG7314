@@ -17,6 +17,10 @@ import com.waypoint.app.core.auth.AuthRepository
 import com.waypoint.app.core.db.TripEntity
 // imports `com.waypoint.app.core.network.AirLabsRepository` for use in this file
 import com.waypoint.app.core.network.AirLabsRepository
+// imports `com.waypoint.app.core.network.GuardedApi` for use in this file
+import com.waypoint.app.core.network.GuardedApi
+// imports `com.waypoint.app.core.network.UsageGuardian` for use in this file
+import com.waypoint.app.core.network.UsageGuardian
 // imports `com.waypoint.app.core.secrets.RemoteSecrets` for use in this file
 import com.waypoint.app.core.secrets.RemoteSecrets
 // imports `com.waypoint.app.features.edititinerary.data.FlightEntity` for use in this file
@@ -275,6 +279,8 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
         val number = flight.flightNumber?.takeIf { it.isNotBlank() } ?: return null
         // calls `ensureLoaded` on `RemoteSecrets` with arguments `()`
         RemoteSecrets.ensureLoaded()
+        // `if` statement: executes `return null` when the guardian says the AirLabs budget is used up, so the flight is not marked as a miss and is looked up again later
+        if (!UsageGuardian.isAllowed(GuardedApi.AIRLABS)) return null
         // declares read-only property `looked`, initialised with the result of calling `AirLabsRepository.lookupDepartureTime(…)`
         val looked = AirLabsRepository.lookupDepartureTime(number)
         // `if` statement: the block below runs when `looked == null` is true

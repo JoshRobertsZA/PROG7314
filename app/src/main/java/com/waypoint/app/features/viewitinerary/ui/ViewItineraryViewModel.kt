@@ -23,6 +23,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 // imports `com.waypoint.app.core.network.AirLabsRepository` for use in this file
 import com.waypoint.app.core.network.AirLabsRepository
+// imports `com.waypoint.app.core.network.GuardedApi` for use in this file
+import com.waypoint.app.core.network.GuardedApi
+// imports `com.waypoint.app.core.network.UsageGuardian` for use in this file
+import com.waypoint.app.core.network.UsageGuardian
 // imports `android.util.Log` for use in this file
 import android.util.Log
 
@@ -199,6 +203,28 @@ class ViewItineraryViewModel(
                 }
             // closes the previous branch and opens the `else` branch, which runs when none of the conditions above matched
             } else {
+                // declares read-only property `budgetUsedUp`, true when the guardian is blocking AirLabs calls, which is why the lookup returned nothing
+                val budgetUsedUp = !UsageGuardian.isAllowed(GuardedApi.AIRLABS)
+                // `if` statement: the block below runs when the AirLabs budget is used up, showing the last known status instead of "not found"
+                if (budgetUsedUp) {
+                    // declares read-only property `lastKnown`, the last real status cached for this flight and day, ignoring "not found" entries
+                    val lastKnown = flightStatusCache[cacheKey]?.second?.takeIf { it.status != "not_found" }
+                    // expression: `_uiState.update { it.copy(flightStatus = ...) }`, a success with the last known status when there is one, otherwise an error explaining the limit
+                    _uiState.update {
+                        // calls `copy` on `it` with an argument list that continues on the following lines
+                        it.copy(
+                            // continues the statement started above: `flightStatus = if (lastKnown != null) FlightStatusState.Success(lastKnown)`
+                            flightStatus = if (lastKnown != null) FlightStatusState.Success(lastKnown)
+                                           // continues the statement started above: `else FlightStatusState.Error("Flight status limit reached for this month, try again later"),`
+                                           else FlightStatusState.Error("Flight status limit reached for this month, try again later"),
+                        // closes the multi-line argument list started above
+                        )
+                    // closes the block
+                    }
+                    // expression: `return@launch`, skipping the "not found" cache entry because the flight was never actually looked up
+                    return@launch
+                // closes the if block
+                }
                 // declares read-only property `missResult`, initialised with the result of calling `AirLabsRepository.FlightStatusResult(…)`
                 val missResult = AirLabsRepository.FlightStatusResult(iata, "not_found", "", "", "", "", "", "", 0, 0)
                 // assigns `flightStatusCache[cacheKey]` the value `Pair(System.currentTimeMillis() - CACHE_TTL_MS + …`
