@@ -4,7 +4,7 @@ Last updated: 3 November 2026
 
 Waypoint is a trip planning app built by Marcus, Grace, Joshua and Dylan as a student project at The IIE Emeris School of Computer Science. This policy explains what the app collects, why, and what you can do about it.
 
-Contact: [TEAM CONTACT EMAIL]
+Contact: ST10438409@myemeris.edu.za
 
 ## What we collect
 
