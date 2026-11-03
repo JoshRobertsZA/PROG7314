@@ -148,8 +148,8 @@ fun currencyInfo(code: String): CurrencyInfo = when (code.uppercase()) {
 
 // declares private read-only property `SUPPORTED_CURRENCIES`, initialised with the result of calling `listOf(…)`
 private val SUPPORTED_CURRENCIES = listOf(
-    // continues the statement started above: `"USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "CNY",`
-    "USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "CNY",
+    // continues the statement started above: `"USD", "EUR", "GBP", "ZAR", "JPY", "AUD", "CAD", "CHF", "CNY",`
+    "USD", "EUR", "GBP", "ZAR", "JPY", "AUD", "CAD", "CHF", "CNY",
     // continues the statement started above: `"INR", "BRL", "MXN", "SGD", "HKD", "NOK", "SEK", "DKK",`
     "INR", "BRL", "MXN", "SGD", "HKD", "NOK", "SEK", "DKK",
     // continues the statement started above: `"NZD", "KES", "NGN", "EGP"`
@@ -167,6 +167,8 @@ fun CurrencyExchangeModal(
     modifier: Modifier = Modifier,
     // continues the statement started above: `fromCode: String = "USD",`
     fromCode: String = "USD",
+    // continues the statement started above: `toCode: String = "ZAR",`
+    toCode: String = "ZAR",
     // continues the statement started above: `initialAmount: String = "1",`
     initialAmount: String = "1",
     // continues the statement started above: `rate: Double? = null,`
@@ -175,22 +177,24 @@ fun CurrencyExchangeModal(
     isLoading: Boolean = false,
     // continues the statement started above: `onFromCodeChanged: (String) -> Unit = {},`
     onFromCodeChanged: (String) -> Unit = {},
+    // continues the statement started above: `onToCodeChanged: (String) -> Unit = {},`
+    onToCodeChanged: (String) -> Unit = {},
+    // continues the statement started above: `onSwapClick: () -> Unit = {},`
+    onSwapClick: () -> Unit = {},
 // ends the argument list started above and opens the block that follows
 ) {
-    // declares mutable property `dropdownExpanded`, delegated to `remember { mutableStateOf(false) }`
-    var dropdownExpanded by remember { mutableStateOf(false) }
     // declares mutable property `amountText`, delegated to `remember { mutableStateOf(initialAmount…`
     var amountText by remember { mutableStateOf(initialAmount) }
 
     // declares read-only property `fromInfo`, initialised with the result of calling `currencyInfo(…)`
     val fromInfo = currencyInfo(fromCode)
     // declares read-only property `toInfo`, initialised with the result of calling `currencyInfo(…)`
-    val toInfo = currencyInfo("ZAR")
+    val toInfo = currencyInfo(toCode)
 
     // declares read-only property `parsedAmount`, initialised with the result of calling `amountText.toDoubleOrNull(…)`
     val parsedAmount = amountText.toDoubleOrNull() ?: 0.0
-    // declares read-only property `convertedResult`, initialised to `rate?.let { parsedAmount * it }`
-    val convertedResult = rate?.let { parsedAmount * it }
+    // declares read-only property `convertedResult`, initialised to `rate?.let { convertAmount(parsedAmount, it) }`
+    val convertedResult = rate?.let { convertAmount(parsedAmount, it) }
 
     // calls `SelectionModal` with an argument list that continues on the following lines
     SelectionModal(
@@ -255,9 +259,9 @@ fun CurrencyExchangeModal(
                     BasicTextField(
                         // continues the statement started above: `value = amountText,`
                         value = amountText,
-                        // continues the statement started above: `onValueChange = { amountText = it.filter { c -> c.isDigit()…`
+                        // continues the statement started above: `onValueChange = { amountText = it.filter { c -> c.isDigit() || c == '.' } },`
                         onValueChange = { amountText = it.filter { c -> c.isDigit() || c == '.' } },
-                        // continues the statement started above: `keyboardOptions = KeyboardOptions(keyboardType = KeyboardTy…`
+                        // continues the statement started above: `keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),`
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         // continues the statement started above: `singleLine = true,`
                         singleLine = true,
@@ -276,115 +280,8 @@ fun CurrencyExchangeModal(
                 // closes the lambda passed to `Column`
                 }
 
-                // opens a block after `Box`
-                Box {
-                    // calls `Row` with an argument list that continues on the following lines
-                    Row(
-                        // continues the statement started above: `modifier = Modifier`
-                        modifier = Modifier
-                            // continues the statement started above: `.clip(RoundedCornerShape(20.dp))`
-                            .clip(RoundedCornerShape(20.dp))
-                            // continues the statement started above: `.background(WaypointCard)`
-                            .background(WaypointCard)
-                            // continues the statement started above: `.border(1.dp, WaypointBorderSoft, RoundedCornerShape(20.dp))`
-                            .border(1.dp, WaypointBorderSoft, RoundedCornerShape(20.dp))
-                            // continues the statement started above: `.clickable { dropdownExpanded = true }`
-                            .clickable { dropdownExpanded = true }
-                            // continues the statement started above: `.padding(horizontal = 14.dp, vertical = 8.dp),`
-                            .padding(horizontal = 14.dp, vertical = 8.dp),
-                        // continues the statement started above: `verticalAlignment = Alignment.CenterVertically,`
-                        verticalAlignment = Alignment.CenterVertically,
-                    // ends the argument list started above and opens the block that follows
-                    ) {
-                        // calls `Text` with an argument list that continues on the following lines
-                        Text(
-                            // continues the statement started above: `text = fromInfo.code,`
-                            text = fromInfo.code,
-                            // continues the statement started above: `fontSize = 14.sp,`
-                            fontSize = 14.sp,
-                            // continues the statement started above: `fontWeight = FontWeight.Bold,`
-                            fontWeight = FontWeight.Bold,
-                            // continues the statement started above: `color = WaypointTextPrimary,`
-                            color = WaypointTextPrimary,
-                        // closes the multi-line argument list started above
-                        )
-                        // calls `Spacer` with arguments `(modifier = Modifier.width(4.dp))`
-                        Spacer(modifier = Modifier.width(4.dp))
-                        // calls `Text` with an argument list that continues on the following lines
-                        Text(
-                            // continues the statement started above: `text = "∨",`
-                            text = "∨",
-                            // continues the statement started above: `fontSize = 12.sp,`
-                            fontSize = 12.sp,
-                            // continues the statement started above: `fontWeight = FontWeight.Bold,`
-                            fontWeight = FontWeight.Bold,
-                            // continues the statement started above: `color = WaypointTextMuted,`
-                            color = WaypointTextMuted,
-                        // closes the multi-line argument list started above
-                        )
-                    // closes the block
-                    }
-
-                    // calls `DropdownMenu` with an argument list that continues on the following lines
-                    DropdownMenu(
-                        // continues the statement started above: `expanded = dropdownExpanded,`
-                        expanded = dropdownExpanded,
-                        // continues the statement started above: `onDismissRequest = { dropdownExpanded = false },`
-                        onDismissRequest = { dropdownExpanded = false },
-                        // continues the statement started above: `modifier = Modifier`
-                        modifier = Modifier
-                            // continues the statement started above: `.background(WaypointCard)`
-                            .background(WaypointCard)
-                            // continues the statement started above: `.heightIn(max = 260.dp),`
-                            .heightIn(max = 260.dp),
-                    // ends the argument list started above and opens the block that follows
-                    ) {
-                        // expression: `SUPPORTED_CURRENCIES.forEach { code ->`
-                        SUPPORTED_CURRENCIES.forEach { code ->
-                            // continues the statement started above: `val info = currencyInfo(code)`
-                            val info = currencyInfo(code)
-                            // calls `DropdownMenuItem` with an argument list that continues on the following lines
-                            DropdownMenuItem(
-                                // continues the statement started above: `text = {`
-                                text = {
-                                    // calls `Row` with arguments `(verticalAlignment = Alignment.CenterVertical…)` and opens a trailing lambda / block
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        // calls `Text` with arguments `(info.flag, fontSize = 18.sp)`
-                                        Text(info.flag, fontSize = 18.sp)
-                                        // calls `Spacer` with arguments `(modifier = Modifier.width(8.dp))`
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        // calls `Text` with an argument list that continues on the following lines
-                                        Text(
-                                            // continues the statement started above: `text = "${info.code} - ${info.name}",`
-                                            text = "${info.code} - ${info.name}",
-                                            // continues the statement started above: `fontSize = 13.sp,`
-                                            fontSize = 13.sp,
-                                            // continues the statement started above: `fontWeight = if (code == fromCode) FontWeight.Bold else Fon…`
-                                            fontWeight = if (code == fromCode) FontWeight.Bold else FontWeight.Normal,
-                                            // continues the statement started above: `color = if (code == fromCode) WaypointTerracotta else Waypo…`
-                                            color = if (code == fromCode) WaypointTerracotta else WaypointTextPrimary,
-                                        // closes the multi-line argument list started above
-                                        )
-                                    // closes the lambda passed to `Row`
-                                    }
-                                // closes the block
-                                },
-                                // continues the statement started above: `onClick = {`
-                                onClick = {
-                                    // calls `onFromCodeChanged` with arguments `(code)`
-                                    onFromCodeChanged(code)
-                                    // assigns `dropdownExpanded` the value `false`
-                                    dropdownExpanded = false
-                                // closes the block
-                                },
-                            // closes the multi-line argument list started above
-                            )
-                        // closes the block
-                        }
-                    // closes the block
-                    }
-                // closes the block
-                }
+                // calls `CurrencyPicker` with arguments `(code = fromCode, onSelected = onFromCodeChanged)`
+                CurrencyPicker(code = fromCode, onSelected = onFromCodeChanged)
             // closes the block
             }
 
@@ -416,13 +313,15 @@ fun CurrencyExchangeModal(
                         .size(36.dp)
                         // continues the statement started above: `.clip(CircleShape)`
                         .clip(CircleShape)
-                        // continues the statement started above: `.background(WaypointTerracotta),`
-                        .background(WaypointTerracotta),
+                        // continues the statement started above: `.background(WaypointTerracotta)`
+                        .background(WaypointTerracotta)
+                        // continues the statement started above: `.clickable { onSwapClick() },`
+                        .clickable { onSwapClick() },
                     // continues the statement started above: `contentAlignment = Alignment.Center,`
                     contentAlignment = Alignment.Center,
                 // ends the argument list started above and opens the block that follows
                 ) {
-                    // calls `Text` with arguments `("⇄", color = White, fontSize = 18.sp, fontWe…)`
+                    // calls `Text` with arguments `("⇄", color = White, fontSize = 18.sp, fontWeight = FontWeight.Bold)`
                     Text("⇄", color = White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 // closes the block
                 }
@@ -484,8 +383,8 @@ fun CurrencyExchangeModal(
                     } else {
                         // calls `Text` with an argument list that continues on the following lines
                         Text(
-                            // continues the statement started above: `text = convertedResult?.let { "%.2f".format(it) } ?: "–",`
-                            text = convertedResult?.let { "%.2f".format(it) } ?: "–",
+                            // continues the statement started above: `text = convertedResult?.let { formatCurrencyAmount(it) } ?: "–",`
+                            text = convertedResult?.let { formatCurrencyAmount(it) } ?: "–",
                             // continues the statement started above: `fontSize = 20.sp,`
                             fontSize = 20.sp,
                             // continues the statement started above: `fontWeight = FontWeight.Bold,`
@@ -499,36 +398,8 @@ fun CurrencyExchangeModal(
                 // closes the lambda passed to `Column`
                 }
 
-                // calls `Row` with an argument list that continues on the following lines
-                Row(
-                    // continues the statement started above: `modifier = Modifier`
-                    modifier = Modifier
-                        // continues the statement started above: `.clip(RoundedCornerShape(20.dp))`
-                        .clip(RoundedCornerShape(20.dp))
-                        // continues the statement started above: `.background(WaypointCard)`
-                        .background(WaypointCard)
-                        // continues the statement started above: `.border(1.dp, WaypointBorderSoft, RoundedCornerShape(20.dp))`
-                        .border(1.dp, WaypointBorderSoft, RoundedCornerShape(20.dp))
-                        // continues the statement started above: `.padding(horizontal = 14.dp, vertical = 8.dp),`
-                        .padding(horizontal = 14.dp, vertical = 8.dp),
-                    // continues the statement started above: `verticalAlignment = Alignment.CenterVertically,`
-                    verticalAlignment = Alignment.CenterVertically,
-                // ends the argument list started above and opens the block that follows
-                ) {
-                    // calls `Text` with an argument list that continues on the following lines
-                    Text(
-                        // continues the statement started above: `text = toInfo.code,`
-                        text = toInfo.code,
-                        // continues the statement started above: `fontSize = 14.sp,`
-                        fontSize = 14.sp,
-                        // continues the statement started above: `fontWeight = FontWeight.Bold,`
-                        fontWeight = FontWeight.Bold,
-                        // continues the statement started above: `color = WaypointTextPrimary,`
-                        color = WaypointTextPrimary,
-                    // closes the multi-line argument list started above
-                    )
-                // closes the block
-                }
+                // calls `CurrencyPicker` with arguments `(code = toCode, onSelected = onToCodeChanged)`
+                CurrencyPicker(code = toCode, onSelected = onToCodeChanged)
             // closes the block
             }
 
@@ -559,14 +430,141 @@ fun CurrencyExchangeModal(
                 )
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
-                    // continues the statement started above: `text = rate?.let { "1 ${fromInfo.code} = ${"%.2f".format(it…`
-                    text = rate?.let { "1 ${fromInfo.code} = ${"%.2f".format(it)} ${toInfo.code}" } ?: "Loading rate...",
+                    // continues the statement started above: `text = rate?.let { "1 ${fromInfo.code} = ${formatCurrencyAmount(it)} ${toInfo.code}" } ?: "Loading rate...",`
+                    text = rate?.let { "1 ${fromInfo.code} = ${formatCurrencyAmount(it)} ${toInfo.code}" } ?: "Loading rate...",
                     // continues the statement started above: `fontSize = 13.sp,`
                     fontSize = 13.sp,
                     // continues the statement started above: `color = WaypointTerracotta,`
                     color = WaypointTerracotta,
                     // continues the statement started above: `fontWeight = FontWeight.Bold,`
                     fontWeight = FontWeight.Bold,
+                // closes the multi-line argument list started above
+                )
+            // closes the block
+            }
+        // closes the block
+        }
+    // closes the block
+    }
+// closes the block
+}
+
+// annotation `@Composable` applied to the declaration that follows
+@Composable
+// declares private function `CurrencyPicker` taking 2 parameters (`code`, `onSelected`); a pill that opens a dropdown of supported currencies, used for both the base and the target side
+private fun CurrencyPicker(
+    // continues the statement started above: `code: String,`
+    code: String,
+    // continues the statement started above: `onSelected: (String) -> Unit,`
+    onSelected: (String) -> Unit,
+// ends the argument list started above and opens the block that follows
+) {
+    // declares mutable property `expanded`, delegated to `remember { mutableStateOf(false) }`
+    var expanded by remember { mutableStateOf(false) }
+    // declares read-only property `info`, initialised with the result of calling `currencyInfo(…)`
+    val info = currencyInfo(code)
+
+    // opens a block after `Box`
+    Box {
+        // calls `Row` with an argument list that continues on the following lines
+        Row(
+            // continues the statement started above: `modifier = Modifier`
+            modifier = Modifier
+                // continues the statement started above: `.clip(RoundedCornerShape(20.dp))`
+                .clip(RoundedCornerShape(20.dp))
+                // continues the statement started above: `.background(WaypointCard)`
+                .background(WaypointCard)
+                // continues the statement started above: `.border(1.dp, WaypointBorderSoft, RoundedCornerShape(20.dp))`
+                .border(1.dp, WaypointBorderSoft, RoundedCornerShape(20.dp))
+                // continues the statement started above: `.clickable { expanded = true }`
+                .clickable { expanded = true }
+                // continues the statement started above: `.padding(horizontal = 14.dp, vertical = 8.dp),`
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            // continues the statement started above: `verticalAlignment = Alignment.CenterVertically,`
+            verticalAlignment = Alignment.CenterVertically,
+        // ends the argument list started above and opens the block that follows
+        ) {
+            // calls `Text` with an argument list that continues on the following lines
+            Text(
+                // continues the statement started above: `text = info.code,`
+                text = info.code,
+                // continues the statement started above: `fontSize = 14.sp,`
+                fontSize = 14.sp,
+                // continues the statement started above: `fontWeight = FontWeight.Bold,`
+                fontWeight = FontWeight.Bold,
+                // continues the statement started above: `color = WaypointTextPrimary,`
+                color = WaypointTextPrimary,
+            // closes the multi-line argument list started above
+            )
+            // calls `Spacer` with arguments `(modifier = Modifier.width(4.dp))`
+            Spacer(modifier = Modifier.width(4.dp))
+            // calls `Text` with an argument list that continues on the following lines
+            Text(
+                // continues the statement started above: `text = "∨",`
+                text = "∨",
+                // continues the statement started above: `fontSize = 12.sp,`
+                fontSize = 12.sp,
+                // continues the statement started above: `fontWeight = FontWeight.Bold,`
+                fontWeight = FontWeight.Bold,
+                // continues the statement started above: `color = WaypointTextMuted,`
+                color = WaypointTextMuted,
+            // closes the multi-line argument list started above
+            )
+        // closes the block
+        }
+
+        // calls `DropdownMenu` with an argument list that continues on the following lines
+        DropdownMenu(
+            // continues the statement started above: `expanded = expanded,`
+            expanded = expanded,
+            // continues the statement started above: `onDismissRequest = { expanded = false },`
+            onDismissRequest = { expanded = false },
+            // continues the statement started above: `modifier = Modifier`
+            modifier = Modifier
+                // continues the statement started above: `.background(WaypointCard)`
+                .background(WaypointCard)
+                // continues the statement started above: `.heightIn(max = 260.dp),`
+                .heightIn(max = 260.dp),
+        // ends the argument list started above and opens the block that follows
+        ) {
+            // expression: `SUPPORTED_CURRENCIES.forEach { option ->`
+            SUPPORTED_CURRENCIES.forEach { option ->
+                // continues the statement started above: `val optionInfo = currencyInfo(option)`
+                val optionInfo = currencyInfo(option)
+                // calls `DropdownMenuItem` with an argument list that continues on the following lines
+                DropdownMenuItem(
+                    // continues the statement started above: `text = {`
+                    text = {
+                        // calls `Row` with arguments `(verticalAlignment = Alignment.CenterVertically)` and opens a trailing lambda / block
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            // calls `Text` with arguments `(optionInfo.flag, fontSize = 18.sp)`
+                            Text(optionInfo.flag, fontSize = 18.sp)
+                            // calls `Spacer` with arguments `(modifier = Modifier.width(8.dp))`
+                            Spacer(modifier = Modifier.width(8.dp))
+                            // calls `Text` with an argument list that continues on the following lines
+                            Text(
+                                // continues the statement started above: `text = "${optionInfo.code} - ${optionInfo.name}",`
+                                text = "${optionInfo.code} - ${optionInfo.name}",
+                                // continues the statement started above: `fontSize = 13.sp,`
+                                fontSize = 13.sp,
+                                // continues the statement started above: `fontWeight = if (option == code) FontWeight.Bold else FontWeight.Normal,`
+                                fontWeight = if (option == code) FontWeight.Bold else FontWeight.Normal,
+                                // continues the statement started above: `color = if (option == code) WaypointTerracotta else WaypointTextPrimary,`
+                                color = if (option == code) WaypointTerracotta else WaypointTextPrimary,
+                            // closes the multi-line argument list started above
+                            )
+                        // closes the lambda passed to `Row`
+                        }
+                    // closes the block
+                    },
+                    // continues the statement started above: `onClick = {`
+                    onClick = {
+                        // calls `onSelected` with arguments `(option)`
+                        onSelected(option)
+                        // assigns `expanded` the value `false`
+                        expanded = false
+                    // closes the block
+                    },
                 // closes the multi-line argument list started above
                 )
             // closes the block
