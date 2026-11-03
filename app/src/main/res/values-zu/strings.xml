@@ -262,7 +262,7 @@
     <string name="auth_display_name_label">Igama eligcwele</string>
     <string name="auth_display_name_hint">Igama lakho</string>
     <string name="auth_email_label">I-imeyili</string>
-    <string name="auth_email_hint">wena@isibonelo.com</string>
+    <string name="auth_email_hint">wena@example.com</string>
     <string name="auth_password_label">Iphasiwedi</string>
     <string name="auth_password_hint">Okungenani izinhlamvu eziyi-8</string>
     <string name="auth_confirm_password_label">Qinisekisa iphasiwedi</string>
