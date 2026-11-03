@@ -255,6 +255,12 @@ The release build is minified with R8, signed with a private upload keystore (ke
 |---|---|---|---|
 | ![Signing key](assets/release/05-signing-apk.png) | ![Release variant](assets/release/06-release-variant-apk.png) | ![Build successful](assets/release/07-apk-built.png) | ![APK file](assets/release/08-apk-file.png) |
 
+### Release pipeline
+
+Every push to `main` runs [`release.yml`](.github/workflows/release.yml). It reads `versionName` from `app/build.gradle.kts`, builds a signed release bundle with `./gradlew bundleRelease` (R8 minification on), uploads it as a workflow artifact, and creates a GitHub Release tagged `v<versionName>` with the `.aab` and the R8 mapping file attached. If the tag already exists, no new release is made, so bump `versionName` to publish the next one. The first release is `v1.0.0`. The workflow can also be started by hand from the Actions tab.
+
+CI signs with a throwaway demo key kept in [`ci/`](ci/README.md), so the pipeline needs no secrets. It is not the Play upload key, which stays on the maintainer's machine and is never committed.
+
 The signed Android App Bundle build is documented in [`assets/release`](assets/release) (images 01 to 04). Store graphics are in [`assets/store`](assets/store).
 
 ---
