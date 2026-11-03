@@ -18,6 +18,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+// Pure, so PR 9 commit 7 can test every provider combination directly
+// without mocking FirebaseAuth - same reasoning as the validators.
+internal fun canReauthenticate(providerIds: List<String>): Boolean =
+    providerIds.contains("password") || providerIds.contains("google.com")
+
 data class ProfileUiState(
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
@@ -73,10 +78,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     // to reauthenticate with here, so the delete dialog uses this to decide
     // whether to show a working confirm action at all - proper GitHub
     // re-auth needs its own Activity-based flow, out of scope for this PR.
-    fun canDeleteAccount(): Boolean {
-        val providers = AuthRepository.currentSignInProviderIds
-        return providers.contains("password") || providers.contains("google.com")
-    }
+    fun canDeleteAccount(): Boolean = canReauthenticate(AuthRepository.currentSignInProviderIds)
 
     fun deleteAccountWithPassword(password: String, onSuccess: () -> Unit) {
         if (_deleteAccountUiState.value.isDeleting) return
