@@ -33,8 +33,8 @@ object PushTokenManager {
     fun onTokenRefreshed(token: String) {
         // assigns `currentToken` the value `token`
         currentToken = token
-        // calls `i` on `Log` with arguments `(TAG, "FCM token: $token")`
-        Log.i(TAG, "FCM token: $token")
+        // calls `i` on `Log` with arguments `(TAG, "FCM token received")`
+        Log.i(TAG, "FCM token received")
     // closes the function `onTokenRefreshed`
     }
 

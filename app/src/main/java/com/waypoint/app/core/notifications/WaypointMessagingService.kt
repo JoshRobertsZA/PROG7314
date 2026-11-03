@@ -43,8 +43,8 @@ class WaypointMessagingService : FirebaseMessagingService() {
 
     // declares override function `onNewToken` taking 1 parameter (`token`) and opens its body
     override fun onNewToken(token: String) {
-        // calls `i` on `Log` with arguments `(TAG, "FCM token refreshed: $token")`
-        Log.i(TAG, "FCM token refreshed: $token")
+        // calls `i` on `Log` with arguments `(TAG, "FCM token refreshed")`
+        Log.i(TAG, "FCM token refreshed")
         // calls `onTokenRefreshed` on `PushTokenManager` with arguments `(token)`
         PushTokenManager.onTokenRefreshed(token)
         // If the user is already signed in, tell the server about the new
