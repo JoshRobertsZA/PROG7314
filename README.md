@@ -230,6 +230,14 @@ below were populated by calling the documented endpoints directly.
 
 *(Screenshots captured on a physical Android device)*
 
+### Dark mode
+
+The app follows the phone's dark mode setting.
+
+| Home | All trips | Itinerary | Profile |
+|---|---|---|---|
+| ![Home in dark mode](assets/dark/home.png) | ![All trips in dark mode](assets/dark/all-trips.png) | ![Itinerary in dark mode](assets/dark/itinerary.png) | ![Profile in dark mode](assets/dark/profile.png) |
+
 ---
 
 ## Demo Video
