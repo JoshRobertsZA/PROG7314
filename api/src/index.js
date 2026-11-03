@@ -86,9 +86,16 @@ app.use((err, req, res, next) => {
   res.status(status).json({ error: message });
 });
 
-// calls `listen` on `app`; its first argument is a callback whose body follows
-app.listen(PORT, () => {
-  // calls `log` on `console` with arguments `(`Waypoint API running on port ${PORT}`)`
-  console.log(`Waypoint API running on port ${PORT}`);
-// closes the callback passed to `listen`
-});
+// Only binds a real port when this file is run directly (node src/index.js),
+// not when it's require()'d - tests import the app and drive it through
+// supertest, which starts its own ephemeral listener per test.
+if (require.main === module) {
+  // calls `listen` on `app`; its first argument is a callback whose body follows
+  app.listen(PORT, () => {
+    // calls `log` on `console` with arguments `(`Waypoint API running on port ${PORT}`)`
+    console.log(`Waypoint API running on port ${PORT}`);
+  // closes the callback passed to `listen`
+  });
+}
+
+module.exports = app;
