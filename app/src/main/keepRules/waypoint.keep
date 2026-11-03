@@ -19,3 +19,10 @@
 
 # The BuildConfig fields are read by name in a few places.
 -keep class com.waypoint.app.BuildConfig { *; }
+
+# WorkManager keeps its own Room database. Room builds it by reflection, so the
+# generated class and its no-argument constructor must survive R8. The release
+# build crashed at startup with NoSuchMethodException on WorkDatabase_Impl
+# without this rule.
+-keep class androidx.work.impl.WorkDatabase_Impl { <init>(); }
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
