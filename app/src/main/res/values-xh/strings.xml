@@ -161,6 +161,13 @@
     <string name="profile_edit_save_error">Ayikwazanga ukugcina utshintsho lwakho. Nceda uzame kwakhona</string>
     <string name="profile_delete_error">Ayikwazanga ukucima i-akhawunti yakho. Nceda uzame kwakhona</string>
     <string name="profile_delete_reauth_required">Nceda ungene kwakhona, uze uzame kwakhona</string>
+    <string name="profile_delete_row_title">Cima i-akhawunti</string>
+    <string name="profile_delete_row_subtitle">Susa ngokupheleleyo i-akhawunti yakho nedata</string>
+    <string name="profile_delete_dialog_title">Cima i-akhawunti?</string>
+    <string name="profile_delete_dialog_warning">Oku kucima ngokupheleleyo uhambo lwakho nedata ye-akhawunti. Oku akunakuguqulwa.</string>
+    <string name="profile_delete_confirm_cta">Cima i-akhawunti</string>
+    <string name="profile_delete_confirm_google_cta">Qinisekisa nge-Google</string>
+    <string name="profile_delete_cancel_cta">Rhoxisa</string>
 
     <string name="language_modal_title">Tshintsha ulwimi</string>
 

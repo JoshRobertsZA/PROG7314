@@ -162,6 +162,13 @@
     <string name="profile_edit_save_error">Ayikwazanga ukulondoloza izinguquko zakho. Sicela uzame futhi</string>
     <string name="profile_delete_error">Ayikwazanga ukusula i-akhawunti yakho. Sicela uzame futhi</string>
     <string name="profile_delete_reauth_required">Sicela ungene kabusha, bese uzama futhi</string>
+    <string name="profile_delete_row_title">Sula i-akhawunti</string>
+    <string name="profile_delete_row_subtitle">Susa ngokuphelele i-akhawunti yakho nedatha</string>
+    <string name="profile_delete_dialog_title">Sula i-akhawunti?</string>
+    <string name="profile_delete_dialog_warning">Lokhu kususa ngokuphelele izinhambo zakho nedatha ye-akhawunti. Lokhu akukwazi ukuhlehliswa.</string>
+    <string name="profile_delete_confirm_cta">Sula i-akhawunti</string>
+    <string name="profile_delete_confirm_google_cta">Qinisekisa nge-Google</string>
+    <string name="profile_delete_cancel_cta">Khansela</string>
 
     <string name="language_modal_title">Shintsha ulimi</string>
 

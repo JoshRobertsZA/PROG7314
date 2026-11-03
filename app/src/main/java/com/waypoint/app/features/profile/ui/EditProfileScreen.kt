@@ -1,6 +1,7 @@
 package com.waypoint.app.features.profile.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -33,6 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -53,6 +55,7 @@ fun EditProfileScreen(
     photoUrl: String = "",
     isSaving: Boolean = false,
     errorMessage: String? = null,
+    onDeleteAccountClick: (() -> Unit)? = null,
 ) {
     var displayName by remember { mutableStateOf(initialDisplayName) }
 
@@ -148,6 +151,20 @@ fun EditProfileScreen(
                 } else {
                     Text(stringResource(R.string.profile_edit_save_cta))
                 }
+            }
+
+            if (onDeleteAccountClick != null) {
+                Text(
+                    text = stringResource(R.string.profile_delete_row_title),
+                    color = WaypointTerracotta,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
+                        .clickable(onClick = onDeleteAccountClick),
+                )
             }
         }
     }

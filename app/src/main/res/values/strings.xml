@@ -307,6 +307,13 @@
     <!-- Delete account (PR 9), see ProfileViewModel -->
     <string name="profile_delete_error">Couldn\'t delete your account. Please try again</string>
     <string name="profile_delete_reauth_required">Please sign in again, then retry</string>
+    <string name="profile_delete_row_title">Delete account</string>
+    <string name="profile_delete_row_subtitle">Permanently remove your account and data</string>
+    <string name="profile_delete_dialog_title">Delete account?</string>
+    <string name="profile_delete_dialog_warning">This permanently deletes your trips and account data. This can\'t be undone.</string>
+    <string name="profile_delete_confirm_cta">Delete account</string>
+    <string name="profile_delete_confirm_google_cta">Confirm with Google</string>
+    <string name="profile_delete_cancel_cta">Cancel</string>
 
     <!-- Biometric app-unlock overlay, shown when Settings' "Biometric
          login" is enabled and the app resumes from the background. -->

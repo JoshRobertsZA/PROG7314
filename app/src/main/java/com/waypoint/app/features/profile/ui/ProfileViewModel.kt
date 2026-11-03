@@ -1,11 +1,13 @@
 package com.waypoint.app.features.profile.ui
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.waypoint.app.R
 import com.waypoint.app.core.auth.AuthRepository
+import com.waypoint.app.core.auth.GoogleSignInHelper
 import com.waypoint.app.core.db.AccountEntity
 import com.waypoint.app.core.db.SessionManager
 import com.waypoint.app.core.network.WaypointApiRepository
@@ -67,51 +69,61 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    // password is used for an email/password account; googleIdToken for a
-    // Google-linked one (Firebase requires a fresh credential to delete the
-    // user, not just an existing session). A GitHub-only account has
-    // neither available here, so it falls through to the reauth-required
-    // error - re-authenticating a GitHub user needs its own Activity-based
-    // flow, which is out of scope for this PR.
-    //
-    // Order matters for the partial-failure case: re-authenticate, delete
-    // the cloud data, delete the Firebase user, then clear the local
-    // session - in that order, so a failure at any step never leaves the
-    // user signed out with their data still intact server-side, or signed
-    // in with their data already gone.
-    fun deleteAccount(password: String?, googleIdToken: String?, onSuccess: () -> Unit) {
-        if (_deleteAccountUiState.value.isDeleting) return
-
+    // A GitHub-only account has neither a password nor a Google credential
+    // to reauthenticate with here, so the delete dialog uses this to decide
+    // whether to show a working confirm action at all - proper GitHub
+    // re-auth needs its own Activity-based flow, out of scope for this PR.
+    fun canDeleteAccount(): Boolean {
         val providers = AuthRepository.currentSignInProviderIds
-        val canReauth = (providers.contains("google.com") && googleIdToken != null) ||
-            (providers.contains("password") && password != null)
-        if (!canReauth) {
-            _deleteAccountUiState.update {
-                it.copy(errorMessage = getApplication<Application>().getString(R.string.profile_delete_reauth_required))
-            }
-            return
-        }
+        return providers.contains("password") || providers.contains("google.com")
+    }
 
+    fun deleteAccountWithPassword(password: String, onSuccess: () -> Unit) {
+        if (_deleteAccountUiState.value.isDeleting) return
         viewModelScope.launch {
             _deleteAccountUiState.update { it.copy(isDeleting = true, errorMessage = null) }
             try {
-                if (providers.contains("google.com") && googleIdToken != null) {
-                    AuthRepository.reauthenticateWithGoogleIdToken(googleIdToken)
-                } else {
-                    AuthRepository.reauthenticateWithEmail(password!!)
-                }
-
-                val idToken = AuthRepository.getIdToken(forceRefresh = true) ?: error("Could not get an auth token")
-                if (!WaypointApiRepository.deleteAccount(idToken)) error("Could not delete cloud data")
-
-                AuthRepository.deleteCurrentUser()
-                SessionManager.signOut()
-                _deleteAccountUiState.update { AccountDeletionUiState() }
-                onSuccess()
+                AuthRepository.reauthenticateWithEmail(password)
+                finishAccountDeletion(onSuccess)
             } catch (e: Exception) {
-                Log.w(TAG, "Account deletion failed", e)
-                _deleteAccountUiState.update { it.copy(isDeleting = false, errorMessage = getApplication<Application>().getString(R.string.profile_delete_error)) }
+                onAccountDeletionFailed(e)
             }
+        }
+    }
+
+    fun deleteAccountWithGoogle(context: Context, onSuccess: () -> Unit) {
+        if (_deleteAccountUiState.value.isDeleting) return
+        viewModelScope.launch {
+            _deleteAccountUiState.update { it.copy(isDeleting = true, errorMessage = null) }
+            try {
+                val idToken = GoogleSignInHelper.requestIdToken(context, filterByAuthorizedAccounts = true)
+                AuthRepository.reauthenticateWithGoogleIdToken(idToken)
+                finishAccountDeletion(onSuccess)
+            } catch (e: Exception) {
+                onAccountDeletionFailed(e)
+            }
+        }
+    }
+
+    // Order matters for the partial-failure case: the caller has already
+    // re-authenticated by the time this runs, then cloud data, then the
+    // Firebase user, then the local session - in that order, so a failure
+    // at any step never leaves the user signed out with their data still
+    // intact server-side, or signed in with their data already gone.
+    private suspend fun finishAccountDeletion(onSuccess: () -> Unit) {
+        val idToken = AuthRepository.getIdToken(forceRefresh = true) ?: error("Could not get an auth token")
+        if (!WaypointApiRepository.deleteAccount(idToken)) error("Could not delete cloud data")
+
+        AuthRepository.deleteCurrentUser()
+        SessionManager.signOut()
+        _deleteAccountUiState.update { AccountDeletionUiState() }
+        onSuccess()
+    }
+
+    private fun onAccountDeletionFailed(e: Exception) {
+        Log.w(TAG, "Account deletion failed", e)
+        _deleteAccountUiState.update {
+            it.copy(isDeleting = false, errorMessage = getApplication<Application>().getString(R.string.profile_delete_error))
         }
     }
 
