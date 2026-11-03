@@ -75,6 +75,12 @@ object AuthRepository {
         auth.sendPasswordResetEmail(email).await()
     }
 
+    suspend fun updateDisplayName(name: String) {
+        val user = auth.currentUser ?: error("No signed-in user to update")
+        val profileUpdate = UserProfileChangeRequest.Builder().setDisplayName(name).build()
+        user.updateProfile(profileUpdate).await()
+    }
+
     // declares suspend function `recoverPendingGitHubSignIn` taking no parameters, returning `FirebaseUser?`; its body is the expression ``
     suspend fun recoverPendingGitHubSignIn(): FirebaseUser? =
         // continues the statement started above: `auth.pendingAuthResult?.await()?.user`

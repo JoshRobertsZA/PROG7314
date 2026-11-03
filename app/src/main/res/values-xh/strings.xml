@@ -156,6 +156,9 @@
     <string name="profile_edit_row_subtitle">Hlaziya igama lakho</string>
     <string name="profile_edit_screen_title">Hlela Iprofayile</string>
     <string name="profile_edit_save_cta">Gcina</string>
+    <string name="profile_edit_error_name_required">Faka igama lakho</string>
+    <string name="profile_edit_error_name_too_long">Igama lide kakhulu</string>
+    <string name="profile_edit_save_error">Ayikwazanga ukugcina utshintsho lwakho. Nceda uzame kwakhona</string>
 
     <string name="language_modal_title">Tshintsha ulwimi</string>
 

@@ -157,6 +157,9 @@
     <string name="profile_edit_row_subtitle">Buyekeza igama lakho</string>
     <string name="profile_edit_screen_title">Hlela Iphrofayela</string>
     <string name="profile_edit_save_cta">Londoloza</string>
+    <string name="profile_edit_error_name_required">Faka igama lakho</string>
+    <string name="profile_edit_error_name_too_long">Igama lide kakhulu</string>
+    <string name="profile_edit_save_error">Ayikwazanga ukulondoloza izinguquko zakho. Sicela uzame futhi</string>
 
     <string name="language_modal_title">Shintsha ulimi</string>
 

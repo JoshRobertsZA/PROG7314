@@ -300,6 +300,9 @@
     <string name="profile_edit_row_subtitle">Update your name</string>
     <string name="profile_edit_screen_title">Edit Profile</string>
     <string name="profile_edit_save_cta">Save</string>
+    <string name="profile_edit_error_name_required">Enter your name</string>
+    <string name="profile_edit_error_name_too_long">Name is too long</string>
+    <string name="profile_edit_save_error">Couldn\'t save your changes. Please try again</string>
 
     <!-- Biometric app-unlock overlay, shown when Settings' "Biometric
          login" is enabled and the app resumes from the background. -->
