@@ -54,8 +54,7 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
     override suspend fun doWork(): Result {
         // declares read-only property `accountId`, initialised to `AuthRepository.currentUser?.uid ?: return Re…`
         val accountId = AuthRepository.currentUser?.uid ?: return Result.success()
-        // `if` statement: executes `return Result.success()` when `!NotificationPreferences.isEnabled(ctx)` is true
-        if (!NotificationPreferences.isEnabled(ctx)) return Result.success()
+        if (!NotificationPreferences.isEnabled(NotificationType.REMINDERS)) return Result.success()
 
         // declares read-only property `now`, initialised with the result of calling `LocalTime.now(…)`
         val now   = LocalTime.now()
@@ -102,7 +101,7 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
         // `if` statement: the block below runs when `daysUntil in COUNTDOWN_DAYS` is true
         if (daysUntil in COUNTDOWN_DAYS) {
             // calls `sendOnce` with arguments `("countdown:${trip.id}:$daysUntil")` and opens a trailing lambda / block
-            sendOnce("countdown:${trip.id}:$daysUntil") {
+            sendOnce(trip.id, "countdown:${trip.id}:$daysUntil") {
                 // declares read-only property `hasPlan`, initialised with the result of calling `itinerary.getSelectedDays(…)`
                 val hasPlan = itinerary.getSelectedDays(trip.id).isNotEmpty()
                 // `if` statement: the block below runs when `daysUntil == 5 && !hasPlan` is true
@@ -113,8 +112,7 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
                         ctx.getString(R.string.reminder_no_plan_body, place)
                 // closes the previous branch and opens the `else` branch, which runs when none of the conditions above matched
                 } else {
-                    // calls `getString` on `ctx` with arguments `(R.string.reminder_countdown_title, daysUntil)`
-                    ctx.getString(R.string.reminder_countdown_title, daysUntil) to
+                    ctx.resources.getQuantityString(R.plurals.reminder_countdown_title, daysUntil, daysUntil) to
                         // calls `getString` on `ctx` with arguments `(R.string.reminder_countdown_body, trip.name,…)`
                         ctx.getString(R.string.reminder_countdown_body, trip.name, place)
                 // closes the else branch
@@ -127,7 +125,7 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
         // `if` statement: the block below runs when `daysUntil == 0` is true
         if (daysUntil == 0) {
             // calls `sendOnce` with arguments `("start:${trip.id}")` and opens a trailing lambda / block
-            sendOnce("start:${trip.id}") {
+            sendOnce(trip.id, "start:${trip.id}") {
                 // calls `getString` on `ctx` with arguments `(R.string.reminder_start_title, trip.name)`
                 ctx.getString(R.string.reminder_start_title, trip.name) to
                     // calls `getString` on `ctx` with arguments `(R.string.reminder_start_body, place)`
@@ -145,7 +143,7 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
             val day = itinerary.getSelectedDaysWithIds(trip.id).firstOrNull { it.date == today }
 
             // calls `sendOnce` with arguments `("digest:${trip.id}:$today")` and opens a trailing lambda / block
-            sendOnce("digest:${trip.id}:$today") {
+            sendOnce(trip.id, "digest:${trip.id}:$today") {
                 // declares read-only property `parts`, initialised with the result of calling `mutableListOf(…)`
                 val parts = mutableListOf<String>()
                 // `if` statement: the block below runs when `day != null` is true
@@ -179,7 +177,7 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
                     // `if` statement: executes `return@forEach` when `time != null && time < EARLY_CUTOFF` is true
                     if (time != null && time < EARLY_CUTOFF) return@forEach
                     // calls `sendOnce` with arguments `("flight:${flight.id}")` and opens a trailing lambda / block
-                    sendOnce("flight:${flight.id}") {
+                    sendOnce(trip.id, "flight:${flight.id}") {
                         // declares read-only property `number`, initialised to `flight.flightNumber?.takeIf { it.isNotBlank(…`
                         val number = flight.flightNumber?.takeIf { it.isNotBlank() } ?: ctx.getString(R.string.reminder_flight_unnamed)
                         // declares read-only property `body`, initialised with the result of calling `if(…)`
@@ -200,7 +198,7 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
         // `if` statement: the block below runs when `today == end.plusDays(1)` is true
         if (today == end.plusDays(1)) {
             // calls `sendOnce` with arguments `("ended:${trip.id}")` and opens a trailing lambda / block
-            sendOnce("ended:${trip.id}") {
+            sendOnce(trip.id, "ended:${trip.id}") {
                 // calls `getString` on `ctx` with arguments `(R.string.reminder_ended_title, trip.name)`
                 ctx.getString(R.string.reminder_ended_title, trip.name) to
                     // calls `getString` on `ctx` with arguments `(R.string.reminder_ended_body)`
@@ -235,7 +233,7 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
                 // `if` statement: executes `return@forEach` when `time >= EARLY_CUTOFF` is true
                 if (time >= EARLY_CUTOFF) return@forEach
                 // calls `sendOnce` with arguments `("flight:${flight.id}")` and opens a trailing lambda / block
-                sendOnce("flight:${flight.id}") {
+                sendOnce(trip.id, "flight:${flight.id}") {
                     // declares read-only property `number`, initialised to `flight.flightNumber?.takeIf { it.isNotBlank(…`
                     val number = flight.flightNumber?.takeIf { it.isNotBlank() } ?: ctx.getString(R.string.reminder_flight_unnamed)
                     // calls `getString` on `ctx` with arguments `(R.string.reminder_flight_title)`
@@ -252,7 +250,7 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
         // declares read-only property `destination`, initialised to `trip.destination ?: return`
         val destination = trip.destination ?: return
         // calls `sendOnce` with arguments `("weather:${trip.id}:$tomorrow")` and opens a trailing lambda / block
-        sendOnce("weather:${trip.id}:$tomorrow") {
+        sendOnce(trip.id, "weather:${trip.id}:$tomorrow") {
             // declares read-only property `weather`, initialised with the result of calling `WeatherRepository.getWeather(…)`
             val weather = WeatherRepository.getWeather(destination) ?: return@sendOnce null
             // declares read-only property `desc`, initialised with the result of calling `weather.description.lowercase(…)`
@@ -299,13 +297,13 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
     }
 
     // declares private suspend function `sendOnce` taking 3 parameters (`key`, `build`, `String>?`) and opens its body
-    private suspend fun sendOnce(key: String, build: suspend () -> Pair<String, String>?) {
+    private suspend fun sendOnce(tripId: String, key: String, build: suspend () -> Pair<String, String>?) {
         // `if` statement: executes `return` when `log.wasSent(key)` is true
         if (log.wasSent(key)) return
         // calls `val` with arguments `(title, body)`
         val (title, body) = build() ?: return
         // calls `show` on `PushNotifier` with arguments `(ctx, title, body)`
-        PushNotifier.show(ctx, title, body)
+        PushNotifier.show(ctx, NotificationType.REMINDERS, title, body, mapOf("tripId" to tripId))
         // calls `markSent` on `log` with arguments `(key)`
         log.markSent(key)
     // closes the function `sendOnce`

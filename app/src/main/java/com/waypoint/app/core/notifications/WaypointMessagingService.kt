@@ -36,8 +36,7 @@ class WaypointMessagingService : FirebaseMessagingService() {
 
         // calls `d` on `Log` with arguments `(TAG, "Push received: type=$type data=${messa…)`
         Log.d(TAG, "Push received: type=$type data=${message.data}")
-        // calls `show` on `PushNotifier` with arguments `(applicationContext, title, body, message.data)`
-        PushNotifier.show(applicationContext, title, body, message.data)
+        PushNotifier.show(applicationContext, NotificationType.TRIP_UPDATES, title, body, message.data)
     // closes the function `onMessageReceived`
     }
 
