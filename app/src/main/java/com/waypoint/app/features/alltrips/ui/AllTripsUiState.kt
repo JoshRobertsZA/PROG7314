@@ -82,6 +82,8 @@ data class TripRow(
     val thumbAlpha: Float,
     // continues the statement started above: `val photoUrl: String? = null,`
     val photoUrl: String? = null,
+    /** True while a local change to this trip is still waiting in the outbox. */
+    val isPendingSync: Boolean = false,
 // ends the argument list and opens the body that holds the theme colours
 ) {
     // declares read-only property `badgeColor`; computed from `status` each time it is read so it follows light and dark mode

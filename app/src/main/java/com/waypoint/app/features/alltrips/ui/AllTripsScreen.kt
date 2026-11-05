@@ -423,6 +423,15 @@ fun AllTripsScreen(
                                                 modifier = Modifier.weight(1f),
                                             // closes the multi-line argument list started above
                                             )
+                                            // Saved on the phone but not yet on the server (e.g. made offline).
+                                            if (trip.isPendingSync) {
+                                                androidx.compose.material3.Icon(
+                                                    painter = painterResource(R.drawable.ic_sync_pending),
+                                                    contentDescription = stringResource(R.string.trip_pending_sync_cd),
+                                                    tint = WaypointTextMuted,
+                                                    modifier = Modifier.padding(end = 6.dp).size(16.dp),
+                                                )
+                                            }
                                             // calls `StatusBadge` with an argument list that continues on the following lines
                                             StatusBadge(
                                                 // continues the statement started above: `text = tripBadgeLabel(trip.badge),`

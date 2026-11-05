@@ -10,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 // imports `com.waypoint.app.core.db.SessionManager` for use in this file
 import com.waypoint.app.core.db.SessionManager
 import com.waypoint.app.core.auth.AuthRepository
+import com.waypoint.app.core.sync.OutboxEntityType
+import com.waypoint.app.core.sync.OutboxRepository
 import com.waypoint.app.core.sync.SyncScheduler
 // imports `com.waypoint.app.features.newtrip.data.TripRepository` for use in this file
 import com.waypoint.app.features.newtrip.data.TripRepository
@@ -29,6 +31,7 @@ class AllTripsViewModel(app: Application) : AndroidViewModel(app) {
 
     // declares private read-only property `repo`, initialised with the result of calling `TripRepository(…)`
     private val repo = TripRepository(app)
+    private val outbox = OutboxRepository(app)
 
     // declares private read-only property `_uiState`, initialised with the result of calling `MutableStateFlow(…)`
     private val _uiState = MutableStateFlow(AllTripsUiState(isLoading = true))
@@ -39,6 +42,8 @@ class AllTripsViewModel(app: Application) : AndroidViewModel(app) {
     init {
         // calls `loadTrips` with arguments `()`
         loadTrips()
+        // Refresh the "waiting to sync" icons as changes are queued and uploaded.
+        viewModelScope.launch { OutboxRepository.changes.collect { loadTrips() } }
     // closes the init block
     }
 
@@ -54,11 +59,12 @@ class AllTripsViewModel(app: Application) : AndroidViewModel(app) {
             val today     = LocalDate.now()
             // declares read-only property `entities`, initialised with the result of calling `repo.getTripsForAccount(…)`
             val entities  = repo.getTripsForAccount(accountId)
+            val pendingIds = outbox.pendingEntityIds(OutboxEntityType.TRIP)
 
             // declares read-only property `rows`, initialised to `entities`
             val rows = entities
                 // chained call `.mapIndexed` on the previous result with an inline lambda (`index, entity ->`) that evaluates `entity.toRow(index, today)`
-                .mapIndexed { index, entity -> entity.toRow(index, today) }
+                .mapIndexed { index, entity -> entity.toRow(index, today).copy(isPendingSync = entity.id in pendingIds) }
                 // expression: `.sortedWith(`
                 .sortedWith(
                     // continues the statement started above: `compareBy<TripRow> { it.status.ordinal }`
