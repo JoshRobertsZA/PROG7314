@@ -41,13 +41,16 @@
     <string name="calendar_edit_trip_glyph" translatable="false">✎</string>
     <string name="calendar_prev_month_glyph" translatable="false">‹</string>
     <string name="calendar_next_month_glyph" translatable="false">›</string>
-    <string name="calendar_wd_sun" translatable="false">S</string>
-    <string name="calendar_wd_mon" translatable="false">M</string>
-    <string name="calendar_wd_tue" translatable="false">T</string>
-    <string name="calendar_wd_wed" translatable="false">W</string>
-    <string name="calendar_wd_thu" translatable="false">T</string>
-    <string name="calendar_wd_fri" translatable="false">F</string>
-    <string name="calendar_wd_sat" translatable="false">S</string>
+
+    <!-- Weekday labels are translatable so zu and xh can use their own abbreviations -->
+    <string name="calendar_wd_sun">S</string>
+    <string name="calendar_wd_mon">M</string>
+    <string name="calendar_wd_tue">"false">T</string>
+    <string name="calendar_wd_wed">W</string>
+    <string name="calendar_wd_thu">"false">T</string>
+    <string name="calendar_wd_fri">F</string>
+    <string name="calendar_wd_sat">S</string>
+
     <string name="calendar_view_itinerary">View itinerary</string>
     <string name="view_itinerary_title">View itinerary</string>
     <string name="view_itinerary_back_glyph" translatable="false">&#8592;</string>
@@ -68,6 +71,23 @@
     <string name="calendar_edit_dates_pick_start">Tap the new start date</string>
     <string name="calendar_edit_dates_pick_end">Now tap the end date, then save</string>
     <string name="common_cancel">Cancel</string>
+
+    <!-- Accessibility -->
+    <string name="common_back">Back</string>
+
+    <!-- Empty and error states -->
+    <string name="home_places_empty">No places found nearby.</string>
+    <string name="place_detail_picker_not_found">We couldn\'t load this place. It may no longer be available.</string>
+    <string name="place_detail_picker_no_wiki">No Wikipedia article found for this place.</string>
+    <string name="common_go_back">Go back</string>
+
+    <!-- Validation messages -->
+    <string name="edit_itinerary_flight_number_invalid">Use a format like BA 2490</string>
+    <string name="new_trip_name_counter" translatable="false">%1$d/%2$d</string>
+
+    <!-- Place detail fallbacks when no place data is passed in -->
+    <string name="place_detail_unknown_name">Place details</string>
+    <string name="place_detail_no_description">No description available for this place yet.</string>
 
     <!-- Home screen (Figma node 47:30, "03 Waypoint — Home").
          Reuses login_brand_name / login_tagline for the header, since the
@@ -102,6 +122,46 @@
     <!-- Shared Firebase Google Sign-In state (Welcome/Login/Register), see AuthViewModel -->
     <string name="auth_signing_in">Signing in…</string>
 
+    <!-- Email sign-up / sign-in screen (PR 8), see AuthRepository/AuthViewModel -->
+    <string name="auth_welcome_email_cta">Continue with email</string>
+    <string name="auth_email_signup_title">Create your account</string>
+    <string name="auth_email_signin_title">Welcome back</string>
+    <string name="auth_display_name_label">Full name</string>
+    <string name="auth_display_name_hint">Your name</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_email_hint">you@example.com</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_password_hint">At least 8 characters</string>
+    <string name="auth_confirm_password_label">Confirm password</string>
+    <string name="auth_signup_cta">Sign up</string>
+    <string name="auth_signin_cta">Sign in</string>
+    <string name="auth_creating_account">Creating account…</string>
+    <string name="auth_switch_to_signin">Already have an account? Sign in</string>
+    <string name="auth_switch_to_signup">Don\'t have an account? Sign up</string>
+    <string name="auth_forgot_password_cta">Forgot password?</string>
+    <string name="auth_back_cd">Back</string>
+
+    <!-- Email sign-up/sign-in validation and Firebase error messages (PR 8) -->
+    <string name="auth_error_display_name_required">Enter your name</string>
+    <string name="auth_error_email_required">Email is required</string>
+    <string name="auth_error_invalid_email">Enter a valid email address</string>
+    <string name="auth_error_password_required">Password is required</string>
+    <string name="auth_error_password_too_short">Password must be at least 8 characters</string>
+    <string name="auth_error_passwords_dont_match">Passwords don\'t match</string>
+    <string name="auth_error_email_in_use">An account with this email already exists</string>
+    <string name="auth_error_account_exists_different_credential">This email is already registered with Google. Sign in with Google instead.</string>
+    <string name="auth_error_user_not_found">No account found with this email</string>
+    <string name="auth_error_wrong_password">Incorrect password</string>
+    <string name="auth_error_network">Check your connection and try again</string>
+    <string name="auth_error_generic">Something went wrong. Please try again</string>
+
+    <!-- Password reset (PR 8), see AuthRepository -->
+    <string name="auth_reset_title">Reset your password</string>
+    <string name="auth_reset_instructions">Enter your email and we\'ll send you a link to reset your password.</string>
+    <string name="auth_reset_cta">Send reset link</string>
+    <string name="auth_reset_sending">Sending…</string>
+    <string name="auth_reset_sent">Check your email for a link to reset your password.</string>
+
     <!-- Edit itinerary screen (Figma node 59:2, "06 Waypoint — Edit Itinerary").
          Trip name/dates, per-day weather, and every booking/place row's
          content are intentionally left inline in activity_edit_itinerary.xml,
@@ -120,7 +180,7 @@
     <string name="edit_itinerary_header_cinemas">Cinemas</string>
     <string name="edit_itinerary_no_places">No places added yet</string>
     <string name="edit_itinerary_remove_place_cd">Remove place</string>
-    <string name="edit_itinerary_note_hint">Add a note...</string>
+    <string name="edit_itinerary_note_hint">Add a note…</string>
     <string name="edit_itinerary_upload_chip">+ Upload</string>
     <string name="edit_itinerary_add_chip">+ Add</string>
     <string name="edit_itinerary_undo_glyph" translatable="false">↺</string>
@@ -169,13 +229,16 @@
     <string name="new_trip_dates_subtitle">Only today and future dates can be selected</string>
     <string name="new_trip_prev_month_glyph" translatable="false">‹</string>
     <string name="new_trip_next_month_glyph" translatable="false">›</string>
-    <string name="new_trip_wd_sun" translatable="false">S</string>
-    <string name="new_trip_wd_mon" translatable="false">M</string>
-    <string name="new_trip_wd_tue" translatable="false">T</string>
-    <string name="new_trip_wd_wed" translatable="false">W</string>
-    <string name="new_trip_wd_thu" translatable="false">T</string>
-    <string name="new_trip_wd_fri" translatable="false">F</string>
-    <string name="new_trip_wd_sat" translatable="false">S</string>
+
+    <!-- Weekday labels are translatable so zu and xh can use their own abbreviations -->
+    <string name="new_trip_wd_sun">S</string>
+    <string name="new_trip_wd_mon">M</string>
+    <string name="new_trip_wd_tue">T</string>
+    <string name="new_trip_wd_wed">W</string>
+    <string name="new_trip_wd_thu">T</string>
+    <string name="new_trip_wd_fri">F</string>
+    <string name="new_trip_wd_sat">S</string>
+
     <string name="new_trip_save_button">Save trip</string>
     <string name="new_trip_footer_hint">You’ll land on the edit itinerary screen next — your trip will only have a name and dates until you add flights, stays, and places.</string>
 
@@ -214,9 +277,11 @@
         <item quantity="one">%d trip</item>
         <item quantity="other">%d trips</item>
     </plurals>
+    <plurals name="profile_pending_changes_count">
+        <item quantity="one">%d change waiting to sync</item>
+        <item quantity="other">%d changes waiting to sync</item>
+    </plurals>
     <string name="profile_preferences_header">Preferences</string>
-    <string name="profile_notifications_title">Notifications</string>
-    <string name="profile_notifications_subtitle">Flight, weather, and trip alerts</string>
     <string name="profile_language_title">Language</string>
     <string name="profile_language_subtitle">App display language</string>
     <string name="profile_biometric_title">Biometric login</string>
@@ -227,6 +292,27 @@
     <string name="profile_biometric_enable_subtitle">Confirm it\'s you to turn this on</string>
     <string name="profile_chevron_glyph" translatable="false">›</string>
     <string name="profile_logout">Log out</string>
+
+    <!-- Edit profile screen (PR 9), see EditProfileScreen -->
+    <string name="profile_edit_row_title">Edit profile</string>
+    <string name="profile_edit_row_subtitle">Update your name</string>
+    <string name="profile_edit_screen_title">Edit Profile</string>
+    <string name="profile_edit_save_cta">Save</string>
+    <string name="profile_edit_error_name_required">Enter your name</string>
+    <string name="profile_edit_error_name_too_long">Name is too long</string>
+    <string name="profile_edit_save_error">Couldn\'t save your changes. Please try again</string>
+
+    <!-- Delete account (PR 9), see ProfileViewModel -->
+    <string name="profile_delete_error">Couldn\'t delete your account. Please try again</string>
+    <string name="profile_delete_reauth_required">Please sign in again, then retry</string>
+    <string name="profile_delete_row_title">Delete account</string>
+    <string name="profile_delete_row_subtitle">Permanently remove your account and data</string>
+    <string name="profile_delete_dialog_title">Delete account?</string>
+    <string name="profile_delete_dialog_warning">This permanently deletes your trips and account data. This can\'t be undone.</string>
+    <string name="profile_delete_confirm_cta">Delete account</string>
+    <string name="profile_delete_confirm_google_cta">Confirm with Google</string>
+    <string name="profile_delete_cancel_cta">Cancel</string>
+    <string name="profile_delete_password_label">Enter your password to confirm</string>
 
     <!-- Biometric app-unlock overlay, shown when Settings' "Biometric
          login" is enabled and the app resumes from the background. -->
@@ -289,17 +375,25 @@
 
     <!-- Push notifications (Firebase Cloud Messaging) -->
     <string name="notification_channel_id" translatable="false">waypoint_default</string>
+    <string name="notification_channel_reminders_id" translatable="false">waypoint_reminders</string>
     <string name="notification_channel_name">Trip updates</string>
     <string name="notification_channel_description">Reminders and alerts about your trips</string>
     <string name="notification_welcome_title">Welcome back!</string>
     <string name="notification_welcome_title_named">Welcome back, %1$s!</string>
     <string name="notification_welcome_body">Your trips are ready whenever you are.</string>
+    <string name="notification_trip_created_title">New trip added</string>
+    <string name="notification_trip_created_body">A trip was added to your account. Tap to view it.</string>
+    <string name="notification_test_title">Test notification</string>
+    <string name="notification_test_body">If you can see this, push notifications are working.</string>
     <!-- Flight departure time (Edit Itinerary) -->
     <string name="edit_itinerary_flight_set_time">Set departure time</string>
     <string name="edit_itinerary_flight_departs">Departs %1$s</string>
 
     <!-- Scheduled trip reminders (TripReminderWorker) -->
-    <string name="reminder_countdown_title">%1$d days to go!</string>
+    <plurals name="reminder_countdown_title">
+        <item quantity="one">%1$d day to go!</item>
+        <item quantity="other">%1$d days to go!</item>
+    </plurals>
     <string name="reminder_countdown_body">%1$s to %2$s is coming up. Time to check your itinerary.</string>
     <string name="reminder_no_plan_title">%1$s is in 5 days</string>
     <string name="reminder_no_plan_body">You haven\'t planned anything for %1$s yet. Open Waypoint to add your itinerary.</string>
@@ -365,4 +459,73 @@
         <item quantity="one">night</item>
         <item quantity="other">nights</item>
     </plurals>
+
+    <!-- Flight status modal, logout dialog, currency modal, explore and place picker -->
+    <string name="common_close">Close</string>
+    <string name="flight_status_loading">Fetching flight status…</string>
+    <string name="flight_status_error_title">Error</string>
+    <string name="flight_status_in_flight">In Flight</string>
+    <string name="flight_status_landed">Landed</string>
+    <string name="flight_status_scheduled">Scheduled</string>
+    <string name="flight_status_cancelled">Cancelled</string>
+    <string name="flight_status_departure">Departure</string>
+    <string name="flight_status_arrival">Arrival</string>
+    <string name="flight_status_terminal">Terminal %1$s</string>
+    <string name="flight_status_gate">Gate %1$s</string>
+    <string name="flight_status_delayed">Delayed %1$d min</string>
+    <string name="flight_status_duration">Duration: %1$dh %2$dm</string>
+    <string name="settings_logout_dialog_title">Log out of Waypoint?</string>
+    <string name="settings_logout_dialog_body">Are you sure you want to log out? You can sign back in anytime to access your trips and saved itineraries.</string>
+    <string name="currency_modal_amount">Amount</string>
+    <string name="currency_modal_convert_to">Convert To</string>
+    <string name="currency_modal_market_rate">Market Rate</string>
+    <string name="explore_results_near">Results near %1$s</string>
+    <string name="place_picker_empty">No %1$s found near your destination.</string>
+    <string name="api_budget_header">API budget</string>
+    <string name="api_budget_locationiq">LocationIQ places</string>
+    <string name="api_budget_airlabs">AirLabs flights</string>
+    <string name="api_budget_today">today</string>
+    <string name="api_budget_this_month">this month</string>
+    <string name="flight_status_limit_reached">Flight status limit reached for this month, try again later</string>
+    <string name="profile_dark_mode_title">Dark mode</string>
+    <string name="profile_dark_mode_subtitle">Use the dark theme</string>
+
+    <!-- Messages shown on the unlock screen when biometric unlock fails. -->
+    <string name="biometric_error_lockout">Too many attempts. Try again in 30 seconds.</string>
+    <string name="biometric_error_lockout_permanent">Biometrics are locked. Use your phone\'s PIN, pattern or password to unlock.</string>
+    <string name="biometric_error_cancelled">Unlock cancelled. Tap Unlock to try again.</string>
+    <string name="biometric_error_no_hardware">Biometrics are not available on this device.</string>
+    <string name="biometric_error_none_enrolled">No screen lock is set up. Set one in your phone settings.</string>
+    <string name="biometric_error_generic">Could not unlock. Please try again.</string>
+
+    <string name="session_expired">Your session has ended. Please sign in again.</string>
+    <string name="settings_notify_trip_updates_title">Trip updates</string>
+    <string name="settings_notify_trip_updates_subtitle">When a trip changes on another device</string>
+    <string name="settings_notify_reminders_title">Trip reminders</string>
+    <string name="settings_notify_reminders_subtitle">Countdowns, flights, weather and daily plans</string>
+    <string name="settings_home_currency_title">Home currency</string>
+    <string name="settings_home_currency_subtitle">The converter on Home converts into this</string>
+    <string name="settings_home_currency_modal_title">Home currency</string>
+    <string name="settings_sync_header">Sync</string>
+    <string name="settings_sync_now_title">Sync now</string>
+    <string name="settings_sync_now_action">Sync</string>
+    <string name="settings_sync_last">Last synced %1$s</string>
+    <string name="settings_sync_never">Not synced on this phone yet</string>
+    <string name="settings_sync_in_progress">Syncing…</string>
+    <string name="settings_sync_offline">You\'re offline. Changes will sync when you reconnect.</string>
+    <string name="notification_channel_reminders_name">Trip reminders</string>
+    <string name="notification_channel_reminders_description">Countdowns, flight times, weather warnings and daily plans</string>
+    <string name="language_sub_english">English (default)</string>
+    <string name="language_sub_zulu">isiZulu (South Africa)</string>
+    <string name="language_sub_xhosa">isiXhosa (South Africa)</string>
+    <string name="trip_pending_sync_cd">Waiting to sync</string>
+    <string name="edit_itinerary_edit_dates_cd">Change dates</string>
+    <string name="edit_itinerary_edit_note_cd">Edit note</string>
+    <string name="edit_itinerary_edit_lodging_title">Lodging dates</string>
+    <string name="edit_itinerary_edit_car_title">Car rental dates</string>
+    <string name="edit_itinerary_from_label">From</string>
+    <string name="edit_itinerary_to_label">To</string>
+    <string name="edit_itinerary_dates_invalid">The end date can\'t be before the start date.</string>
+    <string name="edit_itinerary_note_label">Note</string>
+    <string name="edit_itinerary_note_counter" translatable="false">%1$d/%2$d</string>
 </resources>

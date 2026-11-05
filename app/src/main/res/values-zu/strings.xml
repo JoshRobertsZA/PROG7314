@@ -18,7 +18,7 @@
     doesn't work and needs a native speaker to pick a real abbreviation
     convention (e.g. two letters) rather than a guess.
 -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="brand_tagline">Hlela indlela. Gcina indaba.</string>
 
     <string name="main_go_to_trip_calendar">Iya kukhalenda lohambo</string>
@@ -52,6 +52,22 @@
     <string name="calendar_edit_dates_pick_end">Manje thepha usuku lokuphela, bese ulondoloza</string>
     <string name="common_cancel">Khansela</string>
 
+    <!-- Accessibility -->
+    <string name="common_back">Emuva</string>
+
+    <!-- Empty and error states -->
+    <string name="home_places_empty">Azikho izindawo ezitholakele eduze.</string>
+    <string name="place_detail_picker_not_found">Asikwazanga ukulayisha le ndawo. Kungenzeka ukuthi ayisatholakali.</string>
+    <string name="place_detail_picker_no_wiki">Akukho sihloko se-Wikipedia esitholakele sale ndawo.</string>
+    <string name="common_go_back">Buyela emuva</string>
+
+    <!-- Validation messages -->
+    <string name="edit_itinerary_flight_number_invalid">Sebenzisa ifomethi efana ne-BA 2490</string>
+
+    <!-- Place detail fallbacks when no place data is passed in -->
+    <string name="place_detail_unknown_name">Imininingwane yendawo</string>
+    <string name="place_detail_no_description">Ayikho incazelo yale ndawo okwamanje.</string>
+
     <string name="home_settings_cd">Izilungiselelo</string>
     <string name="home_upcoming_trip_label">UHAMBO OLUZAYO</string>
     <string name="home_view_all_trips">Buka zonke izinhambo</string>
@@ -78,8 +94,6 @@
     <string name="edit_itinerary_header_lodging">Indawo yokulala</string>
     <string name="edit_itinerary_header_car">Ukuqashisa imoto</string>
     <string name="edit_itinerary_header_food">Amarestaurant namakhefi</string>
-    <string name="edit_itinerary_header_attractions">Izindawo zokuvakasha</string>
-    <string name="edit_itinerary_header_entertainment">Ukuzijabulisa</string>
     <string name="edit_itinerary_upload_chip">+ Layisha</string>
     <string name="edit_itinerary_add_chip">+ Engeza</string>
     <string name="edit_itinerary_replace_flight_doc_cd">Shintsha idokhumenti yendiza</string>
@@ -90,8 +104,6 @@
     <string name="edit_itinerary_remove_car_cd">Susa ukuqashisa imoto</string>
     <string name="edit_itinerary_edit_place_cd">Hlela indawo</string>
     <string name="edit_itinerary_remove_place_cd">Susa indawo</string>
-    <string name="edit_itinerary_add_entertainment_placeholder">+ Engeza okokuzijabulisa kulezi zinsuku</string>
-
     <string name="all_trips_back_cd">Emuva</string>
     <string name="all_trips_title">Zonke izinhambo</string>
     <string name="all_trips_search_hint">Sesha izinhambo ngegama noma usuku</string>
@@ -113,8 +125,6 @@
     <string name="explore_filter_all">Konke</string>
     <string name="explore_filter_restaurants">Amarestaurant</string>
     <string name="explore_filter_cafes">Amakhefi</string>
-    <string name="explore_filter_attractions">Izindawo zokuvakasha</string>
-    <string name="explore_filter_entertainment">Ukuzijabulisa</string>
     <string name="explore_filter_hotels">Amahhotela</string>
     <string name="explore_attribution">nge-LocationIQ</string>
 
@@ -128,14 +138,36 @@
         <item quantity="one">%d uhambo</item>
         <item quantity="other">%d izinhambo</item>
     </plurals>
+    <!-- Draft translation, needs native isiZulu speaker review. -->
+    <plurals name="profile_pending_changes_count">
+        <item quantity="one">%d ushintsho olulindele ukuvumelaniswa</item>
+        <item quantity="other">%d izinguquko ezilindele ukuvumelaniswa</item>
+    </plurals>
     <string name="profile_preferences_header">Okuncanyelwayo</string>
-    <string name="profile_notifications_title">Izaziso</string>
-    <string name="profile_notifications_subtitle">Izexwayiso zendiza, isimo sezulu, nohambo</string>
     <string name="profile_language_title">Ulimi</string>
     <string name="profile_language_subtitle">Ulimi lokubonisa lohlelo lokusebenza</string>
     <string name="profile_biometric_title">Ukungena nge-biometric</string>
     <string name="profile_biometric_subtitle">Ukungena nge-Face ID noma izigxivizo zeminwe</string>
     <string name="profile_logout">Phuma</string>
+
+    <!-- Edit profile screen (PR 9); drafted, needs isiZulu native-speaker review -->
+    <string name="profile_edit_row_title">Hlela iphrofayela</string>
+    <string name="profile_edit_row_subtitle">Buyekeza igama lakho</string>
+    <string name="profile_edit_screen_title">Hlela Iphrofayela</string>
+    <string name="profile_edit_save_cta">Londoloza</string>
+    <string name="profile_edit_error_name_required">Faka igama lakho</string>
+    <string name="profile_edit_error_name_too_long">Igama lide kakhulu</string>
+    <string name="profile_edit_save_error">Ayikwazanga ukulondoloza izinguquko zakho. Sicela uzame futhi</string>
+    <string name="profile_delete_error">Ayikwazanga ukusula i-akhawunti yakho. Sicela uzame futhi</string>
+    <string name="profile_delete_reauth_required">Sicela ungene kabusha, bese uzama futhi</string>
+    <string name="profile_delete_row_title">Sula i-akhawunti</string>
+    <string name="profile_delete_row_subtitle">Susa ngokuphelele i-akhawunti yakho nedatha</string>
+    <string name="profile_delete_dialog_title">Sula i-akhawunti?</string>
+    <string name="profile_delete_dialog_warning">Lokhu kususa ngokuphelele izinhambo zakho nedatha ye-akhawunti. Lokhu akukwazi ukuhlehliswa.</string>
+    <string name="profile_delete_confirm_cta">Sula i-akhawunti</string>
+    <string name="profile_delete_confirm_google_cta">Qinisekisa nge-Google</string>
+    <string name="profile_delete_cancel_cta">Khansela</string>
+    <string name="profile_delete_password_label">Faka iphasiwedi yakho ukuze uqinisekise</string>
 
     <string name="language_modal_title">Shintsha ulimi</string>
 
@@ -168,12 +200,19 @@
     <string name="notification_welcome_title">Siyakwamukela futhi!</string>
     <string name="notification_welcome_title_named">Siyakwamukela futhi, %1$s!</string>
     <string name="notification_welcome_body">Izinhambo zakho zilungile noma nini lapho usulungile.</string>
+    <string name="notification_trip_created_title">Uhambo olusha lwengeziwe</string>
+    <string name="notification_trip_created_body">Uhambo lwengezwe ku-akhawunti yakho. Thepha ukuze ulibone.</string>
+    <string name="notification_test_title">Isaziso sokuhlola</string>
+    <string name="notification_test_body">Uma ungakubona lokhu, izaziso ziyasebenza.</string>
     <!-- Flight departure time (Edit Itinerary) -->
     <string name="edit_itinerary_flight_set_time">Setha isikhathi sokuhamba</string>
     <string name="edit_itinerary_flight_departs">Iyahamba %1$s</string>
 
     <!-- Scheduled trip reminders (TripReminderWorker) -->
-    <string name="reminder_countdown_title">Kusele izinsuku ezingu-%1$d!</string>
+    <plurals name="reminder_countdown_title">
+        <item quantity="one">Kusele usuku olu-%1$d!</item>
+        <item quantity="other">Kusele izinsuku ezingu-%1$d!</item>
+    </plurals>
     <string name="reminder_countdown_body">%1$s eya e-%2$s iyeza. Isikhathi sokubheka uhlelo lwakho.</string>
     <string name="reminder_no_plan_title">%1$s ezinsukwini ezi-5</string>
     <string name="reminder_no_plan_body">Awukahleli lutho lwe-%1$s. Vula uWaypoint ukwengeza uhlelo lwakho.</string>
@@ -240,12 +279,50 @@
         <item quantity="one">usuku olu-%d</item>
         <item quantity="other">izinsuku ezingu-%d</item>
     </plurals>
-    <plurals name="night_count_suffix">
+    <!-- A suffix shown after the number, so it cannot contain %d itself. -->
+    <plurals name="night_count_suffix" tools:ignore="ImpliedQuantity">
         <item quantity="one">ubusuku</item>
         <item quantity="other">ubusuku</item>
     </plurals>
     <!-- Previously untranslated keys -->
     <string name="auth_signing_in">Iyangena…</string>
+
+    <!-- Email sign-up / sign-in screen (PR 8); drafted, needs isiZulu native-speaker review -->
+    <string name="auth_welcome_email_cta">Qhubeka nge-imeyili</string>
+    <string name="auth_email_signup_title">Dala i-akhawunti yakho</string>
+    <string name="auth_email_signin_title">Siyakwamukela futhi</string>
+    <string name="auth_display_name_label">Igama eligcwele</string>
+    <string name="auth_display_name_hint">Igama lakho</string>
+    <string name="auth_email_label">I-imeyili</string>
+    <string name="auth_email_hint">wena@example.com</string>
+    <string name="auth_password_label">Iphasiwedi</string>
+    <string name="auth_password_hint">Okungenani izinhlamvu eziyi-8</string>
+    <string name="auth_confirm_password_label">Qinisekisa iphasiwedi</string>
+    <string name="auth_signup_cta">Bhalisa</string>
+    <string name="auth_signin_cta">Ngena</string>
+    <string name="auth_creating_account">Idala i-akhawunti…</string>
+    <string name="auth_switch_to_signin">Usunayo i-akhawunti? Ngena</string>
+    <string name="auth_switch_to_signup">Awunayo i-akhawunti? Bhalisa</string>
+    <string name="auth_forgot_password_cta">Ukhohlwe iphasiwedi?</string>
+    <string name="auth_back_cd">Emuva</string>
+    <string name="auth_error_display_name_required">Faka igama lakho</string>
+    <string name="auth_error_email_required">I-imeyili iyadingeka</string>
+    <string name="auth_error_invalid_email">Faka ikheli le-imeyili elisebenzayo</string>
+    <string name="auth_error_password_required">Iphasiwedi iyadingeka</string>
+    <string name="auth_error_password_too_short">Iphasiwedi kumele ibe okungenani izinhlamvu eziyi-8</string>
+    <string name="auth_error_passwords_dont_match">Amaphasiwedi awafani</string>
+    <string name="auth_error_email_in_use">Kukhona i-akhawunti esele isebenzisa le-imeyili</string>
+    <string name="auth_error_account_exists_different_credential">Le-imeyili isiyabhaliswa nge-Google. Ngena usebenzisa i-Google esikhundleni.</string>
+    <string name="auth_error_user_not_found">Ayikho i-akhawunti etholakele nge-imeyili</string>
+    <string name="auth_error_wrong_password">Iphasiwedi engalungile</string>
+    <string name="auth_error_network">Hlola uxhumano lwakho bese uzama futhi</string>
+    <string name="auth_error_generic">Kukhona okungahambanga kahle. Sicela uzame futhi</string>
+    <string name="auth_reset_title">Setha kabusha iphasiwedi yakho</string>
+    <string name="auth_reset_instructions">Faka i-imeyili yakho bese sikuthumelela isixhumanisi sokusetha kabusha iphasiwedi yakho.</string>
+    <string name="auth_reset_cta">Thumela isixhumanisi sokusetha kabusha</string>
+    <string name="auth_reset_sending">Iyathumela…</string>
+    <string name="auth_reset_sent">Hlola i-imeyili yakho isixhumanisi sokusetha kabusha iphasiwedi yakho.</string>
+
     <string name="edit_itinerary_flight_number_hint">Inombolo yendiza (isb. SA 123)</string>
     <string name="edit_itinerary_header_cinemas">Amasinema</string>
     <string name="edit_itinerary_header_hotels">Amahhotela</string>
@@ -266,4 +343,98 @@
     <string name="view_itinerary_no_car">Akukho kuqasha kwemoto okulayishiwe</string>
     <string name="view_itinerary_no_places">Azikho izindawo ezengeziwe</string>
     <string name="view_itinerary_open_pdf_cd">Vula i-PDF</string>
+    <!-- Biometric login: profile toggle and lock screen -->
+    <string name="profile_biometric_unavailable_no_hardware">Akusekelwa kule divayisi</string>
+    <string name="profile_biometric_unavailable_none_enrolled">Awekho ama-biometric asethiwe kule divayisi</string>
+    <string name="profile_biometric_enable_title">Vula ukungena nge-biometric</string>
+    <string name="profile_biometric_enable_subtitle">Qinisekisa ukuthi nguwe ukuze uvule lokhu</string>
+    <string name="biometric_lock_title">Vula i-Waypoint</string>
+    <string name="biometric_lock_subtitle">Qinisekisa ukuthi nguwe ukuze uqhubeke</string>
+    <string name="biometric_lock_prompt_title">Vula i-Waypoint</string>
+    <string name="biometric_lock_prompt_subtitle">Sebenzisa ubuso bakho noma isigxivizo somunwe ukuze uqhubeke</string>
+    <string name="biometric_lock_unlock_button">Vula</string>
+    <string name="biometric_lock_cancel">Khansela</string>
+
+    <!-- Weekday labels for the trip calendar and new trip calendar -->
+    <string name="calendar_wd_sun">Son</string>
+    <string name="calendar_wd_mon">Mso</string>
+    <string name="calendar_wd_tue">Bil</string>
+    <string name="calendar_wd_wed">Tha</string>
+    <string name="calendar_wd_thu">Sin</string>
+    <string name="calendar_wd_fri">Hla</string>
+    <string name="calendar_wd_sat">Mgq</string>
+    <string name="new_trip_wd_sun">Son</string>
+    <string name="new_trip_wd_mon">Mso</string>
+    <string name="new_trip_wd_tue">Bil</string>
+    <string name="new_trip_wd_wed">Tha</string>
+    <string name="new_trip_wd_thu">Sin</string>
+    <string name="new_trip_wd_fri">Hla</string>
+    <string name="new_trip_wd_sat">Mgq</string>
+
+    <!-- Flight status modal, logout dialog, currency modal, explore and place picker -->
+    <string name="common_close">Vala</string>
+    <string name="flight_status_loading">Kutholwa isimo sendiza…</string>
+    <string name="flight_status_error_title">Iphutha</string>
+    <string name="flight_status_in_flight">Iyandiza</string>
+    <string name="flight_status_landed">Ifikile</string>
+    <string name="flight_status_scheduled">Ihleliwe</string>
+    <string name="flight_status_cancelled">Ikhanseliwe</string>
+    <string name="flight_status_departure">Ukuhamba</string>
+    <string name="flight_status_arrival">Ukufika</string>
+    <string name="flight_status_terminal">I-terminal %1$s</string>
+    <string name="flight_status_gate">Isango %1$s</string>
+    <string name="flight_status_delayed">Ibambezelekile imizuzu engu-%1$d</string>
+    <string name="flight_status_duration">Isikhathi: %1$dh %2$dm</string>
+    <string name="settings_logout_dialog_title">Phuma ku-Waypoint?</string>
+    <string name="settings_logout_dialog_body">Uqinisekile ukuthi ufuna ukuphuma? Ungaphinda ungene noma nini ukuze ufinyelele ohambweni lwakho nezinhlelo ezigciniwe.</string>
+    <string name="currency_modal_amount">Inani</string>
+    <string name="currency_modal_convert_to">Guqula ube</string>
+    <string name="currency_modal_market_rate">Izinga lemakethe</string>
+    <string name="explore_results_near">Imiphumela eseduze ne-%1$s</string>
+    <string name="place_picker_empty">Akukho %1$s okutholakele eduze nendawo oya kuyo.</string>
+    <string name="api_budget_header">Isabelo se-API</string>
+    <string name="api_budget_locationiq">Izindawo ze-LocationIQ</string>
+    <string name="api_budget_airlabs">Izindiza ze-AirLabs</string>
+    <string name="api_budget_today">namuhla</string>
+    <string name="api_budget_this_month">kule nyanga</string>
+    <string name="flight_status_limit_reached">Umkhawulo wesimo sendiza ufikiwe kule nyanga, zama futhi kamuva</string>
+    <string name="profile_dark_mode_title">Imodi emnyama</string>
+    <string name="profile_dark_mode_subtitle">Sebenzisa itimu emnyama</string>
+
+    <string name="biometric_error_lockout">Imizamo eminingi kakhulu. Zama futhi ngemva kwemizuzwana engu-30.</string>
+    <string name="biometric_error_lockout_permanent">I-biometrics ivaliwe. Sebenzisa i-PIN, iphethini noma iphasiwedi yefoni yakho ukuze uvule.</string>
+    <string name="biometric_error_cancelled">Ukuvula kukhanselwe. Thinta u-Vula ukuze uzame futhi.</string>
+    <string name="biometric_error_no_hardware">I-biometrics ayitholakali kule divayisi.</string>
+    <string name="biometric_error_none_enrolled">Akukho ukuvala isikrini okusethiwe. Setha okukodwa kuzilungiselelo zefoni yakho.</string>
+    <string name="biometric_error_generic">Ayikwazanga ukuvula. Sicela uzame futhi.</string>
+
+    <string name="session_expired">Iseshini yakho iphelile. Sicela ungene futhi.</string>
+    <string name="settings_notify_trip_updates_title">Izibuyekezo zohambo</string>
+    <string name="settings_notify_trip_updates_subtitle">Uma uhambo lushintsha kwenye idivayisi</string>
+    <string name="settings_notify_reminders_title">Izikhumbuzo zohambo</string>
+    <string name="settings_notify_reminders_subtitle">Ukubala izinsuku, izindiza, isimo sezulu nezinhlelo zansuku zonke</string>
+    <string name="settings_home_currency_title">Imali yasekhaya</string>
+    <string name="settings_home_currency_subtitle">Isiguquli esikuKhaya siguqulela kule mali</string>
+    <string name="settings_home_currency_modal_title">Imali yasekhaya</string>
+    <string name="settings_sync_header">Ukuvumelanisa</string>
+    <string name="settings_sync_now_title">Vumelanisa manje</string>
+    <string name="settings_sync_now_action">Vumelanisa</string>
+    <string name="settings_sync_last">Kugcine ukuvumelaniswa ngo-%1$s</string>
+    <string name="settings_sync_never">Akukavumelaniswa kule foni okwamanje</string>
+    <string name="settings_sync_in_progress">Kuyavumelaniswa…</string>
+    <string name="settings_sync_offline">Awuxhunyiwe. Izinguquko zizovumelaniswa uma uphinde uxhuma.</string>
+    <string name="notification_channel_reminders_name">Izikhumbuzo zohambo</string>
+    <string name="notification_channel_reminders_description">Ukubala izinsuku, izikhathi zezindiza, izexwayiso zesimo sezulu nezinhlelo zansuku zonke</string>
+    <string name="language_sub_english">IsiNgisi (okuzenzakalelayo)</string>
+    <string name="language_sub_zulu">isiZulu (iNingizimu Afrika)</string>
+    <string name="language_sub_xhosa">isiXhosa (iNingizimu Afrika)</string>
+    <string name="trip_pending_sync_cd">Kulindwe ukuvumelaniswa</string>
+    <string name="edit_itinerary_edit_dates_cd">Shintsha izinsuku</string>
+    <string name="edit_itinerary_edit_note_cd">Hlela inothi</string>
+    <string name="edit_itinerary_edit_lodging_title">Izinsuku zendawo yokuhlala</string>
+    <string name="edit_itinerary_edit_car_title">Izinsuku zokuqasha imoto</string>
+    <string name="edit_itinerary_from_label">Kusukela</string>
+    <string name="edit_itinerary_to_label">Kuze kube</string>
+    <string name="edit_itinerary_dates_invalid">Usuku lokugcina alukwazi ukuba ngaphambi kosuku lokuqala.</string>
+    <string name="edit_itinerary_note_label">Inothi</string>
 </resources>

@@ -28,6 +28,7 @@ local.properties
 
 # API keys / secrets - never commit these
 apikey.properties
+keystore.properties
 secrets.properties
 /secrets/
 
@@ -37,6 +38,8 @@ secrets.properties
 
 # Keystore files
 *.jks
+# the throwaway demo key used by CI, see ci/README.md (not the real upload key)
+!ci/ci-release.jks
 *.keystore
 
 # Log files
@@ -47,3 +50,4 @@ secrets.properties
 
 # Windows
 Thumbs.db
+Key Store Password.txt

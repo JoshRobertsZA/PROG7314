@@ -1,13 +1,17 @@
-// declares that this file belongs to the package `com.waypoint.app.features.settings.ui`
 package com.waypoint.app.features.settings.ui
 
-// expression: `data class SettingsUiState(`
+import com.waypoint.app.core.network.UsageSnapshot
+
+/** State of the Profile tab. */
 data class SettingsUiState(
-    // continues the statement started above: `val isLoading: Boolean = true,`
     val isLoading: Boolean = true,
-    // continues the statement started above: `val plannedThisYear: Int = 0,`
     val plannedThisYear: Int = 0,
-    // continues the statement started above: `val totalTrips: Int = 0,`
     val totalTrips: Int = 0,
-// closes the multi-line argument list started above
+    /** Local changes still waiting in the outbox to reach the API. */
+    val pendingChangeCount: Int = 0,
+    val apiUsage: List<UsageSnapshot> = emptyList(),
+    /** True while SyncWorker is running. */
+    val isSyncing: Boolean = false,
+    /** When the last two-way sync finished; null if this phone has never synced. */
+    val lastSyncAtMs: Long? = null,
 )

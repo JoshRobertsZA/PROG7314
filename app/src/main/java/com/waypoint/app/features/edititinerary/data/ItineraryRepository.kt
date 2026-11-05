@@ -1,736 +1,792 @@
-// declares that this file belongs to the package `com.waypoint.app.features.edititinerary.data`
 package com.waypoint.app.features.edititinerary.data
 
-// imports `android.content.ContentValues` for use in this file
 import android.content.ContentValues
-// imports `android.content.Context` for use in this file
 import android.content.Context
-// imports `com.waypoint.app.core.db.WaypointDbHelper` for use in this file
+import android.util.Log
 import com.waypoint.app.core.db.WaypointDbHelper
-// imports `kotlinx.coroutines.Dispatchers` for use in this file
 import kotlinx.coroutines.Dispatchers
-// imports `kotlinx.coroutines.withContext` for use in this file
 import kotlinx.coroutines.withContext
-// imports `java.time.LocalDate` for use in this file
 import java.time.LocalDate
-// imports `java.util.UUID` for use in this file
 import java.util.UUID
+import com.waypoint.app.core.sync.OutboxEntityType
+import com.waypoint.app.core.sync.OutboxOperation
+import com.waypoint.app.core.sync.OutboxRepository
+import com.waypoint.app.core.network.WaypointApiRepository
+import org.json.JSONObject
 
-// declares class `ItineraryRepository` with a primary constructor taking 1 parameter (`context`) and opens its body
+/**
+ * Local storage for itinerary days, flights, lodging, car rentals and places. Every write is saved to
+ * SQLite and queued in the outbox; [pullAndMergeForTrip] brings in changes from other devices.
+ */
 class ItineraryRepository(context: Context) {
 
-    // declares private read-only property `db`, initialised with the result of calling `WaypointDbHelper.getInstance(…)`
     private val db = WaypointDbHelper.getInstance(context)
+    private val outbox = OutboxRepository(context)
 
 
-    // expression: `suspend fun replaceSelectedDays(`
     suspend fun replaceSelectedDays(
-        // continues the statement started above: `tripId: String,`
         tripId: String,
-        // continues the statement started above: `days: Set<LocalDate>,`
         days: Set<LocalDate>,
-    // continues the statement started above: `) = withContext(Dispatchers.IO) {`
     ) = withContext(Dispatchers.IO) {
-        // declares read-only property `write`, initialised to `db.writableDatabase`
         val write = db.writableDatabase
-        // calls `beginTransaction` on `write` with arguments `()`
+        // Collected inside the transaction below, enqueued after it
+        // commits (outbox.enqueue() opens its own transaction on this same
+        // database, so it must run after this one has ended).
+        val createdDays = mutableListOf<Pair<String, LocalDate>>()
         write.beginTransaction()
-        // `try` block: exceptions thrown inside are handled by the `catch` below
         try {
-            // declares read-only property `existing` of type `Map<LocalDate, String>`, initialised to `run` and opens a lambda / block
             val existing: Map<LocalDate, String> = run {
-                // declares read-only property `cursor`, initialised with the result of calling `db.readableDatabase.query(…)`
                 val cursor = db.readableDatabase.query(
-                    // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_DAYS,`
                     WaypointDbHelper.TABLE_ITIN_DAYS,
-                    // continues the statement started above: `arrayOf(WaypointDbHelper.COL_IDAY_ID, WaypointDbHelper.COL_…`
                     arrayOf(WaypointDbHelper.COL_IDAY_ID, WaypointDbHelper.COL_IDAY_DATE),
-                    // continues the statement started above: `"${WaypointDbHelper.COL_IDAY_TRIP_ID} = ?",`
                     "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ?",
-                    // continues the statement started above: `arrayOf(tripId),`
                     arrayOf(tripId),
-                    // continues the statement started above: `null, null, null,`
                     null, null, null,
-                // closes the multi-line argument list started above
                 )
-                // declares read-only property `map`, initialised with the result of calling `mutableMapOf(…)`
                 val map = mutableMapOf<LocalDate, String>()
-                // expression: `cursor.use { c ->`
                 cursor.use { c ->
-                    // continues the statement started above: `while (c.moveToNext()) {`
                     while (c.moveToNext()) {
-                        // opens a block after `runCatching`
                         runCatching {
-                            // assigns `map[LocalDate.parse(c.getString(1))]` the value `c.getString(0)`
                             map[LocalDate.parse(c.getString(1))] = c.getString(0)
-                        // closes the block
                         }
-                    // closes the block
                     }
-                // closes the block
                 }
-                // expression: `map`
                 map
 
-            // closes the lambda assigned to `existing`
             }
 
-            // declares read-only property `datesToAdd`, initialised to `days - existing.keys`
             val datesToAdd = days - existing.keys
-            // `for` loop: iterates over `datesToAdd`, binding each element to `date`
             for (date in datesToAdd) {
-                // declares read-only property `cv`, initialised with the result of calling `ContentValues(…)` and opens a lambda / block
+                val newId = UUID.randomUUID().toString()
                 val cv = ContentValues().apply {
-                    // calls `put` with arguments `(WaypointDbHelper.COL_IDAY_ID, UUID.randomUUI…)`
-                    put(WaypointDbHelper.COL_IDAY_ID,      UUID.randomUUID().toString())
-                    // calls `put` with arguments `(WaypointDbHelper.COL_IDAY_TRIP_ID, tripId)`
+                    put(WaypointDbHelper.COL_IDAY_ID,      newId)
                     put(WaypointDbHelper.COL_IDAY_TRIP_ID, tripId)
-                    // calls `put` with arguments `(WaypointDbHelper.COL_IDAY_DATE, date.toStrin…)`
                     put(WaypointDbHelper.COL_IDAY_DATE,    date.toString())
-                // closes the lambda assigned to `cv`
                 }
-                // calls `insert` on `write` with arguments `(WaypointDbHelper.TABLE_ITIN_DAYS, null, cv)`
                 write.insert(WaypointDbHelper.TABLE_ITIN_DAYS, null, cv)
-            // closes the for loop
+                createdDays += newId to date
             }
 
-            // calls `setTransactionSuccessful` on `write` with arguments `()`
             write.setTransactionSuccessful()
-        // `finally` block: always runs after the `try`/`catch`, whether or not an exception occurred
         } finally {
-            // calls `endTransaction` on `write` with arguments `()`
             write.endTransaction()
-        // closes the finally block
         }
-    // closes the block
+
+        for ((dayId, date) in createdDays) {
+            val payload = JSONObject().apply {
+                put("id", dayId)
+                put("tripId", tripId)
+                put("date", date.toString())
+            }.toString()
+            outbox.enqueue(OutboxEntityType.DAY, dayId, OutboxOperation.CREATE, payload)
+        }
     }
 
-    // declares suspend function `removeDaysOutside` taking 3 parameters (`tripId`, `start`, `end`); its body is the expression ``
     suspend fun removeDaysOutside(tripId: String, start: LocalDate, end: LocalDate) =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // calls `delete` on `db.writableDatabase` with an argument list that continues on the following lines
+            val whereClause = "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ? AND " +
+                "(${WaypointDbHelper.COL_IDAY_DATE} < ? OR ${WaypointDbHelper.COL_IDAY_DATE} > ?)"
+            val whereArgs = arrayOf(tripId, start.toString(), end.toString())
+
+            // Must read which days (and the flights/places under them) are
+            // about to go before deleting: ON DELETE CASCADE (enabled in
+            // WaypointDbHelper.onConfigure) removes those flights/places
+            // locally as a side effect of the day delete below, without
+            // ever going through deleteFlight()/deletePlace() - so their
+            // own outbox DELETE entries have to be queued here, or the
+            // server never finds out those records are gone.
+            val removedDayIds = mutableListOf<String>()
+            db.readableDatabase.query(
+                WaypointDbHelper.TABLE_ITIN_DAYS, arrayOf(WaypointDbHelper.COL_IDAY_ID),
+                whereClause, whereArgs, null, null, null,
+            ).use { cursor -> while (cursor.moveToNext()) removedDayIds += cursor.getString(0) }
+
+            if (removedDayIds.isEmpty()) return@withContext
+
+            val removedFlightIds = mutableListOf<String>()
+            val removedPlaceIds = mutableListOf<String>()
+            for (dayId in removedDayIds) {
+                db.readableDatabase.query(
+                    WaypointDbHelper.TABLE_ITIN_FLIGHTS, arrayOf(WaypointDbHelper.COL_IFLIGHT_ID),
+                    "${WaypointDbHelper.COL_IFLIGHT_DAY_ID} = ?", arrayOf(dayId), null, null, null,
+                ).use { cursor -> while (cursor.moveToNext()) removedFlightIds += cursor.getString(0) }
+                db.readableDatabase.query(
+                    WaypointDbHelper.TABLE_ITIN_PLACES, arrayOf(WaypointDbHelper.COL_IPLACE_ID),
+                    "${WaypointDbHelper.COL_IPLACE_DAY_ID} = ?", arrayOf(dayId), null, null, null,
+                ).use { cursor -> while (cursor.moveToNext()) removedPlaceIds += cursor.getString(0) }
+            }
+
             db.writableDatabase.delete(
-                // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_DAYS,`
                 WaypointDbHelper.TABLE_ITIN_DAYS,
-                // continues the statement started above: `"${WaypointDbHelper.COL_IDAY_TRIP_ID} = ? AND (${WaypointDb…`
-                "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ? AND (${WaypointDbHelper.COL_IDAY_DATE} < ? OR ${WaypointDbHelper.COL_IDAY_DATE} > ?)",
-                // continues the statement started above: `arrayOf(tripId, start.toString(), end.toString()),`
-                arrayOf(tripId, start.toString(), end.toString()),
-            // closes the multi-line argument list started above
+                whereClause,
+                whereArgs,
             )
-        // closes the block
+
+            for (flightId in removedFlightIds) outbox.enqueue(OutboxEntityType.FLIGHT, flightId, OutboxOperation.DELETE, null)
+            for (placeId in removedPlaceIds) outbox.enqueue(OutboxEntityType.PLACE, placeId, OutboxOperation.DELETE, null)
+            for (dayId in removedDayIds) outbox.enqueue(OutboxEntityType.DAY, dayId, OutboxOperation.DELETE, null)
         }
 
-    // declares suspend function `getSelectedDays` taking 1 parameter (`tripId`), returning `List<LocalDate>`; its body is the expression ``
     suspend fun getSelectedDays(tripId: String): List<LocalDate> =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // declares read-only property `read`, initialised to `db.readableDatabase`
             val read = db.readableDatabase
-            // declares read-only property `cursor`, initialised with the result of calling `read.query(…)`
             val cursor = read.query(
-                // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_DAYS,`
                 WaypointDbHelper.TABLE_ITIN_DAYS,
-                // continues the statement started above: `arrayOf(WaypointDbHelper.COL_IDAY_DATE),`
                 arrayOf(WaypointDbHelper.COL_IDAY_DATE),
-                // continues the statement started above: `"${WaypointDbHelper.COL_IDAY_TRIP_ID} = ?",`
                 "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ?",
-                // continues the statement started above: `arrayOf(tripId),`
                 arrayOf(tripId),
-                // continues the statement started above: `null, null,`
                 null, null,
-                // continues the statement started above: `"${WaypointDbHelper.COL_IDAY_DATE} ASC",`
                 "${WaypointDbHelper.COL_IDAY_DATE} ASC",
-            // closes the multi-line argument list started above
             )
-            // declares read-only property `result`, initialised with the result of calling `mutableListOf(…)`
             val result = mutableListOf<LocalDate>()
-            // opens a block after `cursor.use`
             cursor.use {
-                // `while` loop: repeats the block below as long as `it.moveToNext()` is true
                 while (it.moveToNext()) {
-                    // opens a block after `runCatching`
                     runCatching {
-                        // calls `add` on `result` with arguments `(LocalDate.parse(it.getString(0)))`
                         result.add(LocalDate.parse(it.getString(0)))
-                    // closes the block
                     }
-                // closes the while loop
                 }
-            // closes the block
             }
-            // expression: `result`
             result
-        // closes the block
         }
 
 
-    // declares suspend function `getSelectedDaysWithIds` taking 1 parameter (`tripId`), returning `List<ItineraryDayEntity>`; its body is the expression ``
     suspend fun getSelectedDaysWithIds(tripId: String): List<ItineraryDayEntity> =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // declares read-only property `cursor`, initialised with the result of calling `db.readableDatabase.query(…)`
             val cursor = db.readableDatabase.query(
-                // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_DAYS,`
                 WaypointDbHelper.TABLE_ITIN_DAYS,
-                // continues the statement started above: `arrayOf(WaypointDbHelper.COL_IDAY_ID, WaypointDbHelper.COL_…`
                 arrayOf(WaypointDbHelper.COL_IDAY_ID, WaypointDbHelper.COL_IDAY_DATE),
-                // continues the statement started above: `"${WaypointDbHelper.COL_IDAY_TRIP_ID} = ?",`
                 "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ?",
-                // continues the statement started above: `arrayOf(tripId),`
                 arrayOf(tripId),
-                // continues the statement started above: `null, null,`
                 null, null,
-                // continues the statement started above: `"${WaypointDbHelper.COL_IDAY_DATE} ASC",`
                 "${WaypointDbHelper.COL_IDAY_DATE} ASC",
-            // closes the multi-line argument list started above
             )
-            // declares read-only property `result`, initialised with the result of calling `mutableListOf(…)`
             val result = mutableListOf<ItineraryDayEntity>()
-            // opens a block after `cursor.use`
             cursor.use {
-                // `while` loop: repeats the block below as long as `it.moveToNext()` is true
                 while (it.moveToNext()) {
-                    // opens a block after `runCatching`
                     runCatching {
-                        // calls `add` on `result` with an argument list that continues on the following lines
                         result.add(
-                            // continues the statement started above: `ItineraryDayEntity(`
                             ItineraryDayEntity(
-                                // continues the statement started above: `id = it.getString(0),`
                                 id     = it.getString(0),
-                                // continues the statement started above: `tripId = tripId,`
                                 tripId = tripId,
-                                // continues the statement started above: `date = LocalDate.parse(it.getString(1)),`
                                 date   = LocalDate.parse(it.getString(1)),
-                            // closes the multi-line argument list started above
                             )
-                        // closes the multi-line argument list started above
                         )
-                    // closes the block
                     }
-                // closes the while loop
                 }
-            // closes the block
             }
-            // expression: `result`
             result
-        // closes the block
         }
 
 
-    // declares suspend function `insertFlight` taking 3 parameters (`dayId`, `pdfUri`, `docName`), returning `String`; its body is the expression ``
     suspend fun insertFlight(dayId: String, pdfUri: String, docName: String? = null): String =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // declares read-only property `id`, initialised with the result of calling `UUID.randomUUID(…)`
             val id = UUID.randomUUID().toString()
-            // declares read-only property `cv`, initialised with the result of calling `ContentValues(…)` and opens a lambda / block
             val cv = ContentValues().apply {
-                // calls `put` with arguments `(WaypointDbHelper.COL_IFLIGHT_ID, id)`
                 put(WaypointDbHelper.COL_IFLIGHT_ID,      id)
-                // calls `put` with arguments `(WaypointDbHelper.COL_IFLIGHT_DAY_ID, dayId)`
                 put(WaypointDbHelper.COL_IFLIGHT_DAY_ID,  dayId)
-                // calls `put` with arguments `(WaypointDbHelper.COL_IFLIGHT_PDF_URI, pdfUri)`
                 put(WaypointDbHelper.COL_IFLIGHT_PDF_URI, pdfUri)
-                // calls `put` with arguments `(WaypointDbHelper.COL_IFLIGHT_DOC_NAME, docNa…)`
                 put(WaypointDbHelper.COL_IFLIGHT_DOC_NAME, docName)
-                // calls `put` with arguments `(WaypointDbHelper.COL_IFLIGHT_CREATED, System…)`
                 put(WaypointDbHelper.COL_IFLIGHT_CREATED, System.currentTimeMillis())
-            // closes the lambda assigned to `cv`
             }
-            // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_FLIGHTS, null, cv)`
             db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_FLIGHTS, null, cv)
-            // expression: `id`
+
+            // pdfUri is a device-local content:// URI - meaningless on any
+            // other device, so it's never sent. docName (the filename the
+            // user picked) is still useful cross-device metadata.
+            val payload = JSONObject().apply {
+                put("id", id)
+                put("dayId", dayId)
+                if (docName != null) put("docName", docName)
+            }.toString()
+            outbox.enqueue(OutboxEntityType.FLIGHT, id, OutboxOperation.CREATE, payload)
+
             id
-        // closes the block
         }
 
-    // declares suspend function `updateFlightNumber` taking 2 parameters (`flightId`, `number`); its body is the expression ``
     suspend fun updateFlightNumber(flightId: String, number: String) =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // declares read-only property `cv`, initialised with the result of calling `ContentValues(…)` and opens a lambda / block
             val cv = ContentValues().apply {
-                // calls `put` with arguments `(WaypointDbHelper.COL_IFLIGHT_FLIGHT_NUMBER, …)`
                 put(WaypointDbHelper.COL_IFLIGHT_FLIGHT_NUMBER, number)
-            // closes the lambda assigned to `cv`
             }
-            // calls `update` on `db.writableDatabase` with an argument list that continues on the following lines
             db.writableDatabase.update(
-                // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_FLIGHTS,`
                 WaypointDbHelper.TABLE_ITIN_FLIGHTS,
-                // continues the statement started above: `cv,`
                 cv,
-                // continues the statement started above: `"${WaypointDbHelper.COL_IFLIGHT_ID} = ?",`
                 "${WaypointDbHelper.COL_IFLIGHT_ID} = ?",
-                // continues the statement started above: `arrayOf(flightId),`
                 arrayOf(flightId),
-            // closes the multi-line argument list started above
             )
-        // closes the block
+
+            val payload = JSONObject().apply { put("flightNumber", number) }.toString()
+            outbox.enqueue(OutboxEntityType.FLIGHT, flightId, OutboxOperation.UPDATE, payload)
         }
 
-    // declares suspend function `updateFlightDepartureTime` taking 2 parameters (`flightId`, `time`); its body is the expression ``
     suspend fun updateFlightDepartureTime(flightId: String, time: String?) =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // declares read-only property `cv`, initialised with the result of calling `ContentValues(…)` and opens a lambda / block
             val cv = ContentValues().apply {
-                // `if` statement: executes `putNull(WaypointDbHelper.COL_IFLIGHT_DEPARTU…` when `time == null` is true
                 if (time == null) putNull(WaypointDbHelper.COL_IFLIGHT_DEPARTURE)
-                // statement: `else put(WaypointDbHelper.COL_IFLIGHT_DEPARTURE, time)`
                 else put(WaypointDbHelper.COL_IFLIGHT_DEPARTURE, time)
-            // closes the lambda assigned to `cv`
             }
-            // calls `update` on `db.writableDatabase` with an argument list that continues on the following lines
             db.writableDatabase.update(
-                // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_FLIGHTS, cv,`
                 WaypointDbHelper.TABLE_ITIN_FLIGHTS, cv,
-                // continues the statement started above: `"${WaypointDbHelper.COL_IFLIGHT_ID} = ?", arrayOf(flightId),`
                 "${WaypointDbHelper.COL_IFLIGHT_ID} = ?", arrayOf(flightId),
-            // closes the multi-line argument list started above
             )
-        // closes the block
+
+            val payload = JSONObject().apply { put("departureTime", time ?: JSONObject.NULL) }.toString()
+            outbox.enqueue(OutboxEntityType.FLIGHT, flightId, OutboxOperation.UPDATE, payload)
         }
 
-    // declares suspend function `getFlightsForDays` taking 1 parameter (`dayIds`), returning `List<FlightEntity>`; its body is the expression ``
     suspend fun getFlightsForDays(dayIds: List<String>): List<FlightEntity> =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // `if` statement: executes `return@withContext emptyList()` when `dayIds.isEmpty()` is true
             if (dayIds.isEmpty()) return@withContext emptyList()
-            // declares read-only property `placeholders`, initialised with the result of calling `dayIds.joinToString(…)`
             val placeholders = dayIds.joinToString(",") { "?" }
-            // declares read-only property `cursor`, initialised with the result of calling `db.readableDatabase.rawQuery(…)`
             val cursor = db.readableDatabase.rawQuery(
-                // continues the statement started above: `"SELECT ${WaypointDbHelper.COL_IFLIGHT_ID}, " +`
                 "SELECT ${WaypointDbHelper.COL_IFLIGHT_ID}, " +
-                    // continues the statement started above: `"${WaypointDbHelper.COL_IFLIGHT_DAY_ID}, " +`
                     "${WaypointDbHelper.COL_IFLIGHT_DAY_ID}, " +
-                    // continues the statement started above: `"${WaypointDbHelper.COL_IFLIGHT_FLIGHT_NUMBER}, " +`
                     "${WaypointDbHelper.COL_IFLIGHT_FLIGHT_NUMBER}, " +
-                    // continues the statement started above: `"${WaypointDbHelper.COL_IFLIGHT_PDF_URI}, " +`
                     "${WaypointDbHelper.COL_IFLIGHT_PDF_URI}, " +
-                    // continues the statement started above: `"${WaypointDbHelper.COL_IFLIGHT_CREATED}, " +`
                     "${WaypointDbHelper.COL_IFLIGHT_CREATED}, " +
-                    // continues the statement started above: `"${WaypointDbHelper.COL_IFLIGHT_DEPARTURE}, " +`
                     "${WaypointDbHelper.COL_IFLIGHT_DEPARTURE}, " +
-                    // continues the statement started above: `"${WaypointDbHelper.COL_IFLIGHT_DOC_NAME} " +`
                     "${WaypointDbHelper.COL_IFLIGHT_DOC_NAME} " +
-                    // continues the statement started above: `"FROM ${WaypointDbHelper.TABLE_ITIN_FLIGHTS} " +`
                     "FROM ${WaypointDbHelper.TABLE_ITIN_FLIGHTS} " +
-                    // continues the statement started above: `"WHERE ${WaypointDbHelper.COL_IFLIGHT_DAY_ID} IN ($placehol…`
                     "WHERE ${WaypointDbHelper.COL_IFLIGHT_DAY_ID} IN ($placeholders) " +
-                    // continues the statement started above: `"ORDER BY ${WaypointDbHelper.COL_IFLIGHT_CREATED} ASC",`
                     "ORDER BY ${WaypointDbHelper.COL_IFLIGHT_CREATED} ASC",
-                // continues the statement started above: `dayIds.toTypedArray(),`
                 dayIds.toTypedArray(),
-            // closes the multi-line argument list started above
             )
-            // declares read-only property `result`, initialised with the result of calling `mutableListOf(…)`
             val result = mutableListOf<FlightEntity>()
-            // opens a block after `cursor.use`
             cursor.use {
-                // `while` loop: repeats the block below as long as `it.moveToNext()` is true
                 while (it.moveToNext()) {
-                    // calls `add` on `result` with an argument list that continues on the following lines
                     result.add(
-                        // continues the statement started above: `FlightEntity(`
                         FlightEntity(
-                            // continues the statement started above: `id = it.getString(0),`
                             id           = it.getString(0),
-                            // continues the statement started above: `dayId = it.getString(1),`
                             dayId        = it.getString(1),
-                            // continues the statement started above: `flightNumber = it.getString(2),`
                             flightNumber = it.getString(2),
-                            // continues the statement started above: `pdfUri = it.getString(3),`
                             pdfUri       = it.getString(3),
-                            // continues the statement started above: `createdAtMs = it.getLong(4),`
                             createdAtMs  = it.getLong(4),
-                            // continues the statement started above: `departureTime = if (it.isNull(5)) null else it.getString(5),`
                             departureTime = if (it.isNull(5)) null else it.getString(5),
-                            // continues the statement started above: `docName = if (it.isNull(6)) null else it.getString(6),`
                             docName      = if (it.isNull(6)) null else it.getString(6),
-                        // closes the multi-line argument list started above
                         )
-                    // closes the multi-line argument list started above
                     )
-                // closes the while loop
                 }
-            // closes the block
             }
-            // expression: `result`
             result
-        // closes the block
         }
 
-    // declares suspend function `deleteFlight` taking 1 parameter (`flightId`); its body is the expression ``
     suspend fun deleteFlight(flightId: String) =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // calls `delete` on `db.writableDatabase` with an argument list that continues on the following lines
             db.writableDatabase.delete(
-                // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_FLIGHTS,`
                 WaypointDbHelper.TABLE_ITIN_FLIGHTS,
-                // continues the statement started above: `"${WaypointDbHelper.COL_IFLIGHT_ID} = ?",`
                 "${WaypointDbHelper.COL_IFLIGHT_ID} = ?",
-                // continues the statement started above: `arrayOf(flightId),`
                 arrayOf(flightId),
-            // closes the multi-line argument list started above
             )
-        // closes the block
+            outbox.enqueue(OutboxEntityType.FLIGHT, flightId, OutboxOperation.DELETE, null)
         }
 
 
-    // expression: `suspend fun insertLodging(`
     suspend fun insertLodging(
-        // continues the statement started above: `tripId: String,`
         tripId: String,
-        // continues the statement started above: `fromDate: LocalDate,`
         fromDate: LocalDate,
-        // continues the statement started above: `toDate: LocalDate,`
         toDate: LocalDate,
-        // continues the statement started above: `pdfUri: String,`
         pdfUri: String,
-        // continues the statement started above: `docName: String? = null,`
         docName: String? = null,
-    // continues the statement started above: `): String = withContext(Dispatchers.IO) {`
     ): String = withContext(Dispatchers.IO) {
-        // declares read-only property `id`, initialised with the result of calling `UUID.randomUUID(…)`
         val id = UUID.randomUUID().toString()
-        // declares read-only property `cv`, initialised with the result of calling `ContentValues(…)` and opens a lambda / block
         val cv = ContentValues().apply {
-            // calls `put` with arguments `(WaypointDbHelper.COL_ILODGE_ID, id)`
             put(WaypointDbHelper.COL_ILODGE_ID,        id)
-            // calls `put` with arguments `(WaypointDbHelper.COL_ILODGE_TRIP_ID, tripId)`
             put(WaypointDbHelper.COL_ILODGE_TRIP_ID,   tripId)
-            // calls `put` with arguments `(WaypointDbHelper.COL_ILODGE_FROM_DATE, fromD…)`
             put(WaypointDbHelper.COL_ILODGE_FROM_DATE, fromDate.toString())
-            // calls `put` with arguments `(WaypointDbHelper.COL_ILODGE_TO_DATE, toDate.…)`
             put(WaypointDbHelper.COL_ILODGE_TO_DATE,   toDate.toString())
-            // calls `put` with arguments `(WaypointDbHelper.COL_ILODGE_PDF_URI, pdfUri)`
             put(WaypointDbHelper.COL_ILODGE_PDF_URI,   pdfUri)
-            // calls `put` with arguments `(WaypointDbHelper.COL_ILODGE_CREATED, System.…)`
             put(WaypointDbHelper.COL_ILODGE_CREATED,   System.currentTimeMillis())
-            // calls `put` with arguments `(WaypointDbHelper.COL_ILODGE_DOC_NAME, docName)`
             put(WaypointDbHelper.COL_ILODGE_DOC_NAME,  docName)
-        // closes the lambda assigned to `cv`
         }
-        // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)`
         db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)
-        // expression: `id`
+
+        // pdfUri is device-local, never synced - see insertFlight.
+        val payload = JSONObject().apply {
+            put("id", id)
+            put("tripId", tripId)
+            put("fromDate", fromDate.toString())
+            put("toDate", toDate.toString())
+            if (docName != null) put("docName", docName)
+        }.toString()
+        outbox.enqueue(OutboxEntityType.LODGING, id, OutboxOperation.CREATE, payload)
+
         id
-    // closes the block
     }
 
-    // declares suspend function `getLodgingsForTrip` taking 1 parameter (`tripId`), returning `List<LodgingEntity>`; its body is the expression ``
     suspend fun getLodgingsForTrip(tripId: String): List<LodgingEntity> =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // declares read-only property `cursor`, initialised with the result of calling `db.readableDatabase.query(…)`
             val cursor = db.readableDatabase.query(
-                // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_LODGING, null,`
                 WaypointDbHelper.TABLE_ITIN_LODGING, null,
-                // continues the statement started above: `"${WaypointDbHelper.COL_ILODGE_TRIP_ID} = ?", arrayOf(tripI…`
                 "${WaypointDbHelper.COL_ILODGE_TRIP_ID} = ?", arrayOf(tripId),
-                // continues the statement started above: `null, null, "${WaypointDbHelper.COL_ILODGE_CREATED} ASC",`
                 null, null, "${WaypointDbHelper.COL_ILODGE_CREATED} ASC",
-            // closes the multi-line argument list started above
             )
-            // declares read-only property `out`, initialised with the result of calling `mutableListOf(…)`
             val out = mutableListOf<LodgingEntity>()
-            // opens a block after `cursor.use`
             cursor.use {
-                // `while` loop: repeats the block below as long as `it.moveToNext()` is true
                 while (it.moveToNext()) {
-                    // declares read-only property `nameIdx`, initialised with the result of calling `it.getColumnIndex(…)`
                     val nameIdx = it.getColumnIndex(WaypointDbHelper.COL_ILODGE_DOC_NAME)
-                    // adds to `out` the value `LodgingEntity(`
                     out += LodgingEntity(
-                        // continues the statement started above: `id = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper…`
                         id          = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_ID)),
-                        // continues the statement started above: `tripId = tripId,`
                         tripId      = tripId,
-                        // continues the statement started above: `fromDate = LocalDate.parse(it.getString(it.getColumnIndexOr…`
                         fromDate    = LocalDate.parse(it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_FROM_DATE))),
-                        // continues the statement started above: `toDate = LocalDate.parse(it.getString(it.getColumnIndexOrTh…`
                         toDate      = LocalDate.parse(it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_TO_DATE))),
-                        // continues the statement started above: `pdfUri = it.getString(it.getColumnIndexOrThrow(WaypointDbHe…`
                         pdfUri      = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_PDF_URI)),
-                        // continues the statement started above: `createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointD…`
                         createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ILODGE_CREATED)),
-                        // continues the statement started above: `docName = if (nameIdx < 0 || it.isNull(nameIdx)) null else …`
                         docName     = if (nameIdx < 0 || it.isNull(nameIdx)) null else it.getString(nameIdx),
-                    // closes the multi-line argument list started above
                     )
-                // closes the while loop
                 }
-            // closes the block
             }
-            // expression: `out`
             out
-        // closes the block
         }
 
-    // declares suspend function `deleteLodging` taking 1 parameter (`lodgingId`); its body is the expression ``
     suspend fun deleteLodging(lodgingId: String) =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // calls `delete` on `db.writableDatabase` with an argument list that continues on the following lines
             db.writableDatabase.delete(
-                // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_LODGING,`
                 WaypointDbHelper.TABLE_ITIN_LODGING,
-                // continues the statement started above: `"${WaypointDbHelper.COL_ILODGE_ID} = ?",`
                 "${WaypointDbHelper.COL_ILODGE_ID} = ?",
-                // continues the statement started above: `arrayOf(lodgingId),`
                 arrayOf(lodgingId),
-            // closes the multi-line argument list started above
             )
-        // closes the block
+            outbox.enqueue(OutboxEntityType.LODGING, lodgingId, OutboxOperation.DELETE, null)
         }
 
 
-    // expression: `suspend fun insertCarRental(`
     suspend fun insertCarRental(
-        // continues the statement started above: `tripId: String,`
         tripId: String,
-        // continues the statement started above: `fromDate: LocalDate,`
         fromDate: LocalDate,
-        // continues the statement started above: `toDate: LocalDate,`
         toDate: LocalDate,
-        // continues the statement started above: `pdfUri: String,`
         pdfUri: String,
-        // continues the statement started above: `docName: String? = null,`
         docName: String? = null,
-    // continues the statement started above: `): String = withContext(Dispatchers.IO) {`
     ): String = withContext(Dispatchers.IO) {
-        // declares read-only property `id`, initialised with the result of calling `UUID.randomUUID(…)`
         val id = UUID.randomUUID().toString()
-        // declares read-only property `cv`, initialised with the result of calling `ContentValues(…)` and opens a lambda / block
         val cv = ContentValues().apply {
-            // calls `put` with arguments `(WaypointDbHelper.COL_ICAR_ID, id)`
             put(WaypointDbHelper.COL_ICAR_ID,        id)
-            // calls `put` with arguments `(WaypointDbHelper.COL_ICAR_TRIP_ID, tripId)`
             put(WaypointDbHelper.COL_ICAR_TRIP_ID,   tripId)
-            // calls `put` with arguments `(WaypointDbHelper.COL_ICAR_FROM_DATE, fromDat…)`
             put(WaypointDbHelper.COL_ICAR_FROM_DATE, fromDate.toString())
-            // calls `put` with arguments `(WaypointDbHelper.COL_ICAR_TO_DATE, toDate.to…)`
             put(WaypointDbHelper.COL_ICAR_TO_DATE,   toDate.toString())
-            // calls `put` with arguments `(WaypointDbHelper.COL_ICAR_PDF_URI, pdfUri)`
             put(WaypointDbHelper.COL_ICAR_PDF_URI,   pdfUri)
-            // calls `put` with arguments `(WaypointDbHelper.COL_ICAR_CREATED, System.cu…)`
             put(WaypointDbHelper.COL_ICAR_CREATED,   System.currentTimeMillis())
-            // calls `put` with arguments `(WaypointDbHelper.COL_ICAR_DOC_NAME, docName)`
             put(WaypointDbHelper.COL_ICAR_DOC_NAME,  docName)
-        // closes the lambda assigned to `cv`
         }
-        // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)`
         db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)
-        // expression: `id`
+
+        // pdfUri is device-local, never synced - see insertFlight.
+        val payload = JSONObject().apply {
+            put("id", id)
+            put("tripId", tripId)
+            put("fromDate", fromDate.toString())
+            put("toDate", toDate.toString())
+            if (docName != null) put("docName", docName)
+        }.toString()
+        outbox.enqueue(OutboxEntityType.CAR, id, OutboxOperation.CREATE, payload)
+
         id
-    // closes the block
     }
 
-    // declares suspend function `getCarRentalsForTrip` taking 1 parameter (`tripId`), returning `List<CarRentalEntity>`; its body is the expression ``
     suspend fun getCarRentalsForTrip(tripId: String): List<CarRentalEntity> =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // declares read-only property `cursor`, initialised with the result of calling `db.readableDatabase.query(…)`
             val cursor = db.readableDatabase.query(
-                // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_CAR, null,`
                 WaypointDbHelper.TABLE_ITIN_CAR, null,
-                // continues the statement started above: `"${WaypointDbHelper.COL_ICAR_TRIP_ID} = ?", arrayOf(tripId),`
                 "${WaypointDbHelper.COL_ICAR_TRIP_ID} = ?", arrayOf(tripId),
-                // continues the statement started above: `null, null, "${WaypointDbHelper.COL_ICAR_CREATED} ASC",`
                 null, null, "${WaypointDbHelper.COL_ICAR_CREATED} ASC",
-            // closes the multi-line argument list started above
             )
-            // declares read-only property `out`, initialised with the result of calling `mutableListOf(…)`
             val out = mutableListOf<CarRentalEntity>()
-            // opens a block after `cursor.use`
             cursor.use {
-                // `while` loop: repeats the block below as long as `it.moveToNext()` is true
                 while (it.moveToNext()) {
-                    // declares read-only property `nameIdx`, initialised with the result of calling `it.getColumnIndex(…)`
                     val nameIdx = it.getColumnIndex(WaypointDbHelper.COL_ICAR_DOC_NAME)
-                    // adds to `out` the value `CarRentalEntity(`
                     out += CarRentalEntity(
-                        // continues the statement started above: `id = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper…`
                         id          = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_ID)),
-                        // continues the statement started above: `tripId = tripId,`
                         tripId      = tripId,
-                        // continues the statement started above: `fromDate = LocalDate.parse(it.getString(it.getColumnIndexOr…`
                         fromDate    = LocalDate.parse(it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_FROM_DATE))),
-                        // continues the statement started above: `toDate = LocalDate.parse(it.getString(it.getColumnIndexOrTh…`
                         toDate      = LocalDate.parse(it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_TO_DATE))),
-                        // continues the statement started above: `pdfUri = it.getString(it.getColumnIndexOrThrow(WaypointDbHe…`
                         pdfUri      = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_PDF_URI)),
-                        // continues the statement started above: `createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointD…`
                         createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointDbHelper.COL_ICAR_CREATED)),
-                        // continues the statement started above: `docName = if (nameIdx < 0 || it.isNull(nameIdx)) null else …`
                         docName     = if (nameIdx < 0 || it.isNull(nameIdx)) null else it.getString(nameIdx),
-                    // closes the multi-line argument list started above
                     )
-                // closes the while loop
                 }
-            // closes the block
             }
-            // expression: `out`
             out
-        // closes the block
         }
 
-    // declares suspend function `deleteCarRental` taking 1 parameter (`carRentalId`); its body is the expression ``
     suspend fun deleteCarRental(carRentalId: String) =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // calls `delete` on `db.writableDatabase` with an argument list that continues on the following lines
             db.writableDatabase.delete(
-                // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_CAR,`
                 WaypointDbHelper.TABLE_ITIN_CAR,
-                // continues the statement started above: `"${WaypointDbHelper.COL_ICAR_ID} = ?",`
                 "${WaypointDbHelper.COL_ICAR_ID} = ?",
-                // continues the statement started above: `arrayOf(carRentalId),`
                 arrayOf(carRentalId),
-            // closes the multi-line argument list started above
             )
-        // closes the block
+            outbox.enqueue(OutboxEntityType.CAR, carRentalId, OutboxOperation.DELETE, null)
         }
 
 
-    // expression: `suspend fun insertPlace(`
     suspend fun insertPlace(
-        // continues the statement started above: `dayId: String,`
         dayId: String,
-        // continues the statement started above: `placeName: String,`
         placeName: String,
-        // continues the statement started above: `category: String,`
         category: String,
-        // continues the statement started above: `lat: Double? = null,`
         lat: Double? = null,
-        // continues the statement started above: `lng: Double? = null,`
         lng: Double? = null,
-        // continues the statement started above: `note: String? = null,`
         note: String? = null,
-        // continues the statement started above: `photoUrl: String? = null,`
         photoUrl: String? = null,
-    // continues the statement started above: `): String = withContext(Dispatchers.IO) {`
     ): String = withContext(Dispatchers.IO) {
-        // declares read-only property `id`, initialised with the result of calling `UUID.randomUUID(…)`
         val id = UUID.randomUUID().toString()
-        // declares read-only property `cv`, initialised with the result of calling `ContentValues(…)` and opens a lambda / block
         val cv = ContentValues().apply {
-            // calls `put` with arguments `(WaypointDbHelper.COL_IPLACE_ID, id)`
             put(WaypointDbHelper.COL_IPLACE_ID,       id)
-            // calls `put` with arguments `(WaypointDbHelper.COL_IPLACE_DAY_ID, dayId)`
             put(WaypointDbHelper.COL_IPLACE_DAY_ID,   dayId)
-            // calls `put` with arguments `(WaypointDbHelper.COL_IPLACE_NAME, placeName)`
             put(WaypointDbHelper.COL_IPLACE_NAME,     placeName)
-            // calls `put` with arguments `(WaypointDbHelper.COL_IPLACE_CATEGORY, catego…)`
             put(WaypointDbHelper.COL_IPLACE_CATEGORY, category)
-            // `if` statement: executes `put(WaypointDbHelper.COL_IPLACE_LAT, lat)` when `lat != null` is true
             if (lat != null) put(WaypointDbHelper.COL_IPLACE_LAT, lat)
-            // `if` statement: executes `put(WaypointDbHelper.COL_IPLACE_LNG, lng)` when `lng != null` is true
             if (lng != null) put(WaypointDbHelper.COL_IPLACE_LNG, lng)
-            // `if` statement: executes `put(WaypointDbHelper.COL_IPLACE_NOTE, note)` when `note != null` is true
             if (note != null) put(WaypointDbHelper.COL_IPLACE_NOTE, note)
-            // `if` statement: executes `put(WaypointDbHelper.COL_IPLACE_PHOTO_URL, p…` when `photoUrl != null` is true
             if (photoUrl != null) put(WaypointDbHelper.COL_IPLACE_PHOTO_URL, photoUrl)
-            // calls `put` with arguments `(WaypointDbHelper.COL_IPLACE_CREATED, System.…)`
             put(WaypointDbHelper.COL_IPLACE_CREATED, System.currentTimeMillis())
-        // closes the lambda assigned to `cv`
         }
-        // calls `insert` on `db.writableDatabase` with arguments `(WaypointDbHelper.TABLE_ITIN_PLACES, null, cv)`
         db.writableDatabase.insert(WaypointDbHelper.TABLE_ITIN_PLACES, null, cv)
-        // expression: `id`
+
+        val payload = JSONObject().apply {
+            put("id", id)
+            put("dayId", dayId)
+            put("name", placeName)
+            put("category", category)
+            if (lat != null) put("lat", lat)
+            if (lng != null) put("lng", lng)
+            if (note != null) put("note", note)
+            if (photoUrl != null) put("photoUrl", photoUrl)
+        }.toString()
+        outbox.enqueue(OutboxEntityType.PLACE, id, OutboxOperation.CREATE, payload)
+
         id
-    // closes the block
     }
 
-    // declares suspend function `getPlacesForDay` taking 1 parameter (`dayId`), returning `List<PlaceEntity>`; its body is the expression ``
     suspend fun getPlacesForDay(dayId: String): List<PlaceEntity> =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // declares read-only property `cursor`, initialised with the result of calling `db.readableDatabase.query(…)`
             val cursor = db.readableDatabase.query(
-                // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_PLACES,`
                 WaypointDbHelper.TABLE_ITIN_PLACES,
-                // continues the statement started above: `null,`
                 null,
-                // continues the statement started above: `"${WaypointDbHelper.COL_IPLACE_DAY_ID} = ?",`
                 "${WaypointDbHelper.COL_IPLACE_DAY_ID} = ?",
-                // continues the statement started above: `arrayOf(dayId),`
                 arrayOf(dayId),
-                // continues the statement started above: `null, null,`
                 null, null,
-                // continues the statement started above: `"${WaypointDbHelper.COL_IPLACE_CREATED} ASC",`
                 "${WaypointDbHelper.COL_IPLACE_CREATED} ASC",
-            // closes the multi-line argument list started above
             )
-            // declares read-only property `result`, initialised with the result of calling `mutableListOf(…)`
             val result = mutableListOf<PlaceEntity>()
-            // opens a block after `cursor.use`
             cursor.use {
-                // `while` loop: repeats the block below as long as `it.moveToNext()` is true
                 while (it.moveToNext()) {
-                    // declares read-only property `latIdx`, initialised with the result of calling `it.getColumnIndex(…)`
                     val latIdx   = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_LAT)
-                    // declares read-only property `lngIdx`, initialised with the result of calling `it.getColumnIndex(…)`
                     val lngIdx   = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_LNG)
-                    // declares read-only property `photoIdx`, initialised with the result of calling `it.getColumnIndex(…)`
                     val photoIdx = it.getColumnIndex(WaypointDbHelper.COL_IPLACE_PHOTO_URL)
-                    // calls `add` on `result` with an argument list that continues on the following lines
                     result.add(
-                        // continues the statement started above: `PlaceEntity(`
                         PlaceEntity(
-                            // continues the statement started above: `id = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper…`
                             id          = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_ID)),
-                            // continues the statement started above: `dayId = dayId,`
                             dayId       = dayId,
-                            // continues the statement started above: `name = it.getString(it.getColumnIndexOrThrow(WaypointDbHelp…`
                             name        = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_NAME)),
-                            // continues the statement started above: `category = it.getString(it.getColumnIndexOrThrow(WaypointDb…`
                             category    = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_CATEGORY)),
-                            // continues the statement started above: `lat = if (latIdx >= 0 && !it.isNull(latIdx)) it.getDouble(l…`
                             lat         = if (latIdx >= 0 && !it.isNull(latIdx)) it.getDouble(latIdx) else null,
-                            // continues the statement started above: `lng = if (lngIdx >= 0 && !it.isNull(lngIdx)) it.getDouble(l…`
                             lng         = if (lngIdx >= 0 && !it.isNull(lngIdx)) it.getDouble(lngIdx) else null,
-                            // continues the statement started above: `note = it.getString(it.getColumnIndexOrThrow(WaypointDbHelp…`
                             note        = it.getString(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_NOTE)),
-                            // continues the statement started above: `photoUrl = if (photoIdx >= 0 && !it.isNull(photoIdx)) it.ge…`
                             photoUrl    = if (photoIdx >= 0 && !it.isNull(photoIdx)) it.getString(photoIdx) else null,
-                            // continues the statement started above: `createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointD…`
                             createdAtMs = it.getLong(it.getColumnIndexOrThrow(WaypointDbHelper.COL_IPLACE_CREATED)),
-                        // closes the multi-line argument list started above
                         )
-                    // closes the multi-line argument list started above
                     )
-                // closes the while loop
                 }
-            // closes the block
             }
-            // expression: `result`
             result
-        // closes the block
         }
 
-    // declares suspend function `deletePlace` taking 1 parameter (`placeId`); its body is the expression ``
     suspend fun deletePlace(placeId: String) =
-        // continues the statement started above: `withContext(Dispatchers.IO) {`
         withContext(Dispatchers.IO) {
-            // calls `delete` on `db.writableDatabase` with an argument list that continues on the following lines
             db.writableDatabase.delete(
-                // continues the statement started above: `WaypointDbHelper.TABLE_ITIN_PLACES,`
                 WaypointDbHelper.TABLE_ITIN_PLACES,
-                // continues the statement started above: `"${WaypointDbHelper.COL_IPLACE_ID} = ?",`
                 "${WaypointDbHelper.COL_IPLACE_ID} = ?",
-                // continues the statement started above: `arrayOf(placeId),`
                 arrayOf(placeId),
-            // closes the multi-line argument list started above
             )
-        // closes the block
+            outbox.enqueue(OutboxEntityType.PLACE, placeId, OutboxOperation.DELETE, null)
         }
-// closes the class `ItineraryRepository`
+
+    /** Changes which nights a lodging booking covers. Saved locally first, then synced via the outbox. */
+    suspend fun updateLodgingDates(lodgingId: String, fromDate: LocalDate, toDate: LocalDate) =
+        updateDateRange(
+            table = WaypointDbHelper.TABLE_ITIN_LODGING,
+            idColumn = WaypointDbHelper.COL_ILODGE_ID,
+            fromColumn = WaypointDbHelper.COL_ILODGE_FROM_DATE,
+            toColumn = WaypointDbHelper.COL_ILODGE_TO_DATE,
+            updatedColumn = WaypointDbHelper.COL_ILODGE_UPDATED,
+            type = OutboxEntityType.LODGING,
+            id = lodgingId,
+            fromDate = fromDate,
+            toDate = toDate,
+        )
+
+    /** Changes which days a car rental covers. Saved locally first, then synced via the outbox. */
+    suspend fun updateCarRentalDates(carRentalId: String, fromDate: LocalDate, toDate: LocalDate) =
+        updateDateRange(
+            table = WaypointDbHelper.TABLE_ITIN_CAR,
+            idColumn = WaypointDbHelper.COL_ICAR_ID,
+            fromColumn = WaypointDbHelper.COL_ICAR_FROM_DATE,
+            toColumn = WaypointDbHelper.COL_ICAR_TO_DATE,
+            updatedColumn = WaypointDbHelper.COL_ICAR_UPDATED,
+            type = OutboxEntityType.CAR,
+            id = carRentalId,
+            fromDate = fromDate,
+            toDate = toDate,
+        )
+
+    private suspend fun updateDateRange(
+        table: String,
+        idColumn: String,
+        fromColumn: String,
+        toColumn: String,
+        updatedColumn: String,
+        type: OutboxEntityType,
+        id: String,
+        fromDate: LocalDate,
+        toDate: LocalDate,
+    ) = withContext(Dispatchers.IO) {
+        require(!toDate.isBefore(fromDate)) { "toDate must not be before fromDate" }
+        val cv = ContentValues().apply {
+            put(fromColumn, fromDate.toString())
+            put(toColumn, toDate.toString())
+            put(updatedColumn, System.currentTimeMillis())
+        }
+        db.writableDatabase.update(table, cv, "$idColumn = ?", arrayOf(id))
+        val payload = JSONObject().apply {
+            put("fromDate", fromDate.toString())
+            put("toDate", toDate.toString())
+        }.toString()
+        outbox.enqueue(type, id, OutboxOperation.UPDATE, payload)
+        Log.d("ItineraryRepository", "Updated $type $id to $fromDate..$toDate")
+    }
+
+    /** Sets or clears a place's note. A blank note is stored as no note. */
+    suspend fun updatePlaceNote(placeId: String, note: String?) =
+        withContext(Dispatchers.IO) {
+            val cv = ContentValues().apply {
+                if (note != null) put(WaypointDbHelper.COL_IPLACE_NOTE, note) else putNull(WaypointDbHelper.COL_IPLACE_NOTE)
+                put(WaypointDbHelper.COL_IPLACE_UPDATED, System.currentTimeMillis())
+            }
+            db.writableDatabase.update(
+                WaypointDbHelper.TABLE_ITIN_PLACES,
+                cv,
+                "${WaypointDbHelper.COL_IPLACE_ID} = ?",
+                arrayOf(placeId),
+            )
+            val payload = JSONObject().apply { put("note", note ?: JSONObject.NULL) }.toString()
+            outbox.enqueue(OutboxEntityType.PLACE, placeId, OutboxOperation.UPDATE, payload)
+        }
+
+
+    // Pulls this trip's itinerary from the cloud and merges it into local
+    // SQLite. "Last write wins, keeping original timestamps": an entity
+    // with an unsent local change (still in the outbox) is left alone -
+    // the cloud doesn't know about that change yet, so it can't be the
+    // more recent write. Everything else is brought in line with the
+    // cloud, including removing local rows the cloud no longer has (the
+    // API has no per-field updatedAt to compare against, and deletes are
+    // hard deletes server-side, so "missing from the cloud response" is
+    // the only signal available that another device deleted it).
+    //
+    // Known limitation: if a day is removed here while a flight/place
+    // under it has its own unsent pending change, SQLite's ON DELETE
+    // CASCADE still removes that child locally. Its outbox entry is
+    // untouched and gets attempted later by SyncWorker, which fails
+    // cleanly (404, treated as permanent) rather than looping - a rare
+    // concurrent-edit case, not handled more precisely than that.
+    suspend fun pullAndMergeForTrip(idToken: String, tripId: String) = withContext(Dispatchers.IO) {
+        val cloudDays = WaypointApiRepository.getDaysForTrip(idToken, tripId) ?: return@withContext
+        val cloudLodging = WaypointApiRepository.getLodgingForTrip(idToken, tripId) ?: emptyList()
+        val cloudCars = WaypointApiRepository.getCarsForTrip(idToken, tripId) ?: emptyList()
+
+        mergeDays(tripId, cloudDays)
+        mergeLodging(tripId, cloudLodging)
+        mergeCars(tripId, cloudCars)
+
+        for (day in cloudDays) {
+            val cloudFlights = WaypointApiRepository.getFlightsForDay(idToken, day.id) ?: emptyList()
+            val cloudPlaces = WaypointApiRepository.getPlacesForDay(idToken, day.id) ?: emptyList()
+            mergeFlights(day.id, cloudFlights)
+            mergePlaces(day.id, cloudPlaces)
+        }
+    }
+
+    private suspend fun mergeDays(tripId: String, cloudDays: List<WaypointApiRepository.DayPayload>) {
+        val pending = outbox.pendingEntityIds(OutboxEntityType.DAY)
+        val wdb = db.writableDatabase
+        val cloudIds = cloudDays.map { it.id }.toSet()
+
+        for (d in cloudDays) {
+            if (d.id in pending) continue
+            val cv = ContentValues().apply {
+                put(WaypointDbHelper.COL_IDAY_TRIP_ID, d.tripId)
+                put(WaypointDbHelper.COL_IDAY_DATE, d.date)
+            }
+            // Try UPDATE first, INSERT only if no row matched - never
+            // INSERT OR REPLACE here, since itinerary_days is the parent
+            // side of an ON DELETE CASCADE FK (flights/places reference
+            // it); REPLACE deletes-then-reinserts on conflict, which would
+            // cascade-wipe every flight/place under this day as a side
+            // effect of what's meant to be a plain field update.
+            val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_DAYS, cv, "${WaypointDbHelper.COL_IDAY_ID} = ?", arrayOf(d.id))
+            if (updated == 0) {
+                cv.put(WaypointDbHelper.COL_IDAY_ID, d.id)
+                wdb.insert(WaypointDbHelper.TABLE_ITIN_DAYS, null, cv)
+            }
+        }
+
+        val localIds = mutableListOf<String>()
+        wdb.query(
+            WaypointDbHelper.TABLE_ITIN_DAYS, arrayOf(WaypointDbHelper.COL_IDAY_ID),
+            "${WaypointDbHelper.COL_IDAY_TRIP_ID} = ?", arrayOf(tripId), null, null, null,
+        ).use { c -> while (c.moveToNext()) localIds += c.getString(0) }
+        for (id in localIds) {
+            if (id !in cloudIds && id !in pending) {
+                wdb.delete(WaypointDbHelper.TABLE_ITIN_DAYS, "${WaypointDbHelper.COL_IDAY_ID} = ?", arrayOf(id))
+            }
+        }
+    }
+
+    private suspend fun mergeFlights(dayId: String, cloudFlights: List<WaypointApiRepository.FlightPayload>) {
+        val pending = outbox.pendingEntityIds(OutboxEntityType.FLIGHT)
+        val wdb = db.writableDatabase
+        val cloudIds = cloudFlights.map { it.id }.toSet()
+
+        for (f in cloudFlights) {
+            if (f.id in pending) continue
+            // pdfUri is deliberately absent here - it's device-local and
+            // was never in the cloud payload to begin with (see
+            // insertFlight), so this never overwrites whatever PDF this
+            // device already has attached to the flight.
+            val cv = ContentValues().apply {
+                put(WaypointDbHelper.COL_IFLIGHT_DAY_ID, f.dayId)
+                put(WaypointDbHelper.COL_IFLIGHT_FLIGHT_NUMBER, f.flightNumber)
+                put(WaypointDbHelper.COL_IFLIGHT_DEPARTURE, f.departureTime)
+                put(WaypointDbHelper.COL_IFLIGHT_DOC_NAME, f.docName)
+                put(WaypointDbHelper.COL_IFLIGHT_CREATED, f.createdAtMs)
+            }
+            val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_FLIGHTS, cv, "${WaypointDbHelper.COL_IFLIGHT_ID} = ?", arrayOf(f.id))
+            if (updated == 0) {
+                // pdf_uri is NOT NULL with no column default - only the
+                // INSERT path needs an explicit value, since this device
+                // has never had one for an id it's only just learned about.
+                cv.put(WaypointDbHelper.COL_IFLIGHT_ID, f.id)
+                cv.put(WaypointDbHelper.COL_IFLIGHT_PDF_URI, "")
+                wdb.insert(WaypointDbHelper.TABLE_ITIN_FLIGHTS, null, cv)
+            }
+        }
+
+        val localIds = mutableListOf<String>()
+        wdb.query(
+            WaypointDbHelper.TABLE_ITIN_FLIGHTS, arrayOf(WaypointDbHelper.COL_IFLIGHT_ID),
+            "${WaypointDbHelper.COL_IFLIGHT_DAY_ID} = ?", arrayOf(dayId), null, null, null,
+        ).use { c -> while (c.moveToNext()) localIds += c.getString(0) }
+        for (id in localIds) {
+            if (id !in cloudIds && id !in pending) {
+                wdb.delete(WaypointDbHelper.TABLE_ITIN_FLIGHTS, "${WaypointDbHelper.COL_IFLIGHT_ID} = ?", arrayOf(id))
+            }
+        }
+    }
+
+    private suspend fun mergeLodging(tripId: String, cloudLodging: List<WaypointApiRepository.LodgingPayload>) {
+        val pending = outbox.pendingEntityIds(OutboxEntityType.LODGING)
+        val wdb = db.writableDatabase
+        val cloudIds = cloudLodging.map { it.id }.toSet()
+
+        for (l in cloudLodging) {
+            if (l.id in pending) continue
+            // pdfUri deliberately absent - see mergeFlights.
+            val cv = ContentValues().apply {
+                put(WaypointDbHelper.COL_ILODGE_TRIP_ID, l.tripId)
+                put(WaypointDbHelper.COL_ILODGE_FROM_DATE, l.fromDate)
+                put(WaypointDbHelper.COL_ILODGE_TO_DATE, l.toDate)
+                put(WaypointDbHelper.COL_ILODGE_DOC_NAME, l.docName)
+                put(WaypointDbHelper.COL_ILODGE_CREATED, l.createdAtMs)
+            }
+            val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_LODGING, cv, "${WaypointDbHelper.COL_ILODGE_ID} = ?", arrayOf(l.id))
+            if (updated == 0) {
+                cv.put(WaypointDbHelper.COL_ILODGE_ID, l.id)
+                cv.put(WaypointDbHelper.COL_ILODGE_PDF_URI, "")
+                wdb.insert(WaypointDbHelper.TABLE_ITIN_LODGING, null, cv)
+            }
+        }
+
+        val localIds = mutableListOf<String>()
+        wdb.query(
+            WaypointDbHelper.TABLE_ITIN_LODGING, arrayOf(WaypointDbHelper.COL_ILODGE_ID),
+            "${WaypointDbHelper.COL_ILODGE_TRIP_ID} = ?", arrayOf(tripId), null, null, null,
+        ).use { c -> while (c.moveToNext()) localIds += c.getString(0) }
+        for (id in localIds) {
+            if (id !in cloudIds && id !in pending) {
+                wdb.delete(WaypointDbHelper.TABLE_ITIN_LODGING, "${WaypointDbHelper.COL_ILODGE_ID} = ?", arrayOf(id))
+            }
+        }
+    }
+
+    private suspend fun mergeCars(tripId: String, cloudCars: List<WaypointApiRepository.CarPayload>) {
+        val pending = outbox.pendingEntityIds(OutboxEntityType.CAR)
+        val wdb = db.writableDatabase
+        val cloudIds = cloudCars.map { it.id }.toSet()
+
+        for (c0 in cloudCars) {
+            if (c0.id in pending) continue
+            // pdfUri deliberately absent - see mergeFlights.
+            val cv = ContentValues().apply {
+                put(WaypointDbHelper.COL_ICAR_TRIP_ID, c0.tripId)
+                put(WaypointDbHelper.COL_ICAR_FROM_DATE, c0.fromDate)
+                put(WaypointDbHelper.COL_ICAR_TO_DATE, c0.toDate)
+                put(WaypointDbHelper.COL_ICAR_DOC_NAME, c0.docName)
+                put(WaypointDbHelper.COL_ICAR_CREATED, c0.createdAtMs)
+            }
+            val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_CAR, cv, "${WaypointDbHelper.COL_ICAR_ID} = ?", arrayOf(c0.id))
+            if (updated == 0) {
+                cv.put(WaypointDbHelper.COL_ICAR_ID, c0.id)
+                cv.put(WaypointDbHelper.COL_ICAR_PDF_URI, "")
+                wdb.insert(WaypointDbHelper.TABLE_ITIN_CAR, null, cv)
+            }
+        }
+
+        val localIds = mutableListOf<String>()
+        wdb.query(
+            WaypointDbHelper.TABLE_ITIN_CAR, arrayOf(WaypointDbHelper.COL_ICAR_ID),
+            "${WaypointDbHelper.COL_ICAR_TRIP_ID} = ?", arrayOf(tripId), null, null, null,
+        ).use { c -> while (c.moveToNext()) localIds += c.getString(0) }
+        for (id in localIds) {
+            if (id !in cloudIds && id !in pending) {
+                wdb.delete(WaypointDbHelper.TABLE_ITIN_CAR, "${WaypointDbHelper.COL_ICAR_ID} = ?", arrayOf(id))
+            }
+        }
+    }
+
+    private suspend fun mergePlaces(dayId: String, cloudPlaces: List<WaypointApiRepository.PlacePayload>) {
+        val pending = outbox.pendingEntityIds(OutboxEntityType.PLACE)
+        val wdb = db.writableDatabase
+        val cloudIds = cloudPlaces.map { it.id }.toSet()
+
+        for (p in cloudPlaces) {
+            if (p.id in pending) continue
+            val cv = ContentValues().apply {
+                put(WaypointDbHelper.COL_IPLACE_DAY_ID, p.dayId)
+                put(WaypointDbHelper.COL_IPLACE_NAME, p.name)
+                // place_category is NOT NULL locally but nullable from the
+                // API (places.js makes it optional on create) - default to
+                // empty rather than violate the constraint.
+                put(WaypointDbHelper.COL_IPLACE_CATEGORY, p.category ?: "")
+                put(WaypointDbHelper.COL_IPLACE_LAT, p.lat)
+                put(WaypointDbHelper.COL_IPLACE_LNG, p.lng)
+                put(WaypointDbHelper.COL_IPLACE_NOTE, p.note)
+                put(WaypointDbHelper.COL_IPLACE_PHOTO_URL, p.photoUrl)
+                put(WaypointDbHelper.COL_IPLACE_CREATED, p.createdAtMs)
+            }
+            val updated = wdb.update(WaypointDbHelper.TABLE_ITIN_PLACES, cv, "${WaypointDbHelper.COL_IPLACE_ID} = ?", arrayOf(p.id))
+            if (updated == 0) {
+                cv.put(WaypointDbHelper.COL_IPLACE_ID, p.id)
+                wdb.insert(WaypointDbHelper.TABLE_ITIN_PLACES, null, cv)
+            }
+        }
+
+        val localIds = mutableListOf<String>()
+        wdb.query(
+            WaypointDbHelper.TABLE_ITIN_PLACES, arrayOf(WaypointDbHelper.COL_IPLACE_ID),
+            "${WaypointDbHelper.COL_IPLACE_DAY_ID} = ?", arrayOf(dayId), null, null, null,
+        ).use { c -> while (c.moveToNext()) localIds += c.getString(0) }
+        for (id in localIds) {
+            if (id !in cloudIds && id !in pending) {
+                wdb.delete(WaypointDbHelper.TABLE_ITIN_PLACES, "${WaypointDbHelper.COL_IPLACE_ID} = ?", arrayOf(id))
+            }
+        }
+    }
 }

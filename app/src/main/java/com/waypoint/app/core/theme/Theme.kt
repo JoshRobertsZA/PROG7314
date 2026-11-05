@@ -1,49 +1,59 @@
-// declares that this file belongs to the package `com.waypoint.app.core.theme`
 package com.waypoint.app.core.theme
 
-// imports `androidx.compose.material3.MaterialTheme` for use in this file
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-// imports `androidx.compose.material3.lightColorScheme` for use in this file
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
-// imports `androidx.compose.runtime.Composable` for use in this file
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 
-// declares private read-only property `WaypointColorScheme`, initialised with the result of calling `lightColorScheme(…)`
-private val WaypointColorScheme = lightColorScheme(
-    // continues the statement started above: `primary = WaypointTerracotta,`
-    primary = WaypointTerracotta,
-    // continues the statement started above: `onPrimary = White,`
-    onPrimary = White,
-    // continues the statement started above: `background = WaypointCream,`
-    background = WaypointCream,
-    // continues the statement started above: `onBackground = WaypointTextPrimary,`
-    onBackground = WaypointTextPrimary,
-    // continues the statement started above: `surface = WaypointCard,`
-    surface = WaypointCard,
-    // continues the statement started above: `onSurface = WaypointTextPrimary,`
-    onSurface = WaypointTextPrimary,
-    // continues the statement started above: `surfaceVariant = WaypointCard,`
-    surfaceVariant = WaypointCard,
-    // continues the statement started above: `onSurfaceVariant = WaypointTextMuted,`
-    onSurfaceVariant = WaypointTextMuted,
-    // continues the statement started above: `outline = WaypointBorderSoft,`
-    outline = WaypointBorderSoft,
-// closes the multi-line argument list started above
-)
+private fun waypointColorScheme(dark: Boolean): ColorScheme =
+    if (dark) {
+        darkColorScheme(
+            primary = WaypointTerracotta,
+            onPrimary = White,
+            background = WaypointCream,
+            onBackground = WaypointTextPrimary,
+            surface = WaypointCard,
+            onSurface = WaypointTextPrimary,
+            surfaceVariant = WaypointCard,
+            onSurfaceVariant = WaypointTextMuted,
+            outline = WaypointBorderSoft,
+        )
+    } else {
+        lightColorScheme(
+            primary = WaypointTerracotta,
+            onPrimary = White,
+            background = WaypointCream,
+            onBackground = WaypointTextPrimary,
+            surface = WaypointCard,
+            onSurface = WaypointTextPrimary,
+            surfaceVariant = WaypointCard,
+            onSurfaceVariant = WaypointTextMuted,
+            outline = WaypointBorderSoft,
+        )
+    }
 
-// annotation `@Composable` applied to the declaration that follows
+/**
+ * Applies Waypoint's own colours, Rubik typography and shapes, in light or dark depending on Settings
+ * or the phone.
+ */
 @Composable
-// declares function `WaypointTheme` taking 1 parameter (`content`) and opens its body
-fun WaypointTheme(content: @Composable () -> Unit) {
-    // calls `MaterialTheme` with an argument list that continues on the following lines
+fun WaypointTheme(darkTheme: Boolean = ThemePreferences.override ?: isSystemInDarkTheme(), content: @Composable () -> Unit) {
+    if (WaypointPalette.dark != darkTheme) WaypointPalette.dark = darkTheme
+    val colorScheme = remember(darkTheme) { waypointColorScheme(darkTheme) }
     MaterialTheme(
-        // continues the statement started above: `colorScheme = WaypointColorScheme,`
-        colorScheme = WaypointColorScheme,
-        // continues the statement started above: `typography = WaypointTypography,`
+        colorScheme = colorScheme,
         typography = WaypointTypography,
-        // continues the statement started above: `content = content,`
-        content = content,
-    // closes the multi-line argument list started above
-    )
-// closes the function `WaypointTheme`
+    // opens the content block of `MaterialTheme`
+    ) {
+        // provides the default text colour with the same structure in both modes, so switching theme redraws the screens instead of rebuilding them: cream in dark mode, unchanged in light mode
+        CompositionLocalProvider(
+            LocalContentColor provides if (darkTheme) WaypointTextPrimary else LocalContentColor.current,
+            content = content,
+        )
+    }
 }

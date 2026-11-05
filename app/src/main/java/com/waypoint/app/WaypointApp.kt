@@ -1,36 +1,41 @@
-// declares that this file belongs to the package `com.waypoint.app`
 package com.waypoint.app
 
-// imports `android.app.Application` for use in this file
+import android.util.Log
 import android.app.Application
-// imports `coil.ImageLoader` for use in this file
 import coil.ImageLoader
-// imports `coil.ImageLoaderFactory` for use in this file
 import coil.ImageLoaderFactory
-// imports `com.waypoint.app.core.network.HttpClient` for use in this file
 import com.waypoint.app.core.network.HttpClient
-// imports `com.waypoint.app.core.notifications.NotificationChannels` for use in this file
+import com.waypoint.app.core.network.UsageGuardian
+import com.waypoint.app.core.network.WaypointApiRepository
 import com.waypoint.app.core.notifications.NotificationChannels
-// imports `com.waypoint.app.core.notifications.TripReminderScheduler` for use in this file
 import com.waypoint.app.core.notifications.TripReminderScheduler
+import com.waypoint.app.core.secrets.RemoteSecrets
+import com.waypoint.app.core.settings.AppSettings
+import com.waypoint.app.core.settings.SettingsSync
+import com.waypoint.app.core.sync.SyncScheduler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
-// declares class `WaypointApp`, inheriting from `Application(), ImageLoaderFactory` and opens its body
+/** Process-wide setup that must run before any screen is shown. */
 class WaypointApp : Application(), ImageLoaderFactory {
 
-    // declares override function `newImageLoader` taking no parameters, returning `ImageLoader`; its body is the expression ``
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     override fun newImageLoader(): ImageLoader =
-        // continues the statement started above: `ImageLoader.Builder(this).okHttpClient { HttpClient.instanc…`
         ImageLoader.Builder(this).okHttpClient { HttpClient.instance }.build()
 
-    // declares override function `onCreate` taking no parameters and opens its body
     override fun onCreate() {
-        // calls `onCreate` on `super` with arguments `()`
         super.onCreate()
-        // calls `ensureCreated` on `NotificationChannels` with arguments `(this)`
+        Log.i("WaypointApp", "Process started: version ${BuildConfig.VERSION_NAME}, API ${android.os.Build.VERSION.SDK_INT}")
+        AppSettings.init(this)
+        SettingsSync.init()
+        RemoteSecrets.init(this)
+        UsageGuardian.init(this)
         NotificationChannels.ensureCreated(this)
-        // calls `ensureScheduled` on `TripReminderScheduler` with arguments `(this)`
         TripReminderScheduler.ensureScheduled(this)
-    // closes the function `onCreate`
+        SyncScheduler.ensurePeriodic(this)
+        appScope.launch { WaypointApiRepository.warmUp() }
     }
-// closes the class `WaypointApp`
 }
