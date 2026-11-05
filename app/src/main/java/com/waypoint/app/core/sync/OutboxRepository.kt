@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.waypoint.app.core.db.WaypointDbHelper
+import com.waypoint.app.core.notifications.TripReminderScheduler
 import com.waypoint.app.core.db.WaypointDbHelper.Companion.COL_OUTBOX_ATTEMPTS
 import com.waypoint.app.core.db.WaypointDbHelper.Companion.COL_OUTBOX_CREATED
 import com.waypoint.app.core.db.WaypointDbHelper.Companion.COL_OUTBOX_ENTITY_ID
@@ -165,6 +166,8 @@ class OutboxRepository(context: Context) {
         notifyChanged()
         // Upload as soon as there is a connection; offline, WorkManager holds it until there is.
         SyncScheduler.enqueue(appContext)
+        // Every saved trip or itinerary change can make a reminder due (e.g. a trip starting tomorrow).
+        TripReminderScheduler.checkSoon(appContext)
     }
 
     /** Count of pending entries, for a UI badge - avoids hydrating/sorting every row just to show a number. */
