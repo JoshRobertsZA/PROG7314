@@ -62,4 +62,9 @@
 
     <!-- Notifications screen -->
     <color name="waypoint_notif_row_border">#E8C9A0</color>
+    <!-- Launcher icon: WaypointCream and WaypointTerracotta from the Compose theme -->
+    <color name="launcher_background">#F2E9D3</color>
+    <color name="launcher_pin">#C1673D</color>
+    <!-- Default profile avatar background (warm sand) -->
+    <color name="avatar_background">#E8C9A0</color>
 </resources>
