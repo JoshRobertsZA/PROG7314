@@ -24,6 +24,7 @@ specification is at
 ## Contents
 
 - [About](#about)
+- [Release Notes](#release-notes)
 - [Features](#features)
 - [Architecture](#architecture)
 - [APIs Used](#apis-used)
@@ -47,19 +48,28 @@ Waypoint lets travellers plan and manage trips from a single app. Users can buil
 
 ---
 
+## Release Notes
+
+See [RELEASE_NOTES.md](RELEASE_NOTES.md) for everything added since the Part 2 prototype, including the sync, push, guardian and dark-theme work below, grouped by area.
+
+---
+
 ## Features
 
-- **Google Sign-In**: Biometric lock for returning sessions
+- **Google and email sign-in**: Plus biometric lock (with device-credential fallback) for returning sessions
 - **Trip management**: Create, edit, and delete trips with date ranges and destinations
-- **Day-by-day itinerary builder**: Flight tracking (AirLabs) per leg
-- **Explore nearby**: Points of interest powered by LocationIQ
+- **Day-by-day itinerary builder**: Flight tracking (AirLabs) per leg, date-aware so the right day's status is shown
+- **Explore nearby**: Points of interest powered by LocationIQ, with a per-user local cache
 - **Live weather**: Displayed for any destination via OpenWeatherMap
-- **Currency converter**: Using real-time rates from ExchangeRate-API
+- **Currency converter**: Any base/target pair, using real-time rates from ExchangeRate-API
 - **Wikipedia summaries**: Used for destinations and places
-- **Push notifications**: Via Firebase Cloud Messaging with WorkManager scheduling
-- **Cloud sync**: Offline-first with local SQLite as source of truth; trips sync to cloud via REST API on every create, update, and delete, and are pulled back on login to restore data on new or wiped devices
-- **Multi-language support**: English (default), isiZulu, isiXhosa
-- **GitHub Actions CI**: Automated lint, unit tests, and APK build on every push
+- **Push notifications**: Server-sent via Firebase Cloud Messaging on trip creation, with WorkManager-scheduled reminders
+- **Cloud sync**: Offline-first with local SQLite as source of truth and an outbox queue for pending changes; trips and itinerary sync to the cloud via REST API and are pulled back on login to restore data on new or wiped devices
+- **API usage guardian**: Tracks daily/monthly third-party API usage and falls back to cached data before a free-tier limit is hit
+- **Profile management**: Edit display name, delete account (cascades through cloud data and re-authenticates first)
+- **Dark theme**: Follows the system setting
+- **Multi-language support**: English (default), isiZulu, isiXhosa, with an automated test enforcing translation parity
+- **GitHub Actions CI**: Automated lint, unit tests, API tests, and APK build on every push; signed release bundles published automatically on `main`
 
 ---
 
@@ -102,12 +112,13 @@ Third-party API keys are fetched at runtime from the Waypoint REST API (`GET /co
 
 The app follows an offline-first pattern:
 
-1. Every trip write (create, update, delete) hits SQLite immediately so the UI never waits on the network
-2. After the SQLite write succeeds, the app fires a background coroutine to sync the change to the Waypoint REST API
-3. On login, the app pulls all cloud trips and merges them into SQLite using `CONFLICT_IGNORE` so local data is never overwritten
-4. The REST API authenticates every request using the user's Firebase ID token
+1. Every trip and itinerary write (create, update, delete) hits SQLite immediately so the UI never waits on the network
+2. The write is also enqueued in a local `sync_outbox` table; repeated edits to the same record are coalesced into one pending operation instead of replaying every intermediate state
+3. A `SyncWorker`, constrained to run only with network access, drains the outbox in the background and retries failed entries with backoff — including on `401`, `408` and `429` responses, instead of dropping them
+4. On login, reconnect, and pull-to-refresh, the app pulls cloud trips and itinerary and merges them into SQLite with last-write-wins, so local edits are never silently overwritten
+5. The REST API authenticates every request using the user's Firebase ID token
 
-This means the app works fully offline and data is restored automatically when signing in on a new or wiped device.
+This means the app works fully offline, queued changes are never lost, and data is restored automatically when signing in on a new or wiped device.
 
 ---
 
@@ -118,25 +129,34 @@ deployment for the REST API.
 
 ### Android CI - GitHub Actions
 
-Every push and pull request to `main` or `dev` triggers three parallel jobs on
-`ubuntu-latest` with JDK 17 and a cached Gradle setup:
+Every push and pull request to `main` or `dev` triggers four parallel jobs on
+`ubuntu-latest` with JDK 17 and a cached Gradle setup, plus an unsigned release assemble
+job that catches R8/minification problems before a real signed build:
 
 1. **Lint** - runs `./gradlew lintDebug` and uploads the HTML report as an artifact
 2. **Unit Tests** - runs `./gradlew testDebugUnitTest`, uploads the XML results, and
    publishes a pass/fail summary as a PR check
 3. **Build** - runs `./gradlew assembleDebug` and uploads the debug APK as an artifact
+4. **API Tests** - runs `npm test` (Jest + Supertest) in [`api/`](api)
 
 A `concurrency` group cancels superseded runs so only the newest commit on a branch is
 tested. A Discord webhook posts a per-job status update and a final summary, so the team
 is notified without checking GitHub. The workflow can also be triggered manually via
-`workflow_dispatch`.
+`workflow_dispatch`. A separate [`release.yml`](.github/workflows/release.yml) workflow
+builds a signed release bundle and publishes a GitHub Release on every push to `main` -
+see [Play Store Preparation](#play-store-preparation).
 
 CI configuration: [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml)
 
-**Unit tests:** 22 JUnit tests covering local persistence models, cache staleness rules,
-and pure business logic. Run locally with `./gradlew testDebugUnitTest`; results land in
-`app/build/reports/tests/testDebugUnitTest/`, the same report CI uploads as the
-`unit-test-report` artifact.
+**Unit tests:** 194 JUnit tests across 22 files covering local persistence models, cache
+staleness and serialisation, validation rules, biometric error mapping, sync failure
+handling, and other pure business logic. Run locally with `./gradlew testDebugUnitTest`;
+results land in `app/build/reports/tests/testDebugUnitTest/`, the same report CI uploads
+as the `unit-test-report` artifact.
+
+**API tests:** 52 Jest + Supertest tests across 7 files covering auth middleware, trips,
+itinerary, account deletion, counters and push, using an in-memory Firestore mock so no
+real credentials are needed. Run locally with `npm test` from [`api/`](api).
 
 <details>
 <summary>Test class breakdown</summary>
@@ -144,11 +164,26 @@ and pure business logic. Run locally with `./gradlew testDebugUnitTest`; results
 | Test class | What it covers |
 |---|---|
 | [`TripEntityTest`](app/src/test/java/com/waypoint/app/TripEntityTest.kt) | Trip entity creation, chronological date sorting, nullable destination handling |
+| [`TripValidationTest`](app/src/test/java/com/waypoint/app/TripValidationTest.kt) | Trip name length, date order, and flight number normalisation/format rules |
+| [`TripMergeTest`](app/src/test/java/com/waypoint/app/TripMergeTest.kt) | Last-write-wins merge of cloud trips pulled during sync |
 | [`ItineraryEntitiesTest`](app/src/test/java/com/waypoint/app/ItineraryEntitiesTest.kt) | Itinerary day, flight, lodging/car rental, and place entity initialization |
+| [`OutboxCoalescingTest`](app/src/test/java/com/waypoint/app/OutboxCoalescingTest.kt) | Sync outbox coalescing rules and parent-before-child ordering |
+| [`SyncFailureRulesTest`](app/src/test/java/com/waypoint/app/SyncFailureRulesTest.kt) | Which sync failures are retried (401/408/429) vs dropped |
 | [`CacheModelsTest`](app/src/test/java/com/waypoint/app/CacheModelsTest.kt) | Weather, currency, and places cache staleness thresholds |
+| [`PlacesCacheOrderTest`](app/src/test/java/com/waypoint/app/PlacesCacheOrderTest.kt) | Local-first cache read order with shared-cache fallback |
+| [`PlacesCacheSerializerTest`](app/src/test/java/com/waypoint/app/PlacesCacheSerializerTest.kt) | Places cache JSON round-trip and malformed-input handling |
+| [`GitHubCacheRepositoryPathTest`](app/src/test/java/com/waypoint/app/GitHubCacheRepositoryPathTest.kt) | Shared cache key construction for weather and currency |
 | [`WeatherRepositoryTest`](app/src/test/java/com/waypoint/app/WeatherRepositoryTest.kt) | City-name-to-slug conversion for weather lookups |
+| [`CurrencyConversionTest`](app/src/test/java/com/waypoint/app/CurrencyConversionTest.kt) | Conversion and rounding across any currency pair |
+| [`AirLabsDateTest`](app/src/test/java/com/waypoint/app/AirLabsDateTest.kt) | Date-scoped flight schedule lookup and cache keys |
 | [`ExplorePlaceFilterTest`](app/src/test/java/com/waypoint/app/ExplorePlaceFilterTest.kt) | Category filtering (restaurants, parks, all) on Explore results |
+| [`EmailAuthValidatorTest`](app/src/test/java/com/waypoint/app/EmailAuthValidatorTest.kt) | Email/password sign-up and sign-in validation rules |
+| [`ProfileTest`](app/src/test/java/com/waypoint/app/ProfileTest.kt) | Display name validation and account-deletion reauthentication rules |
+| [`BiometricErrorsTest`](app/src/test/java/com/waypoint/app/BiometricErrorsTest.kt) | Biometric error-code to user-facing message mapping |
+| [`UsageGuardianTest`](app/src/test/java/com/waypoint/app/UsageGuardianTest.kt) | API usage thresholds and cache-fallback decisions |
+| [`AmountInputTest`](app/src/test/java/com/waypoint/app/AmountInputTest.kt) | Currency amount input parsing, including comma decimals |
 | [`AppLanguageTest`](app/src/test/java/com/waypoint/app/AppLanguageTest.kt) | Supported locale tags and display names |
+| [`TranslationParityTest`](app/src/test/java/com/waypoint/app/TranslationParityTest.kt) | Fails if an isiZulu or isiXhosa string key is missing or stale |
 | [`ExampleUnitTest`](app/src/test/java/com/waypoint/app/ExampleUnitTest.kt) | Default Android Studio template test |
 
 </details>
