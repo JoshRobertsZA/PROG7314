@@ -427,4 +427,12 @@
     <string name="language_sub_zulu">isiZulu (uMzantsi Afrika)</string>
     <string name="language_sub_xhosa">isiXhosa (uMzantsi Afrika)</string>
     <string name="trip_pending_sync_cd">Kulindwe ukungqamaniswa</string>
+    <string name="edit_itinerary_edit_dates_cd">Tshintsha imihla</string>
+    <string name="edit_itinerary_edit_note_cd">Hlela inqaku</string>
+    <string name="edit_itinerary_edit_lodging_title">Imihla yendawo yokuhlala</string>
+    <string name="edit_itinerary_edit_car_title">Imihla yokuqesha imoto</string>
+    <string name="edit_itinerary_from_label">Ukusuka</string>
+    <string name="edit_itinerary_to_label">Ukuya</string>
+    <string name="edit_itinerary_dates_invalid">Umhla wokugqibela awunakuba ngaphambi komhla wokuqala.</string>
+    <string name="edit_itinerary_note_label">Inqaku</string>
 </resources>

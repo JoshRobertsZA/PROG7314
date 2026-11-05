@@ -519,4 +519,13 @@
     <string name="language_sub_zulu">isiZulu (South Africa)</string>
     <string name="language_sub_xhosa">isiXhosa (South Africa)</string>
     <string name="trip_pending_sync_cd">Waiting to sync</string>
+    <string name="edit_itinerary_edit_dates_cd">Change dates</string>
+    <string name="edit_itinerary_edit_note_cd">Edit note</string>
+    <string name="edit_itinerary_edit_lodging_title">Lodging dates</string>
+    <string name="edit_itinerary_edit_car_title">Car rental dates</string>
+    <string name="edit_itinerary_from_label">From</string>
+    <string name="edit_itinerary_to_label">To</string>
+    <string name="edit_itinerary_dates_invalid">The end date can\'t be before the start date.</string>
+    <string name="edit_itinerary_note_label">Note</string>
+    <string name="edit_itinerary_note_counter" translatable="false">%1$d/%2$d</string>
 </resources>
