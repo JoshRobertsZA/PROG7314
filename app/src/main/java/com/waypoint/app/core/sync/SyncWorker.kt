@@ -7,33 +7,47 @@ import androidx.work.WorkerParameters
 import com.waypoint.app.core.auth.AuthRepository
 import com.waypoint.app.core.network.WaypointApiRepository
 import com.waypoint.app.core.notifications.PushTokenManager
+import com.waypoint.app.core.settings.AppSettings
+import com.waypoint.app.core.settings.SettingsSync
+import com.waypoint.app.features.edititinerary.data.ItineraryRepository
+import com.waypoint.app.features.newtrip.data.TripRepository
 
-// A 4xx means the server rejected the change and retrying will not help, except for an
-// expired token (401), a timeout (408) and rate limiting (429), which can succeed later.
+/** 4xx responses that retrying can never fix. 401/408/429 can succeed later. */
 internal fun isPermanentFailure(httpStatus: Int): Boolean =
     httpStatus in 400..499 && httpStatus != 401 && httpStatus != 408 && httpStatus != 429
 
-// Drains the local sync outbox: sends each pending entry to the API in the
-// order OutboxRepository.peekAll() returns (parents before children, then
-// oldest first), acking on success. WorkManager's own NetworkType.CONNECTED
-// constraint and exponential backoff (set up in SyncScheduler, not here -
-// this class only defines what a single run does) handle not running at
-// all without a network and retrying the whole worker later.
+/**
+ * Two-way sync. Uploads the outbox (parents before children), then pulls the
+ * cloud copy so changes made on another device arrive here. Conflicts are
+ * resolved by the most recent updatedAt (see TripRepository.pullAndMergeTrips).
+ */
 class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     private val outbox = OutboxRepository(applicationContext)
 
     override suspend fun doWork(): Result {
-        // Not signed in - nothing to sync, and nothing useful a retry would
-        // change, so this is success (not failure/retry), matching
-        // TripReminderWorker's same pattern for the same situation.
+        val user = AuthRepository.currentUser ?: return Result.success()
         val idToken = AuthRepository.getIdToken() ?: return Result.success()
 
-        val entries = outbox.peekAll()
-        if (entries.isEmpty()) return Result.success()
+        val pushedAll = pushOutbox(idToken)
+        if (!pushedAll) return Result.retry()
 
-        var anyRetryableFailure = false
-        for (entry in entries) {
+        return try {
+            pullCloudChanges(idToken, user.uid)
+            SettingsSync.pull(applicationContext, idToken)
+            AppSettings.recordSync(System.currentTimeMillis())
+            Log.i(TAG, "Sync complete for ${user.uid}")
+            Result.success()
+        } catch (e: Exception) {
+            Log.w(TAG, "Pull failed, will retry: ${e.message}")
+            Result.retry()
+        }
+    }
+
+    /** Returns false when at least one entry failed in a way worth retrying. */
+    private suspend fun pushOutbox(idToken: String): Boolean {
+        var allSent = true
+        for (entry in outbox.peekAll()) {
             val result = WaypointApiRepository.sendOutboxPayload(
                 idToken,
                 methodFor(entry.operation),
@@ -44,30 +58,25 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
             when {
                 result.successful -> outbox.ack(entry.id)
                 isPermanentFailure(result.httpStatus) -> {
-                    // A 4xx means the request itself is wrong (bad id,
-                    // validation failure, ownership conflict...) - retrying
-                    // the exact same payload will never succeed, so this
-                    // drops the entry rather than retrying it forever. Logged
-                    // clearly since this is effectively silent data loss for
-                    // that one change.
-                    Log.w(
-                        TAG,
-                        "Permanent failure (HTTP ${result.httpStatus}) for " +
-                            "${entry.entityType}/${entry.entityId}, dropping from outbox",
-                    )
+                    Log.w(TAG, "Permanent failure (HTTP ${result.httpStatus}) for ${entry.entityType}/${entry.entityId}, dropping from outbox")
                     outbox.ack(entry.id)
                 }
                 else -> {
-                    // Network failure (-1) or 5xx - both are plausibly
-                    // transient, so keep the entry and let this worker run
-                    // retry it.
                     outbox.markFailed(entry.id, "HTTP ${result.httpStatus}")
-                    anyRetryableFailure = true
+                    allSent = false
                 }
             }
         }
+        return allSent
+    }
 
-        return if (anyRetryableFailure) Result.retry() else Result.success()
+    private suspend fun pullCloudChanges(idToken: String, accountId: String) {
+        val trips = TripRepository(applicationContext)
+        val itinerary = ItineraryRepository(applicationContext)
+        trips.pullAndMergeTrips(idToken, accountId)
+        for (trip in trips.getTripsForAccount(accountId)) {
+            itinerary.pullAndMergeForTrip(idToken, trip.id)
+        }
     }
 
     private fun methodFor(operation: OutboxOperation): String = when (operation) {
@@ -85,8 +94,6 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
             OutboxEntityType.CAR -> "/itinerary/cars"
             OutboxEntityType.PLACE -> "/itinerary/places"
         }
-        // A create posts to the collection; update/delete target the
-        // specific id.
         return if (entry.operation == OutboxOperation.CREATE) base else "$base/${entry.entityId}"
     }
 

@@ -16,6 +16,10 @@ import com.waypoint.app.core.db.WaypointDbHelper.Companion.COL_OUTBOX_OPERATION
 import com.waypoint.app.core.db.WaypointDbHelper.Companion.COL_OUTBOX_PAYLOAD_JSON
 import com.waypoint.app.core.db.WaypointDbHelper.Companion.TABLE_SYNC_OUTBOX
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.util.UUID
@@ -113,7 +117,17 @@ internal fun mergeJson(base: String?, updates: String?): String? {
 // nothing to the server at all.
 class OutboxRepository(context: Context) {
 
+    private val appContext = context.applicationContext
     private val db = WaypointDbHelper.getInstance(context)
+
+    companion object {
+        private val _changes = MutableStateFlow(0L)
+
+        /** Ticks whenever the outbox gains or loses a row, so the UI can refresh its "waiting to sync" state. */
+        val changes: StateFlow<Long> = _changes.asStateFlow()
+
+        private fun notifyChanged() = _changes.update { it + 1 }
+    }
 
     suspend fun enqueue(
         entityType: OutboxEntityType,
@@ -148,6 +162,9 @@ class OutboxRepository(context: Context) {
         } finally {
             wdb.endTransaction()
         }
+        notifyChanged()
+        // Upload as soon as there is a connection; offline, WorkManager holds it until there is.
+        SyncScheduler.enqueue(appContext)
     }
 
     /** Count of pending entries, for a UI badge - avoids hydrating/sorting every row just to show a number. */
@@ -171,6 +188,7 @@ class OutboxRepository(context: Context) {
 
     suspend fun ack(entryId: String) = withContext(Dispatchers.IO) {
         db.writableDatabase.delete(TABLE_SYNC_OUTBOX, "$COL_OUTBOX_ID = ?", arrayOf(entryId))
+        notifyChanged()
     }
 
     // Used by pull/merge (ItineraryRepository, TripRepository): an entity
