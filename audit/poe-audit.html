@@ -1,0 +1,355 @@
+<title>Waypoint POE Audit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a marking sheet. Summary bar up top, then rubric sections as stacked lists of tickable rows. */
+:root {
+  --paper: #f5f6f8;
+  --sheet: #ffffff;
+  --ink: #18213a;
+  --muted: #5d6780;
+  --rule: #dfe3ea;
+  --accent: #2448c9;
+  --accent-soft: #e5eafb;
+  --done: #1d7a4e;
+  --done-soft: #e3f3ea;
+  --block: #b42318;
+  --block-soft: #fbe9e7;
+  --warn: #9a5b00;
+  --warn-soft: #fbf0dc;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #10131c; --sheet: #171b27; --ink: #e6e9f2; --muted: #9aa3bb; --rule: #2a3042;
+    --accent: #8ea7ff; --accent-soft: #1f2846; --done: #5fd39a; --done-soft: #15302a;
+    --block: #ff8a7a; --block-soft: #3a1c1a; --warn: #f0b75c; --warn-soft: #33281a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #10131c; --sheet: #171b27; --ink: #e6e9f2; --muted: #9aa3bb; --rule: #2a3042;
+  --accent: #8ea7ff; --accent-soft: #1f2846; --done: #5fd39a; --done-soft: #15302a;
+  --block: #ff8a7a; --block-soft: #3a1c1a; --warn: #f0b75c; --warn-soft: #33281a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 880px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+header { display: flex; flex-direction: column; gap: 10px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(30px, 6vw, 44px); line-height: 1.05; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 62ch; margin: 0; }
+
+.summary {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px;
+  padding: 14px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
+.count { font-family: var(--font-display); font-weight: 800; font-size: 26px; font-variant-numeric: tabular-nums; }
+.count small { font-family: var(--font-body); font-weight: 400; font-size: 14px; color: var(--muted); }
+.bar { flex: 1 1 200px; height: 10px; background: var(--rule); border-radius: 99px; overflow: hidden; min-width: 0; }
+.bar > span { display: block; height: 100%; width: 0; background: var(--done); transition: width .3s; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.filters button {
+  font: 600 13px var(--font-body); color: var(--ink); background: transparent;
+  border: 1px solid var(--rule); border-radius: 99px; padding: 5px 12px; cursor: pointer;
+}
+.filters button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--sheet); }
+.status { width: 100%; font-size: 13px; color: var(--muted); margin: 0; }
+.status:empty { display: none; }
+.status.warn { color: var(--warn); }
+
+section.group { display: flex; flex-direction: column; gap: 10px; }
+.group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+.group-head h2 { font-family: var(--font-display); font-weight: 600; font-size: 21px; margin: 0; text-wrap: balance; }
+.marks { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.group-note { margin: 0; color: var(--muted); font-size: 14px; max-width: 70ch; }
+
+ul.items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+li.item { display: grid; grid-template-columns: 28px 1fr; gap: 4px 12px; padding: 12px 4px; border-bottom: 1px solid var(--rule); }
+li.item[hidden] { display: none !important; }
+li.item input { width: 20px; height: 20px; margin: 3px 0 0; accent-color: var(--done); cursor: pointer; }
+li.item input:disabled { cursor: not-allowed; }
+li.item input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.body { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.title-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.title { font-weight: 600; }
+li.item.is-done .title { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+.detail { color: var(--muted); font-size: 14.5px; margin: 0; }
+.pill { font: 600 11px var(--font-mono); letter-spacing: .04em; text-transform: uppercase; border-radius: 4px; padding: 2px 6px; white-space: nowrap; }
+.pill.blocker { background: var(--block-soft); color: var(--block); }
+.pill.fix { background: var(--accent-soft); color: var(--accent); }
+.pill.risk { background: var(--warn-soft); color: var(--warn); }
+.pill.optional { background: var(--rule); color: var(--muted); }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+code.ref { font-family: var(--font-mono); font-size: 12.5px; background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 6px; overflow-wrap: anywhere; }
+.who { font-size: 13px; color: var(--done); }
+.who:empty { display: none; }
+
+details.verified { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; }
+details.verified summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: 18px; }
+details.verified ul { margin: 12px 0 0; padding-left: 20px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+.empty-filter { color: var(--muted); font-size: 14px; padding: 10px 4px; margin: 0; }
+@media (prefers-reduced-motion: reduce) { .bar > span { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">PROG7314 · Final POE · Audit of 5 Nov 2026</span>
+    <h1>Waypoint POE audit</h1>
+    <p class="lede">Everything still open against the lecturer's TL;DR and the POE brief. Tick an item when it's done. Ticks are shared, so the whole team sees the same list.</p>
+  </header>
+
+  <div class="summary" role="region" aria-label="Progress">
+    <div class="count"><span id="doneCount">0</span><small> / <span id="totalCount">0</span> done</small></div>
+    <div class="bar" aria-hidden="true"><span id="barFill"></span></div>
+    <div class="filters" role="group" aria-label="Show">
+      <button type="button" id="f-all" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" id="f-open" data-filter="open" aria-pressed="false">To do</button>
+      <button type="button" id="f-done" data-filter="done" aria-pressed="false">Done</button>
+    </div>
+    <p class="status" id="status" aria-live="polite">Loading the team's ticks…</p>
+  </div>
+
+  <div id="groups"></div>
+
+  <details class="verified">
+    <summary>Already verified as solid (no action)</summary>
+    <ul>
+      <li>Hosted API on Cloud Run responds: <code class="ref">/health</code> → 200, <code class="ref">/trips</code> without a token → 401.</li>
+      <li>Every user route uses <code class="ref">requireAuth</code>. Entities have full CRUD, return 400 on bad input, and trip create is idempotent on a client-generated UUID.</li>
+      <li>FCM push is sent from the API when a trip is created, dead tokens are pruned, and the app registers its token in <code class="ref">onNewToken</code>.</li>
+      <li>The app asks for notification permission, and tapping a notification opens the trip.</li>
+      <li>English, isiZulu and isiXhosa have every translatable key, including notification text.</li>
+      <li>Sign-in: Google via Credential Manager, GitHub, email/password, forgot password, and friendly error messages.</li>
+      <li>Biometrics: AppCompatActivity host, <code class="ref">canAuthenticate</code> check, PIN fallback, and a Settings switch.</li>
+      <li>Offline: SQLite plus an outbox, WorkManager with a network constraint and exponential backoff, and an offline indicator in the header.</li>
+      <li>194 Android unit tests in 22 classes, 52 API tests, and green CI on <code class="ref">dev</code>.</li>
+      <li>core-splashscreen and an adaptive launcher icon are in place.</li>
+      <li>Release config: applicationId <code class="ref">com.waypoint.app</code>, version 1 / 1.0.0, R8 on.</li>
+      <li>No secrets or keystores in git history (only the example files and the throwaway CI key). <code class="ref">google-services.json</code> is committed and <code class="ref">.gitattributes</code> forces LF.</li>
+      <li>342 commits on main from all four members. Feature graphic is 1024×500.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+const GROUPS = [
+  { id: "submit", title: "Submission blockers", marks: "GitHub/README 10 · Video 5",
+    note: "These decide whether the marker sees Part 3 at all.",
+    items: [
+      { id: "merge-main", tag: "blocker", title: "Merge dev into main through a PR", detail: "dev is 152 commits ahead of main, so none of the Part 3 work is on main yet. Merge, then confirm the Android CI run on main is green.", ref: "origin/dev → origin/main" },
+      { id: "push-classroom", tag: "blocker", title: "Push the final code to the classroom repo", detail: "The new-origin remote (EMWCCN classroom repo) is behind. If that is the submission repo, it needs the final main too." },
+      { id: "tag-final", tag: "blocker", title: "Tag the final commit as the Final POE", detail: "Only a local part-2 tag exists and nothing is on GitHub. Run git tag -a v1.0.0-final-poe -m \"Final POE\", then git push origin --tags.", ref: "v1.0.0-final-poe" },
+      { id: "gh-release", tag: "blocker", title: "Create the GitHub Release with the signed APK and AAB", detail: "There are no releases yet. Attach a signed APK and AAB built with your own keystore (release.yml only makes an AAB with the throwaway CI key). Paste the release notes in.", ref: ".github/workflows/release.yml" },
+      { id: "new-video", tag: "blocker", title: "Record the final demo video and update the README link", detail: "The README still links the Part 2 video. Follow the video steps further down this page, upload it as unlisted, and replace the link.", ref: "README.md:14" },
+    ]},
+  { id: "readme", title: "README", marks: "GitHub, README and testing 10",
+    note: "The marker checks the README against the code. Right now several sections describe the Part 2 app.",
+    items: [
+      { id: "rm-features", tag: "fix", title: "Update the feature list", detail: "It says Google Sign-In only. Add email/password, forgot password, GitHub, biometric unlock, settings, and offline sync.", ref: "README.md:50" },
+      { id: "rm-udf", tag: "fix", title: "Name user-defined features 1–5 exactly as in the design doc", detail: "Nowhere in the README are features 4 and 5 named. Use the same names in the README, release notes and video." },
+      { id: "rm-tests", tag: "fix", title: "Fix the test count and test table", detail: "It says 22 tests and lists 7 classes. There are 194 tests in 22 classes, plus 52 API tests. Drop ExampleUnitTest from the table.", ref: "README.md:136" },
+      { id: "rm-sync", tag: "fix", title: "Rewrite the sync section", detail: "Describe the outbox, WorkManager with a network constraint and backoff, and state the conflict rule: the most recent updatedAt wins. Remove the CONFLICT_IGNORE and fire-and-forget coroutine wording.", ref: "README.md:101" },
+      { id: "rm-itinerary", tag: "fix", title: "Correct the 'itinerary stays local' claim", detail: "SyncWorker now syncs days, flights, lodging, cars and places, so the Cloud Data Verification text is out of date.", ref: "README.md:218" },
+      { id: "rm-release-notes", tag: "fix", title: "Add a release notes section", detail: "List every change since Part 2 under New, Improved and Fixed, and say which innovative features are new in this version." },
+      { id: "rm-diagram", tag: "fix", title: "Add an architecture diagram", detail: "Show the app, REST API, Firestore, Firebase Auth and FCM. Right now there is only a table." },
+      { id: "rm-team", tag: "fix", title: "Add a team contributions section", detail: "Who built what, per member." },
+      { id: "rm-setup", tag: "fix", title: "Fix the setup steps for a fresh clone", detail: "Replace the <<URL>> placeholder, drop the 'add google-services.json' step (it's committed), and say physical device rather than emulator.", ref: "README.md:276" },
+      { id: "rm-settings", tag: "fix", title: "Document the settings screen", detail: "List each setting and what it visibly changes in the app." },
+      { id: "rm-ai", tag: "fix", title: "Strengthen the AI write-up", detail: "Stay under 500 words. Give 2–3 concrete examples of what you asked, what you changed and how you tested it, and reference each tool properly (Harvard style like the rest).", ref: "README.md:289" },
+    ]},
+  { id: "code", title: "App code", marks: "Biometrics, Offline, Notifications, Languages 10 each",
+    note: "Gaps against the specific advice in the tips handout.",
+    items: [
+      { id: "c-locale", tag: "fix", title: "Wire up the locale config in the manifest", detail: "Add android:localeConfig=\"@xml/locales_config\" and the AppLocalesMetadataHolderService with autoStoreLocales. Without the service, the language resets after a restart on Android 12 and below.", ref: "app/src/main/AndroidManifest.xml" },
+      { id: "c-signout", tag: "fix", title: "Clear Credential Manager state on sign-out", detail: "signOut() only calls Firebase. Also call CredentialManager.clearCredentialState.", ref: "core/auth/AuthRepository.kt:121" },
+      { id: "c-timeout", tag: "fix", title: "Raise the read timeout to 30 seconds", detail: "It's 10 s now. Cloud Run cold starts can be slower than that.", ref: "core/network/HttpClient.kt:21" },
+      { id: "c-health", tag: "fix", title: "Call /health when the app starts", detail: "Wakes the server before the first real request." },
+      { id: "c-401", tag: "fix", title: "Sign the user out on a 401", detail: "Nothing handles an expired or revoked session right now." },
+      { id: "c-periodic", tag: "fix", title: "Add a 15-minute periodic sync job", detail: "There is only the one-time job when something changes. Add a periodic backup with a network constraint.", ref: "core/sync/SyncScheduler.kt" },
+      { id: "c-keep", tag: "fix", title: "Stop KEEP from stranding new changes", detail: "With ExistingWorkPolicy.KEEP, a change saved while a sync is running isn't picked up until the next trigger. Use APPEND_OR_REPLACE.", ref: "core/sync/SyncScheduler.kt" },
+      { id: "c-pull", tag: "fix", title: "Pull new data after pushing", detail: "SyncWorker only uploads. The tips want it to fetch anything new afterwards.", ref: "core/sync/SyncWorker.kt" },
+      { id: "c-syncnow", tag: "fix", title: "Add 'Sync now' and last sync time to Settings", detail: "Both are listed in the tips as expected on the settings screen.", ref: "features/settings/ui/SettingsScreen.kt" },
+      { id: "c-pending", tag: "fix", title: "Show a pending-sync icon on unsynced items", detail: "Lets the viewer see offline changes waiting to upload." },
+      { id: "c-notif-types", tag: "fix", title: "Split notifications into one switch per type", detail: "There's a single on/off switch now. Trip created and trip reminders should each have their own." },
+      { id: "c-app-pref", tag: "fix", title: "Add an app-specific preference", detail: "For example a default currency for the converter. It must visibly change the app." },
+      { id: "c-datastore", tag: "fix", title: "Move settings to DataStore and save them to the API", detail: "They live in SharedPreferences and never reach the server, so they don't follow the user to another phone." },
+      { id: "c-mainscreen", tag: "fix", title: "Remove the debug MainScreen", detail: "It has hard-coded 'Go to …' buttons and __scratch__ routes, and nothing navigates to it.", ref: "MainActivity.kt:407" },
+      { id: "c-clearall", tag: "fix", title: "Move 'Clear All' into strings.xml", detail: "The only hard-coded user-facing text left, so it isn't translated.", ref: "features/notifications/ui/NotificationsScreen.kt:188" },
+      { id: "c-colors", tag: "fix", title: "Move the Welcome screen colours into the theme", detail: "Hard-coded Color(0x…) values on lines 211–217, 758 and 830.", ref: "features/welcome/WelcomeScreen.kt" },
+      { id: "c-example-test", tag: "fix", title: "Delete the 2 + 2 = 4 test", detail: "The tips say the template test doesn't count.", ref: "app/src/test/…/ExampleUnitTest.kt" },
+    ]},
+  { id: "quality", title: "Code comments", marks: "Brief: professional comments",
+    note: "A judgement call, but worth deciding as a team before the marker reads the code.",
+    items: [
+      { id: "q-comments", tag: "risk", title: "Replace the auto-generated line comments", detail: "About 8,700 of 28,000 Kotlin lines (31%) are comments like \"calls `alias` with arguments…\". They read as machine-made and may clash with the AI write-up. Replace them with short KDoc on classes and non-obvious functions." },
+    ]},
+  { id: "store", title: "Play Store readiness", marks: "Play Store 5",
+    items: [
+      { id: "s-icon", tag: "fix", title: "Add a 512×512 PNG app icon", detail: "Not in the repo yet." },
+      { id: "s-shots", tag: "fix", title: "Re-export the store screenshots", detail: "01–04 are JPEGs saved as .png at 738×1600, which is taller than 2:1 and Play rejects them. 05–07 are low-res 334×652 crops. You need at least four real PNG screens with real data.", ref: "assets/store/phone/" },
+      { id: "s-privacy", tag: "fix", title: "Put the privacy policy link in the listing", detail: "It's in the README but not in listing.md.", ref: "docs/store/listing.md" },
+      { id: "s-rating", tag: "fix", title: "Write out the content rating answers", detail: "listing.md only has one line. Add your answers to the rating questionnaire next to the data safety form.", ref: "docs/store/listing.md:57" },
+      { id: "s-folder", tag: "fix", title: "Gather everything into a store-listing folder", detail: "The tips name a store-listing folder. Move docs/store and assets/store into it so it's easy to show in the video." },
+      { id: "s-test-release", tag: "fix", title: "Install the signed release APK on a phone and test every screen", detail: "R8 can break JSON parsing in release builds. Check that data still loads." },
+    ]},
+  { id: "repo", title: "Repo hygiene", marks: "GitHub 10",
+    items: [
+      { id: "r-emails", tag: "fix", title: "Check every member's commit emails link to their GitHub", detail: "Josh commits from 2 addresses and Dylan from 3. Add the vcconnect and myemeris addresses to each GitHub account so commits count under the right name." },
+      { id: "r-blob", tag: "optional", title: "Consider using blob storage", detail: "Listed as a learning outcome in the brief but not a rubric row. For example, a trip cover photo in Firebase Storage." },
+    ]},
+  { id: "video", title: "Video run sheet", marks: "Video 5 · and evidence for every feature",
+    note: "The lecturer marks from the video. One take on a physical phone, with a voice-over, in this order.",
+    items: [
+      { id: "v1", tag: "fix", title: "Introduce the app, the team and the phone", detail: "" },
+      { id: "v2", tag: "fix", title: "Register, sign in with SSO, close the app, unlock with fingerprint", detail: "Also show cancelling the prompt and using the PIN fallback." },
+      { id: "v3", tag: "fix", title: "Change settings, including language and theme, and restart to show they stuck", detail: "Close the app fully before reopening." },
+      { id: "v4", tag: "fix", title: "Create, edit and delete a trip with the API logs or Swagger on screen", detail: "" },
+      { id: "v5", tag: "fix", title: "Show the new user in Firebase Auth and the changed records in Firestore", detail: "" },
+      { id: "v6", tag: "fix", title: "Offline: aeroplane mode on, make changes, reconnect, show sync reaching Firestore", detail: "" },
+      { id: "v7", tag: "fix", title: "Trigger a notification from a real event and tap it to open the trip", detail: "Create a trip on one phone and receive it on the other." },
+      { id: "v8", tag: "fix", title: "Demo all five user-defined features by their design-doc names", detail: "" },
+      { id: "v9", tag: "fix", title: "Show two or three screens in each language", detail: "English, isiZulu and isiXhosa." },
+      { id: "v10", tag: "fix", title: "Walk through the API code, the green pipeline, commit history, release tag and store-listing folder", detail: "" },
+    ]},
+];
+
+const TAG_LABEL = { blocker: "Blocker", fix: "To do", risk: "Risk", optional: "Optional" };
+const ticks = {};
+let filter = "all";
+let db = null, userApi = null, myId = null, canWrite = true;
+const statusEl = document.getElementById("status");
+
+try { const f = localStorage.getItem("poe-audit-filter"); if (f) filter = f; } catch (e) {}
+
+function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+
+function build() {
+  const root = document.getElementById("groups");
+  for (const g of GROUPS) {
+    const sec = el("section", "group"); sec.id = "g-" + g.id;
+    const head = el("div", "group-head");
+    head.append(el("h2", null, g.title), el("span", "marks", g.marks));
+    sec.append(head);
+    if (g.note) sec.append(el("p", "group-note", g.note));
+    const ul = el("ul", "items");
+    for (const it of g.items) {
+      const li = el("li", "item"); li.dataset.id = it.id;
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.id = "cb-" + it.id;
+      cb.addEventListener("change", () => toggle(it.id, cb.checked, cb));
+      const body = el("div", "body");
+      const tr = el("div", "title-row");
+      const lab = el("label", "title", it.title); lab.htmlFor = cb.id;
+      tr.append(lab, el("span", "pill " + it.tag, TAG_LABEL[it.tag]));
+      body.append(tr);
+      if (it.detail) body.append(el("p", "detail", it.detail));
+      const meta = el("div", "meta");
+      if (it.ref) meta.append(el("code", "ref", it.ref));
+      meta.append(el("span", "who"));
+      body.append(meta);
+      li.append(cb, body); ul.append(li);
+    }
+    const empty = el("p", "empty-filter", "Nothing here for this filter."); empty.hidden = true;
+    sec.append(ul, empty);
+    root.append(sec);
+  }
+  document.getElementById("totalCount").textContent = GROUPS.reduce((n, g) => n + g.items.length, 0);
+  document.querySelectorAll(".filters button").forEach(b => b.addEventListener("click", () => {
+    filter = b.dataset.filter;
+    try { localStorage.setItem("poe-audit-filter", filter); } catch (e) {}
+    render();
+  }));
+}
+
+function fmtDate(ms) {
+  return new Date(ms).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+}
+
+async function render() {
+  const ids = [...new Set(Object.values(ticks).filter(t => t.done && t.by).map(t => t.by))];
+  let ps = {};
+  if (userApi && ids.length) { try { ps = await userApi.profiles(ids); } catch (e) {} }
+  let done = 0;
+  document.querySelectorAll("li.item").forEach(li => {
+    const t = ticks[li.dataset.id];
+    const isDone = !!(t && t.done);
+    if (isDone) done++;
+    li.classList.toggle("is-done", isDone);
+    const cb = li.querySelector("input");
+    cb.checked = isDone;
+    cb.disabled = !db || !canWrite;
+    const who = li.querySelector(".who");
+    who.textContent = isDone ? "Done" + (t.by ? " by " + ((ps[t.by] && ps[t.by].name) || "a teammate") : "") + (t.at ? " · " + fmtDate(t.at) : "") : "";
+    li.hidden = (filter === "open" && isDone) || (filter === "done" && !isDone);
+  });
+  document.querySelectorAll("section.group").forEach(sec => {
+    const visible = sec.querySelectorAll("li.item:not([hidden])").length;
+    sec.querySelector(".empty-filter").hidden = visible > 0;
+  });
+  const total = document.querySelectorAll("li.item").length;
+  document.getElementById("doneCount").textContent = done;
+  document.getElementById("barFill").style.width = (total ? (done / total) * 100 : 0) + "%";
+  document.querySelectorAll(".filters button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.filter === filter)));
+}
+
+const writing = {};
+async function toggle(id, checked, cb) {
+  if (!db) return;
+  if (writing[id]) { cb.checked = !checked; return; }
+  writing[id] = true;
+  const prev = ticks[id];
+  ticks[id] = checked ? { done: true, by: myId, at: Date.now() } : { done: false };
+  render();
+  try {
+    await db.collection("ticks").doc(id).set(checked ? { done: true, by: myId, at: Date.now() } : { done: false, at: Date.now() });
+  } catch (e) {
+    if (prev) ticks[id] = prev; else delete ticks[id];
+    if (e && e.code === "invalid_argument") { canWrite = false; statusEl.textContent = "You can view this list but not tick items. Ask the owner for Contributor access."; }
+    else statusEl.textContent = "That tick didn't save. Try again in a moment.";
+    statusEl.className = "status warn";
+    render();
+  } finally { writing[id] = false; }
+}
+
+build();
+render();
+
+(async () => {
+  const use = window.claude && window.claude.use ? (n) => window.claude.use(n) : async () => null;
+  const [dbNs, userNs] = await Promise.all([use("db"), use("user")]);
+  db = dbNs; userApi = userNs;
+  if (!db) { statusEl.textContent = "Sign in to claude.ai to see and change the team's ticks."; statusEl.className = "status warn"; render(); return; }
+  if (userApi) {
+    myId = await userApi.id();
+    const w = await userApi.can("data.write");
+    if (w === false) { canWrite = false; statusEl.textContent = "View only: you can see progress but not tick items."; }
+  }
+  const timer = setTimeout(() => { statusEl.textContent = "Can't reach the saved ticks yet. What you see may be out of date."; statusEl.className = "status warn"; }, 10000);
+  db.collection("ticks").onSnapshot(snap => {
+    for (const k of Object.keys(ticks)) delete ticks[k];
+    snap.docs.forEach(d => { ticks[d.id] = d.data(); });
+    if (!snap.metadata.fromCache) {
+      clearTimeout(timer);
+      if (canWrite) { statusEl.textContent = ""; statusEl.className = "status"; }
+    }
+    render();
+  }, err => {
+    clearTimeout(timer);
+    statusEl.textContent = "Live updates stopped. Reload the page to reconnect.";
+    statusEl.className = "status warn";
+  });
+})();
+</script>
