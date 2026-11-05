@@ -2,6 +2,7 @@
 package com.waypoint.app
 
 // imports `android.Manifest` for use in this file
+import android.util.Log
 import android.Manifest
 // imports `android.app.Activity` for use in this file
 import android.app.Activity
@@ -177,10 +178,43 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         pendingTripId.value = intent.getStringExtra("tripId")
+        Log.d(TAG, "onNewIntent: opened from a notification for trip ${pendingTripId.value}")
+    }
+
+    // Lifecycle logging: shows in Logcat (tag "MainActivity") when the app is opened, backgrounded and
+    // reopened, which is also when the biometric lock is armed and shown.
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart: app visible")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume: app in the foreground")
+    }
+
+    override fun onPause() {
+        Log.d(TAG, "onPause: app leaving the foreground")
+        super.onPause()
+    }
+
+    override fun onStop() {
+        Log.d(TAG, "onStop: app in the background (biometric lock armed if enabled)")
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        Log.d(TAG, "onDestroy: activity destroyed (finishing=$isFinishing)")
+        super.onDestroy()
+    }
+
+    private companion object {
+        const val TAG = "MainActivity"
     }
 
     // declares override function `onCreate` taking 1 parameter (`savedInstanceState`) and opens its body
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "onCreate: ${if (savedInstanceState == null) "cold start" else "recreated (e.g. language change)"}")
         // declares read-only property `splashScreen`, initialised with the result of calling `installSplashScreen(…)`
         val splashScreen = installSplashScreen()
         // expression: `splashScreen.setKeepOnScreenCondition { false }`

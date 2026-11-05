@@ -1,5 +1,6 @@
 package com.waypoint.app
 
+import android.util.Log
 import android.app.Application
 import coil.ImageLoader
 import coil.ImageLoaderFactory
@@ -27,6 +28,7 @@ class WaypointApp : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+        Log.i("WaypointApp", "Process started: version ${BuildConfig.VERSION_NAME}, API ${android.os.Build.VERSION.SDK_INT}")
         AppSettings.init(this)
         SettingsSync.init()
         RemoteSecrets.init(this)
