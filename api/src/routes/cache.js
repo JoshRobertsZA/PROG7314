@@ -8,7 +8,7 @@ const COLLECTION = 'cache';
 // The three cache kinds the app actually writes (weather/currency/places),
 // each keyed by a simple identifier (city slug, currency code). This also
 // closes off path traversal / arbitrary-document access through the :path
-// param, same reasoning as the counter key allowlist in PR 1.
+// param.
 const PATH_PATTERN = /^(weather|currency|places)_[a-zA-Z0-9_]{1,64}$/;
 
 router.get('/:path', requireAuth, async (req, res) => {
