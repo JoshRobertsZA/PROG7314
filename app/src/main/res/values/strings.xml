@@ -180,7 +180,7 @@
     <string name="edit_itinerary_header_cinemas">Cinemas</string>
     <string name="edit_itinerary_no_places">No places added yet</string>
     <string name="edit_itinerary_remove_place_cd">Remove place</string>
-    <string name="edit_itinerary_note_hint">Add a note...</string>
+    <string name="edit_itinerary_note_hint">Add a note…</string>
     <string name="edit_itinerary_upload_chip">+ Upload</string>
     <string name="edit_itinerary_add_chip">+ Add</string>
     <string name="edit_itinerary_undo_glyph" translatable="false">↺</string>
@@ -282,8 +282,6 @@
         <item quantity="other">%d changes waiting to sync</item>
     </plurals>
     <string name="profile_preferences_header">Preferences</string>
-    <string name="profile_notifications_title">Notifications</string>
-    <string name="profile_notifications_subtitle">Flight, weather, and trip alerts</string>
     <string name="profile_language_title">Language</string>
     <string name="profile_language_subtitle">App display language</string>
     <string name="profile_biometric_title">Biometric login</string>
@@ -377,6 +375,7 @@
 
     <!-- Push notifications (Firebase Cloud Messaging) -->
     <string name="notification_channel_id" translatable="false">waypoint_default</string>
+    <string name="notification_channel_reminders_id" translatable="false">waypoint_reminders</string>
     <string name="notification_channel_name">Trip updates</string>
     <string name="notification_channel_description">Reminders and alerts about your trips</string>
     <string name="notification_welcome_title">Welcome back!</string>
@@ -391,7 +390,10 @@
     <string name="edit_itinerary_flight_departs">Departs %1$s</string>
 
     <!-- Scheduled trip reminders (TripReminderWorker) -->
-    <string name="reminder_countdown_title">%1$d days to go!</string>
+    <plurals name="reminder_countdown_title">
+        <item quantity="one">%1$d day to go!</item>
+        <item quantity="other">%1$d days to go!</item>
+    </plurals>
     <string name="reminder_countdown_body">%1$s to %2$s is coming up. Time to check your itinerary.</string>
     <string name="reminder_no_plan_title">%1$s is in 5 days</string>
     <string name="reminder_no_plan_body">You haven\'t planned anything for %1$s yet. Open Waypoint to add your itinerary.</string>
@@ -496,4 +498,25 @@
     <string name="biometric_error_none_enrolled">No screen lock is set up. Set one in your phone settings.</string>
     <string name="biometric_error_generic">Could not unlock. Please try again.</string>
 
+    <string name="session_expired">Your session has ended. Please sign in again.</string>
+    <string name="settings_notify_trip_updates_title">Trip updates</string>
+    <string name="settings_notify_trip_updates_subtitle">When a trip changes on another device</string>
+    <string name="settings_notify_reminders_title">Trip reminders</string>
+    <string name="settings_notify_reminders_subtitle">Countdowns, flights, weather and daily plans</string>
+    <string name="settings_home_currency_title">Home currency</string>
+    <string name="settings_home_currency_subtitle">The converter on Home converts into this</string>
+    <string name="settings_home_currency_modal_title">Home currency</string>
+    <string name="settings_sync_header">Sync</string>
+    <string name="settings_sync_now_title">Sync now</string>
+    <string name="settings_sync_now_action">Sync</string>
+    <string name="settings_sync_last">Last synced %1$s</string>
+    <string name="settings_sync_never">Not synced on this phone yet</string>
+    <string name="settings_sync_in_progress">Syncing…</string>
+    <string name="settings_sync_offline">You\'re offline. Changes will sync when you reconnect.</string>
+    <string name="notification_channel_reminders_name">Trip reminders</string>
+    <string name="notification_channel_reminders_description">Countdowns, flight times, weather warnings and daily plans</string>
+    <string name="language_sub_english">English (default)</string>
+    <string name="language_sub_zulu">isiZulu (South Africa)</string>
+    <string name="language_sub_xhosa">isiXhosa (South Africa)</string>
+    <string name="trip_pending_sync_cd">Waiting to sync</string>
 </resources>

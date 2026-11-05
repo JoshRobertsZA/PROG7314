@@ -143,8 +143,6 @@
         <item quantity="other">%d iinguqu ezilindileyo ukuze zivunyelwaniswe</item>
     </plurals>
     <string name="profile_preferences_header">Ezikhethwayo</string>
-    <string name="profile_notifications_title">Izaziso</string>
-    <string name="profile_notifications_subtitle">Izilumkiso zenqwelomoya, imozulu, nohambo</string>
     <string name="profile_language_title">Ulwimi</string>
     <string name="profile_language_subtitle">Ulwimi lokubonisa le-app</string>
     <string name="profile_biometric_title">Ukungena nge-biometric</string>
@@ -210,7 +208,10 @@
     <string name="edit_itinerary_flight_departs">Iyahamba %1$s</string>
 
     <!-- Scheduled trip reminders (TripReminderWorker) -->
-    <string name="reminder_countdown_title">Kusele iintsuku ezi-%1$d!</string>
+    <plurals name="reminder_countdown_title">
+        <item quantity="one">Kusele usuku olu-%1$d!</item>
+        <item quantity="other">Kusele iintsuku ezi-%1$d!</item>
+    </plurals>
     <string name="reminder_countdown_body">%1$s eya e-%2$s iyeza. Lixesha lokujonga uhlelo lwakho.</string>
     <string name="reminder_no_plan_title">%1$s kwiintsuku ezi-5</string>
     <string name="reminder_no_plan_body">Awukacwangcisi nto ye-%1$s. Vula uWaypoint ukongeza uhlelo lwakho.</string>
@@ -405,4 +406,25 @@
     <string name="biometric_error_none_enrolled">Akukho kuvalwa kwesikrini okuseti. Seta enye kuseto lwefowuni yakho.</string>
     <string name="biometric_error_generic">Ayikwazanga ukuvula. Nceda uphinde uzame.</string>
 
+    <string name="session_expired">Iseshoni yakho iphelile. Nceda ungene kwakhona.</string>
+    <string name="settings_notify_trip_updates_title">Uhlaziyo lohambo</string>
+    <string name="settings_notify_trip_updates_subtitle">Xa uhambo lutshintsha kwesinye isixhobo</string>
+    <string name="settings_notify_reminders_title">Izikhumbuzi zohambo</string>
+    <string name="settings_notify_reminders_subtitle">Ukubala iintsuku, iinqwelomoya, imozulu nezicwangciso zemihla ngemihla</string>
+    <string name="settings_home_currency_title">Imali yasekhaya</string>
+    <string name="settings_home_currency_subtitle">Isiguquli esikwiKhaya siguqulela kule mali</string>
+    <string name="settings_home_currency_modal_title">Imali yasekhaya</string>
+    <string name="settings_sync_header">Ukungqamanisa</string>
+    <string name="settings_sync_now_title">Ngqamanisa ngoku</string>
+    <string name="settings_sync_now_action">Ngqamanisa</string>
+    <string name="settings_sync_last">Kugqibele ukungqamaniswa ngo-%1$s</string>
+    <string name="settings_sync_never">Akukangqamaniswa kule fowuni okwangoku</string>
+    <string name="settings_sync_in_progress">Kuyangqamaniswa…</string>
+    <string name="settings_sync_offline">Awudibananga. Utshintsho luza kungqamaniswa xa uphinda udibana.</string>
+    <string name="notification_channel_reminders_name">Izikhumbuzi zohambo</string>
+    <string name="notification_channel_reminders_description">Ukubala iintsuku, amaxesha eenqwelomoya, izilumkiso zemozulu nezicwangciso zemihla ngemihla</string>
+    <string name="language_sub_english">IsiNgesi (okuzenzekelayo)</string>
+    <string name="language_sub_zulu">isiZulu (uMzantsi Afrika)</string>
+    <string name="language_sub_xhosa">isiXhosa (uMzantsi Afrika)</string>
+    <string name="trip_pending_sync_cd">Kulindwe ukungqamaniswa</string>
 </resources>
