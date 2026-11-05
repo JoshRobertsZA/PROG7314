@@ -4,6 +4,30 @@ Everything below landed after the Part 2 prototype (`main` at `ab2a3a7`) on the 
 the final POE submission. Grouped by area; branch names are in parentheses for
 traceability back to the commit plan.
 
+## Innovative features
+
+A few things in this release go beyond the brief:
+
+- **Offline-first sync with a real outbox queue** — writes land in SQLite immediately
+  and never block on the network. A background worker drains a queue of pending
+  operations with retry and backoff, coalescing repeated edits to the same record into
+  one API call instead of replaying every intermediate state
+- **API usage guardian** — the app tracks its own daily/monthly call budget against
+  AirLabs and LocationIQ's free-tier limits and falls back to cached data before the
+  quota is exhausted, rather than letting calls fail once the limit is hit
+- **Per-user local places cache with live fallback** — nearby-places results are cached
+  per user in SQLite and read before the shared cache, falling back to a live LocationIQ
+  call if the shared cache is unreachable, so one user's stale cache never blocks another
+- **Server-mediated secrets** — no third-party API key is ever embedded in the app; all
+  of them are fetched at runtime from an authenticated endpoint and cached locally,
+  closing a real exposure found during the security review in `fix/token-exposure`
+- **Automated i18n parity enforcement** — a unit test fails the build if any string key
+  is missing from the isiZulu or isiXhosa translations, so translation gaps can't ship
+  silently
+- **Fully automated signed release pipeline** — every push to `main` builds a signed,
+  minified app bundle and publishes it as a tagged GitHub Release with no manual signing
+  step, using a throwaway CI key so the pipeline needs no secrets
+
 ## Cloud sync and offline support
 
 - Added a REST API for trip and itinerary CRUD, backed by Firestore, with per-field
