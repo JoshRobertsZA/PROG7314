@@ -136,6 +136,9 @@ import com.waypoint.app.core.theme.WaypointGoogleText
 import com.waypoint.app.core.theme.WaypointTerracotta
 // imports `com.waypoint.app.core.theme.WelcomeCardScrim` for use in this file
 import com.waypoint.app.core.theme.WelcomeCardScrim
+import com.waypoint.app.core.theme.WelcomePhotoScrim
+import com.waypoint.app.core.theme.WaypointGitHubButton
+import com.waypoint.app.core.theme.WelcomeErrorText
 // imports `com.waypoint.app.core.theme.White` for use in this file
 import com.waypoint.app.core.theme.White
 
@@ -206,17 +209,7 @@ private fun CinematicHeroBackground(modifier: Modifier = Modifier) {
                     // continues the statement started above: `Brush.verticalGradient(`
                     Brush.verticalGradient(
                         // continues the statement started above: `colors = listOf(`
-                        colors = listOf(
-                            // continues the statement started above: `Color(0xCC0F172A),`
-                            Color(0xCC0F172A),
-                            // continues the statement started above: `Color(0x66090D16),`
-                            Color(0x66090D16),
-                            // continues the statement started above: `Color(0xEB070A10),`
-                            Color(0xEB070A10),
-                            // continues the statement started above: `Color(0xFA04060A),`
-                            Color(0xFA04060A),
-                        // closes the multi-line argument list started above
-                        ),
+                        colors = WelcomePhotoScrim,
                     // closes the multi-line argument list started above
                     ),
                 // closes the multi-line argument list started above
@@ -754,8 +747,8 @@ private fun FrostedGlassContainerCard(
                         .height(50.dp)
                         // continues the statement started above: `.clip(RoundedCornerShape(16.dp))`
                         .clip(RoundedCornerShape(16.dp))
-                        // continues the statement started above: `.background(Color(0xFF24292E))`
-                        .background(Color(0xFF24292E))
+                        // continues the statement started above: `.background(WaypointGitHubButton)`
+                        .background(WaypointGitHubButton)
                         // continues the statement started above: `.border(1.dp, White.copy(alpha = 0.2f), RoundedCornerShape(…`
                         .border(1.dp, White.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
                         // continues the statement started above: `.clickable(enabled = !isLoading, onClick = onGitHubContinue…`
@@ -826,8 +819,8 @@ private fun FrostedGlassContainerCard(
                 Text(
                     // continues the statement started above: `text = errorMessage,`
                     text = errorMessage,
-                    // continues the statement started above: `color = Color(0xFFFF8A8A),`
-                    color = Color(0xFFFF8A8A),
+                    // continues the statement started above: `color = WelcomeErrorText,`
+                    color = WelcomeErrorText,
                     // continues the statement started above: `fontSize = 12.sp,`
                     fontSize = 12.sp,
                     // continues the statement started above: `fontWeight = FontWeight.SemiBold,`

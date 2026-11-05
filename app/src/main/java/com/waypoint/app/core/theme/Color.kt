@@ -113,6 +113,15 @@ val WelcomeGradientNightBottom = Color(0xFF4B3B62)
 // declares read-only property `WelcomeCardScrim`, initialised with the result of calling `Color(…)`
 val WelcomeCardScrim = Color(0xBF000000)
 
+/** Top-to-bottom scrim over the welcome photo, so white text stays readable. */
+val WelcomePhotoScrim = listOf(Color(0xCC0F172A), Color(0x66090D16), Color(0xEB070A10), Color(0xFA04060A))
+
+/** GitHub's brand charcoal, used only for the "Continue with GitHub" button. */
+val WaypointGitHubButton = Color(0xFF24292E)
+
+/** Error text shown on the dark welcome card. */
+val WelcomeErrorText = Color(0xFFFF8A8A)
+
 // declares read-only property `WaypointRadioBorderUnselected`; a light colour in light mode and a dark one in dark mode
 val WaypointRadioBorderUnselected: Color get() = if (WaypointPalette.dark) Color(0xFF5A483A) else Color(0xFFE6DCC4)
 

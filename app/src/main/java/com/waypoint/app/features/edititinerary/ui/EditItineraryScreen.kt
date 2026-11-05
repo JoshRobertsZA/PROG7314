@@ -2,6 +2,7 @@
 package com.waypoint.app.features.edititinerary.ui
 
 // imports `android.net.Uri` for use in this file
+import com.waypoint.app.core.theme.White
 import android.net.Uri
 // imports `androidx.activity.compose.rememberLauncherForActivityResult` for use in this file
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -749,7 +750,7 @@ private fun FlightCard(
                     // continues the statement started above: `contentScale = ContentScale.Fit,`
                     contentScale       = ContentScale.Fit,
                     // continues the statement started above: `modifier = Modifier.size(44.dp).clip(RoundedCornerShape(Rad…`
-                    modifier           = Modifier.size(44.dp).clip(RoundedCornerShape(RadiusThumbnail)).background(Color.White),
+                    modifier           = Modifier.size(44.dp).clip(RoundedCornerShape(RadiusThumbnail)).background(White),
                     // continues the statement started above: `loading = { ThumbnailBlock(accentColor = WaypointPlaceAccen…`
                     loading = { ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail) },
                     // continues the statement started above: `error = { ThumbnailBlock(accentColor = WaypointPlaceAccent4…`

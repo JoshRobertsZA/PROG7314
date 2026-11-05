@@ -2,6 +2,7 @@
 package com.waypoint.app.features.viewitinerary.ui
 
 // imports `android.content.Intent` for use in this file
+import com.waypoint.app.core.theme.White
 import android.content.Intent
 // imports `android.widget.Toast` for use in this file
 import android.widget.Toast
@@ -594,8 +595,8 @@ private fun ViewFlightCard(flight: ViewFlightItem, onStatusClick: () -> Unit) {
                         .size(44.dp)
                         // continues the statement started above: `.clip(RoundedCornerShape(RadiusThumbnail))`
                         .clip(RoundedCornerShape(RadiusThumbnail))
-                        // continues the statement started above: `.background(androidx.compose.ui.graphics.Color.White),`
-                        .background(androidx.compose.ui.graphics.Color.White),
+                        // continues the statement started above: `.background(White),`
+                        .background(White),
                     // continues the statement started above: `loading = { ThumbnailBlock(accentColor = WaypointPlaceAccen…`
                     loading = { ThumbnailBlock(accentColor = WaypointPlaceAccent4, size = 44.dp, cornerRadius = RadiusThumbnail) },
                     // continues the statement started above: `error = { ThumbnailBlock(accentColor = WaypointPlaceAccent4…`
@@ -1100,8 +1101,8 @@ private fun ViewPlaceDetailOverlay(
                     Text(
                         // continues the statement started above: `text = stringResource(R.string.view_itinerary_open_maps),`
                         text       = stringResource(R.string.view_itinerary_open_maps),
-                        // continues the statement started above: `color = androidx.compose.ui.graphics.Color.White,`
-                        color      = androidx.compose.ui.graphics.Color.White,
+                        // continues the statement started above: `color = White,`
+                        color      = White,
                         // continues the statement started above: `fontSize = 15.sp,`
                         fontSize   = 15.sp,
                         // continues the statement started above: `fontWeight = FontWeight.Bold,`
