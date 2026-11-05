@@ -103,6 +103,10 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 // imports `com.waypoint.app.R` for use in this file
 import com.waypoint.app.R
+import android.text.format.DateUtils
+import androidx.compose.material3.CircularProgressIndicator
+import com.waypoint.app.core.connectivity.rememberIsOnline
+import com.waypoint.app.core.settings.AppSettings
 // imports `com.waypoint.app.core.auth.BiometricAuthenticator` for use in this file
 import android.widget.Toast
 import com.waypoint.app.core.auth.BiometricAuthenticator
@@ -116,8 +120,6 @@ import com.waypoint.app.core.auth.BiometricLockPreferences
 import com.waypoint.app.core.common.TabHeader
 // imports `com.waypoint.app.core.db.SessionManager` for use in this file
 import com.waypoint.app.core.db.SessionManager
-// imports `com.waypoint.app.core.notifications.NotificationPreferences` for use in this file
-import com.waypoint.app.core.notifications.NotificationPreferences
 import com.waypoint.app.core.notifications.PushNotifier
 // imports `com.waypoint.app.core.locale.AppLanguage` for use in this file
 import com.waypoint.app.core.locale.AppLanguage
@@ -177,6 +179,8 @@ fun SettingsScreen(
     var showLanguageModal by remember { mutableStateOf(false) }
     // declares mutable property `showLogoutModal`, delegated to `remember { mutableStateOf(false) }`
     var showLogoutModal by remember { mutableStateOf(false) }
+    var showCurrencyModal by remember { mutableStateOf(false) }
+    var pendingCurrency by remember { mutableStateOf(AppSettings.current.defaultCurrency) }
 
     // calls `Column` with an argument list that continues on the following lines
     Column(
@@ -235,8 +239,8 @@ fun SettingsScreen(
             )
             // calls `Text` with an argument list that continues on the following lines
             Text(
-                // continues the statement started above: `text = SessionManager.displayName.ifBlank { "Alex Carter" },`
-                text = SessionManager.displayName.ifBlank { "Alex Carter" },
+                // continues the statement started above: `text = SessionManager.displayName,`
+                text = SessionManager.displayName,
                 // continues the statement started above: `color = WaypointTextPrimary,`
                 color = WaypointTextPrimary,
                 // continues the statement started above: `fontSize = 18.sp,`
@@ -252,7 +256,7 @@ fun SettingsScreen(
             // calls `Text` with an argument list that continues on the following lines
             Text(
                 // continues the statement started above: `text = SessionManager.email.ifBlank { "alex.carter@email.co…`
-                text = SessionManager.email.ifBlank { "alex.carter@email.com" },
+                text = SessionManager.email,
                 // continues the statement started above: `color = WaypointTextMuted,`
                 color = WaypointTextMuted,
                 // continues the statement started above: `fontSize = 12.sp,`
@@ -364,157 +368,158 @@ fun SettingsScreen(
 
             // declares read-only property `context`, initialised to `LocalContext.current`
             val context = LocalContext.current
-            // declares mutable property `notificationsEnabled`, delegated to `remember { mutableStateOf(NotificationP…`
-            var notificationsEnabled by remember { mutableStateOf(NotificationPreferences.isEnabled(context)) }
-            // calls `PreferenceRow` with an argument list that continues on the following lines
-            PreferenceRow(
-                // continues the statement started above: `title = stringResource(R.string.profile_notifications_title…`
-                title = stringResource(R.string.profile_notifications_title),
-                // continues the statement started above: `subtitle = stringResource(R.string.profile_notifications_su…`
-                subtitle = stringResource(R.string.profile_notifications_subtitle),
-                // continues the statement started above: `modifier = Modifier.padding(top = 12.dp),`
-                modifier = Modifier.padding(top = 12.dp),
-            // ends the argument list started above and opens the block that follows
-            ) {
-                // calls `PreferenceToggle` with an argument list that continues on the following lines
-                PreferenceToggle(
-                    // continues the statement started above: `checked = notificationsEnabled,`
-                    checked = notificationsEnabled,
-                    // continues the statement started above: `onCheckedChange = {`
-                    onCheckedChange = {
-                        // assigns `notificationsEnabled` the value `it`
-                        notificationsEnabled = it
-                        // calls `setEnabled` on `NotificationPreferences` with arguments `(context, it)`
-                        NotificationPreferences.setEnabled(context, it)
-                        // Turning the preference on is meaningless if the OS
-                        // permission was never granted (or was revoked) -
-                        // without this, the toggle could show "on" while
-                        // PushNotifier.show() silently does nothing.
-                        if (it && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !PushNotifier.hasPermission(context)) {
-                            onRequestNotificationPermission()
-                        }
-                    // closes the block
-                    },
-                // closes the multi-line argument list started above
-                )
-            // closes the block
+            val settings by AppSettings.state.collectAsState()
+            val isOnline by rememberIsOnline()
+
+            // Switching a notification type on is pointless without the Android 13+ permission, so ask for it then.
+            fun requestPermissionIfTurningOn(turningOn: Boolean) {
+                if (turningOn && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !PushNotifier.hasPermission(context)) {
+                    onRequestNotificationPermission()
+                }
             }
 
-            // declares read-only property `darkModeOn`, whether the dark theme is showing right now, from the user's choice or the phone's setting
-            val darkModeOn = ThemePreferences.override ?: isSystemInDarkTheme()
-            // calls `PreferenceRow` with an argument list that continues on the following lines
             PreferenceRow(
-                // continues the statement started above: `title = stringResource(R.string.profile_dark_mode_title),`
-                title = stringResource(R.string.profile_dark_mode_title),
-                // continues the statement started above: `subtitle = stringResource(R.string.profile_dark_mode_subtitle),`
-                subtitle = stringResource(R.string.profile_dark_mode_subtitle),
-                // continues the statement started above: `modifier = Modifier.padding(top = 12.dp),`
+                title = stringResource(R.string.settings_notify_trip_updates_title),
+                subtitle = stringResource(R.string.settings_notify_trip_updates_subtitle),
                 modifier = Modifier.padding(top = 12.dp),
-            // ends the argument list started above and opens the block that follows
             ) {
-                // calls `PreferenceToggle` which saves the choice and switches the theme straight away
+                PreferenceToggle(
+                    checked = settings.notifyTripUpdates,
+                    onCheckedChange = {
+                        AppSettings.setNotifyTripUpdates(it)
+                        requestPermissionIfTurningOn(it)
+                    },
+                )
+            }
+
+            PreferenceRow(
+                title = stringResource(R.string.settings_notify_reminders_title),
+                subtitle = stringResource(R.string.settings_notify_reminders_subtitle),
+                modifier = Modifier.padding(top = 12.dp),
+            ) {
+                PreferenceToggle(
+                    checked = settings.notifyReminders,
+                    onCheckedChange = {
+                        AppSettings.setNotifyReminders(it)
+                        requestPermissionIfTurningOn(it)
+                    },
+                )
+            }
+
+            val darkModeOn = ThemePreferences.override ?: isSystemInDarkTheme()
+            PreferenceRow(
+                title = stringResource(R.string.profile_dark_mode_title),
+                subtitle = stringResource(R.string.profile_dark_mode_subtitle),
+                modifier = Modifier.padding(top = 12.dp),
+            ) {
                 PreferenceToggle(
                     checked = darkModeOn,
-                    onCheckedChange = { ThemePreferences.setDark(context, it) },
-                // closes the multi-line argument list started above
+                    onCheckedChange = { ThemePreferences.setDark(it) },
                 )
-            // closes the block
             }
 
-            // calls `PreferenceRow` with an argument list that continues on the following lines
             PreferenceRow(
-                // continues the statement started above: `title = stringResource(R.string.profile_language_title),`
                 title = stringResource(R.string.profile_language_title),
-                // continues the statement started above: `subtitle = stringResource(R.string.profile_language_subtitl…`
                 subtitle = stringResource(R.string.profile_language_subtitle),
-                // continues the statement started above: `onClick = { showLanguageModal = true },`
                 onClick = { showLanguageModal = true },
-                // continues the statement started above: `modifier = Modifier.padding(top = 12.dp),`
                 modifier = Modifier.padding(top = 12.dp),
-            // ends the argument list started above and opens the block that follows
             ) {
-                // calls `ChevronValue` with arguments `(value = selectedLanguage.displayName)`
                 ChevronValue(value = selectedLanguage.displayName)
-            // closes the block
             }
 
-            // declares read-only property `biometricAvailability`, initialised to `remember { BiometricAuthenticator.availabili…`
-            val biometricAvailability = remember { BiometricAuthenticator.availability(context) }
-            // declares mutable property `biometricEnabled`, delegated to `remember { mutableStateOf(BiometricLock…`
-            var biometricEnabled by remember { mutableStateOf(BiometricLockPreferences.isEnabled(context)) }
-            // declares read-only property `biometricSubtitle`, initialised with the result of calling `when(…)` and opens a lambda / block
-            val biometricSubtitle = when (biometricAvailability) {
-                // lambda `BiometricAvailability.AVAILAB… -> stringResource(R.string.profi…`
-                BiometricAvailability.AVAILABLE -> stringResource(R.string.profile_biometric_subtitle)
-                // lambda `BiometricAvailability.NONE_EN… -> stringResource(R.string.profi…`
-                BiometricAvailability.NONE_ENROLLED -> stringResource(R.string.profile_biometric_unavailable_none_enrolled)
-                // `else` branch of the `when`: evaluates `stringResource(R.string.profile_biometric_unavailable_no_hardware)`
-                else -> stringResource(R.string.profile_biometric_unavailable_no_hardware)
-            // closes the lambda assigned to `biometricSubtitle`
-            }
-            // declares read-only property `enableTitle`, initialised with the result of calling `stringResource(…)`
-            val enableTitle = stringResource(R.string.profile_biometric_enable_title)
-            // declares read-only property `enableSubtitle`, initialised with the result of calling `stringResource(…)`
-            val enableSubtitle = stringResource(R.string.profile_biometric_enable_subtitle)
-            // calls `PreferenceRow` with an argument list that continues on the following lines
             PreferenceRow(
-                // continues the statement started above: `title = stringResource(R.string.profile_biometric_title),`
-                title = stringResource(R.string.profile_biometric_title),
-                // continues the statement started above: `subtitle = biometricSubtitle,`
-                subtitle = biometricSubtitle,
-                // continues the statement started above: `modifier = Modifier.padding(top = 12.dp),`
+                title = stringResource(R.string.settings_home_currency_title),
+                subtitle = stringResource(R.string.settings_home_currency_subtitle),
+                onClick = {
+                    pendingCurrency = settings.defaultCurrency
+                    showCurrencyModal = true
+                },
                 modifier = Modifier.padding(top = 12.dp),
-            // ends the argument list started above and opens the block that follows
             ) {
-                // calls `PreferenceToggle` with an argument list that continues on the following lines
+                ChevronValue(value = settings.defaultCurrency)
+            }
+
+            val biometricAvailability = remember { BiometricAuthenticator.availability(context) }
+            val biometricSubtitle = when (biometricAvailability) {
+                BiometricAvailability.AVAILABLE -> stringResource(R.string.profile_biometric_subtitle)
+                BiometricAvailability.NONE_ENROLLED -> stringResource(R.string.profile_biometric_unavailable_none_enrolled)
+                else -> stringResource(R.string.profile_biometric_unavailable_no_hardware)
+            }
+            val enableTitle = stringResource(R.string.profile_biometric_enable_title)
+            val enableSubtitle = stringResource(R.string.profile_biometric_enable_subtitle)
+            PreferenceRow(
+                title = stringResource(R.string.profile_biometric_title),
+                subtitle = biometricSubtitle,
+                modifier = Modifier.padding(top = 12.dp),
+            ) {
                 PreferenceToggle(
-                    // continues the statement started above: `checked = biometricEnabled,`
-                    checked = biometricEnabled,
-                    // continues the statement started above: `enabled = biometricAvailability == BiometricAvailability.AV…`
+                    checked = settings.biometricLock,
                     enabled = biometricAvailability == BiometricAvailability.AVAILABLE,
-                    // continues the statement started above: `onCheckedChange = { turningOn ->`
                     onCheckedChange = { turningOn ->
-                        // continues the statement started above: `if (!turningOn) {`
                         if (!turningOn) {
-                            // assigns `biometricEnabled` the value `false`
-                            biometricEnabled = false
-                            // calls `setEnabled` on `BiometricLockPreferences` with arguments `(context, false)`
-                            BiometricLockPreferences.setEnabled(context, false)
-                            // expression: `return@PreferenceToggle`
+                            BiometricLockPreferences.setEnabled(false)
                             return@PreferenceToggle
-                        // closes the block
                         }
-                        // calls `authenticate` on `BiometricAuthenticator` with an argument list that continues on the following lines
+                        // Confirm the user can actually unlock before locking the app behind it.
                         BiometricAuthenticator.authenticate(
-                            // continues the statement started above: `activity = context as FragmentActivity,`
                             activity = context as FragmentActivity,
-                            // continues the statement started above: `title = enableTitle,`
                             title = enableTitle,
-                            // continues the statement started above: `subtitle = enableSubtitle,`
                             subtitle = enableSubtitle,
-                            // continues the statement started above: `onSuccess = {`
-                            onSuccess = {
-                                // assigns `biometricEnabled` the value `true`
-                                biometricEnabled = true
-                                // calls `setEnabled` on `BiometricLockPreferences` with arguments `(context, true)`
-                                BiometricLockPreferences.setEnabled(context, true)
-                            // closes the block
-                            },
+                            onSuccess = { BiometricLockPreferences.setEnabled(true) },
                             onError = { code, _ ->
-                                // tells the user why the prompt failed
                                 Toast.makeText(
                                     context,
                                     context.getString(biometricFailureMessage(classifyBiometricError(code))),
                                     Toast.LENGTH_SHORT,
                                 ).show()
                             },
-                        // closes the multi-line argument list started above
                         )
-                    // closes the block
                     },
-                // closes the multi-line argument list started above
                 )
-            // closes the block
+            }
+
+            Text(
+                text = stringResource(R.string.settings_sync_header),
+                color = WaypointTextPrimary,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 20.dp),
+            )
+            val lastSyncAtMs = uiState.lastSyncAtMs
+            val syncSubtitle = when {
+                uiState.isSyncing -> stringResource(R.string.settings_sync_in_progress)
+                !isOnline -> stringResource(R.string.settings_sync_offline)
+                lastSyncAtMs == null -> stringResource(R.string.settings_sync_never)
+                else -> stringResource(
+                    R.string.settings_sync_last,
+                    DateUtils.formatDateTime(
+                        context,
+                        lastSyncAtMs,
+                        DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_MONTH,
+                    ),
+                )
+            }
+            val canSync = isOnline && !uiState.isSyncing
+            PreferenceRow(
+                title = stringResource(R.string.settings_sync_now_title),
+                subtitle = syncSubtitle,
+                onClick = if (canSync) viewModel::syncNow else null,
+                modifier = Modifier.padding(top = 12.dp),
+            ) {
+                if (uiState.isSyncing) {
+                    CircularProgressIndicator(
+                        color = WaypointTerracotta,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(20.dp),
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.settings_sync_now_action),
+                        color = if (canSync) WaypointTerracotta else WaypointTextMuted,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
             }
 
             // calls `Box` with an argument list that continues on the following lines
@@ -588,6 +593,7 @@ fun SettingsScreen(
                                 LocaleListCompat.forLanguageTags(selectedLanguage.localeTag),
                             // closes the multi-line argument list started above
                             )
+                            AppSettings.markLanguageChanged()
                             // assigns `showLanguageModal` the value `false`
                             showLanguageModal = false
                         // closes the block
@@ -602,6 +608,24 @@ fun SettingsScreen(
         }
 
         // `if` statement: the block below runs when `showLogoutModal` is true
+        if (showCurrencyModal) {
+            Dialog(
+                onDismissRequest = { showCurrencyModal = false },
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+            ) {
+                Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                    CurrencyModal(
+                        selectedCode = pendingCurrency,
+                        onCurrencySelected = { pendingCurrency = it },
+                        onSaveClick = {
+                            AppSettings.setDefaultCurrency(pendingCurrency)
+                            showCurrencyModal = false
+                        },
+                    )
+                }
+            }
+        }
+
         if (showLogoutModal) {
             // calls `LogoutConfirmationModal` with an argument list that continues on the following lines
             LogoutConfirmationModal(

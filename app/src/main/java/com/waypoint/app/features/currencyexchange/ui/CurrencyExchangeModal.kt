@@ -147,7 +147,8 @@ fun currencyInfo(code: String): CurrencyInfo = when (code.uppercase()) {
 }
 
 // declares private read-only property `SUPPORTED_CURRENCIES`, initialised with the result of calling `listOf(…)`
-private val SUPPORTED_CURRENCIES = listOf(
+/** Currencies the converter and the Settings "home currency" picker offer. */
+val SUPPORTED_CURRENCIES = listOf(
     // continues the statement started above: `"USD", "EUR", "GBP", "ZAR", "JPY", "AUD", "CAD", "CHF", "CNY",`
     "USD", "EUR", "GBP", "ZAR", "JPY", "AUD", "CAD", "CHF", "CNY",
     // continues the statement started above: `"INR", "BRL", "MXN", "SGD", "HKD", "NOK", "SEK", "DKK",`
