@@ -278,7 +278,7 @@ The language picker in Settings uses `AppCompatDelegate.setApplicationLocales()`
 
 ## Security
 
-- No API keys, passwords or keystores are committed. `.gitignore` excludes `apikey.properties`, `keystore.properties`, `*.jks`, `*.keystore`, `local.properties` and `.env`. The only keystore in the repo is the deliberately public CI signing key described in [`ci/README.md`](ci/README.md).
+- No API keys, passwords or keystores are committed. `.gitignore` excludes `apikey.properties`, `keystore.properties`, `*.jks`, `*.keystore`, `local.properties` and `.env`. The release signing key is kept as encrypted GitHub repository secrets, never in the repository.
 - `google-services.json` is committed, as Firebase recommends. It identifies the project and holds no secrets.
 - Every API route checks the Firebase ID token and filters data by the user id taken from it.
 - No password is ever stored on the phone. Biometric unlock only gates an existing Firebase session.
@@ -402,7 +402,12 @@ cd api && npm test
 
 ### Release pipeline ([`release.yml`](.github/workflows/release.yml))
 
-Every push to `main` builds a signed release bundle with R8, uploads it as a workflow artifact and, if the version has not been released before, creates a GitHub Release tagged `v<versionName>`. CI signs with the throwaway key in [`ci/`](ci/README.md), so the pipeline needs no secrets. The Play upload key stays on the maintainer's machine.
+The release workflow builds a signed APK (for installing on a phone) and a signed App Bundle (for Google Play) with R8, and checks the APK's signature.
+
+- **Every push to `main`** builds both files as a workflow artifact, so each merge proves the release build still works.
+- **Pushing a version tag** (e.g. `v1.0.0-final-poe`) also creates the GitHub Release for that tag, with the APK, the AAB, the R8 mapping file and [`docs/release-notes.md`](docs/release-notes.md) as its description.
+
+Builds are signed with our upload key, which is stored as encrypted GitHub repository secrets (`RELEASE_KEYSTORE_BASE64`, `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`) and only written to the build machine for the length of the job. It is never committed. If the secrets are missing (for example on a fork), the build is left unsigned and no release is published.
 
 ---
 
@@ -428,7 +433,7 @@ Everything for the Play listing is in the [`store-listing`](store-listing/README
 
 ## Release notes
 
-Release notes for each version, listing everything new, improved and fixed since the Part 2 prototype, are published with the release on GitHub: [Releases](https://github.com/JoshRobertsZA/PROG7314/releases).
+The release notes for the final version, listing everything new, improved and fixed since the Part 2 prototype and which of our user-defined features were added, are in [`docs/release-notes.md`](docs/release-notes.md). The same notes are published with the signed APK and AAB on the [GitHub Release](https://github.com/JoshRobertsZA/PROG7314/releases).
 
 ---
 
