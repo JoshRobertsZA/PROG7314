@@ -61,8 +61,8 @@ android {
     defaultConfig {
         // assigns `applicationId` the value `"com.waypoint.app"`
         applicationId = "com.waypoint.app"
-        // assigns `minSdk` the value `24`
-        minSdk = 24
+        // Android 8.0+: java.time is used throughout for trip dates
+        minSdk = 26
         // assigns `targetSdk` the value `36`
         targetSdk = 36
         // assigns `versionCode` the value `1`
@@ -319,6 +319,7 @@ android {
         implementation(libs.androidx.core.splashscreen)
         // calls `implementation` with arguments `(libs.coil.compose)`
         implementation(libs.coil.compose)
+        implementation(libs.androidx.datastore.preferences)
 // closes the block
     }
 }
