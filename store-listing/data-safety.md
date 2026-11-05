@@ -9,7 +9,7 @@ Use these answers in Play Console > App content > Data safety.
 | Does the app collect or share user data? | Yes |
 | Is all data encrypted in transit? | Yes (HTTPS) |
 | Can users request data deletion? | Yes, in app (Profile > Delete account) |
-| Account creation methods | Email and password, Google sign-in |
+| Account creation methods | Email and password, Google sign-in, GitHub sign-in |
 | Privacy policy URL | https://st10438409-emeris.github.io/waypoint-privacy/ |
 
 ## Data types collected
@@ -20,7 +20,8 @@ Use these answers in Play Console > App content > Data safety.
 | Personal info | Name | Yes | No | Account management, app functionality | No |
 | Location | Approximate location | Yes | Yes (LocationIQ, OpenWeatherMap) | App functionality | Yes |
 | Location | Precise location | Yes | Yes (LocationIQ) | App functionality | Yes |
-| App activity | Other user-generated content (trips, itinerary, flights, lodging) | Yes | No | App functionality | No |
+| App activity | Other user-generated content (trips, itinerary, flights, lodging, car rentals, places and notes) | Yes | No | App functionality | No |
+| App activity | Other actions (app settings: theme, language, notification choices, home currency) | Yes | No | App functionality, personalisation | No |
 | Photos and videos | Profile photo link | Yes | No | Account management | Yes |
 | Device or other IDs | FCM device token | Yes | No | App functionality (notifications) | No |
 
@@ -40,7 +41,7 @@ Financial info, health and fitness, messages, audio, files, contacts, calendar, 
 | INTERNET | Sync trips and call APIs |
 | ACCESS_NETWORK_STATE | Detect offline mode |
 | ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION | Nearby places in Explore (runtime prompt, optional) |
-| POST_NOTIFICATIONS | Trip reminders (runtime prompt on Android 13+) |
+| POST_NOTIFICATIONS | Trip updates and trip reminders (runtime prompt on Android 13+, each type can be switched off in Settings) |
 
 ## Open items for the team
 

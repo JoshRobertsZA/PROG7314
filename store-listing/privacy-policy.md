@@ -1,6 +1,6 @@
 # Waypoint Privacy Policy
 
-Last updated: 3 November 2026
+Last updated: 5 November 2026
 
 Waypoint is a trip planning app built by Marcus, Grace, Joshua and Dylan as a student project at The IIE Emeris School of Computer Science. This policy explains what the app collects, why, and what you can do about it.
 
@@ -8,7 +8,9 @@ Contact: ST10438409@myemeris.edu.za
 
 ## What we collect
 
-**Account details.** When you sign in with email or Google we receive your email address, display name and profile photo link. Sign-in is handled by Firebase Authentication.
+**Account details.** When you sign in with email, Google or GitHub we receive your email address, display name and profile photo link. Sign-in is handled by Firebase Authentication.
+
+**App settings.** Your theme, language, notification choices and home currency are saved to our server so they follow you to another device. The biometric lock setting stays on your phone only.
 
 **Trip content you create.** Trips, itinerary days, flights, lodging, car hire, saved places and notifications. This is stored on your device and synced to our server so it is available after a reinstall or on another device.
 
@@ -44,9 +46,9 @@ Data is sent over HTTPS. Passwords are handled by Firebase and never stored by u
 
 ## Your choices
 
-- **Delete your account and data:** use delete account in Profile. This removes your account and the trip data stored on our server.
+- **Delete your account and data:** use delete account in Profile. This removes your account and the trips, itinerary, settings and notification tokens stored on our server, and the copy on your phone.
 - **Location:** you can deny or revoke location permission in system settings. Explore still works with a searched city.
-- **Notifications:** you can turn them off in system settings.
+- **Notifications:** you can turn trip updates and trip reminders off separately in the app's Settings, or all notifications off in system settings.
 - **Backup:** Android may back up app data to your Google account if you have device backup turned on. You control this in your device settings.
 
 ## Children

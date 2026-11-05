@@ -295,7 +295,7 @@ The language picker in Settings uses `AppCompatDelegate.setApplicationLocales()`
 
 | Live flight status | Currency converter |
 |---|---|
-| ![Flight status](assets/store/phone/05-flight-status.png) | ![Currency converter](assets/store/phone/06-currency.png) |
+| ![Flight status](store-listing/screenshots/05-flight-status.png) | ![Currency converter](store-listing/screenshots/06-currency.png) |
 
 ### Dark mode
 
@@ -408,10 +408,17 @@ Every push to `main` builds a signed release bundle with R8, uploads it as a wor
 
 ## Play Store preparation
 
-- Application id `com.waypoint.app`, version `1.0.0` (code 1), R8 minification on for release.
-- Signed release AAB and APK built with our own upload keystore, kept outside the repository; `keystore.properties.example` shows the expected fields.
-- Store listing text, privacy policy, data safety answers and content rating are in [`docs/store`](docs/store); graphics are in [`assets/store`](assets/store).
-- Privacy policy: <https://st10438409-emeris.github.io/waypoint-privacy/>
+Everything for the Play listing is in the [`store-listing`](store-listing/README.md) folder:
+
+- **Listing text** ([listing.md](store-listing/listing.md)): app name, short and full description within Google's character limits, category, contact details and "What's new" text
+- **Graphics**: a [512 × 512 icon](store-listing/graphics/icon-512.png), a [1024 × 500 feature graphic](store-listing/graphics/feature-graphic.png) and [phone screenshots](store-listing/screenshots) of real screens
+- **Policies**: [privacy policy](store-listing/privacy-policy.md) (published at <https://st10438409-emeris.github.io/waypoint-privacy/>), [Data safety answers](store-listing/data-safety.md) and the [content rating questionnaire](store-listing/content-rating.md) (Everyone / PEGI 3)
+- **Signed build**: application id `com.waypoint.app`, version `1.0.0` (code 1), R8 on. The release AAB and APK are signed with our own upload keystore, kept outside the repository (`keystore.properties.example` shows the fields), and attached to the GitHub Release.
+- **Launcher icon**: an adaptive icon built from the Waypoint pin, with a monochrome layer for Android 13 themed icons
+
+| | |
+|---|---|
+| ![Store icon](store-listing/graphics/icon-512.png) | ![Feature graphic](store-listing/graphics/feature-graphic.png) |
 
 | Signing key | Release variant | Build successful | Signed APK |
 |---|---|---|---|
