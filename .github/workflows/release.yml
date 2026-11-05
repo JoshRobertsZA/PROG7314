@@ -7,9 +7,9 @@ name: Release
 # - Pushing to main builds the same files as a workflow artifact, so every merge is checked, but makes
 #   no release.
 #
-# Signing: if the RELEASE_* repository secrets are set, the build is signed with our own upload key.
-# Without them it falls back to the public CI test key in ci/ (see ci/README.md) and says so in the
-# run summary; a build signed that way is not a production build.
+# Signing: the build is signed with our upload key, stored as the RELEASE_* repository secrets and only
+# written to the runner for the length of the job. Without the secrets (e.g. on a fork) the build is
+# left unsigned, which still checks that R8 works, and no release is published.
 on:
   push:
     branches: [main]
@@ -74,21 +74,16 @@ jobs:
             echo "key=upload" >> "$GITHUB_OUTPUT"
             echo "Signed with the Waypoint upload key (from repository secrets)." >> "$GITHUB_STEP_SUMMARY"
           else
-            {
-              echo "storeFile=ci/ci-release.jks"
-              echo "storePassword=waypoint-ci"
-              echo "keyAlias=ci"
-              echo "keyPassword=waypoint-ci"
-            } > keystore.properties
-            echo "key=ci" >> "$GITHUB_OUTPUT"
-            echo "::warning::RELEASE_* secrets are not set, so this build is signed with the public CI test key, not the upload key."
-            echo "Signed with the public CI test key - not a production build." >> "$GITHUB_STEP_SUMMARY"
+            echo "key=none" >> "$GITHUB_OUTPUT"
+            echo "::warning::RELEASE_* secrets are not set, so this build is unsigned and cannot be released."
+            echo "Unsigned build: the RELEASE_* secrets are not set." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Build the signed APK and bundle
         run: ./gradlew assembleRelease bundleRelease --stacktrace
 
       - name: Check the APK signature
+        if: steps.signing.outputs.key == 'upload'
         run: |
           APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)
           "$APKSIGNER" verify --print-certs app/build/outputs/apk/release/app-release.apk | tee -a "$GITHUB_STEP_SUMMARY"
@@ -96,7 +91,9 @@ jobs:
       - name: Name the files after the version
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/release/app-release.apk "dist/waypoint-${{ steps.version.outputs.name }}.apk"
+          # Gradle names the APK app-release-unsigned.apk when there is no signing key.
+          APK=$(ls app/build/outputs/apk/release/app-release*.apk | head -n 1)
+          cp "$APK" "dist/waypoint-${{ steps.version.outputs.name }}.apk"
           cp app/build/outputs/bundle/release/app-release.aab "dist/waypoint-${{ steps.version.outputs.name }}.aab"
           if [ -f app/build/outputs/mapping/release/mapping.txt ]; then
             cp app/build/outputs/mapping/release/mapping.txt "dist/waypoint-${{ steps.version.outputs.name }}-mapping.txt"
@@ -105,7 +102,7 @@ jobs:
       - name: Upload the files as a workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: waypoint-${{ steps.version.outputs.name }}-${{ steps.signing.outputs.key }}-signed
+          name: release-${{ steps.version.outputs.name }}-${{ steps.signing.outputs.key == 'upload' && 'signed' || 'unsigned' }}
           path: dist/*
           retention-days: 30
 
@@ -117,7 +114,7 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           if [ "${{ steps.signing.outputs.key }}" != "upload" ]; then
-            echo "::error::Refusing to publish a release signed with the CI test key. Add the RELEASE_* secrets and re-run."
+            echo "::error::Refusing to publish an unsigned release. Add the RELEASE_* secrets and re-run."
             exit 1
           fi
           if gh release view "$TAG" > /dev/null 2>&1; then
