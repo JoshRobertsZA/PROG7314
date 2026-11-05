@@ -387,31 +387,6 @@ class TripRepository(context: Context) {
     // closes the block
     }
 
-    // declares suspend function `syncTripCreate` taking 2 parameters (`idToken`, `tripId`); its body is the expression `withContext(Dispatchers.IO) {`
-    suspend fun syncTripCreate(idToken: String, tripId: String) = withContext(Dispatchers.IO) {
-        // declares read-only property `trip`, initialised with the result of calling `getTripById(…)`
-        val trip = getTripById(tripId) ?: return@withContext
-        // calls `createTrip` on `WaypointApiRepository` with arguments `(idToken, trip)`
-        WaypointApiRepository.createTrip(idToken, trip)
-    // closes the block
-    }
-
-    // declares suspend function `syncTripUpdate` taking 2 parameters (`idToken`, `tripId`); its body is the expression `withContext(Dispatchers.IO) {`
-    suspend fun syncTripUpdate(idToken: String, tripId: String) = withContext(Dispatchers.IO) {
-        // declares read-only property `trip`, initialised with the result of calling `getTripById(…)`
-        val trip = getTripById(tripId) ?: return@withContext
-        // calls `updateTrip` on `WaypointApiRepository` with arguments `(idToken, trip)`
-        WaypointApiRepository.updateTrip(idToken, trip)
-    // closes the block
-    }
-
-    // declares suspend function `syncTripDelete` taking 2 parameters (`idToken`, `tripId`); its body is the expression `withContext(Dispatchers.IO) {`
-    suspend fun syncTripDelete(idToken: String, tripId: String) = withContext(Dispatchers.IO) {
-        // calls `deleteTrip` on `WaypointApiRepository` with arguments `(idToken, tripId)`
-        WaypointApiRepository.deleteTrip(idToken, tripId)
-    // closes the block
-    }
-
     // declares suspend function `pullAndMergeTrips` taking 2 parameters (`idToken`, `accountId`); its body is the expression `withContext(Dispatchers.IO) {`
     // Was CONFLICT_IGNORE (local always wins, cloud edits/deletes from
     // other devices never applied - the audit's original finding). Now a
