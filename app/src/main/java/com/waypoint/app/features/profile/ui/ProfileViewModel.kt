@@ -122,6 +122,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
         val deletedAccountId = SessionManager.accountId
         AuthRepository.deleteCurrentUser()
+        AuthRepository.signOut(getApplication())
         // the privacy policy promises deletion, so the copy on this phone goes too
         withContext(Dispatchers.IO) {
             WaypointDbHelper.getInstance(getApplication<Application>()).deleteAccountData(deletedAccountId)

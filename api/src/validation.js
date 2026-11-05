@@ -40,6 +40,48 @@ function isValidLng(lng) {
   return typeof lng === 'number' && lng >= -180 && lng <= 180;
 }
 
+// Matches AppLanguage in the Android app.
+const SUPPORTED_LANGUAGES = ['en', 'zu', 'xh'];
+const CURRENCY_PATTERN = /^[A-Z]{3}$/;
+
+const SETTINGS_DEFAULTS = Object.freeze({
+  darkMode: null,
+  notifyTripUpdates: true,
+  notifyReminders: true,
+  defaultCurrency: 'ZAR',
+  language: 'en',
+  updatedAtMs: 0,
+});
+
+// Checks a PUT /account/settings body field by field and returns either
+// { settings } containing only the known fields, or { error } with a
+// message for a 400 response.
+function validateSettings(body) {
+  if (body == null || typeof body !== 'object' || Array.isArray(body)) {
+    return { error: 'Request body must be a JSON object' };
+  }
+  const { darkMode, notifyTripUpdates, notifyReminders, defaultCurrency, language, updatedAtMs } = body;
+
+  if (darkMode !== null && typeof darkMode !== 'boolean') {
+    return { error: 'darkMode must be true, false or null' };
+  }
+  if (typeof notifyTripUpdates !== 'boolean') return { error: 'notifyTripUpdates must be a boolean' };
+  if (typeof notifyReminders !== 'boolean') return { error: 'notifyReminders must be a boolean' };
+  if (typeof defaultCurrency !== 'string' || !CURRENCY_PATTERN.test(defaultCurrency)) {
+    return { error: 'defaultCurrency must be a 3-letter ISO 4217 code, e.g. ZAR' };
+  }
+  if (!SUPPORTED_LANGUAGES.includes(language)) {
+    return { error: `language must be one of: ${SUPPORTED_LANGUAGES.join(', ')}` };
+  }
+  if (!Number.isInteger(updatedAtMs) || updatedAtMs < 0) {
+    return { error: 'updatedAtMs must be a non-negative integer (milliseconds since epoch)' };
+  }
+
+  return {
+    settings: { darkMode, notifyTripUpdates, notifyReminders, defaultCurrency, language, updatedAtMs },
+  };
+}
+
 module.exports = {
   UUID_PATTERN,
   isValidId,
@@ -48,4 +90,6 @@ module.exports = {
   isValidDateOrder,
   isValidLat,
   isValidLng,
+  SETTINGS_DEFAULTS,
+  validateSettings,
 };

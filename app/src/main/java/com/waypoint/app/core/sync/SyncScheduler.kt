@@ -3,38 +3,58 @@ package com.waypoint.app.core.sync
 import android.content.Context
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.util.concurrent.TimeUnit
 
-// Not called from anywhere yet - the actual trigger points (login,
-// reconnect, pull-to-refresh) are a separate commit. This just defines how
-// a sync run is requested once something does call enqueue().
+/**
+ * Schedules [SyncWorker]. A one-off run is queued after every local change and on
+ * reconnect; a 15-minute periodic run is the safety net if a one-off is missed.
+ * Both require a network connection, so offline changes wait in the outbox.
+ */
 object SyncScheduler {
 
     private const val WORK_NAME = "outbox_sync"
+    private const val PERIODIC_WORK_NAME = "outbox_sync_periodic"
 
+    private val networkConstraint = Constraints.Builder()
+        .setRequiredNetworkType(NetworkType.CONNECTED)
+        .build()
+
+    /**
+     * Queues a sync. APPEND_OR_REPLACE chains it after a run already in progress, so a
+     * change saved mid-sync is still uploaded (KEEP would have dropped this request).
+     */
     fun enqueue(context: Context) {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-
         val request = OneTimeWorkRequestBuilder<SyncWorker>()
-            .setConstraints(constraints)
-            // WorkManager's minimum allowed backoff is 10 seconds; this
-            // doubles on each retry (LINEAR would just add 10s each time,
-            // which floods a genuinely-down server for longer before
-            // backing off meaningfully).
+            .setConstraints(networkConstraint)
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.SECONDS)
             .build()
 
-        // KEEP, not REPLACE: if a sync is already queued or running,
-        // another enqueue() call (e.g. two screens both triggering a sync)
-        // shouldn't cancel its progress and restart from the front of the
-        // outbox.
         WorkManager.getInstance(context.applicationContext)
-            .enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, request)
+            .enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.APPEND_OR_REPLACE, request)
     }
+
+    fun ensurePeriodic(context: Context) {
+        val request = PeriodicWorkRequestBuilder<SyncWorker>(15, TimeUnit.MINUTES)
+            .setConstraints(networkConstraint)
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
+            .build()
+
+        WorkManager.getInstance(context.applicationContext)
+            .enqueueUniquePeriodicWork(PERIODIC_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
+    }
+
+    /** True while a one-off sync is running or waiting to run. */
+    fun isSyncing(context: Context): Flow<Boolean> =
+        WorkManager.getInstance(context.applicationContext)
+            .getWorkInfosForUniqueWorkFlow(WORK_NAME)
+            .map { infos -> infos.any { it.state == WorkInfo.State.RUNNING } }
 }

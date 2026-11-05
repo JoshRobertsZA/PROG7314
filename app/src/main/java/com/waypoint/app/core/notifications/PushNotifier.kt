@@ -3,6 +3,7 @@ package com.waypoint.app.core.notifications
 
 // imports `android.Manifest` for use in this file
 import android.Manifest
+import android.annotation.SuppressLint
 // imports `android.app.PendingIntent` for use in this file
 import android.app.PendingIntent
 // imports `android.content.Context` for use in this file
@@ -40,10 +41,20 @@ object PushNotifier {
     // declares private read-only property `ioScope`, initialised with the result of calling `CoroutineScope(…)`
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    // declares function `show` taking 4 parameters (`context`, `title`, `body`, `extras`) and opens its body
-    fun show(context: Context, title: String, body: String, extras: Map<String, String> = emptyMap()) {
-        // `if` statement: executes `return` when `!NotificationPreferences.isEnabled(context)` is true
-        if (!NotificationPreferences.isEnabled(context)) return
+    /**
+     * Shows a notification of [type] unless the user switched that type off in Settings.
+     * A `tripId` in [extras] makes a tap open that trip (handled in MainActivity).
+     */
+    // hasPermission() is checked at the top of this function; lint can't follow that.
+    @SuppressLint("MissingPermission")
+    fun show(
+        context: Context,
+        type: NotificationType,
+        title: String,
+        body: String,
+        extras: Map<String, String> = emptyMap(),
+    ) {
+        if (!NotificationPreferences.isEnabled(type)) return
         // `if` statement: executes `return` when `!hasPermission(context)` is true
         if (!hasPermission(context)) return
 
@@ -69,7 +80,7 @@ object PushNotifier {
         )
 
         // declares read-only property `notification`, initialised with the result of calling `NotificationCompat.Builder(…)`
-        val notification = NotificationCompat.Builder(context, NotificationChannels.defaultChannelId(context))
+        val notification = NotificationCompat.Builder(context, NotificationChannels.channelId(context, type))
             // chained call `.setSmallIcon` on the previous result with arguments `(R.drawable.ic_bell)`
             .setSmallIcon(R.drawable.ic_bell)
             // chained call `.setContentTitle` on the previous result with arguments `(title)`

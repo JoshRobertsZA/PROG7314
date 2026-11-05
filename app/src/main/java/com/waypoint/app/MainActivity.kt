@@ -83,6 +83,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.compose.rememberNavController
 // imports `com.waypoint.app.core.auth.AuthRepository` for use in this file
 import com.waypoint.app.core.auth.AuthRepository
+import com.waypoint.app.core.auth.SessionEvents
 // imports `com.waypoint.app.core.auth.AuthViewModel` for use in this file
 import com.waypoint.app.core.auth.AuthViewModel
 // imports `com.waypoint.app.core.auth.BiometricAuthenticator` for use in this file
@@ -117,8 +118,6 @@ import com.waypoint.app.core.sync.SyncScheduler
 import com.waypoint.app.core.theme.WaypointTheme
 // imports `com.waypoint.app.R` for use in this file
 import com.waypoint.app.R
-// imports `com.waypoint.app.features.alltrips.ui.AllTripsScreen` for use in this file
-import com.waypoint.app.features.alltrips.ui.AllTripsScreen
 // imports `com.waypoint.app.features.edititinerary.ui.EditItineraryScreen` for use in this file
 import com.waypoint.app.features.edititinerary.ui.EditItineraryScreen
 // imports `com.waypoint.app.features.edititinerary.ui.EditItineraryViewModel` for use in this file
@@ -127,20 +126,10 @@ import com.waypoint.app.features.edititinerary.ui.EditItineraryViewModel
 import com.waypoint.app.features.placepicker.ui.PlaceDetailPickerScreen
 // imports `com.waypoint.app.features.placepicker.ui.PlacePickerScreen` for use in this file
 import com.waypoint.app.features.placepicker.ui.PlacePickerScreen
-// imports `com.waypoint.app.features.explore.ui.ExploreScreen` for use in this file
-import com.waypoint.app.features.explore.ui.ExploreScreen
-// imports `com.waypoint.app.features.explore.ui.ExploreViewModel` for use in this file
-import com.waypoint.app.features.explore.ui.ExploreViewModel
-// imports `com.waypoint.app.features.main.ui.MainScreen` for use in this file
-import com.waypoint.app.features.main.ui.MainScreen
 // imports `com.waypoint.app.features.newtrip.ui.NewTripScreen` for use in this file
 import com.waypoint.app.features.newtrip.ui.NewTripScreen
 // imports `com.waypoint.app.features.notifications.ui.NotificationsScreen` for use in this file
 import com.waypoint.app.features.notifications.ui.NotificationsScreen
-// imports `com.waypoint.app.features.placedetail.ui.PlaceDetailScreen` for use in this file
-import com.waypoint.app.features.placedetail.ui.PlaceDetailScreen
-// imports `com.waypoint.app.features.settings.ui.SettingsScreen` for use in this file
-import com.waypoint.app.features.settings.ui.SettingsScreen
 // imports `com.waypoint.app.features.splash.ui.SplashScreen` for use in this file
 import com.waypoint.app.features.splash.ui.SplashScreen
 // imports `com.waypoint.app.features.tripcalendar.ui.TripCalendarScreen` for use in this file
@@ -285,6 +274,16 @@ private fun WaypointNavHost(
     LaunchedEffect(isOnline) {
         if (isOnline) SyncScheduler.enqueue(context)
     }
+
+    // The API rejected our token (revoked, disabled or deleted account), so end the session.
+    LaunchedEffect(Unit) {
+        SessionEvents.unauthorized.collect {
+            if (!AuthRepository.isSignedIn) return@collect
+            authViewModel.signOut()
+            android.widget.Toast.makeText(context, R.string.session_expired, android.widget.Toast.LENGTH_LONG).show()
+            navController.navigate(Routes.Welcome) { popUpTo(0) { inclusive = true } }
+        }
+    }
     // declares read-only property `activity`, initialised to `context as FragmentActivity`
     val activity = context as FragmentActivity
 
@@ -296,7 +295,7 @@ private fun WaypointNavHost(
     // declares function `armBiometricLockIfNeeded` taking no parameters and opens its body
     fun armBiometricLockIfNeeded() {
         // calls `if` with an argument list that continues on the following lines
-        if (BiometricLockPreferences.isEnabled(context) &&
+        if (BiometricLockPreferences.isEnabled() &&
             // continues the statement started above: `BiometricAuthenticator.availability(context) == BiometricAv…`
             BiometricAuthenticator.availability(context) == BiometricAvailability.AVAILABLE
         // ends the argument list started above and opens the block that follows
@@ -403,34 +402,6 @@ private fun WaypointNavHost(
             SplashScreen(onFinished = { splashAnimationDone = true })
         // closes the lambda passed to `composable`
         }
-        // calls `composable` with arguments `(Routes.Main)` and opens a trailing lambda / block
-        composable(Routes.Main) {
-            // calls `MainScreen` with an argument list that continues on the following lines
-            MainScreen(
-                // continues the statement started above: `onGoToWelcomeClick = { navController.navigate(Routes.Welcom…`
-                onGoToWelcomeClick = { navController.navigate(Routes.Welcome) },
-                // continues the statement started above: `onGoToTripCalendarClick = { navController.navigate(Routes.t…`
-                onGoToTripCalendarClick = { navController.navigate(Routes.tripCalendar("__scratch__")) },
-                // continues the statement started above: `onGoToViewItineraryClick = { navController.navigate(Routes.…`
-                onGoToViewItineraryClick = { navController.navigate(Routes.viewItinerary("__scratch__")) },
-                // continues the statement started above: `onGoToEditItineraryClick = { navController.navigate(Routes.…`
-                onGoToEditItineraryClick = { navController.navigate(Routes.editItinerary("__scratch__")) },
-                // continues the statement started above: `onGoToAllTripsClick = { navController.navigate(Routes.AllTr…`
-                onGoToAllTripsClick = { navController.navigate(Routes.AllTrips) },
-                // continues the statement started above: `onGoToSettingsClick = { navController.navigate(Routes.Setti…`
-                onGoToSettingsClick = { navController.navigate(Routes.Settings) },
-                // continues the statement started above: `onGoToExploreClick = { navController.navigate(Routes.Explor…`
-                onGoToExploreClick = { navController.navigate(Routes.Explore) },
-                // continues the statement started above: `onGoToHomeClick = { navController.navigate(Routes.Home) },`
-                onGoToHomeClick = { navController.navigate(Routes.Home) },
-                // continues the statement started above: `onGoToNotificationsClick = { navController.navigate(Routes.…`
-                onGoToNotificationsClick = { navController.navigate(Routes.Notifications) },
-                // continues the statement started above: `onGoToPlaceDetailClick = { navController.navigate(Routes.Pl…`
-                onGoToPlaceDetailClick = { navController.navigate(Routes.PlaceDetail) },
-            // closes the multi-line argument list started above
-            )
-        // closes the lambda passed to `composable`
-        }
         // calls `composable` with arguments `(Routes.Welcome)` and opens a trailing lambda / block
         composable(Routes.Welcome) {
             // calls `WelcomeScreen` with an argument list that continues on the following lines
@@ -500,6 +471,7 @@ private fun WaypointNavHost(
                 // continues the statement started above: `onNotificationsClick = { navController.navigate(Routes.Noti…`
                 onNotificationsClick = { navController.navigate(Routes.Notifications) },
                 onEditProfileClick = { navController.navigate(Routes.EditProfile) },
+                onRequestNotificationPermission = onRequestNotificationPermission,
                 // continues the statement started above: `onLogoutClick = {`
                 onLogoutClick = {
                     // calls `signOut` on `authViewModel` with arguments `()`
@@ -557,20 +529,6 @@ private fun WaypointNavHost(
             // closes the multi-line argument list started above
             )
         // closes the block
-        }
-        // calls `composable` with arguments `(Routes.AllTrips)` and opens a trailing lambda / block
-        composable(Routes.AllTrips) {
-            // calls `AllTripsScreen` with an argument list that continues on the following lines
-            AllTripsScreen(
-                // continues the statement started above: `onBackClick = { navController.popBackStack() },`
-                onBackClick    = { navController.popBackStack() },
-                // continues the statement started above: `onNewTripClick = { navController.navigate(Routes.NewTrip) },`
-                onNewTripClick = { navController.navigate(Routes.NewTrip) },
-                // continues the statement started above: `onTripClick = { tripId -> navController.navigate(Routes.tri…`
-                onTripClick    = { tripId -> navController.navigate(Routes.tripCalendar(tripId)) },
-            // closes the multi-line argument list started above
-            )
-        // closes the lambda passed to `composable`
         }
         // calls `composable` with an argument list that continues on the following lines
         composable(
@@ -634,35 +592,6 @@ private fun WaypointNavHost(
             )
         // closes the block
         }
-        // calls `composable` with arguments `(Routes.Explore)` and opens a trailing lambda / block
-        composable(Routes.Explore) {
-            // calls `ExploreScreen` with arguments `(exploreViewModel = viewModel<ExploreViewMode…)`
-            ExploreScreen(exploreViewModel = viewModel<ExploreViewModel>())
-        // closes the lambda passed to `composable`
-        }
-        // calls `composable` with arguments `(Routes.Settings)` and opens a trailing lambda / block
-        composable(Routes.Settings) {
-            // calls `SettingsScreen` with an argument list that continues on the following lines
-            SettingsScreen(
-                // continues the statement started above: `onRequestNotificationPermission = onRequestNotificationPerm…`
-                onRequestNotificationPermission = onRequestNotificationPermission,
-                // continues the statement started above: `onLogoutClick = {`
-                onLogoutClick = {
-                    // calls `signOut` on `authViewModel` with arguments `()`
-                    authViewModel.signOut()
-                    // calls `navigate` on `navController` with arguments `(Routes.Welcome)` and opens a trailing lambda / block
-                    navController.navigate(Routes.Welcome) {
-                        // calls `popUpTo` with arguments `(0)`
-                        popUpTo(0) { inclusive = true }
-                    // closes the lambda passed to `navigate`
-                    }
-                // closes the block
-                },
-                onEditProfileClick = { navController.navigate(Routes.EditProfile) },
-            // closes the multi-line argument list started above
-            )
-        // closes the lambda passed to `composable`
-        }
         composable(Routes.EditProfile) {
             val profileViewModel: ProfileViewModel = viewModel()
             val profileUiState by profileViewModel.uiState.collectAsState()
@@ -699,12 +628,6 @@ private fun WaypointNavHost(
                     errorMessage = deleteAccountUiState.errorMessage,
                 )
             }
-        }
-        // calls `composable` with arguments `(Routes.PlaceDetail)` and opens a trailing lambda / block
-        composable(Routes.PlaceDetail) {
-            // calls `PlaceDetailScreen` with arguments `(onBackClick = { navController.popBackStack()…)`
-            PlaceDetailScreen(onBackClick = { navController.popBackStack() })
-        // closes the lambda passed to `composable`
         }
         // calls `composable` with arguments `(Routes.Notifications)` and opens a trailing lambda / block
         composable(Routes.Notifications) {

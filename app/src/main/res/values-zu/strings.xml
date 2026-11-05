@@ -18,7 +18,7 @@
     doesn't work and needs a native speaker to pick a real abbreviation
     convention (e.g. two letters) rather than a guess.
 -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="brand_tagline">Hlela indlela. Gcina indaba.</string>
 
     <string name="main_go_to_trip_calendar">Iya kukhalenda lohambo</string>
@@ -144,8 +144,6 @@
         <item quantity="other">%d izinguquko ezilindele ukuvumelaniswa</item>
     </plurals>
     <string name="profile_preferences_header">Okuncanyelwayo</string>
-    <string name="profile_notifications_title">Izaziso</string>
-    <string name="profile_notifications_subtitle">Izexwayiso zendiza, isimo sezulu, nohambo</string>
     <string name="profile_language_title">Ulimi</string>
     <string name="profile_language_subtitle">Ulimi lokubonisa lohlelo lokusebenza</string>
     <string name="profile_biometric_title">Ukungena nge-biometric</string>
@@ -211,7 +209,10 @@
     <string name="edit_itinerary_flight_departs">Iyahamba %1$s</string>
 
     <!-- Scheduled trip reminders (TripReminderWorker) -->
-    <string name="reminder_countdown_title">Kusele izinsuku ezingu-%1$d!</string>
+    <plurals name="reminder_countdown_title">
+        <item quantity="one">Kusele usuku olu-%1$d!</item>
+        <item quantity="other">Kusele izinsuku ezingu-%1$d!</item>
+    </plurals>
     <string name="reminder_countdown_body">%1$s eya e-%2$s iyeza. Isikhathi sokubheka uhlelo lwakho.</string>
     <string name="reminder_no_plan_title">%1$s ezinsukwini ezi-5</string>
     <string name="reminder_no_plan_body">Awukahleli lutho lwe-%1$s. Vula uWaypoint ukwengeza uhlelo lwakho.</string>
@@ -278,7 +279,8 @@
         <item quantity="one">usuku olu-%d</item>
         <item quantity="other">izinsuku ezingu-%d</item>
     </plurals>
-    <plurals name="night_count_suffix">
+    <!-- A suffix shown after the number, so it cannot contain %d itself. -->
+    <plurals name="night_count_suffix" tools:ignore="ImpliedQuantity">
         <item quantity="one">ubusuku</item>
         <item quantity="other">ubusuku</item>
     </plurals>
@@ -406,4 +408,25 @@
     <string name="biometric_error_none_enrolled">Akukho ukuvala isikrini okusethiwe. Setha okukodwa kuzilungiselelo zefoni yakho.</string>
     <string name="biometric_error_generic">Ayikwazanga ukuvula. Sicela uzame futhi.</string>
 
+    <string name="session_expired">Iseshini yakho iphelile. Sicela ungene futhi.</string>
+    <string name="settings_notify_trip_updates_title">Izibuyekezo zohambo</string>
+    <string name="settings_notify_trip_updates_subtitle">Uma uhambo lushintsha kwenye idivayisi</string>
+    <string name="settings_notify_reminders_title">Izikhumbuzo zohambo</string>
+    <string name="settings_notify_reminders_subtitle">Ukubala izinsuku, izindiza, isimo sezulu nezinhlelo zansuku zonke</string>
+    <string name="settings_home_currency_title">Imali yasekhaya</string>
+    <string name="settings_home_currency_subtitle">Isiguquli esikuKhaya siguqulela kule mali</string>
+    <string name="settings_home_currency_modal_title">Imali yasekhaya</string>
+    <string name="settings_sync_header">Ukuvumelanisa</string>
+    <string name="settings_sync_now_title">Vumelanisa manje</string>
+    <string name="settings_sync_now_action">Vumelanisa</string>
+    <string name="settings_sync_last">Kugcine ukuvumelaniswa ngo-%1$s</string>
+    <string name="settings_sync_never">Akukavumelaniswa kule foni okwamanje</string>
+    <string name="settings_sync_in_progress">Kuyavumelaniswa…</string>
+    <string name="settings_sync_offline">Awuxhunyiwe. Izinguquko zizovumelaniswa uma uphinde uxhuma.</string>
+    <string name="notification_channel_reminders_name">Izikhumbuzo zohambo</string>
+    <string name="notification_channel_reminders_description">Ukubala izinsuku, izikhathi zezindiza, izexwayiso zesimo sezulu nezinhlelo zansuku zonke</string>
+    <string name="language_sub_english">IsiNgisi (okuzenzakalelayo)</string>
+    <string name="language_sub_zulu">isiZulu (iNingizimu Afrika)</string>
+    <string name="language_sub_xhosa">isiXhosa (iNingizimu Afrika)</string>
+    <string name="trip_pending_sync_cd">Kulindwe ukuvumelaniswa</string>
 </resources>

@@ -45,9 +45,22 @@ async function sendDataMessage(tokens, data) {
   return { successCount: resp.successCount, failureCount: resp.failureCount, pruned };
 }
 
+// True unless the user switched this kind of notification off in the app's
+// Settings (synced to the `settings` collection by PUT /account/settings).
+async function isEnabledFor(uid, settingKey) {
+  const doc = await db.collection('settings').doc(uid).get();
+  return !(doc.exists && doc.data()[settingKey] === false);
+}
+
+// opts.setting names the user preference that gates this push (e.g.
+// 'notifyTripUpdates'); when it is off nothing is sent.
 async function sendToUser(uid, data, opts = {}) {
+  if (opts.setting && !(await isEnabledFor(uid, opts.setting))) {
+    console.log(`push skipped for ${uid}: ${opts.setting} is off`);
+    return { successCount: 0, failureCount: 0, pruned: 0, skipped: true };
+  }
   const tokens = await getTokensForUser(uid, opts);
   return sendDataMessage(tokens, data);
 }
 
-module.exports = { sendToUser, sendDataMessage, getTokensForUser };
+module.exports = { sendToUser, sendDataMessage, getTokensForUser, isEnabledFor };

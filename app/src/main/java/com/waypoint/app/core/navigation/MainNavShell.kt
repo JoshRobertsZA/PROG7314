@@ -59,6 +59,7 @@ fun MainNavShell(
     // continues the statement started above: `onNotificationsClick: () -> Unit = {},`
     onNotificationsClick: () -> Unit = {},
     onEditProfileClick: () -> Unit = {},
+    onRequestNotificationPermission: () -> Unit = {},
     // continues the statement started above: `modifier: Modifier = Modifier,`
     modifier: Modifier = Modifier,
 // ends the argument list started above and opens the block that follows
@@ -179,6 +180,7 @@ fun MainNavShell(
                     // continues the statement started above: `onNotificationsClick = onNotificationsClick,`
                     onNotificationsClick = onNotificationsClick,
                     onEditProfileClick = onEditProfileClick,
+                    onRequestNotificationPermission = onRequestNotificationPermission,
                 // closes the multi-line argument list started above
                 )
             // closes the lambda passed to `composable`

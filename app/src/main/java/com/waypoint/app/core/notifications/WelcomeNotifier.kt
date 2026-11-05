@@ -35,8 +35,7 @@ object WelcomeNotifier {
             context.getString(R.string.notification_welcome_title)
         // closes the else branch
         }
-        // calls `show` on `PushNotifier` with arguments `(context, title, context.getString(R.string.n…)`
-        PushNotifier.show(context, title, context.getString(R.string.notification_welcome_body))
+        PushNotifier.show(context, NotificationType.TRIP_UPDATES, title, context.getString(R.string.notification_welcome_body))
         // assigns `shownThisProcess` the value `true`
         shownThisProcess = true
     // closes the function `notifyIfNeeded`

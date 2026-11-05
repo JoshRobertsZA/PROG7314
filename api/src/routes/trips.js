@@ -144,7 +144,7 @@ router.post('/', requireAuth, async (req, res) => {
     // it doesn't get notified about a trip it just created itself - only
     // the user's other devices do.
     const deviceToken = req.headers['x-device-token'];
-    sendToUser(req.user.uid, { type: 'trip_created', tripId: id }, { excludeToken: deviceToken })
+    sendToUser(req.user.uid, { type: 'trip_created', tripId: id }, { excludeToken: deviceToken, setting: 'notifyTripUpdates' })
       .catch(err => console.error('push on trip create failed:', err.message));
   } catch (err) {
     console.error('POST /trips error:', err);

@@ -80,14 +80,11 @@ private fun languageFlag(language: AppLanguage): String = when (language) {
 }
 
 // declares private function `languageSubLabel` taking 1 parameter (`language`), returning `String`; its body is the expression `when (language) {`
+@Composable
 private fun languageSubLabel(language: AppLanguage): String = when (language) {
-    // lambda `AppLanguage.ENGLISH -> "English (Default)"`
-    AppLanguage.ENGLISH -> "English (Default)"
-    // lambda `AppLanguage.ZULU -> "isiZulu (South Africa)"`
-    AppLanguage.ZULU -> "isiZulu (South Africa)"
-    // lambda `AppLanguage.XHOSA -> "isiXhosa (South Africa)"`
-    AppLanguage.XHOSA -> "isiXhosa (South Africa)"
-// closes the block
+    AppLanguage.ENGLISH -> stringResource(R.string.language_sub_english)
+    AppLanguage.ZULU -> stringResource(R.string.language_sub_zulu)
+    AppLanguage.XHOSA -> stringResource(R.string.language_sub_xhosa)
 }
 
 // annotation `@Composable` applied to the declaration that follows
@@ -119,9 +116,10 @@ fun LanguageModal(
             // expression: `AppLanguage.entries.forEach { language ->`
             AppLanguage.entries.forEach { language ->
                 // continues the statement started above: `LanguageOptionRow(`
-                LanguageOptionRow(
-                    // continues the statement started above: `language = language,`
-                    language = language,
+                SelectionOptionRow(
+                    flag = languageFlag(language),
+                    title = language.displayName,
+                    subtitle = languageSubLabel(language),
                     // continues the statement started above: `selected = language == selectedLanguage,`
                     selected = language == selectedLanguage,
                     // continues the statement started above: `onClick = { onLanguageSelected(language) },`
@@ -138,11 +136,12 @@ fun LanguageModal(
 }
 
 // annotation `@Composable` applied to the declaration that follows
+/** One radio-style option, shared by the language and home-currency pickers. */
 @Composable
-// expression: `private fun LanguageOptionRow(`
-private fun LanguageOptionRow(
-    // continues the statement started above: `language: AppLanguage,`
-    language: AppLanguage,
+internal fun SelectionOptionRow(
+    flag: String,
+    title: String,
+    subtitle: String,
     // continues the statement started above: `selected: Boolean,`
     selected: Boolean,
     // continues the statement started above: `onClick: () -> Unit,`
@@ -196,15 +195,15 @@ private fun LanguageOptionRow(
         // ends the argument list started above and opens the block that follows
         ) {
             // calls `Text` with arguments `(text = languageFlag(language), fontSize = 24…)`
-            Text(text = languageFlag(language), fontSize = 24.sp)
+            Text(text = flag, fontSize = 24.sp)
             // calls `Spacer` with arguments `(modifier = Modifier.width(14.dp))`
             Spacer(modifier = Modifier.width(14.dp))
             // opens a block after `Column`
             Column {
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
-                    // continues the statement started above: `text = language.displayName,`
-                    text = language.displayName,
+                    // continues the statement started above: `text = title,`
+                    text = title,
                     // continues the statement started above: `color = if (selected) WaypointTerracotta else WaypointTextP…`
                     color = if (selected) WaypointTerracotta else WaypointTextPrimary,
                     // continues the statement started above: `fontSize = 15.sp,`
@@ -215,8 +214,8 @@ private fun LanguageOptionRow(
                 )
                 // calls `Text` with an argument list that continues on the following lines
                 Text(
-                    // continues the statement started above: `text = languageSubLabel(language),`
-                    text = languageSubLabel(language),
+                    // continues the statement started above: `text = subtitle,`
+                    text = subtitle,
                     // continues the statement started above: `color = WaypointTextMuted,`
                     color = WaypointTextMuted,
                     // continues the statement started above: `fontSize = 12.sp,`

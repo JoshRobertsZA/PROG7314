@@ -5,6 +5,7 @@ package com.waypoint.app.features.home.ui
 import android.app.Application
 // imports `android.content.Context` for use in this file
 import android.content.Context
+import android.util.Log
 // imports `androidx.lifecycle.AndroidViewModel` for use in this file
 import androidx.lifecycle.AndroidViewModel
 // imports `androidx.lifecycle.viewModelScope` for use in this file
@@ -13,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.waypoint.app.core.location.LocationProvider
 // imports `com.waypoint.app.core.secrets.RemoteSecrets` for use in this file
 import com.waypoint.app.core.secrets.RemoteSecrets
+import com.waypoint.app.core.settings.AppSettings
 // imports `com.waypoint.app.features.explore.data.LocationIQRepository` for use in this file
 import com.waypoint.app.features.explore.data.LocationIQRepository
 // imports `com.waypoint.app.features.home.data.CurrencyRepository` for use in this file
@@ -39,6 +41,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 // imports `kotlinx.coroutines.flow.catch` for use in this file
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 // imports `kotlinx.coroutines.flow.update` for use in this file
 import kotlinx.coroutines.flow.update
 // imports `kotlinx.coroutines.launch` for use in this file
@@ -56,8 +61,6 @@ private const val DEFAULT_CITY = "Cape Town"
 private const val DEFAULT_CURR = "USD"
 // declares private const read-only property `KEY_CURRENCY_TO`, initialised to the string literal "selected_currency_to"
 private const val KEY_CURRENCY_TO = "selected_currency_to"
-// declares private const read-only property `DEFAULT_CURR_TO`, initialised to the string literal "ZAR"
-private const val DEFAULT_CURR_TO = "ZAR"
 
 // declares class `HomeViewModel` with a primary constructor taking 1 parameter (`application`), inheriting from `AndroidViewModel(application)` and opens its body
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
@@ -73,8 +76,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             selectedCity         = prefs.getString(KEY_CITY,     DEFAULT_CITY) ?: DEFAULT_CITY,
             // continues the statement started above: `selectedFromCurrency = prefs.getString(KEY_CURRENCY, DEFAUL…`
             selectedFromCurrency = prefs.getString(KEY_CURRENCY, DEFAULT_CURR) ?: DEFAULT_CURR,
-            // continues the statement started above: `selectedToCurrency = prefs.getString(KEY_CURRENCY_TO, DEFAULT_CURR_TO) ?: DEFAULT_CURR_TO,`
-            selectedToCurrency   = prefs.getString(KEY_CURRENCY_TO, DEFAULT_CURR_TO) ?: DEFAULT_CURR_TO,
+            // Until the user picks one on Home, convert into the home currency chosen in Settings.
+            selectedToCurrency   = prefs.getString(KEY_CURRENCY_TO, null) ?: AppSettings.current.defaultCurrency,
         // closes the multi-line argument list started above
         ),
     // closes the multi-line argument list started above
@@ -101,8 +104,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             loadFeaturedTrip()
         // closes the block
         }
-        // calls `startLocationUpdates` with arguments `()`
         startLocationUpdates()
+        // Changing the home currency in Settings retargets the converter straight away.
+        viewModelScope.launch {
+            AppSettings.state.map { it.defaultCurrency }.distinctUntilChanged().drop(1).collect { code ->
+                Log.d("HomeViewModel", "Home currency changed in Settings to $code")
+                selectToCurrency(code)
+            }
+        }
     // closes the init block
     }
 

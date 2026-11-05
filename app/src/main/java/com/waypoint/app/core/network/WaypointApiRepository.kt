@@ -114,7 +114,23 @@ object WaypointApiRepository {
     )
 
 
-    // declares private function `authBuilder` taking 1 parameter (`idToken`), returning `Request.Builder`; its body is the expression ``
+    /**
+     * Calls the public `/health` route. Cloud Run scales to zero when idle, so hitting
+     * this at app start wakes the server while the splash screen is still showing.
+     */
+    suspend fun warmUp(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val req = Request.Builder().url("$BASE_URL/health").get().build()
+            HttpClient.instance.newCall(req).execute().use { resp ->
+                Log.i(TAG, "GET /health -> HTTP ${resp.code}")
+                resp.isSuccessful
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "GET /health failed: ${e.message}")
+            false
+        }
+    }
+
     private fun authBuilder(idToken: String): Request.Builder =
         // continues the statement started above: `Request.Builder().header("Authorization", "Bearer $idToken")`
         Request.Builder().header("Authorization", "Bearer $idToken")
@@ -720,17 +736,63 @@ object WaypointApiRepository {
         }
     }
 
-    suspend fun sendTestNotification(idToken: String): Boolean = withContext(Dispatchers.IO) {
+    /** The user's synced settings as stored by the API. `updatedAtMs == 0` means none saved yet. */
+    data class SettingsPayload(
+        val darkMode: Boolean?,
+        val notifyTripUpdates: Boolean,
+        val notifyReminders: Boolean,
+        val defaultCurrency: String,
+        val language: String?,
+        val updatedAtMs: Long,
+    )
+
+    /** GET /account/settings. Returns null when the request failed. */
+    suspend fun getSettings(idToken: String): SettingsPayload? = withContext(Dispatchers.IO) {
         try {
-            val body = "{}".toRequestBody(JSON_TYPE)
-            val req = authBuilder(idToken).url("$BASE_URL/notify/test").post(body).build()
-            val resp = HttpClient.instance.newCall(req).execute()
-            resp.isSuccessful.also { ok -> if (!ok) Log.w(TAG, "POST /notify/test HTTP ${resp.code}") }
+            val req = authBuilder(idToken).url("$BASE_URL/account/settings").get().build()
+            HttpClient.instance.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) {
+                    Log.w(TAG, "GET /account/settings HTTP ${resp.code}")
+                    return@withContext null
+                }
+                val o = JSONObject(resp.body?.string().orEmpty())
+                SettingsPayload(
+                    darkMode = if (o.isNull("darkMode")) null else o.optBoolean("darkMode"),
+                    notifyTripUpdates = o.optBoolean("notifyTripUpdates", true),
+                    notifyReminders = o.optBoolean("notifyReminders", true),
+                    defaultCurrency = o.optString("defaultCurrency", "ZAR"),
+                    language = if (o.isNull("language")) null else o.optString("language"),
+                    updatedAtMs = o.optLong("updatedAtMs", 0L),
+                )
+            }
         } catch (e: Exception) {
-            Log.w(TAG, "sendTestNotification failed: ${e.message}")
+            Log.w(TAG, "getSettings failed: ${e.message}")
+            null
+        }
+    }
+
+    /** PUT /account/settings. The server keeps whichever copy has the newer updatedAtMs. */
+    suspend fun putSettings(idToken: String, settings: SettingsPayload): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val json = JSONObject().apply {
+                put("darkMode", settings.darkMode ?: JSONObject.NULL)
+                put("notifyTripUpdates", settings.notifyTripUpdates)
+                put("notifyReminders", settings.notifyReminders)
+                put("defaultCurrency", settings.defaultCurrency)
+                put("language", settings.language ?: JSONObject.NULL)
+                put("updatedAtMs", settings.updatedAtMs)
+            }.toString().toRequestBody(JSON_TYPE)
+            val req = authBuilder(idToken).url("$BASE_URL/account/settings").put(json).build()
+            HttpClient.instance.newCall(req).execute().use { resp ->
+                Log.i(TAG, "PUT /account/settings -> HTTP ${resp.code}")
+                resp.isSuccessful
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "putSettings failed: ${e.message}")
             false
         }
     }
+
 
 
     // HTTP status of a sendOutboxPayload() call, or -1 for a network-level

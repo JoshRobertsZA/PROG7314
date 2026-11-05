@@ -265,6 +265,18 @@ const openapiSpec = {
       Error: errorSchema,
       // continues the statement started above: `Deleted: deletedSchema,`
       Deleted: deletedSchema,
+      Settings: {
+        type: 'object',
+        required: ['darkMode', 'notifyTripUpdates', 'notifyReminders', 'defaultCurrency', 'language', 'updatedAtMs'],
+        properties: {
+          darkMode: { type: 'boolean', nullable: true, description: 'null = follow the phone setting', example: true },
+          notifyTripUpdates: { type: 'boolean', example: true },
+          notifyReminders: { type: 'boolean', example: true },
+          defaultCurrency: { type: 'string', pattern: '^[A-Z]{3}$', example: 'ZAR' },
+          language: { type: 'string', enum: ['en', 'zu', 'xh'], example: 'zu' },
+          updatedAtMs: { type: 'integer', description: 'When the settings last changed on the phone; the newer copy wins', example: 1762300000000 },
+        },
+      },
 
       // continues the statement started above: `Health: {`
       Health: {
@@ -1427,6 +1439,31 @@ const openapiSpec = {
           'itself - the client deletes that separately, after this succeeds.',
         responses: {
           200: jsonRes('Deleted', 'Deleted'),
+          ...authErrors,
+        },
+      },
+    },
+
+    '/account/settings': {
+      get: {
+        tags: ['Account'],
+        summary: "Get the caller's synced settings",
+        description: 'Returns the defaults with updatedAtMs 0 if the caller has never saved settings.',
+        responses: {
+          200: jsonRes('Settings', 'Settings'),
+          ...authErrors,
+        },
+      },
+      put: {
+        tags: ['Account'],
+        summary: "Save the caller's settings",
+        description:
+          'Last write wins by updatedAtMs: if the stored copy is newer it is kept and returned with ' +
+          'applied: false. Trip-update pushes are skipped while notifyTripUpdates is false.',
+        requestBody: jsonBody('Settings'),
+        responses: {
+          200: jsonRes('Stored settings', 'Settings'),
+          400: err('A field is missing or invalid (unknown language, currency not 3 capital letters, etc.)'),
           ...authErrors,
         },
       },
