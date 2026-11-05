@@ -5,6 +5,7 @@ package com.waypoint.app.features.edititinerary.data
 import android.content.ContentValues
 // imports `android.content.Context` for use in this file
 import android.content.Context
+import android.util.Log
 // imports `com.waypoint.app.core.db.WaypointDbHelper` for use in this file
 import com.waypoint.app.core.db.WaypointDbHelper
 // imports `kotlinx.coroutines.Dispatchers` for use in this file
@@ -842,6 +843,77 @@ class ItineraryRepository(context: Context) {
             )
             outbox.enqueue(OutboxEntityType.PLACE, placeId, OutboxOperation.DELETE, null)
         // closes the block
+        }
+
+    /** Changes which nights a lodging booking covers. Saved locally first, then synced via the outbox. */
+    suspend fun updateLodgingDates(lodgingId: String, fromDate: LocalDate, toDate: LocalDate) =
+        updateDateRange(
+            table = WaypointDbHelper.TABLE_ITIN_LODGING,
+            idColumn = WaypointDbHelper.COL_ILODGE_ID,
+            fromColumn = WaypointDbHelper.COL_ILODGE_FROM_DATE,
+            toColumn = WaypointDbHelper.COL_ILODGE_TO_DATE,
+            updatedColumn = WaypointDbHelper.COL_ILODGE_UPDATED,
+            type = OutboxEntityType.LODGING,
+            id = lodgingId,
+            fromDate = fromDate,
+            toDate = toDate,
+        )
+
+    /** Changes which days a car rental covers. Saved locally first, then synced via the outbox. */
+    suspend fun updateCarRentalDates(carRentalId: String, fromDate: LocalDate, toDate: LocalDate) =
+        updateDateRange(
+            table = WaypointDbHelper.TABLE_ITIN_CAR,
+            idColumn = WaypointDbHelper.COL_ICAR_ID,
+            fromColumn = WaypointDbHelper.COL_ICAR_FROM_DATE,
+            toColumn = WaypointDbHelper.COL_ICAR_TO_DATE,
+            updatedColumn = WaypointDbHelper.COL_ICAR_UPDATED,
+            type = OutboxEntityType.CAR,
+            id = carRentalId,
+            fromDate = fromDate,
+            toDate = toDate,
+        )
+
+    private suspend fun updateDateRange(
+        table: String,
+        idColumn: String,
+        fromColumn: String,
+        toColumn: String,
+        updatedColumn: String,
+        type: OutboxEntityType,
+        id: String,
+        fromDate: LocalDate,
+        toDate: LocalDate,
+    ) = withContext(Dispatchers.IO) {
+        require(!toDate.isBefore(fromDate)) { "toDate must not be before fromDate" }
+        val cv = ContentValues().apply {
+            put(fromColumn, fromDate.toString())
+            put(toColumn, toDate.toString())
+            put(updatedColumn, System.currentTimeMillis())
+        }
+        db.writableDatabase.update(table, cv, "$idColumn = ?", arrayOf(id))
+        val payload = JSONObject().apply {
+            put("fromDate", fromDate.toString())
+            put("toDate", toDate.toString())
+        }.toString()
+        outbox.enqueue(type, id, OutboxOperation.UPDATE, payload)
+        Log.d("ItineraryRepository", "Updated $type $id to $fromDate..$toDate")
+    }
+
+    /** Sets or clears a place's note. A blank note is stored as no note. */
+    suspend fun updatePlaceNote(placeId: String, note: String?) =
+        withContext(Dispatchers.IO) {
+            val cv = ContentValues().apply {
+                if (note != null) put(WaypointDbHelper.COL_IPLACE_NOTE, note) else putNull(WaypointDbHelper.COL_IPLACE_NOTE)
+                put(WaypointDbHelper.COL_IPLACE_UPDATED, System.currentTimeMillis())
+            }
+            db.writableDatabase.update(
+                WaypointDbHelper.TABLE_ITIN_PLACES,
+                cv,
+                "${WaypointDbHelper.COL_IPLACE_ID} = ?",
+                arrayOf(placeId),
+            )
+            val payload = JSONObject().apply { put("note", note ?: JSONObject.NULL) }.toString()
+            outbox.enqueue(OutboxEntityType.PLACE, placeId, OutboxOperation.UPDATE, payload)
         }
 
 

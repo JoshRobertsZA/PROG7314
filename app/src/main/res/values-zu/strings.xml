@@ -429,4 +429,12 @@
     <string name="language_sub_zulu">isiZulu (iNingizimu Afrika)</string>
     <string name="language_sub_xhosa">isiXhosa (iNingizimu Afrika)</string>
     <string name="trip_pending_sync_cd">Kulindwe ukuvumelaniswa</string>
+    <string name="edit_itinerary_edit_dates_cd">Shintsha izinsuku</string>
+    <string name="edit_itinerary_edit_note_cd">Hlela inothi</string>
+    <string name="edit_itinerary_edit_lodging_title">Izinsuku zendawo yokuhlala</string>
+    <string name="edit_itinerary_edit_car_title">Izinsuku zokuqasha imoto</string>
+    <string name="edit_itinerary_from_label">Kusukela</string>
+    <string name="edit_itinerary_to_label">Kuze kube</string>
+    <string name="edit_itinerary_dates_invalid">Usuku lokugcina alukwazi ukuba ngaphambi kosuku lokuqala.</string>
+    <string name="edit_itinerary_note_label">Inothi</string>
 </resources>

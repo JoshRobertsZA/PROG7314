@@ -38,6 +38,22 @@ import java.time.LocalTime
 // imports `java.time.temporal.ChronoUnit` for use in this file
 import java.time.temporal.ChronoUnit
 
+
+internal const val MORNING_HOUR = 7
+internal const val EVENING_HOUR = 19
+
+/** The two sets of reminder rules: morning (countdowns, start, today's digest, ended) and evening (tomorrow). */
+internal enum class ReminderPass { MORNING, EVENING }
+
+/**
+ * Which rule sets are due at [hour]. Rules run on every check from their hour onward (not only at
+ * exactly 07:00 or 19:00), and ReminderLogRepository makes sure each reminder is still sent once.
+ */
+internal fun reminderPassesDue(hour: Int): Set<ReminderPass> = buildSet {
+    if (hour >= MORNING_HOUR) add(ReminderPass.MORNING)
+    if (hour >= EVENING_HOUR) add(ReminderPass.EVENING)
+}
+
 // declares class `TripReminderWorker` with a primary constructor taking 2 parameters (`context`, `params`), inheriting from `CoroutineWorker(context, params)` and opens its body
 class TripReminderWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
@@ -65,14 +81,10 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
 
         // `try` block: exceptions thrown inside are handled by the `catch` below
         try {
-            // `when` expression on the value of `now.hour`: the first matching branch below runs
-            when (now.hour) {
-                // `when` branch: when the subject matches `MORNING_HOUR`, evaluates `allTrips.forEach { runMorningRules(it, …`
-                MORNING_HOUR -> allTrips.forEach { runMorningRules(it, today) }
-                // `when` branch: when the subject matches `EVENING_HOUR`, evaluates `allTrips.forEach { runEveningRules(it, …`
-                EVENING_HOUR -> allTrips.forEach { runEveningRules(it, today) }
-            // closes the when block
-            }
+            val passes = reminderPassesDue(now.hour)
+            Log.d(TAG, "Reminder check at ${now.hour}h for ${allTrips.size} trips: $passes")
+            if (ReminderPass.MORNING in passes) allTrips.forEach { runMorningRules(it, today) }
+            if (ReminderPass.EVENING in passes) allTrips.forEach { runEveningRules(it, today) }
         // `catch` block: handles a thrown `Exception` bound to `e`
         } catch (e: Exception) {
             // calls `w` on `Log` with arguments `(TAG, "Reminder pass failed", e)`
@@ -313,10 +325,6 @@ class TripReminderWorker(context: Context, params: WorkerParameters) : Coroutine
     private companion object {
         // declares const read-only property `TAG`, initialised to the string literal "TripReminderWorker"
         const val TAG = "TripReminderWorker"
-        // declares const read-only property `MORNING_HOUR`, initialised to the number 7
-        const val MORNING_HOUR = 7
-        // declares const read-only property `EVENING_HOUR`, initialised to the number 19
-        const val EVENING_HOUR = 19
         // declares read-only property `COUNTDOWN_DAYS`, initialised with the result of calling `setOf(…)`
         val COUNTDOWN_DAYS = setOf(30, 10, 5, 1)
         // declares read-only property `EARLY_CUTOFF` of type `LocalTime`, initialised with the result of calling `LocalTime.of(…)`

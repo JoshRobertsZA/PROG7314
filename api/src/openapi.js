@@ -192,7 +192,7 @@ const openapiSpec = {
       // expression: `'REST API middleware between the Waypoint Android app and Firest…`
       'REST API middleware between the Waypoint Android app and Firestore.\n\n' +
       // continues the statement started above: `'**Authentication** — every endpoint except `GET /health` a…`
-      '**Authentication** — every endpoint except `GET /health` and `GET /counter/{key}` ' +
+      '**Authentication** — every endpoint except `GET /health` and `GET /config/web-client-id` ' +
       // continues the statement started above: `'requires a Firebase ID token sent as `Authorization: Beare…`
       'requires a Firebase ID token sent as `Authorization: Bearer <token>`. ' +
       // continues the statement started above: `'Use the **Authorize** button above and paste the raw token…`
@@ -233,8 +233,6 @@ const openapiSpec = {
     { name: 'Itinerary — Cars', description: 'Car rentals for a trip' },
     // continues the statement started above: `{ name: 'Itinerary — Places', description: 'Places of inter…`
     { name: 'Itinerary — Places', description: 'Places of interest planned for a day' },
-    // continues the statement started above: `{ name: 'Counter', description: 'Atomic named counters' },`
-    { name: 'Counter', description: 'Atomic named counters' },
     { name: 'Config', description: 'Server-held API keys and the Firebase web client id' },
     { name: 'Cache', description: 'Shared weather/currency/places lookup cache' },
     { name: 'Devices', description: 'FCM push tokens registered per user' },
@@ -717,21 +715,6 @@ const openapiSpec = {
           note: { type: 'string', nullable: true },
           // continues the statement started above: `photoUrl: { type: 'string', nullable: true },`
           photoUrl: { type: 'string', nullable: true },
-        // closes the block
-        },
-      // closes the block
-      },
-
-      // continues the statement started above: `Counter: {`
-      Counter: {
-        // expression: `type: 'object',`
-        type: 'object',
-        // continues the statement started above: `properties: {`
-        properties: {
-          // expression: `key: { type: 'string', example: 'trips_created' },`
-          key: { type: 'string', example: 'trips_created' },
-          // continues the statement started above: `count: { type: 'integer', example: 42 },`
-          count: { type: 'integer', example: 42 },
         // closes the block
         },
       // closes the block
@@ -1223,67 +1206,6 @@ const openapiSpec = {
         notFound: 'Place not found',
       // expression: `}),`
       }),
-    // closes the block
-    },
-
-    // continues the statement started above: `'/counter/{key}': {`
-    '/counter/{key}': {
-      // opens a block after `get:`
-      get: {
-        // expression: `tags: ['Counter'],`
-        tags: ['Counter'],
-        // continues the statement started above: `summary: 'Read a counter',`
-        summary: 'Read a counter',
-        // continues the statement started above: `description: 'Public read. An unknown key reports a count o…`
-        description:
-          'Public read. An unknown key reports a count of `0` rather than 404. ' +
-          'Key must match `^[a-z][a-z0-9_-]{0,63}$`.',
-        // continues the statement started above: `security: [],`
-        security: [],
-        // continues the statement started above: `parameters: [pathParam('key', 'Counter name, e.g. `trips_cr…`
-        parameters: [pathParam('key', 'Counter name, e.g. `trips_created`')],
-        // continues the statement started above: `responses: {`
-        responses: {
-          // expression: `200: jsonRes('Current value', 'Counter'),`
-          200: jsonRes('Current value', 'Counter'),
-          400: err('Counter key does not match the allowed pattern'),
-          // continues the statement started above: `500: err('Unexpected server error'),`
-          500: err('Unexpected server error'),
-        // closes the block
-        },
-      // closes the block
-      },
-    // closes the block
-    },
-    // continues the statement started above: `'/counter/{key}/increment': {`
-    '/counter/{key}/increment': {
-      // opens a block after `post:`
-      post: {
-        // expression: `tags: ['Counter'],`
-        tags: ['Counter'],
-        // continues the statement started above: `summary: 'Increment a counter',`
-        summary: 'Increment a counter',
-        // continues the statement started above: `description:`
-        description:
-          // expression: `'Runs inside a Firestore transaction, so concurrent callers cann…`
-          'Runs inside a Firestore transaction, so concurrent callers cannot double-count. ' +
-          // continues the statement started above: `'The counter is created at `1` if it does not exist yet.',`
-          'The counter is created at `1` if it does not exist yet.',
-        // continues the statement started above: `parameters: [pathParam('key', 'Counter name')],`
-        parameters: [pathParam('key', 'Counter name')],
-        // continues the statement started above: `responses: {`
-        responses: {
-          // expression: `200: jsonRes('Value after incrementing', 'Counter'),`
-          200: jsonRes('Value after incrementing', 'Counter'),
-          400: err('Counter key does not match the allowed pattern'),
-          // continues the statement started above: `401: err('Missing, invalid or expired Firebase ID token'),`
-          401: err('Missing, invalid or expired Firebase ID token'),
-          // continues the statement started above: `500: err('Unexpected server error'),`
-          500: err('Unexpected server error'),
-        // closes the block
-        },
-      // closes the block
-      },
     // closes the block
     },
 

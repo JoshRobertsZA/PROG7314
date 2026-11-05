@@ -13,8 +13,6 @@ const { openapiSpec } = require('./openapi');
 const tripsRouter = require('./routes/trips');
 // declares const `itineraryRouter`, initialised with the result of calling `require(…)`
 const itineraryRouter = require('./routes/itinerary');
-// declares const `counterRouter`, initialised with the result of calling `require(…)`
-const counterRouter = require('./routes/counter');
 const configRouter = require('./routes/config');
 const cacheRouter = require('./routes/cache');
 const devicesRouter = require('./routes/devices');
@@ -60,8 +58,6 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapiSpec, {
 app.use('/trips', tripsRouter);
 // calls `use` on `app` with arguments `('/itinerary', itineraryRouter)`
 app.use('/itinerary', itineraryRouter);
-// calls `use` on `app` with arguments `('/counter', counterRouter)`
-app.use('/counter', counterRouter);
 app.use('/config', configRouter);
 app.use('/cache', cacheRouter);
 app.use('/devices', devicesRouter);
