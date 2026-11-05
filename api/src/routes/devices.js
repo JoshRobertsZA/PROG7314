@@ -1,3 +1,7 @@
+/**
+ * /devices routes: register and remove a phone's FCM token for the signed-in user, so pushes can be
+ * sent to all of their devices.
+ */
 const express = require('express');
 const router = express.Router();
 const { db } = require('../firebase');

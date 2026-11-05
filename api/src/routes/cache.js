@@ -1,3 +1,7 @@
+/**
+ * /cache routes: a shared cache of weather, currency and nearby-places lookups, so all users share one
+ * copy of each result and stay within the third-party APIs' free quotas.
+ */
 const express = require('express');
 const router = express.Router();
 const { db } = require('../firebase');

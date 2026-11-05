@@ -30,6 +30,10 @@ import com.waypoint.app.core.theme.WaypointTerracotta
 import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
 
+/**
+ * Confirms account deletion. Asks for the password (email accounts) or a fresh Google sign-in first,
+ * because Firebase requires a recent sign-in.
+ */
 @Composable
 fun DeleteAccountDialog(
     onDismiss: () -> Unit,

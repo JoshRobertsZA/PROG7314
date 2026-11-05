@@ -2,6 +2,7 @@ package com.waypoint.app.features.settings.ui
 
 import com.waypoint.app.core.network.UsageSnapshot
 
+/** State of the Profile tab. */
 data class SettingsUiState(
     val isLoading: Boolean = true,
     val plannedThisYear: Int = 0,

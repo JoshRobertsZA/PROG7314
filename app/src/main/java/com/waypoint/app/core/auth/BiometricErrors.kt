@@ -28,6 +28,7 @@ fun classifyBiometricError(errorCode: Int): BiometricFailure = when (errorCode) 
     else -> BiometricFailure.OTHER
 }
 
+/** Maps a biometric failure to the message shown on the lock screen. */
 @StringRes
 fun biometricFailureMessage(failure: BiometricFailure): Int = when (failure) {
     BiometricFailure.LOCKOUT -> R.string.biometric_error_lockout

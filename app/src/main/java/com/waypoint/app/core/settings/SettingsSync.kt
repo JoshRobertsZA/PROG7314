@@ -16,6 +16,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** What a settings sync should do after comparing the phone's copy with the API's. */
 internal enum class SettingsSyncAction { APPLY_REMOTE, UPLOAD_LOCAL, NONE }
 
 /** Last write wins: the copy with the newer updatedAtMs is kept; equal means already in step. */

@@ -1,17 +1,15 @@
-// declares that this file belongs to the package `com.waypoint.app.core.notifications`
 package com.waypoint.app.core.notifications
 
-// imports `android.util.Log` for use in this file
 import android.util.Log
-// imports `com.google.firebase.messaging.FirebaseMessagingService` for use in this file
 import com.google.firebase.messaging.FirebaseMessagingService
-// imports `com.google.firebase.messaging.RemoteMessage` for use in this file
 import com.google.firebase.messaging.RemoteMessage
 
-// declares class `WaypointMessagingService`, inheriting from `FirebaseMessagingService()` and opens its body
+/**
+ * Receives FCM pushes from the API and turns them into notifications, and re-registers the device when
+ * its token changes.
+ */
 class WaypointMessagingService : FirebaseMessagingService() {
 
-    // declares override function `onMessageReceived` taking 1 parameter (`message`) and opens its body
     override fun onMessageReceived(message: RemoteMessage) {
         // The server sends a data-only payload (type + whatever extras that
         // type needs, e.g. tripId) rather than a notification.title/body -
@@ -34,29 +32,19 @@ class WaypointMessagingService : FirebaseMessagingService() {
             }
         }
 
-        // calls `d` on `Log` with arguments `(TAG, "Push received: type=$type data=${messa…)`
         Log.d(TAG, "Push received: type=$type data=${message.data}")
         PushNotifier.show(applicationContext, NotificationType.TRIP_UPDATES, title, body, message.data)
-    // closes the function `onMessageReceived`
     }
 
-    // declares override function `onNewToken` taking 1 parameter (`token`) and opens its body
     override fun onNewToken(token: String) {
-        // calls `i` on `Log` with arguments `(TAG, "FCM token refreshed")`
         Log.i(TAG, "FCM token refreshed")
-        // calls `onTokenRefreshed` on `PushTokenManager` with arguments `(token)`
         PushTokenManager.onTokenRefreshed(token)
         // If the user is already signed in, tell the server about the new
         // token right away rather than waiting for the next login.
         DeviceRegistrar.registerIfSignedIn()
-    // closes the function `onNewToken`
     }
 
-    // declares the companion object holding members shared by all instances of the enclosing class
     private companion object {
-        // declares const read-only property `TAG`, initialised to the string literal "WaypointFCM"
         const val TAG = "WaypointFCM"
-    // closes the companion object
     }
-// closes the class `WaypointMessagingService`
 }

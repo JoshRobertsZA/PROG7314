@@ -136,8 +136,9 @@ details.verified ul { margin: 12px 0 0; padding-left: 20px; color: var(--muted);
       <li>Sign-in: Google via Credential Manager, GitHub, email/password, forgot password, and friendly error messages.</li>
       <li>Biometrics: AppCompatActivity host, <code class="ref">canAuthenticate</code> check, PIN fallback, and a Settings switch.</li>
       <li>Offline: SQLite plus an outbox, WorkManager with a network constraint and exponential backoff, and an offline indicator in the header.</li>
-      <li>194 Android unit tests in 22 classes, 52 API tests, and green CI on <code class="ref">dev</code>.</li>
-      <li>core-splashscreen and an adaptive launcher icon are in place.</li>
+      <li>150 Android unit tests in 23 classes, 58 API tests, lint with 0 errors, and green CI on <code class="ref">dev</code>.</li>
+      <li>core-splashscreen in place; the launcher icon is now the Waypoint pin (it was the Android template until PR #78).</li>
+      <li>Latest API deployed to Cloud Run (settings routes live, unused <code class="ref">/counter</code> routes gone).</li>
       <li>Release config: applicationId <code class="ref">com.waypoint.app</code>, version 1 / 1.0.0, R8 on.</li>
       <li>No secrets or keystores in git history (only the example files and the throwaway CI key). <code class="ref">google-services.json</code> is committed and <code class="ref">.gitattributes</code> forces LF.</li>
       <li>342 commits on main from all four members. Feature graphic is 1024×500.</li>
@@ -210,6 +211,23 @@ const GROUPS = [
     items: [
       { id: "r-emails", tag: "fix", title: "Check every member's commit emails link to their GitHub", detail: "Josh commits from 2 addresses and Dylan from 3. Add the vcconnect and myemeris addresses to each GitHub account so commits count under the right name." },
       { id: "r-blob", tag: "optional", title: "Consider using blob storage", detail: "Listed as a learning outcome in the brief but not a rubric row. For example, a trip cover photo in Firebase Storage." },
+    ]},
+  { id: "final", title: "Found since the first audit", marks: "Features 4 & 5 · UI · Play Store · GitHub",
+    note: "Extra items that turned up while fixing the list above.",
+    items: [
+      { id: "f-udf", tag: "fix", title: "Make features 4 and 5 demo-able and fully editable", detail: "Reminders fire on demand and after saves; lodging, car rentals and places can be edited (PR #75).", ref: "feat/udf-reminders-flights" },
+      { id: "f-dead-code", tag: "fix", title: "Remove endpoints and API calls the app never used", detail: "Dead direct API calls and the /counter routes removed (PR #75)." },
+      { id: "f-icon", tag: "fix", title: "Replace the default Android launcher icon", detail: "Now the Waypoint pin, with themed-icon support (PR #78)." },
+      { id: "f-avatar", tag: "fix", title: "Replace the stock-photo default avatar", detail: "The cat photo is now a branded vector avatar (PR #78)." },
+      { id: "f-logging", tag: "fix", title: "Log the activity lifecycle", detail: "Brief asks for logging of app lifecycles; MainActivity and WaypointApp now log it (PR #77)." },
+      { id: "f-readme-design", tag: "fix", title: "README: design considerations and version control sections", detail: "Both named in the brief (PR #77)." },
+      { id: "f-deploy-api", tag: "blocker", title: "Redeploy the API to Cloud Run", detail: "Needed for /account/settings and to drop /counter. Live check passed." },
+      { id: "f-privacy-live", tag: "fix", title: "Update the published privacy policy page", detail: "The live page is still the 3 Nov version. Copy store-listing/privacy-policy.md into the waypoint-privacy repo.", ref: "ST10438409-Emeris/waypoint-privacy" },
+      { id: "f-part2-tag", tag: "fix", title: "Push the part-2 tag", detail: "The README says Part 2 is tagged, but no tags exist on GitHub. Run: git push origin part-2" },
+      { id: "f-phone-test", tag: "blocker", title: "Test all the new work on a phone", detail: "Settings sync between two phones, aeroplane-mode edit then reconnect, Sync now, both notification switches, reminder for a trip starting tomorrow, editing bookings and notes, new icon and avatar." },
+      { id: "f-translations", tag: "fix", title: "Native-speaker check of the new isiZulu and isiXhosa strings", detail: "Claude wrote the new translations; a first-language speaker should read them over on the phone." },
+      { id: "f-readme-shots", tag: "fix", title: "Add Part 3 screenshots to the README", detail: "Settings, biometric prompt, offline and waiting-to-sync icons, a notification, edit dialogs, and screens in isiZulu and isiXhosa. Add a couple to store-listing/screenshots too." },
+      { id: "f-release-notes", tag: "fix", title: "Put the release notes on the final GitHub Release", detail: "The README links to Releases. Paste audit/release-notes.md into the v1.0.0-final-poe release.", ref: "audit/release-notes.md" },
     ]},
   { id: "video", title: "Video run sheet", marks: "Video 5 · and evidence for every feature",
     note: "The lecturer marks from the video. One take on a physical phone, with a voice-over, in this order.",

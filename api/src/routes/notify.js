@@ -1,3 +1,7 @@
+/**
+ * /notify/test: sends a test push to every device the caller has registered. Used to demonstrate
+ * notifications from Swagger UI or Postman; real pushes are sent from the route where the event happens.
+ */
 const express = require('express');
 const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
