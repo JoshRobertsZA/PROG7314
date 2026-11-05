@@ -372,8 +372,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 if (idToken != null) WaypointApiRepository.unregisterDevice(idToken, deviceToken)
             }
         }
-        // calls `signOut` on `AuthRepository` with arguments `()`
-        AuthRepository.signOut()
+        AuthRepository.signOut(getApplication())
         // calls `signOut` on `SessionManager` with arguments `()`
         SessionManager.signOut()
         // calls `reset` on `WelcomeNotifier` with arguments `()`

@@ -1,8 +1,16 @@
 // declares that this file belongs to the package `com.waypoint.app.core.auth`
 package com.waypoint.app.core.auth
 
-// imports `android.app.Activity` for use in this file
 import android.app.Activity
+import android.content.Context
+import android.util.Log
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
+import com.waypoint.app.core.settings.AppSettings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 // imports `com.google.firebase.auth.FirebaseAuth` for use in this file
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.EmailAuthProvider
@@ -117,11 +125,21 @@ object AuthRepository {
         // continues the statement started above: `auth.currentUser?.getIdToken(forceRefresh)?.await()?.token`
         auth.currentUser?.getIdToken(forceRefresh)?.await()?.token
 
-    // declares function `signOut` taking no parameters and opens its body
-    fun signOut() {
-        // calls `signOut` on `auth` with arguments `()`
+    private val signOutScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /**
+     * Signs out of Firebase and clears Credential Manager's state, so the next
+     * Google sign-in shows the account picker instead of silently reusing the old account.
+     */
+    fun signOut(context: Context) {
         auth.signOut()
-    // closes the function `signOut`
+        AppSettings.onSignedOut()
+        val appContext = context.applicationContext
+        signOutScope.launch {
+            runCatching {
+                CredentialManager.create(appContext).clearCredentialState(ClearCredentialStateRequest())
+            }.onFailure { Log.w("AuthRepository", "clearCredentialState failed: ${it.message}") }
+        }
     }
 // closes the object `AuthRepository`
 }
