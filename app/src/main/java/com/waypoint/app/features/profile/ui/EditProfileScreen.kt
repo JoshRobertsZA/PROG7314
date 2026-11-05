@@ -101,9 +101,9 @@ fun EditProfileScreen(
                 model = photoUrl.ifBlank { null },
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.img_mock_avatar),
-                error = painterResource(R.drawable.img_mock_avatar),
-                fallback = painterResource(R.drawable.img_mock_avatar),
+                placeholder = painterResource(R.drawable.ic_avatar_default),
+                error = painterResource(R.drawable.ic_avatar_default),
+                fallback = painterResource(R.drawable.ic_avatar_default),
                 modifier = Modifier
                     .size(88.dp)
                     .align(Alignment.CenterHorizontally)
