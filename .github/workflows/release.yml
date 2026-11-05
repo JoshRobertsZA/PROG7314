@@ -1,10 +1,19 @@
 name: Release
 
-# Builds a signed release bundle and publishes a GitHub Release when main changes.
-# It signs with the throwaway key in ci/ (see ci/README.md), so no secrets are needed.
+# Builds a signed release APK and App Bundle.
+#
+# - Pushing a tag that starts with "v" (e.g. v1.0.0-final-poe) creates a GitHub Release for that tag
+#   with the APK, the AAB, the R8 mapping file and docs/release-notes.md as the description.
+# - Pushing to main builds the same files as a workflow artifact, so every merge is checked, but makes
+#   no release.
+#
+# Signing: if the RELEASE_* repository secrets are set, the build is signed with our own upload key.
+# Without them it falls back to the public CI test key in ci/ (see ci/README.md) and says so in the
+# run summary; a build signed that way is not a production build.
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   workflow_dispatch:
 
 permissions:
@@ -16,7 +25,7 @@ concurrency:
 
 jobs:
   release:
-    name: Signed bundle and release
+    name: Signed APK, bundle and release
     runs-on: ubuntu-latest
 
     steps:
@@ -44,56 +53,79 @@ jobs:
             exit 1
           fi
           echo "name=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Point the build at the CI signing key
+      - name: Set up the signing key
+        id: signing
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
-          cat > keystore.properties <<PROPS
-          storeFile=ci/ci-release.jks
-          storePassword=waypoint-ci
-          keyAlias=ci
-          keyPassword=waypoint-ci
-          PROPS
+          if [ -n "$RELEASE_KEYSTORE_BASE64" ] && [ -n "$RELEASE_STORE_PASSWORD" ] && [ -n "$RELEASE_KEY_ALIAS" ] && [ -n "$RELEASE_KEY_PASSWORD" ]; then
+            # The keystore only exists on the runner for this job and is never committed or uploaded.
+            echo "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload-key.jks"
+            {
+              echo "storeFile=$RUNNER_TEMP/upload-key.jks"
+              echo "storePassword=$RELEASE_STORE_PASSWORD"
+              echo "keyAlias=$RELEASE_KEY_ALIAS"
+              echo "keyPassword=$RELEASE_KEY_PASSWORD"
+            } > keystore.properties
+            echo "key=upload" >> "$GITHUB_OUTPUT"
+            echo "Signed with the Waypoint upload key (from repository secrets)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "storeFile=ci/ci-release.jks"
+              echo "storePassword=waypoint-ci"
+              echo "keyAlias=ci"
+              echo "keyPassword=waypoint-ci"
+            } > keystore.properties
+            echo "key=ci" >> "$GITHUB_OUTPUT"
+            echo "::warning::RELEASE_* secrets are not set, so this build is signed with the public CI test key, not the upload key."
+            echo "Signed with the public CI test key - not a production build." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
-      - name: Build the signed release bundle
-        run: ./gradlew bundleRelease --stacktrace
+      - name: Build the signed APK and bundle
+        run: ./gradlew assembleRelease bundleRelease --stacktrace
+
+      - name: Check the APK signature
+        run: |
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)
+          "$APKSIGNER" verify --print-certs app/build/outputs/apk/release/app-release.apk | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Name the files after the version
         run: |
           mkdir -p dist
+          cp app/build/outputs/apk/release/app-release.apk "dist/waypoint-${{ steps.version.outputs.name }}.apk"
           cp app/build/outputs/bundle/release/app-release.aab "dist/waypoint-${{ steps.version.outputs.name }}.aab"
           if [ -f app/build/outputs/mapping/release/mapping.txt ]; then
             cp app/build/outputs/mapping/release/mapping.txt "dist/waypoint-${{ steps.version.outputs.name }}-mapping.txt"
           fi
 
-      - name: Upload the bundle as a workflow artifact
+      - name: Upload the files as a workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: waypoint-${{ steps.version.outputs.name }}
+          name: waypoint-${{ steps.version.outputs.name }}-${{ steps.signing.outputs.key }}-signed
           path: dist/*
           retention-days: 30
 
-      # A release is only made when this version has not been released before.
-      # Bump versionName in app/build.gradle.kts for the next one.
-      - name: Check whether the tag already exists
-        id: tag
-        run: |
-          if git ls-remote --exit-code --tags origin "refs/tags/${{ steps.version.outputs.tag }}" > /dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create the GitHub Release
-        if: steps.tag.outputs.exists == 'false'
+      # Releases only come from tags, so a release always matches an exact, tagged commit.
+      - name: Create or update the GitHub Release
+        if: github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
         run: |
-          gh release create "${{ steps.version.outputs.tag }}" dist/* \
-            --target "${{ github.sha }}" \
-            --title "Waypoint ${{ steps.version.outputs.name }}" \
-            --generate-notes
-
-      - name: Explain when no release was made
-        if: steps.tag.outputs.exists == 'true'
-        run: echo "Tag ${{ steps.version.outputs.tag }} already exists, so no new release was created. Bump versionName to publish one."
+          if [ "${{ steps.signing.outputs.key }}" != "upload" ]; then
+            echo "::error::Refusing to publish a release signed with the CI test key. Add the RELEASE_* secrets and re-run."
+            exit 1
+          fi
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+            gh release edit "$TAG" --notes-file docs/release-notes.md
+          else
+            gh release create "$TAG" dist/* \
+              --verify-tag \
+              --title "Waypoint ${{ steps.version.outputs.name }} (Final POE)" \
+              --notes-file docs/release-notes.md
+          fi
