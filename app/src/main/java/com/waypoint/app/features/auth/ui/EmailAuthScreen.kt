@@ -45,14 +45,17 @@ import com.waypoint.app.core.theme.WaypointTerracotta
 import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
 
+/** Which form the email screen is showing. */
 enum class EmailAuthMode { SIGN_IN, SIGN_UP, RESET }
 
+/** What the user submitted from the email screen, validated by the ViewModel. */
 sealed interface EmailAuthSubmission {
     data class SignUp(val displayName: String, val email: String, val password: String, val confirmPassword: String) : EmailAuthSubmission
     data class SignIn(val email: String, val password: String) : EmailAuthSubmission
     data class Reset(val email: String) : EmailAuthSubmission
 }
 
+/** Email sign-in, sign-up and forgot-password forms. */
 @Composable
 fun EmailAuthScreen(
     onBackClick: () -> Unit,

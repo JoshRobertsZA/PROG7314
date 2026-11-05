@@ -24,6 +24,7 @@ import com.waypoint.app.core.theme.WaypointTerracotta
 // Round icon button used for back and close actions.
 //Pass a contentDescription so TalkBack says what the button does instead of reading the glyph.
 
+/** Round icon button used in screen headers (back, close, settings). */
 @Composable
 fun CircleIconButton(
     onClick: () -> Unit,

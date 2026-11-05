@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.util.UUID
 
+/** The kinds of record the outbox can sync. */
 enum class OutboxEntityType {
     TRIP, DAY, FLIGHT, LODGING, CAR, PLACE;
 
@@ -39,8 +40,10 @@ enum class OutboxEntityType {
         }
 }
 
+/** The API operation a queued change becomes. */
 enum class OutboxOperation { CREATE, UPDATE, DELETE }
 
+/** One queued local change waiting to be sent to the API. */
 data class OutboxEntry(
     val id: String,
     val entityType: OutboxEntityType,
@@ -101,6 +104,7 @@ internal fun coalesce(
     }
 }
 
+/** Merges two JSON payloads, with fields in [updates] winning. Used when coalescing queued changes. */
 internal fun mergeJson(base: String?, updates: String?): String? {
     if (updates == null) return base
     if (base == null) return updates

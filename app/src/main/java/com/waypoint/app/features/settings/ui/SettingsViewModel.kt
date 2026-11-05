@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+/** Trip counts, API budget usage and live sync status for the Profile tab. */
 class SettingsViewModel(app: Application) : AndroidViewModel(app) {
 
     private val repo = TripRepository(app)

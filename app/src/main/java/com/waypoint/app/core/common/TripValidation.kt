@@ -4,6 +4,10 @@ import java.time.LocalDate
 
 //Shared validation rules for trips and flights, so every screen checks input the same way.
 
+/**
+ * Input rules shared by the trip and itinerary screens, kept free of Android types so they can be
+ * unit-tested.
+ */
 object TripValidation {
 
     // Longest trip name allowed.

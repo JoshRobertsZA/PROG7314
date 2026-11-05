@@ -27,16 +27,22 @@ import kotlinx.coroutines.launch
 internal fun canReauthenticate(providerIds: List<String>): Boolean =
     providerIds.contains("password") || providerIds.contains("google.com")
 
+/** State of the edit-profile form. */
 data class ProfileUiState(
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
 )
 
+/** State of the delete-account dialog. */
 data class AccountDeletionUiState(
     val isDeleting: Boolean = false,
     val errorMessage: String? = null,
 )
 
+/**
+ * Saves the display name and deletes the account: cloud data first, then the Firebase user, then the
+ * copy on the phone.
+ */
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
     private val tripRepository = TripRepository(application)

@@ -11,6 +11,7 @@ enum class NotificationType {
     REMINDERS,
 }
 
+/** Whether each notification type is switched on in Settings. */
 object NotificationPreferences {
     fun isEnabled(type: NotificationType): Boolean = when (type) {
         NotificationType.TRIP_UPDATES -> AppSettings.current.notifyTripUpdates

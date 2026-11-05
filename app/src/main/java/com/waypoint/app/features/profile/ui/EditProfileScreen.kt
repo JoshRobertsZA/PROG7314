@@ -46,6 +46,7 @@ import com.waypoint.app.core.theme.WaypointTerracotta
 import com.waypoint.app.core.theme.WaypointTextMuted
 import com.waypoint.app.core.theme.WaypointTextPrimary
 
+/** Edit the display name, and start account deletion. */
 @Composable
 fun EditProfileScreen(
     onBackClick: () -> Unit,
