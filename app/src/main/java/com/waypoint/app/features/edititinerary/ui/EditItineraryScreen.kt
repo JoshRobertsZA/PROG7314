@@ -72,6 +72,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 // imports `androidx.compose.runtime.getValue` for use in this file
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 // imports `androidx.compose.ui.Alignment` for use in this file
 import androidx.compose.ui.Alignment
 // imports `androidx.compose.ui.Modifier` for use in this file
@@ -171,6 +174,38 @@ fun EditItineraryScreen(
     val context = LocalContext.current
     // declares read-only property `state`, delegated to `viewModel.uiState.collectAsState()`
     val state by viewModel.uiState.collectAsState()
+    var editingLodging by remember { mutableStateOf<LodgingItem?>(null) }
+    var editingCarRental by remember { mutableStateOf<CarRentalItem?>(null) }
+    var editingPlace by remember { mutableStateOf<PlaceItem?>(null) }
+
+    editingLodging?.let { lodging ->
+        BookingDatesDialog(
+            title = stringResource(R.string.edit_itinerary_edit_lodging_title),
+            days = state.days,
+            initialFrom = lodging.fromDate,
+            initialTo = lodging.toDate,
+            onSave = { from, to -> viewModel.onUpdateLodgingDates(lodging.id, from, to) },
+            onDismiss = { editingLodging = null },
+        )
+    }
+    editingCarRental?.let { car ->
+        BookingDatesDialog(
+            title = stringResource(R.string.edit_itinerary_edit_car_title),
+            days = state.days,
+            initialFrom = car.fromDate,
+            initialTo = car.toDate,
+            onSave = { from, to -> viewModel.onUpdateCarRentalDates(car.id, from, to) },
+            onDismiss = { editingCarRental = null },
+        )
+    }
+    editingPlace?.let { place ->
+        PlaceNoteDialog(
+            placeName = place.name,
+            initialNote = place.note,
+            onSave = { note -> viewModel.onUpdatePlaceNote(place.id, note) },
+            onDismiss = { editingPlace = null },
+        )
+    }
 
     // calls `LaunchedEffect` with arguments `(Unit)`
     LaunchedEffect(Unit) { viewModel.refreshPlacesForActiveDay() }
@@ -432,6 +467,8 @@ fun EditItineraryScreen(
                     pdfUri        = lodging.pdfUri,
                     // continues the statement started above: `onDeleteClick = { viewModel.onDeleteLodging(lodging.id) },`
                     onDeleteClick = { viewModel.onDeleteLodging(lodging.id) },
+                    onEditClick   = { editingLodging = lodging },
+                    editContentDescription = stringResource(R.string.edit_itinerary_edit_dates_cd),
                 // closes the multi-line argument list started above
                 )
             // closes the block
@@ -474,6 +511,8 @@ fun EditItineraryScreen(
                     pdfUri        = car.pdfUri,
                     // continues the statement started above: `onDeleteClick = { viewModel.onDeleteCarRental(car.id) },`
                     onDeleteClick = { viewModel.onDeleteCarRental(car.id) },
+                    onEditClick   = { editingCarRental = car },
+                    editContentDescription = stringResource(R.string.edit_itinerary_edit_dates_cd),
                 // closes the multi-line argument list started above
                 )
             // closes the block
@@ -515,6 +554,7 @@ fun EditItineraryScreen(
                     place         = place,
                     // continues the statement started above: `onDeleteClick = { viewModel.onDeletePlace(place.id) },`
                     onDeleteClick = { viewModel.onDeletePlace(place.id) },
+                    onEditClick   = { editingPlace = place },
                 // closes the multi-line argument list started above
                 )
             // closes the block
@@ -568,6 +608,7 @@ fun EditItineraryScreen(
                         place        = place,
                         // continues the statement started above: `onDeleteClick = { viewModel.onDeletePlace(place.id) },`
                         onDeleteClick = { viewModel.onDeletePlace(place.id) },
+                        onEditClick   = { editingPlace = place },
                     // closes the multi-line argument list started above
                     )
                 // closes the block
@@ -894,6 +935,8 @@ private fun DocCard(
     pdfUri: String,
     // continues the statement started above: `onDeleteClick: () -> Unit,`
     onDeleteClick: () -> Unit,
+    onEditClick: () -> Unit,
+    editContentDescription: String,
 // ends the argument list started above and opens the block that follows
 ) {
     // calls `RowSurface` with arguments `(modifier = Modifier.fillMaxWidth().padding(t…)` and opens a trailing lambda / block
@@ -917,6 +960,12 @@ private fun DocCard(
             // closes the lambda passed to `Column`
             }
             // calls `IconActionButton` with an argument list that continues on the following lines
+            IconActionButton(
+                glyph              = stringResource(R.string.edit_itinerary_edit_glyph),
+                contentDescription = editContentDescription,
+                color              = WaypointTerracotta,
+                onClick            = onEditClick,
+            )
             IconActionButton(
                 // continues the statement started above: `glyph = stringResource(R.string.edit_itinerary_close_glyph),`
                 glyph              = stringResource(R.string.edit_itinerary_close_glyph),
@@ -976,6 +1025,7 @@ private fun PlaceCard(
     place: PlaceItem,
     // continues the statement started above: `onDeleteClick: () -> Unit,`
     onDeleteClick: () -> Unit,
+    onEditClick: () -> Unit,
 // ends the argument list started above and opens the block that follows
 ) {
     // calls `RowSurface` with arguments `(modifier = Modifier.fillMaxWidth().padding(t…)` and opens a trailing lambda / block
@@ -1055,6 +1105,12 @@ private fun PlaceCard(
             // closes the lambda passed to `Column`
             }
             // calls `IconActionButton` with an argument list that continues on the following lines
+            IconActionButton(
+                glyph              = stringResource(R.string.edit_itinerary_edit_glyph),
+                contentDescription = stringResource(R.string.edit_itinerary_edit_note_cd),
+                color              = WaypointTerracotta,
+                onClick            = onEditClick,
+            )
             IconActionButton(
                 // continues the statement started above: `glyph = stringResource(R.string.edit_itinerary_close_glyph),`
                 glyph              = stringResource(R.string.edit_itinerary_close_glyph),
@@ -1154,8 +1210,8 @@ private fun IconActionButton(
     Box(
         // continues the statement started above: `modifier = modifier`
         modifier         = modifier
-            // continues the statement started above: `.size(28.dp)`
-            .size(28.dp)
+            // 40dp keeps the edit and remove buttons comfortably tappable side by side
+            .size(40.dp)
             // continues the statement started above: `.clickable(onClick = onClick),`
             .clickable(onClick = onClick),
         // continues the statement started above: `contentAlignment = Alignment.Center,`

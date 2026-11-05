@@ -23,15 +23,9 @@ data class DayItem(
     val date: LocalDate,
 // ends the argument list started above and opens the block that follows
 ) {
-    // declares read-only property `label` of type `String`
+    /** e.g. "5 Nov", with the month name in the app's current language. */
     val label: String
-        // custom getter: returns `"${date.dayOfMonth} ${`
-        get() = "${date.dayOfMonth} ${
-            date.month.name
-                .lowercase()
-                .replaceFirstChar { it.uppercaseChar() }
-                .take(3)
-        }"
+        get() = date.format(java.time.format.DateTimeFormatter.ofPattern("d MMM", java.util.Locale.getDefault()))
 // closes the block
 }
 

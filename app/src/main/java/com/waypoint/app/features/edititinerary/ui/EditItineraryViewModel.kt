@@ -371,6 +371,37 @@ class EditItineraryViewModel(
     // closes the function `onDeleteCarRental`
     }
 
+    /** Returns false (and saves nothing) if the range is out of order or outside the itinerary. */
+    fun onUpdateLodgingDates(lodgingId: String, from: LocalDate, to: LocalDate): Boolean {
+        if (!TripValidation.isBookingRangeValid(from, to, _uiState.value.days.map { it.date })) return false
+        viewModelScope.launch {
+            repo.updateLodgingDates(lodgingId, from, to)
+            _uiState.update { it.copy(lodgings = loadLodgings()) }
+        }
+        return true
+    }
+
+    /** Returns false (and saves nothing) if the range is out of order or outside the itinerary. */
+    fun onUpdateCarRentalDates(carRentalId: String, from: LocalDate, to: LocalDate): Boolean {
+        if (!TripValidation.isBookingRangeValid(from, to, _uiState.value.days.map { it.date })) return false
+        viewModelScope.launch {
+            repo.updateCarRentalDates(carRentalId, from, to)
+            _uiState.update { it.copy(carRentals = loadCarRentals()) }
+        }
+        return true
+    }
+
+    /** Returns false (and saves nothing) if the note is too long. */
+    fun onUpdatePlaceNote(placeId: String, note: String): Boolean {
+        if (!TripValidation.isPlaceNoteValid(note)) return false
+        val activeDayId = _uiState.value.days.getOrNull(_uiState.value.activeDayIndex)?.dayId ?: return false
+        viewModelScope.launch {
+            repo.updatePlaceNote(placeId, TripValidation.normalisePlaceNote(note))
+            _uiState.update { it.copy(placesForActiveDay = loadPlacesFor(activeDayId)) }
+        }
+        return true
+    }
+
 
     // declares function `onFlightNumberChanged` taking 2 parameters (`flightId`, `number`) and opens its body
     fun onFlightNumberChanged(flightId: String, number: String) {

@@ -25,4 +25,15 @@ object TripValidation {
     // True when the flight number matches the IATA format after normalising.
     fun isFlightNumberValid(input: String): Boolean =
         FLIGHT_NUMBER_REGEX.matches(normaliseFlightNumber(input))
+
+    const val PLACE_NOTE_MAX = 300
+
+    /** Trims a place note; blank becomes null (no note). Longer notes are rejected by [isPlaceNoteValid]. */
+    fun normalisePlaceNote(input: String): String? = input.trim().ifEmpty { null }
+
+    fun isPlaceNoteValid(input: String): Boolean = input.trim().length <= PLACE_NOTE_MAX
+
+    /** A booking's dates must be in order and fall on days that are part of the itinerary. */
+    fun isBookingRangeValid(from: LocalDate, to: LocalDate, itineraryDays: List<LocalDate>): Boolean =
+        !to.isBefore(from) && from in itineraryDays && to in itineraryDays
 }
