@@ -221,6 +221,7 @@ fun TripCalendarScreen(
         CitySearchDialog(
             onDismiss = viewModel::onDismissDestSearch,
             onCitySelected = viewModel::onDestinationSelected,
+            allowCustomEntry = true,
         )
     }
 
