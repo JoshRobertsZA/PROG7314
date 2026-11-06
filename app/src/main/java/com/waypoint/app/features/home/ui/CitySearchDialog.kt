@@ -32,11 +32,15 @@ import com.waypoint.app.core.theme.WaypointTextPrimary
 import com.waypoint.app.features.home.data.WikipediaCitySearch
 import kotlinx.coroutines.delay
 
-/** Wikipedia-backed city search, used to pick the weather city on Home, the area in Explore, and a trip's destination. */
+/**
+ * Wikipedia-backed city search, used to pick the weather city on Home, the area in Explore, and a trip's destination.
+ * With [allowCustomEntry] the typed text can be used as is, so a trip destination can still be saved offline.
+ */
 @Composable
 fun CitySearchDialog(
     onCitySelected: (String) -> Unit,
     onDismiss: () -> Unit,
+    allowCustomEntry: Boolean = false,
 ) {
     var query by remember { mutableStateOf("") }
     var suggestions by remember { mutableStateOf(emptyList<String>()) }
@@ -99,6 +103,26 @@ fun CitySearchDialog(
                         .fillMaxWidth()
                         .padding(top = 8.dp),
                 ) {
+                    val typed = query.trim()
+                    // Offered whenever something is typed and it is not already one of the suggestions
+                    if (allowCustomEntry && typed.length >= 2 && suggestions.none { it.equals(typed, ignoreCase = true) }) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.city_search_use_typed, typed),
+                                color = WaypointTerracotta,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        onCitySelected(typed)
+                                        onDismiss()
+                                    }
+                                    .padding(vertical = 10.dp, horizontal = 4.dp),
+                            )
+                            HorizontalDivider(color = WaypointTextMuted.copy(alpha = 0.15f))
+                        }
+                    }
                     items(suggestions) { city ->
                         Text(
                             text = city,
