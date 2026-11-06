@@ -73,6 +73,7 @@ fun NewTripScreen(
         CitySearchDialog(
             onCitySelected = viewModel::onDestinationSelected,
             onDismiss      = viewModel::onDismissDestSearch,
+            allowCustomEntry = true,
         )
     }
 

@@ -260,6 +260,7 @@
     <string name="city_search_title">Khetha idolobha</string>
     <string name="city_search_hint">Thayipha igama ledolobha…</string>
     <string name="city_search_no_results">Ayikho imiphumela etholakele</string>
+    <string name="city_search_use_typed">Sebenzisa &quot;%1$s&quot;</string>
     <string name="currency_modal_select">Khetha imali</string>
     <string name="new_trip_destination_label">Indawo oya kuyo</string>
     <string name="year_picker_hint">Thepha inyanga ukuya kuyo</string>

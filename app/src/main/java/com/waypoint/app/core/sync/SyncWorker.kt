@@ -10,7 +10,10 @@ import com.waypoint.app.core.notifications.PushTokenManager
 import com.waypoint.app.core.settings.AppSettings
 import com.waypoint.app.core.settings.SettingsSync
 import com.waypoint.app.features.edititinerary.data.ItineraryRepository
+import com.waypoint.app.features.explore.data.LocationIQRepository
+import com.waypoint.app.features.home.data.WikipediaCitySearch
 import com.waypoint.app.features.newtrip.data.TripRepository
+import java.time.LocalDate
 
 /** 4xx responses that retrying can never fix. 401/408/429 can succeed later. */
 internal fun isPermanentFailure(httpStatus: Int): Boolean =
@@ -28,6 +31,11 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
     override suspend fun doWork(): Result {
         val user = AuthRepository.currentUser ?: return Result.success()
         val idToken = AuthRepository.getIdToken() ?: return Result.success()
+
+        // Trips saved offline have a destination name but no coordinates or photo yet; fill them in
+        // now that there is a connection, before the outbox is pushed so the update goes up in this run
+        runCatching { fillMissingDestinationDetails(user.uid) }
+            .onFailure { Log.w(TAG, "Destination backfill failed: ${it.message}") }
 
         val pushedAll = pushOutbox(idToken)
         if (!pushedAll) return Result.retry()
@@ -76,6 +84,36 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         trips.pullAndMergeTrips(idToken, accountId)
         for (trip in trips.getTripsForAccount(accountId)) {
             itinerary.pullAndMergeForTrip(idToken, trip.id)
+        }
+    }
+
+    /** Looks up coordinates and a photo for upcoming trips whose destination was saved without them. */
+    private suspend fun fillMissingDestinationDetails(accountId: String) {
+        val trips = TripRepository(applicationContext)
+        val today = LocalDate.now().toString()
+        for (trip in trips.getTripsForAccount(accountId)) {
+            val destination = trip.destination?.takeIf { it.isNotBlank() } ?: continue
+            // Past trips are skipped so a destination that can never be found is not retried forever
+            if (trip.endDate < today) {
+                Log.d(TAG, "Backfill skipped for '${trip.name}': trip ended ${trip.endDate}")
+                continue
+            }
+            if (trip.destLat != null && trip.destLng != null) continue
+            val coords = LocationIQRepository.geocodeCity(destination)
+            if (coords == null) {
+                Log.w(TAG, "Backfill: no coordinates found for '$destination' (missing key, budget used up or lookup failed)")
+                continue
+            }
+            val photo = trip.destPhotoUrl ?: WikipediaCitySearch.thumbnailUrl(destination)
+            Log.i(TAG, "Backfill: '$destination' -> ${coords.first}, ${coords.second}")
+            trips.updateTripDetails(
+                id           = trip.id,
+                name         = trip.name,
+                destination  = destination,
+                destLat      = coords.first,
+                destLng      = coords.second,
+                destPhotoUrl = photo,
+            )
         }
     }
 
