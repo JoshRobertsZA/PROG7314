@@ -94,10 +94,18 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         for (trip in trips.getTripsForAccount(accountId)) {
             val destination = trip.destination?.takeIf { it.isNotBlank() } ?: continue
             // Past trips are skipped so a destination that can never be found is not retried forever
-            if (trip.endDate < today) continue
+            if (trip.endDate < today) {
+                Log.d(TAG, "Backfill skipped for '${trip.name}': trip ended ${trip.endDate}")
+                continue
+            }
             if (trip.destLat != null && trip.destLng != null) continue
-            val coords = LocationIQRepository.geocodeCity(destination) ?: continue
+            val coords = LocationIQRepository.geocodeCity(destination)
+            if (coords == null) {
+                Log.w(TAG, "Backfill: no coordinates found for '$destination' (missing key, budget used up or lookup failed)")
+                continue
+            }
             val photo = trip.destPhotoUrl ?: WikipediaCitySearch.thumbnailUrl(destination)
+            Log.i(TAG, "Backfill: '$destination' -> ${coords.first}, ${coords.second}")
             trips.updateTripDetails(
                 id           = trip.id,
                 name         = trip.name,
