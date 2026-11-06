@@ -738,7 +738,9 @@ const openapiSpec = {
         summary: 'Read a cached lookup',
         description:
           'Shared across every user - any authenticated caller can read any path. ' +
-          '`path` must match `^(weather|currency|places)_[a-zA-Z0-9_]{1,64}$`.',
+          // No backtick straight after "$": swagger-ui-express inserts the spec with String.replace,
+          // which reads "$`" as a special pattern and breaks the generated page.
+          '`path` must be `weather_`, `currency_` or `places_` followed by 1-64 letters, digits or underscores.',
         parameters: [pathParam('path', 'Cache key, e.g. `weather_cape_town` or `currency_USD_ZAR`')],
         responses: {
           200: jsonRes('The cached entry', 'CacheEntry'),

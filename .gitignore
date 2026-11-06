@@ -38,8 +38,6 @@ secrets.properties
 
 # Keystore files
 *.jks
-# the throwaway demo key used by CI, see ci/README.md (not the real upload key)
-!ci/ci-release.jks
 *.keystore
 
 # Log files

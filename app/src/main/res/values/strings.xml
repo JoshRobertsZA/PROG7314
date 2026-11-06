@@ -45,9 +45,9 @@
     <!-- Weekday labels are translatable so zu and xh can use their own abbreviations -->
     <string name="calendar_wd_sun">S</string>
     <string name="calendar_wd_mon">M</string>
-    <string name="calendar_wd_tue">"false">T</string>
+    <string name="calendar_wd_tue">T</string>
     <string name="calendar_wd_wed">W</string>
-    <string name="calendar_wd_thu">"false">T</string>
+    <string name="calendar_wd_thu">T</string>
     <string name="calendar_wd_fri">F</string>
     <string name="calendar_wd_sat">S</string>
 
