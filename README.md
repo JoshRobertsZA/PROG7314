@@ -12,8 +12,7 @@
 
 ### Submission links
 
-<!-- Replace the video link below with the final POE video once it is uploaded (unlisted). -->
-[![Demonstration Video](https://img.shields.io/badge/Demonstration_Video-YouTube-red?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/kx_R5qv70TE) &nbsp; [![API Documentation](https://img.shields.io/badge/API_Documentation-Swagger_UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://prog7314-git-287180570190.africa-south1.run.app/docs) &nbsp; [![Privacy Policy](https://img.shields.io/badge/Privacy_Policy-GitHub_Pages-24292E?style=for-the-badge&logo=github&logoColor=white)](https://st10438409-emeris.github.io/waypoint-privacy/)
+[![Demonstration Video](https://img.shields.io/badge/Demonstration_Video-YouTube-red?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/2Ox3HgyETtA) &nbsp; [![API Documentation](https://img.shields.io/badge/API_Documentation-Swagger_UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://prog7314-git-287180570190.africa-south1.run.app/docs) &nbsp; [![Privacy Policy](https://img.shields.io/badge/Privacy_Policy-GitHub_Pages-24292E?style=for-the-badge&logo=github&logoColor=white)](https://st10438409-emeris.github.io/waypoint-privacy/)
 
 ---
 
